@@ -2,7 +2,7 @@
   This files is used to pre-build data during the build process.
   Avoid adding client-side code here, as it can break the build process.
 */
-import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, LOCALHOST, ContractsChainId } from "./chains";
+import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, LOCALHOST, ContractsChainId, BASE_SEPOLIA } from "./chains";
 
 export const SWAP_GRAPH_MAX_MARKETS_PER_TOKEN = 5;
 
@@ -1102,4 +1102,20 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
   // Localhost markets will be dynamically loaded from the deployed contracts
   // Add your markets here after creating them via the deployment scripts
   [LOCALHOST]: {},
+  [BASE_SEPOLIA]: {
+    // EUR/USD [mUSDC-mUSDC]
+    "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554": {
+      marketTokenAddress: "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554",
+      indexTokenAddress: "0xfba59E25FB69199D21d109C4b6680DFb3aF883fe",
+      longTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
+      shortTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
+    },
+    // WBTC/USD [mUSDC-mUSDC]
+    "0xd37dc80216c897fB2dD020C6CE25C71832e7543d": {
+      marketTokenAddress: "0xd37dc80216c897fB2dD020C6CE25C71832e7543d",
+      indexTokenAddress: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
+      longTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
+      shortTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
+    },
+  },
 };

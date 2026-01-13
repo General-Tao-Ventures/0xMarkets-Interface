@@ -12,6 +12,7 @@ import {
   SOURCE_BASE_MAINNET,
   SOURCE_OPTIMISM_SEPOLIA,
   SOURCE_SEPOLIA,
+  BASE_SEPOLIA,
 } from "sdk/configs/chains";
 
 import { isDevelopment } from "./env";
@@ -39,6 +40,7 @@ export const IS_NETWORK_DISABLED: Record<ContractsChainId, boolean> = {
   [AVALANCHE_FUJI]: false,
   [BOTANIX]: false,
   [LOCALHOST]: false,
+  [BASE_SEPOLIA]: false,
 };
 
 export const NETWORK_EXECUTION_TO_CREATE_FEE_FACTOR = {
@@ -129,6 +131,19 @@ const constants = {
     // contract requires that execution fee be strictly greater than instead of gte
     DECREASE_ORDER_EXECUTION_GAS_FEE: parseEther("0.000300001"),
   },
+  [BASE_SEPOLIA]: {
+    nativeTokenSymbol: "ETH",
+    wrappedTokenSymbol: "WETH",
+    defaultCollateralSymbol: "USDC",
+    defaultFlagOrdersEnabled: true,
+    positionReaderPropsLength: 9,
+    v2: true,
+
+    SWAP_ORDER_EXECUTION_GAS_FEE: parseEther("0.0003"),
+    INCREASE_ORDER_EXECUTION_GAS_FEE: parseEther("0.0003"),
+    // contract requires that execution fee be strictly greater than instead of gte
+    DECREASE_ORDER_EXECUTION_GAS_FEE: parseEther("0.000300001"),
+  },
 } satisfies Record<ContractsChainId, Record<string, any>>;
 
 const ALCHEMY_WHITELISTED_DOMAINS = ["gmx.io", "app.gmx.io", "gmxapp.io"];
@@ -177,6 +192,12 @@ export const RPC_PROVIDERS: Record<AnyChainId | typeof ETH_MAINNET, string[]> = 
     "https://rpc.ankr.com/botanix_mainnet",
   ],
   [LOCALHOST]: ["http://127.0.0.1:8545"],
+  [BASE_SEPOLIA]: [
+    "https://base-sepolia.drpc.org",
+    "https://base-sepolia.publicnode.com",
+    "https://base-sepolia.therpc.io",
+    "https://base-sepolia.rpc.ankr.com",
+  ],
 };
 
 export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
@@ -193,6 +214,7 @@ export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
   [SOURCE_OPTIMISM_SEPOLIA]: [getAlchemyOptimismSepoliaHttpUrl("fallback")],
   [SOURCE_SEPOLIA]: [getAlchemyBaseSepoliaHttpUrl("fallback")],
   [LOCALHOST]: ["http://127.0.0.1:8545"],
+  [BASE_SEPOLIA]: [getAlchemyBaseSepoliaHttpUrl("fallback")],
 };
 
 export const PRIVATE_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
@@ -247,7 +269,7 @@ function getAlchemyKey(purpose: AlchemyKeyPurpose) {
     }
   }
 
-  return "EmVYwUw0N2tXOuG0SZfe5Z04rzBsCbr2";
+  return "jXT7KIV6ttYFNoSprdkqG";
 }
 
 export function getAlchemyArbitrumHttpUrl(purpose: AlchemyKeyPurpose) {
@@ -306,6 +328,10 @@ export function getAlchemySepoliaWsUrl(purpose: AlchemyKeyPurpose) {
   return `wss://eth-sepolia.g.alchemy.com/v2/${getAlchemyKey(purpose)}`;
 }
 
+export function getAlchemyBaseSepoliaWsUrl(purpose: AlchemyKeyPurpose) {
+  return `wss://base-sepolia.g.alchemy.com/v2/${getAlchemyKey(purpose)}`;
+}
+
 export function getExplorerUrl(chainId: number | "layerzero" | "layerzero-testnet"): string {
   switch (chainId as AnyChainId | "layerzero" | "layerzero-testnet") {
     case ARBITRUM:
@@ -326,6 +352,8 @@ export function getExplorerUrl(chainId: number | "layerzero" | "layerzero-testne
       return "https://basescan.org/";
     case LOCALHOST:
       return "http://127.0.0.1:8545/";
+    case BASE_SEPOLIA:
+      return "https://basescan.org/";
     case "layerzero":
       return "https://layerzeroscan.com/";
     case "layerzero-testnet":

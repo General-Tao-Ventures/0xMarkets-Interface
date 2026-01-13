@@ -6,6 +6,7 @@ import {
   ARBITRUM_SEPOLIA,
   AVALANCHE,
   AVALANCHE_FUJI,
+  BASE_SEPOLIA,
   BOTANIX,
   LOCALHOST,
   SOURCE_BASE_MAINNET,
@@ -83,6 +84,18 @@ export const BATCH_CONFIGS: Record<
     },
   },
   [ARBITRUM_SEPOLIA]: {
+    http: {
+      batchSize: 40,
+      wait: 100,
+    },
+    client: {
+      multicall: {
+        batchSize: 1024 * 1024,
+        wait: 100,
+      },
+    },
+  },
+  [BASE_SEPOLIA]: {
     http: {
       batchSize: 40,
       wait: 100,

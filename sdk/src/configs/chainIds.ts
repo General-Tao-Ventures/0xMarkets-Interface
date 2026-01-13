@@ -13,3 +13,4 @@ export const SOURCE_OPTIMISM_SEPOLIA = 11155420;
 export const SOURCE_SEPOLIA = 11155111;
 // Local development
 export const LOCALHOST = 31337;
+export const BASE_SEPOLIA = 84532;

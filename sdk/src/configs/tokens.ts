@@ -2,12 +2,73 @@ import { zeroAddress } from "viem";
 
 import type { Token, TokenAddressTypesMap, TokenCategory } from "types/tokens";
 
-import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, LOCALHOST } from "./chains";
+import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, LOCALHOST, BASE_SEPOLIA } from "./chains";
 import { getContract } from "./contracts";
 
 export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
 export const TOKENS: { [chainId: number]: Token[] } = {
+  [BASE_SEPOLIA]: [
+    {
+      name: "Ethereum",
+      symbol: "ETH",
+      decimals: 18,
+      address: zeroAddress,
+      isNative: true,
+      isShortable: true,
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
+      isV1Available: true,
+    },
+    {
+      name: "Wrapped ETH",
+      symbol: "WETH",
+      address: "0xEa347A7CB535cBE125099A4C3B992149aE08e55d",
+      decimals: 18,
+      isWrapped: true,
+      baseSymbol: "ETH",
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
+    },
+    {
+      name: "USDC",
+      symbol: "USDC",
+      address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      decimals: 6,
+      isStable: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/usd-coin",
+    },
+    {
+      name: "EUR",
+      symbol: "EUR",
+      decimals: 18,
+      address: "0xfba59E25FB69199D21d109C4b6680DFb3aF883fe",
+      isStable: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/1/small/euro.png?1547033579",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/euro",
+    },
+    {
+      name: "Mock USDC",
+      symbol: "mUSDC",
+      decimals: 6,
+      address: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
+      isStable: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/usd-coin",
+    },
+    {
+      name: "Wrapped BTC",
+      symbol: "WBTC",
+      decimals: 8,
+      address: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
+      isSynthetic: false,
+      imageUrl: "https://assets.coingecko.com/coins/images/7598/thumb/wrapped_bitcoin_wbtc.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/wrapped-bitcoin",
+    },
+  ],
   [ARBITRUM]: [
     {
       name: "Ethereum",
@@ -2054,7 +2115,7 @@ export const TOKENS_BY_SYMBOL_MAP: { [chainId: number]: { [symbol: string]: Toke
 export const WRAPPED_TOKENS_MAP: { [chainId: number]: Token } = {};
 export const NATIVE_TOKENS_MAP: { [chainId: number]: Token } = {};
 
-const CHAIN_IDS = [ARBITRUM, AVALANCHE, AVALANCHE_FUJI, BOTANIX, ARBITRUM_SEPOLIA, LOCALHOST];
+const CHAIN_IDS = [ARBITRUM, AVALANCHE, AVALANCHE_FUJI, BOTANIX, ARBITRUM_SEPOLIA, LOCALHOST, BASE_SEPOLIA];
 
 for (let j = 0; j < CHAIN_IDS.length; j++) {
   const chainId = CHAIN_IDS[j];

@@ -20,6 +20,8 @@ import {
   SOURCE_BASE_MAINNET,
   SOURCE_OPTIMISM_SEPOLIA,
   SOURCE_SEPOLIA,
+  BASE_SEPOLIA,
+  getAlchemyBaseSepoliaWsUrl,
 } from "config/chains";
 import { isDevelopment } from "config/env";
 import { getIsLargeAccount } from "domain/stats/isLargeAccount";
@@ -104,6 +106,14 @@ export function getWsProvider(chainId: AnyChainId): WebSocketProvider | JsonRpcP
       {
         staticNetwork: network,
       }
+    );
+  }
+
+  if (chainId === BASE_SEPOLIA) {
+    return new ethers.WebSocketProvider(
+      getAlchemyBaseSepoliaWsUrl(getIsLargeAccount() ? "largeAccount" : "fallback"),
+      network,
+      { staticNetwork: network }
     );
   }
 

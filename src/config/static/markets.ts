@@ -6,7 +6,7 @@
 */
 import { MARKETS as SDK_MARKETS } from "sdk/configs/markets";
 
-import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, LOCALHOST, ContractsChainId } from "./chains";
+import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, LOCALHOST, ContractsChainId, BASE_SEPOLIA } from "./chains";
 
 type MarketUiConfig = {
   enabled: boolean;
@@ -640,6 +640,12 @@ const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig
     },
   },
   [LOCALHOST]: {},
+  [BASE_SEPOLIA]: {
+    // EUR/USD
+    "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554": {
+      enabled: true,
+    },
+  },
 };
 
 export const MARKETS = Object.keys(MARKETS_UI_CONFIGS).reduce(

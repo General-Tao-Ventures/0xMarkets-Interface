@@ -9,6 +9,7 @@ import {
   SOURCE_BASE_MAINNET,
   SOURCE_OPTIMISM_SEPOLIA,
   SOURCE_SEPOLIA,
+  BASE_SEPOLIA,
 } from "config/chains";
 
 import gmIcon from "img/gm_icon.svg";
@@ -86,6 +87,13 @@ const ICONS: Record<number | "common", ChainIcons> = {
     esgmx: esGMXArbitrumIcon,
     gm: gmArbitrum,
   },
+  [BASE_SEPOLIA]: {
+    network: base,
+    gmx: gmxIcon,
+    glp: glpIcon,
+    esgmx: esGMXIcon,
+    gm: gmIcon,
+  },
   common: {
     gmx: gmxIcon,
     gmxOutline: gmxOutlineIcon,
@@ -106,7 +114,8 @@ export const CHAIN_ID_TO_NETWORK_ICON: Record<AnyChainId | 0, string> = {
   [SOURCE_OPTIMISM_SEPOLIA]: optimismSepolia,
   [SOURCE_SEPOLIA]: sepolia,
   [BOTANIX]: botanix,
-  [LOCALHOST]: arbitrum,
+  [LOCALHOST]: arbitrum,  
+  [BASE_SEPOLIA]: base,
 };
 
 /**
