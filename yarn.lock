@@ -5074,6 +5074,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/regenerator-runtime@npm:^0":
+  version: 0.13.8
+  resolution: "@types/regenerator-runtime@npm:0.13.8"
+  checksum: 130031ba8725696b99437254575bd747bc683190e2c1a776a74e8977891a95f35a2bee6d6dde48db1f7afb03202637e33c423a09dd303491dd079a6ecbd02618
+  languageName: node
+  linkType: hard
+
 "@types/scheduler@npm:*":
   version: 0.16.3
   resolution: "@types/scheduler@npm:0.16.3"
@@ -10248,6 +10255,7 @@ __metadata:
     "@types/react-date-range": 1.4.9
     "@types/react-dom": 18.2.21
     "@types/react-router-dom": 5.3.3
+    "@types/regenerator-runtime": ^0
     "@typescript-eslint/eslint-plugin": 8.26.1
     "@typescript-eslint/parser": 8.26.1
     "@uniswap/sdk-core": 3.0.1
@@ -10308,6 +10316,7 @@ __metadata:
     react-toastify: 10.0.5
     react-use: 17.3.1
     recharts: 2.12.7
+    regenerator-runtime: 0.14.1
     reselect: 5.1.0
     rollup-plugin-visualizer: 5.12.0
     sass: 1.55.0
@@ -14134,6 +14143,13 @@ __metadata:
   version: 1.4.2
   resolution: "regenerate@npm:1.4.2"
   checksum: 3317a09b2f802da8db09aa276e469b57a6c0dd818347e05b8862959c6193408242f150db5de83c12c3fa99091ad95fb42a6db2c3329bfaa12a0ea4cbbeb30cb0
+  languageName: node
+  linkType: hard
+
+"regenerator-runtime@npm:0.14.1":
+  version: 0.14.1
+  resolution: "regenerator-runtime@npm:0.14.1"
+  checksum: 9f57c93277b5585d3c83b0cf76be47b473ae8c6d9142a46ce8b0291a04bb2cf902059f0f8445dcabb3fb7378e5fe4bb4ea1e008876343d42e46d3b484534ce38
   languageName: node
   linkType: hard
 

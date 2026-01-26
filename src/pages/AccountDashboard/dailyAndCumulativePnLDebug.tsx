@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client";
 import { Trans, t } from "@lingui/macro";
 import { Area, Bar } from "recharts";
 
@@ -144,26 +143,7 @@ export function DebugLegend({ lastPoint }: { lastPoint?: AccountPnlHistoryPoint 
   ));
 }
 
-export const DEV_QUERY = gql`
-  query AccountHistoricalPnlResolver($account: String!, $from: Int) {
-    accountPnlHistoryStats(account: $account, from: $from) {
-      cumulativePnl
-      cumulativeRealizedFees
-      cumulativeRealizedPnl
-      cumulativeRealizedPriceImpact
-      pnl
-      realizedFees
-      realizedPnl
-      realizedPriceImpact
-      timestamp
-      unrealizedFees
-      unrealizedPnl
-      startUnrealizedPnl
-      startUnrealizedFees
-    }
-  }
-`;
-
+// Debug fields computed client-side from trade actions
 export const DEBUG_FIELDS = [
   "realizedFees",
   "realizedPnl",

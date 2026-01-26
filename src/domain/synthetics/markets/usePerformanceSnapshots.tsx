@@ -37,7 +37,9 @@ export function usePerformanceSnapshots({
   const performanceSnapshots = useMemo(() => {
     if (!data) return {};
 
-    return data.reduce((acc, item) => {
+    const dataArray = Array.isArray(data) ? data : [];
+
+    return dataArray.reduce((acc, item) => {
       acc[item.address] = item.snapshots
         .map((snapshot) => {
           const performance = parseValue(snapshot.uniswapV2Performance, PRECISION_DECIMALS);

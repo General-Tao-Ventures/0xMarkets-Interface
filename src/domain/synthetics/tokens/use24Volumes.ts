@@ -12,8 +12,8 @@ import { getByKey } from "sdk/utils/objects";
 type PositionVolumeInfosResponse = Record<Address, bigint>;
 
 const MARKET_VOLUMES_QUERY = gql`
-  query MarketVolumesInfoResolver($timestamp: Float!) {
-    positionsVolume(where: { timestamp: $timestamp }) {
+  query MarketVolumesInfoResolver($timestamp: Int!) {
+    positionsVolumes(where: { timestamp_gte: $timestamp }) {
       volume
       market
     }
@@ -40,12 +40,12 @@ export function use24hVolumes() {
         return;
       }
 
-      const response = await client.query<{ positionsVolume: { volume: string; market: Address }[] }>({
+      const response = await client.query<{ positionsVolumes: { volume: string; market: Address }[] }>({
         query: MARKET_VOLUMES_QUERY,
         variables,
       });
 
-      return response.data?.positionsVolume.reduce(
+      return response.data?.positionsVolumes.reduce(
         (acc, entry) => {
           acc[entry.market] = BigInt(entry.volume);
 

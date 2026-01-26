@@ -8,14 +8,19 @@ import { getByKey } from "sdk/utils/objects";
 
 import { convertToUsd, useTokensDataRequest } from "../tokens";
 
+// Query all positions with collateral data to compute totals client-side
 const POSITIONS_COLLATERAL_QUERY = gql`
-  query MyQuery {
-    positionTotalCollateralAmount {
-      amount
-      token
+  query PositionsCollateral {
+    positions(where: { sizeInUsd_gt: "0" }) {
+      collateralAmount
+      collateralToken
     }
   }
 `;
+
+type PositionCollateralResponse = {
+  positions: { collateralAmount: string; collateralToken: Address }[];
+};
 
 export function usePositionsTotalCollateral(chainId: ContractsChainId) {
   const { tokensData } = useTokensDataRequest(chainId);
@@ -29,20 +34,39 @@ export function usePositionsTotalCollateral(chainId: ContractsChainId) {
         return;
       }
 
-      const response = await client.query<{ positionTotalCollateralAmount: { amount: string; token: Address }[] }>({
+      const response = await client.query<PositionCollateralResponse>({
         query: POSITIONS_COLLATERAL_QUERY,
       });
 
-      return response.data?.positionTotalCollateralAmount.reduce((acc, cur) => {
-        const token = getByKey(tokensData, cur.token);
+      if (!response.data?.positions) {
+        return 0n;
+      }
+
+      // Aggregate collateral by token first
+      const collateralByToken = new Map<Address, bigint>();
+      for (const position of response.data.positions) {
+        const token = position.collateralToken;
+        const amount = BigInt(position.collateralAmount);
+        const existing = collateralByToken.get(token) || 0n;
+        collateralByToken.set(token, existing + amount);
+      }
+
+      // Convert to USD
+      let totalCollateralUsd = 0n;
+      for (const [tokenAddress, amount] of collateralByToken) {
+        const token = getByKey(tokensData, tokenAddress);
 
         if (!token || token.prices?.minPrice === undefined) {
-          return acc;
+          continue;
         }
 
-        const positionsCollateralUsd = convertToUsd(BigInt(cur.amount), token.decimals, token.prices.minPrice);
-        return acc + (positionsCollateralUsd !== undefined ? positionsCollateralUsd : 0n);
-      }, 0n);
+        const collateralUsd = convertToUsd(amount, token.decimals, token.prices.minPrice);
+        if (collateralUsd !== undefined) {
+          totalCollateralUsd += collateralUsd;
+        }
+      }
+
+      return totalCollateralUsd;
     },
     {
       errorRetryCount: 2,

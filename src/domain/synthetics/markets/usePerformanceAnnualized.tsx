@@ -31,7 +31,9 @@ export function usePerformanceAnnualized({
   const performance = useMemo(() => {
     if (!data) return {};
 
-    return data.reduce((acc, item) => {
+    const dataArray = Array.isArray(data) ? data : [];
+
+    return dataArray.reduce((acc, item) => {
       const performance = parseValue(item.uniswapV2Performance, PRECISION_DECIMALS);
       if (typeof performance === "undefined") return acc;
       acc[item.address] = performance;

@@ -1,4 +1,4 @@
-import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, ETH_MAINNET } from "config/chains";
+import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BASE_SEPOLIA, BOTANIX, ETH_MAINNET } from "config/chains";
 import { isDevelopment } from "config/env";
 
 import { createClient } from "./utils";
@@ -23,6 +23,7 @@ export const avalancheSubsquidClient = createClient(AVALANCHE, "subsquid");
 export const avalancheFujiSubsquidClient = createClient(AVALANCHE_FUJI, "subsquid");
 export const arbitrumSepoliaSubsquidClient = createClient(ARBITRUM_SEPOLIA, "subsquid");
 export const botanixSubsquidClient = createClient(BOTANIX, "subsquid");
+export const baseSepoliaSubsquidClient = createClient(BASE_SEPOLIA, "subsquid");
 
 export const REFERRAL_SUPPORTED_CHAIN_IDS = isDevelopment()
   ? [ARBITRUM, AVALANCHE, AVALANCHE_FUJI]
@@ -67,6 +68,10 @@ export function getSubsquidGraphClient(chainId: number) {
 
   if (chainId === BOTANIX) {
     return botanixSubsquidClient;
+  }
+
+  if (chainId === BASE_SEPOLIA) {
+    return baseSepoliaSubsquidClient;
   }
 
   return null;

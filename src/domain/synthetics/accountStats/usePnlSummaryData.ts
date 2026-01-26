@@ -1,6 +1,7 @@
-import { gql, useQuery as useGqlQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { useMemo } from "react";
 import type { Address } from "viem";
+import useSWR from "swr";
 
 import { useShowDebugValues } from "context/SyntheticsStateContext/hooks/settingsHooks";
 import { EMPTY_ARRAY } from "lib/objects";
@@ -35,106 +36,176 @@ export type PnlSummaryPointDebugFields = {
 
 type PnlSummaryData = PnlSummaryPoint[];
 
-const PROD_QUERY = gql`
-  query AccountHistoricalPnlResolver($account: String!) {
-    accountPnlSummaryStats(account: $account) {
-      bucketLabel
-      losses
-      pnlBps
+// Query raw trade actions to compute PnL summary client-side
+const TRADE_ACTIONS_QUERY = gql`
+  query TradeActionsForPnlSummary($account: String!) {
+    tradeActions(
+      where: { account_eq: $account, eventName_in: ["OrderExecuted", "PositionDecrease", "PositionIncrease"] }
+      orderBy: timestamp_ASC
+      limit: 1000
+    ) {
+      id
+      eventName
+      timestamp
+      sizeDeltaUsd
       pnlUsd
-      realizedPnlUsd
-      unrealizedPnlUsd
-      startUnrealizedPnlUsd
-      volume
-      wins
-      winsLossesRatioBps
-      usedCapitalUsd
+      basePnlUsd
+      priceImpactUsd
+      positionFeeAmount
+      borrowingFeeAmount
+      fundingFeeAmount
+      initialCollateralDeltaAmount
+      collateralTokenPriceMin
     }
   }
 `;
 
-export const DEBUG_QUERY = gql`
-  query AccountHistoricalPnlResolver($account: String!) {
-    accountPnlSummaryStats(account: $account) {
-      bucketLabel
-      losses
-      pnlBps
-      pnlUsd
-      realizedPnlUsd
-      unrealizedPnlUsd
-      startUnrealizedPnlUsd
-      volume
-      wins
-      winsLossesRatioBps
-      usedCapitalUsd
+type RawTradeAction = {
+  id: string;
+  eventName: string;
+  timestamp: number;
+  sizeDeltaUsd: string | null;
+  pnlUsd: string | null;
+  basePnlUsd: string | null;
+  priceImpactUsd: string | null;
+  positionFeeAmount: string | null;
+  borrowingFeeAmount: string | null;
+  fundingFeeAmount: string | null;
+  initialCollateralDeltaAmount: string | null;
+  collateralTokenPriceMin: string | null;
+};
 
-      realizedBasePnlUsd
-      realizedFeesUsd
-      realizedPriceImpactUsd
-      unrealizedBasePnlUsd
-      unrealizedFeesUsd
-      startUnrealizedBasePnlUsd
-      startUnrealizedFeesUsd
-    }
+// Time bucket definitions (in seconds)
+const TIME_BUCKETS = [
+  { label: "1d", duration: 86400 },
+  { label: "7d", duration: 604800 },
+  { label: "30d", duration: 2592000 },
+  { label: "90d", duration: 7776000 },
+  { label: "All", duration: Infinity },
+];
+
+function computePnlSummaryFromTrades(trades: RawTradeAction[], showDebugValues: boolean): PnlSummaryData {
+  if (!trades || trades.length === 0) {
+    return EMPTY_ARRAY as PnlSummaryData;
   }
-`;
+
+  const now = Math.floor(Date.now() / 1000);
+
+  return TIME_BUCKETS.map((bucket) => {
+    const cutoffTime = bucket.duration === Infinity ? 0 : now - bucket.duration;
+    const bucketTrades = trades.filter((t) => t.timestamp >= cutoffTime);
+
+    let wins = 0;
+    let losses = 0;
+    let volume = 0n;
+    let realizedPnlUsd = 0n;
+    let realizedBasePnlUsd = 0n;
+    let realizedFeesUsd = 0n;
+    let realizedPriceImpactUsd = 0n;
+    let usedCapitalUsd = 0n;
+
+    for (const trade of bucketTrades) {
+      // Volume from sizeDeltaUsd
+      if (trade.sizeDeltaUsd) {
+        const sizeDelta = BigInt(trade.sizeDeltaUsd);
+        volume += sizeDelta > 0n ? sizeDelta : -sizeDelta;
+      }
+
+      // PnL tracking
+      const pnl = trade.pnlUsd ? BigInt(trade.pnlUsd) : 0n;
+      const basePnl = trade.basePnlUsd ? BigInt(trade.basePnlUsd) : 0n;
+      const priceImpact = trade.priceImpactUsd ? BigInt(trade.priceImpactUsd) : 0n;
+
+      // Calculate fees in USD
+      const positionFee = trade.positionFeeAmount ? BigInt(trade.positionFeeAmount) : 0n;
+      const borrowingFee = trade.borrowingFeeAmount ? BigInt(trade.borrowingFeeAmount) : 0n;
+      const fundingFee = trade.fundingFeeAmount ? BigInt(trade.fundingFeeAmount) : 0n;
+      const collateralPrice = trade.collateralTokenPriceMin ? BigInt(trade.collateralTokenPriceMin) : 1n;
+      const feesUsd = ((positionFee + borrowingFee + fundingFee) * collateralPrice) / BigInt(1e30);
+
+      realizedPnlUsd += pnl;
+      realizedBasePnlUsd += basePnl;
+      realizedFeesUsd += feesUsd;
+      realizedPriceImpactUsd += priceImpact;
+
+      // Track wins/losses for position decreases with PnL
+      if (trade.eventName === "PositionDecrease" || trade.eventName === "OrderExecuted") {
+        if (pnl > 0n) {
+          wins++;
+        } else if (pnl < 0n) {
+          losses++;
+        }
+      }
+
+      // Used capital from collateral
+      if (trade.initialCollateralDeltaAmount && trade.collateralTokenPriceMin) {
+        const collateral = BigInt(trade.initialCollateralDeltaAmount);
+        const price = BigInt(trade.collateralTokenPriceMin);
+        if (collateral > 0n) {
+          usedCapitalUsd += (collateral * price) / BigInt(1e30);
+        }
+      }
+    }
+
+    // Calculate PnL basis points (relative to used capital)
+    const pnlBps = usedCapitalUsd > 0n ? (realizedPnlUsd * 10000n) / usedCapitalUsd : 0n;
+
+    // Win/loss ratio in basis points
+    const totalTrades = wins + losses;
+    const winsLossesRatioBps = totalTrades > 0 ? BigInt(Math.floor((wins / totalTrades) * 10000)) : undefined;
+
+    const point: PnlSummaryPoint = {
+      bucketLabel: bucket.label,
+      losses,
+      pnlBps,
+      pnlUsd: realizedPnlUsd,
+      realizedPnlUsd,
+      unrealizedPnlUsd: 0n, // Would need open positions to calculate
+      startUnrealizedPnlUsd: 0n,
+      volume,
+      wins,
+      winsLossesRatioBps,
+      usedCapitalUsd,
+      // Debug fields
+      realizedBasePnlUsd: showDebugValues ? realizedBasePnlUsd : 0n,
+      realizedFeesUsd: showDebugValues ? realizedFeesUsd : 0n,
+      realizedPriceImpactUsd: showDebugValues ? realizedPriceImpactUsd : 0n,
+      unrealizedBasePnlUsd: 0n,
+      unrealizedFeesUsd: 0n,
+      startUnrealizedBasePnlUsd: 0n,
+      startUnrealizedFeesUsd: 0n,
+    };
+
+    return point;
+  });
+}
 
 export function usePnlSummaryData(chainId: number, account: Address) {
   const showDebugValues = useShowDebugValues();
+  const client = getSubsquidGraphClient(chainId);
 
-  const res = useGqlQuery(showDebugValues ? DEBUG_QUERY : PROD_QUERY, {
-    client: getSubsquidGraphClient(chainId)!,
-    variables: { account: account },
-  });
+  const { data, error, isLoading } = useSWR<PnlSummaryData>(
+    account && client ? ["usePnlSummaryData", chainId, account, showDebugValues] : null,
+    {
+      fetcher: async () => {
+        const res = await client!.query({
+          query: TRADE_ACTIONS_QUERY,
+          variables: { account: account.toLowerCase() },
+          fetchPolicy: "no-cache",
+        });
 
-  const transformedData: PnlSummaryData = useMemo(() => {
-    if (!res.data?.accountPnlSummaryStats) {
-      return EMPTY_ARRAY;
+        const trades = (res.data?.tradeActions || []) as RawTradeAction[];
+        return computePnlSummaryFromTrades(trades, showDebugValues);
+      },
     }
-
-    return res.data.accountPnlSummaryStats.map((row: any) => {
-      if (showDebugValues) {
-        return {
-          bucketLabel: row.bucketLabel,
-          losses: row.losses,
-          pnlBps: BigInt(row.pnlBps),
-          pnlUsd: BigInt(row.pnlUsd),
-          realizedPnlUsd: BigInt(row.realizedPnlUsd),
-          unrealizedPnlUsd: BigInt(row.unrealizedPnlUsd),
-          startUnrealizedPnlUsd: BigInt(row.startUnrealizedPnlUsd),
-          volume: BigInt(row.volume),
-          wins: row.wins,
-          winsLossesRatioBps: row.winsLossesRatioBps ? BigInt(row.winsLossesRatioBps) : undefined,
-          usedCapitalUsd: BigInt(row.usedCapitalUsd),
-
-          realizedBasePnlUsd: row.realizedBasePnlUsd !== undefined ? BigInt(row.realizedBasePnlUsd) : 0n,
-          realizedFeesUsd: row.realizedFeesUsd !== undefined ? BigInt(row.realizedFeesUsd) : 0n,
-          realizedPriceImpactUsd: row.realizedPriceImpactUsd !== undefined ? BigInt(row.realizedPriceImpactUsd) : 0n,
-          unrealizedBasePnlUsd: row.unrealizedBasePnlUsd !== undefined ? BigInt(row.unrealizedBasePnlUsd) : 0n,
-          unrealizedFeesUsd: row.unrealizedFeesUsd !== undefined ? BigInt(row.unrealizedFeesUsd) : 0n,
-          startUnrealizedBasePnlUsd:
-            row.startUnrealizedBasePnlUsd !== undefined ? BigInt(row.startUnrealizedBasePnlUsd) : 0n,
-          startUnrealizedFeesUsd: row.startUnrealizedFeesUsd !== undefined ? BigInt(row.startUnrealizedFeesUsd) : 0n,
-        };
-      }
-      return {
-        bucketLabel: row.bucketLabel,
-        losses: row.losses,
-        pnlBps: BigInt(row.pnlBps),
-        pnlUsd: BigInt(row.pnlUsd),
-        realizedPnlUsd: BigInt(row.realizedPnlUsd),
-        unrealizedPnlUsd: BigInt(row.unrealizedPnlUsd),
-        startUnrealizedPnlUsd: BigInt(row.startUnrealizedPnlUsd),
-        volume: BigInt(row.volume),
-        wins: row.wins,
-        winsLossesRatioBps: row.winsLossesRatioBps ? BigInt(row.winsLossesRatioBps) : undefined,
-        usedCapitalUsd: BigInt(row.usedCapitalUsd),
-      };
-    });
-  }, [res.data?.accountPnlSummaryStats, showDebugValues]);
+  );
 
   return useMemo(
-    () => ({ data: transformedData, error: res.error, loading: res.loading }),
-    [res.error, res.loading, transformedData]
+    () => ({
+      data: data || (EMPTY_ARRAY as PnlSummaryData),
+      error,
+      loading: isLoading,
+    }),
+    [data, error, isLoading]
   );
 }
