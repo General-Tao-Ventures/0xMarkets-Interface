@@ -67,7 +67,7 @@ export function LogoSection({ isCollapsed }: { isCollapsed: boolean | undefined 
         "py-24 px-16 mb-4": !isCollapsed,
       })}
     >
-      <img src={logoIcon} alt="GMX Logo" />
+      <img src={logoIcon} alt="0xMarkets Logo" />
       {!isCollapsed ? <LogoText /> : null}
     </Link>
   );
@@ -142,9 +142,9 @@ export function MenuSection({
     { icon: <TradeIcon />, label: t`Trade`, key: "trade", to: "/trade" },
     { icon: <DatabaseIcon />, label: t`Pools`, key: "pools", to: "/pools" },
     { icon: <DashboardIcon />, label: t`Stats`, key: "stats", to: "/stats" },
-    { icon: <ReferralsIcon />, label: t`Referrals`, key: "referrals", to: "/referrals" },
+    // Hidden for now: { icon: <ReferralsIcon />, label: t`Referrals`, key: "referrals", to: "/referrals" },
     { icon: <LeaderboardIcon />, label: t`Leaderboard`, key: "leaderboard", to: "/leaderboard" },
-    { icon: <EcosystemIcon />, label: t`Ecosystem`, key: "ecosystem", to: "/ecosystem" },
+    // Hidden for now: { icon: <EcosystemIcon />, label: t`Ecosystem`, key: "ecosystem", to: "/ecosystem" },
   ];
 
   const { pathname } = useLocation();

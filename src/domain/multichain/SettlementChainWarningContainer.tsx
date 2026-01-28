@@ -53,7 +53,7 @@ export function SettlementChainWarningContainer() {
       <div className="pl-5">
         <Trans>
           You switched your settlement network to {getChainName(settlementChainId)}, but you still have{" "}
-          {formatUsd(gmxAccountUsd)} remaining in your {getChainName(anyNonEmptyGmxAccountChainId)} GMX Account.
+          {formatUsd(gmxAccountUsd)} remaining in your {getChainName(anyNonEmptyGmxAccountChainId)} 0xMarkets Account.
         </Trans>
         <br />
         <Button variant="link" className="mt-2 !text-12" onClick={handleNetworkSwitch}>

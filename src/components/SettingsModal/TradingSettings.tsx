@@ -96,7 +96,7 @@ export function TradingSettings({
               description={<Trans>High execution reliability using premium RPCs.</Trans>}
               info={
                 <Trans>
-                  You sign each transaction off-chain. Trades use GMX-sponsored premium RPCs for reliability, even
+                  You sign each transaction off-chain. Trades use 0xMarkets-sponsored premium RPCs for reliability, even
                   during network congestion. Gas payments in {gasPaymentTokensText}.
                 </Trans>
               }
@@ -118,9 +118,9 @@ export function TradingSettings({
               disabled={isExpressTradingDisabled}
               info={
                 <Trans>
-                  GMX executes transactions for you without individual signing, providing a seamless, CEX-like
-                  experience. Trades use GMX-sponsored premium RPCs for reliability, even during network congestion. Gas
-                  payments in {gasPaymentTokensText}.
+                  0xMarkets executes transactions for you without individual signing, providing a seamless, CEX-like
+                  experience. Trades use 0xMarkets-sponsored premium RPCs for reliability, even during network
+                  congestion. Gas payments in {gasPaymentTokensText}.
                 </Trans>
               }
               chip={
@@ -166,8 +166,8 @@ export function TradingSettings({
               variant="icon"
               content={
                 <Trans>
-                  The settlement chain is the network used for your GMX Account and opening positions. GMX Account
-                  balances and positions are specific to the selected network.
+                  The settlement chain is the network used for your 0xMarkets Account and opening positions. 0xMarkets
+                  Account balances and positions are specific to the selected network.
                 </Trans>
               }
               handle={<Trans>Settlement Chain</Trans>}

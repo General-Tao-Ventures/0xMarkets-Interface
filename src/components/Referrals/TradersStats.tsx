@@ -216,7 +216,7 @@ function TradersStats({ referralsData, traderTier, chainId, userReferralCodeStri
       {currentDiscountDistributions.length > 0 ? (
         <Card
           title={t`Rebates Distribution History`}
-          tooltipText={t`GMX V2 discounts are automatically applied on each trade and are not displayed on this table.`}
+          tooltipText={t`0xMarkets discounts are automatically applied on each trade and are not displayed on this table.`}
           bodyPadding={false}
           divider={true}
         >
@@ -341,7 +341,7 @@ function TradersStats({ referralsData, traderTier, chainId, userReferralCodeStri
         </Card>
       ) : (
         <EmptyMessage
-          tooltipText={t`GMX V2 Rebates are automatically applied as fee discounts on each trade and are not displayed on this table.`}
+          tooltipText={t`0xMarkets Rebates are automatically applied as fee discounts on each trade and are not displayed on this table.`}
           message={t`No rebates distribution history yet.`}
         />
       )}

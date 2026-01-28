@@ -37,7 +37,7 @@ export function BotanixBanner() {
           <Trans>providing liquidity</Trans>
         </Link>{" "}
         <Trans>
-          using GLV and GM tokens. Buying or staking GMX, or using referrals, is not supported at this time.
+          using GLV and GM tokens. Buying or staking 0xMarkets, or using referrals, is not supported at this time.
         </Trans>
       </p>
       <p>

@@ -30,7 +30,7 @@ export function PerformanceLabel({
           <br />
           <br />
           For detailed stats and comparisons, see the{" "}
-          <ExternalLink href="https://dune.com/gmx-io/v2-lp-dashboard">GMX V2 LP Dashboard</ExternalLink>.
+          <ExternalLink href="https://dune.com/gmx-io/v2-lp-dashboard">0xMarkets LP Dashboard</ExternalLink>.
         </Trans>
       }
     />

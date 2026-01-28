@@ -985,7 +985,7 @@ export const WithdrawalView = () => {
               >
                 deposit
               </Button>{" "}
-              more {isOutOfTokenErrorToken?.symbol} to your GMX account.
+              more {isOutOfTokenErrorToken?.symbol} to your 0xMarkets account.
             </Trans>
           </AlertInfoCard>
         )}
@@ -1025,7 +1025,7 @@ export const WithdrawalView = () => {
             value={protocolFeeUsd !== undefined ? formatUsd(protocolFeeUsd) : "..."}
           />
           <SyntheticsInfoRow
-            label={<Trans>GMX Balance</Trans>}
+            label={<Trans>0xMarkets Balance</Trans>}
             value={<ValueTransition from={formatUsd(gmxAccountUsd)} to={formatUsd(nextGmxAccountBalanceUsd)} />}
           />
           <SyntheticsInfoRow

@@ -226,7 +226,7 @@ const Toolbar = ({ account }: { account: string }) => {
 function GmxAccountBalanceTooltipContent() {
   return (
     <Trans>
-      Your GMX Account balance, usable for trading from any supported chain.
+      Your 0xMarkets Account balance, usable for trading from any supported chain.
       <br />
       <ExternalLink href="https://docs.gmx.io/docs/trading/v2#multichain-trading">Read more</ExternalLink>.
     </Trans>
@@ -255,7 +255,7 @@ function SettlementChainBalance() {
         <SyntheticsInfoRow
           label={
             <TooltipWithPortal content={<GmxAccountBalanceTooltipContent />} variant="iconStroke">
-              <Trans>GMX Account Balance</Trans>
+              <Trans>0xMarkets Account Balance</Trans>
             </TooltipWithPortal>
           }
           className="py-4"

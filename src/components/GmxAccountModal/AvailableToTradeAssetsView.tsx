@@ -24,7 +24,7 @@ const FILTERS: FilterType[] = ["all", "wallet", "gmxAccount"];
 
 const FILTER_TITLE_MAP: Record<FilterType, MessageDescriptor> = {
   all: msg`All`,
-  gmxAccount: msg`GMX Account`,
+  gmxAccount: msg`0xMarkets Account`,
   wallet: msg`Wallet`,
 };
 
@@ -116,7 +116,7 @@ const AssetsList = ({ tokens, noChainFilter }: { tokens: DisplayToken[]; noChain
               <div>
                 <div>{displayToken.symbol}</div>
                 <div className="text-body-small text-slate-100">
-                  {displayToken.chainId === 0 ? t`GMX Account` : getChainName(displayToken.chainId)}
+                  {displayToken.chainId === 0 ? t`0xMarkets Account` : getChainName(displayToken.chainId)}
                 </div>
               </div>
             </div>

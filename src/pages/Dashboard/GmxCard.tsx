@@ -98,22 +98,22 @@ export function GmxCard({
               <div className="flex flex-wrap items-center justify-between gap-8">
                 <div className="flex items-center gap-8">
                   <div className="App-card-title-mark-icon">
-                    <img src={currentIcons.gmx} width="40" alt="GMX Token Icon" />
+                    <img src={currentIcons.gmx} width="40" alt="0xMarkets Token Icon" />
                   </div>
                   <div>
-                    <div className="text-body-medium font-medium">GMX</div>
+                    <div className="text-body-medium font-medium">0xMarkets</div>
                   </div>
                 </div>
                 <div className="h-32">
                   <Button size="small" variant="secondary" to="/buy_gmx">
-                    <img src={currentIcons.gmx} width="16" alt="GMX Icon" />
-                    <Trans>Buy GMX</Trans>
+                    <img src={currentIcons.gmx} width="16" alt="0xMarkets Icon" />
+                    <Trans>Buy 0xMarkets</Trans>
                   </Button>
                 </div>
               </div>
               <div className="text-13 text-typography-secondary">
-                GMX is the utility and governance token. It also accrues 30% of the protocol fees via a buyback and
-                distribution mechanism.
+                0xMarkets is the utility and governance token. It also accrues 30% of the protocol fees via a buyback
+                and distribution mechanism.
               </div>
             </AppCardSection>
 
@@ -158,7 +158,7 @@ export function GmxCard({
                     position="bottom-end"
                     handle={formatAmountHuman(totalGmxSupply, GMX_DECIMALS, false, 2)}
                     handleClassName="numbers"
-                    content={t`Total circulating supply of GMX tokens.`}
+                    content={t`Total circulating supply of 0xMarkets tokens.`}
                   />
                 </div>
               </div>
@@ -181,7 +181,7 @@ export function GmxCard({
                               amount={stakedGmxArbitrum}
                               usd={stakedGmxArbitrumUsd}
                               decimals={GMX_DECIMALS}
-                              symbol="GMX"
+                              symbol="0xM"
                             />
                           }
                           showDollar={false}
@@ -193,7 +193,7 @@ export function GmxCard({
                               amount={stakedGmxAvalanche}
                               usd={stakedGmxAvalancheUsd}
                               decimals={GMX_DECIMALS}
-                              symbol="GMX"
+                              symbol="0xM"
                             />
                           }
                           showDollar={false}
@@ -206,7 +206,7 @@ export function GmxCard({
                               amount={totalStakedGmx}
                               usd={totalStakedGmxUsd}
                               decimals={GMX_DECIMALS}
-                              symbol="GMX"
+                              symbol="0xM"
                             />
                           }
                           showDollar={false}

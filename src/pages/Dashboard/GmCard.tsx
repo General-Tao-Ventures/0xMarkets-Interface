@@ -79,18 +79,18 @@ export function GmCard() {
                     <img src={currentIcons.gm} width="40" alt="GM Icon" />
                   </div>
                   <div>
-                    <div className="text-body-medium font-medium">GM</div>
+                    <div className="text-body-medium font-medium">0xMarkets</div>
                   </div>
                 </div>
                 <div className="h-32">
                   <Button size="small" variant="secondary" to="/pools">
-                    <img src={currentIcons.gm} width="16" alt="GMX Icon" />
-                    <Trans>Buy GM</Trans>
+                    <img src={currentIcons.gm} width="16" alt="0xMarkets Icon" />
+                    <Trans>Buy 0xMarkets</Trans>
                   </Button>
                 </div>
               </div>
               <div className="text-13 text-typography-secondary">
-                GM is the liquidity provider token for GMX V2 markets. Accrues 63% of the V2 markets generated fees.
+                0xMarkets is the liquidity provider token. Accrues 63% of the markets generated fees.
               </div>
             </AppCardSection>
             <AppCardSection>
@@ -115,7 +115,7 @@ export function GmCard() {
         }
         right={
           <AppCardSection>
-            <InteractivePieChart data={chartData} label={t`GM Markets`} />
+            <InteractivePieChart data={chartData} label={t`0xMarkets Markets`} />
           </AppCardSection>
         }
       />

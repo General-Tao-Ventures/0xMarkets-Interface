@@ -861,7 +861,7 @@ export const DepositView = () => {
             value={protocolFeeUsd !== undefined ? formatUsd(protocolFeeUsd) : "..."}
           />
           <SyntheticsInfoRow
-            label={<Trans>GMX Balance</Trans>}
+            label={<Trans>0xMarkets Balance</Trans>}
             value={<ValueTransition from={formatUsd(gmxAccountUsd)} to={formatUsd(nextGmxAccountBalanceUsd)} />}
           />
         </div>

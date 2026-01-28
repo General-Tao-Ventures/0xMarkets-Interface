@@ -11,7 +11,7 @@ import Tabs from "components/Tabs/Tabs";
 
 import { mobileTradeTypeClassNames, tradeTypeClassNames, tradeTypeLabels } from "./tradeboxConstants";
 
-const OPTIONS = Object.values(TradeType);
+const OPTIONS = [TradeType.Long, TradeType.Short];
 
 export function TradeBoxHeaderTabs({ isInCurtain }: { isInCurtain?: boolean }) {
   const localizedTradeTypeLabels = useLocalizedMap(tradeTypeLabels);
@@ -29,7 +29,7 @@ export function TradeBoxHeaderTabs({ isInCurtain }: { isInCurtain?: boolean }) {
   );
 
   const tabsOptions = useMemo(() => {
-    return Object.values(TradeType).map((type) => ({
+    return OPTIONS.map((type) => ({
       value: type,
       label: localizedTradeTypeLabels[type],
       className: tradeTypeClassNames[type],

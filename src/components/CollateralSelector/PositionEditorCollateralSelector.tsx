@@ -133,7 +133,7 @@ function CollateralListItemDesktop({
                   alt={getChainName(tokenData.isGmxAccount ? 0 : chainId)}
                   className="size-16"
                 />
-                {tokenData.isGmxAccount ? <Trans>GMX Balance</Trans> : getChainName(chainId)}
+                {tokenData.isGmxAccount ? <Trans>0xMarkets Balance</Trans> : getChainName(chainId)}
               </div>
             </>
           )}
