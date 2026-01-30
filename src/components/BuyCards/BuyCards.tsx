@@ -9,6 +9,7 @@ import {
   ARBITRUM_SEPOLIA,
   AVALANCHE,
   AVALANCHE_FUJI,
+  BASE_SEPOLIA,
   BOTANIX,
   LOCALHOST,
   ContractsChainId,
@@ -32,6 +33,7 @@ import { TrackingLink } from "components/TrackingLink/TrackingLink";
 import ArbitrumIcon from "img/ic_arbitrum_24.svg?react";
 import ArbitrumSepoliaIcon from "img/ic_arbitrum_sepolia_24.svg?react";
 import AvalancheIcon from "img/ic_avalanche_24.svg?react";
+import BaseIcon from "img/ic_base_24.svg?react";
 import BotanixIcon from "img/ic_botanix_24.svg?react";
 
 const gmxIcon = getIcon("common", "gmx");
@@ -44,6 +46,7 @@ const NETWORK_ICONS: Record<ContractsChainId, React.ComponentType<{ className?: 
   [BOTANIX]: BotanixIcon,
   [AVALANCHE_FUJI]: AvalancheIcon,
   [ARBITRUM_SEPOLIA]: ArbitrumSepoliaIcon,
+  [BASE_SEPOLIA]: BaseIcon,
   [LOCALHOST]: ArbitrumIcon,
 };
 
@@ -205,7 +208,7 @@ export default function BuyCards() {
                 className="!text-typography-primary"
                 newTab
                 variant="secondary"
-                to="https://docs.gmx.io/docs/category/tokenomics"
+                to="https://docs.0xmarkets.io/docs/category/tokenomics"
               >
                 <Trans>Read more</Trans>
               </Button>
@@ -252,7 +255,7 @@ export default function BuyCards() {
               className="!text-typography-primary"
               newTab
               variant="secondary"
-              to="https://docs.gmx.io/docs/providing-liquidity/v2/#glv-pools"
+              to="https://docs.0xmarkets.io/docs/providing-liquidity/v2/#glv-pools"
             >
               <Trans>Read more</Trans>
             </Button>
@@ -295,7 +298,7 @@ export default function BuyCards() {
               className="!text-typography-primary"
               newTab
               variant="secondary"
-              to="https://docs.gmx.io/docs/providing-liquidity/v2"
+              to="https://docs.0xmarkets.io/docs/providing-liquidity/v2"
             >
               <Trans>Read more</Trans>
             </Button>

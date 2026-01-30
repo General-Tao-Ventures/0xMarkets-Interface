@@ -42,7 +42,7 @@ export {
 };
 
 export const CONTRACTS_CHAIN_IDS: ContractsChainId[] = [ARBITRUM, AVALANCHE, BOTANIX];
-export const CONTRACTS_CHAIN_IDS_DEV: ContractsChainId[] = [...CONTRACTS_CHAIN_IDS, AVALANCHE_FUJI, ARBITRUM_SEPOLIA, LOCALHOST];
+export const CONTRACTS_CHAIN_IDS_DEV: ContractsChainId[] = [...CONTRACTS_CHAIN_IDS, AVALANCHE_FUJI, ARBITRUM_SEPOLIA, BASE_SEPOLIA, LOCALHOST];
 
 export type ContractsChainId =
   | typeof ARBITRUM

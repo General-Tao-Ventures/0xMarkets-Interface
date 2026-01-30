@@ -112,8 +112,8 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       currency_code: "USD",
       data_status: "streaming",
       visible_plots_set: "ohlc",
-      exchange: "GMX",
-      listed_exchange: "GMX",
+      exchange: "0xMarkets",
+      listed_exchange: "0xMarkets",
       format: "price",
       pricescale: Math.max(1, 10 ** priceDecimals / visualMultiplier),
     };

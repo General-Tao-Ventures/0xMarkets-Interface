@@ -460,25 +460,25 @@ export const CONTRACTS = {
     NATIVE_TOKEN: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
   },
   [BASE_SEPOLIA]: {
-    // Synthetics
-    DataStore: "0x101354d7F85b2F1CC011A2EA9778aDc9c5b9F6B9",
-    EventEmitter: "0xa6da7be0b6b8820076fBBf10F1706CFe9B5e2891",
-    SubaccountRouter: "0x4127e9A50F2f4A47e5d9EDaD8b685B3C9d15b8b7",
-    ExchangeRouter: "0x18d369f248f9BCd63274699ee38e876cd9132056",
-    DepositVault: "0xb351DbbA63bCee8930637F53bda0Cf6e6C8e4Ba8",
-    WithdrawalVault: "0x9b48a851dAb16770653E364094C55321171b4766",
-    OrderVault: "0x92A75a2B35cB30403FabEe567E119b096bb1554c",
-    ShiftVault: "0x96Ad50960af4ff24d807e0058398fEe7A143A509",
+    // Synthetics - Updated to match deployed contracts (Jan 2025)
+    DataStore: "0xBaD049d5FedE7Bd9022F7E750B982349fE17e83E",
+    EventEmitter: "0x1E4cBc2ea12B190D6222D568151b5e708e1477F8",
+    SubaccountRouter: "0x733FC820632de04Ff901E2664d208401c4E71A6e",
+    ExchangeRouter: "0xAf0BD41cf8376bB1084774bf81804faf7Ba9dE46",
+    DepositVault: "0xAeDAad1F7acB0D1b1e1775cEde4606d617d75DCd",
+    WithdrawalVault: "0x88f6B6e498720594D21B9a3E2dc3A4CbF35C1ed6",
+    OrderVault: "0xF4c5C6C21baeB725AA87bb708e1e3Cc9c2495da7",
+    ShiftVault: "0xbDE46443061949B7ce0e534A3BC53A1E98BaD745",
 
-    SyntheticsReader: "0x826610a18c7b19Bf150133d4d8825586ab88464B",
-    SyntheticsRouter: "0x5302E909d1e93e30F05B5D6Eea766363D14F9892",
+    SyntheticsReader: "0xb53122a72ceA22F71Cf75dc70A2Ed2526246253c",
+    SyntheticsRouter: "0x189D42feB4F7238d3B908eD3B45aBc69A43c9bED",
 
-    GlvReader: "0xD47eC2eBAef65e3c6F197323Dc2cb2510bF86635",
-    GlvRouter: "0x2Bc485F18a97b58BCD5058Ac19921631620F402F",
-    GlvVault: "0x729794Ad182621879588D2Eab9565Ca31edECF1d",
+    GlvReader: "0x838a9822868ddAF0951e2474c575b8632835776A",
+    GlvRouter: "0xEf4cB87df8050cD98237aF174F4b7972972a114F",
+    GlvVault: "0x1c1427d9B8a6C3B419f686A070F4612689B276f7",
 
-    GelatoRelayRouter: "0x3EB69e3A069F9d756330a80e373BE11286506bF0",
-    SubaccountGelatoRelayRouter: "0xfCBa42932a898c698F80D0Af66d78726DD407B08",
+    GelatoRelayRouter: "0xeFa1Af575d9Fe55c71CE83f5D03B075bf62a60Ef",
+    SubaccountGelatoRelayRouter: "0xba091449600a69fC351F50988B22679ADeB63F28",
 
     MultichainClaimsRouter: zeroAddress,
     MultichainGlvRouter: zeroAddress,
@@ -489,22 +489,22 @@ export const CONTRACTS = {
     MultichainVault: zeroAddress,
     LayerZeroProvider: zeroAddress,
 
-    ChainlinkPriceFeedProvider: "0x4A977F1a36d6eC4ef1A6dD74FBC7030d0b1F2427",
+    ChainlinkPriceFeedProvider: "0xA861Ea7fEc99F19C5fD9872679CeDb965d80c391",
     ClaimHandler: zeroAddress,
 
     // External
-    ExternalHandler: "0xF1e181Fae31F246fDD7e43C7368aAC1Ed10a16da",
+    ExternalHandler: "0xd56529c954f29620DAA2dB23F4dB45506254A2b0",
     OpenOceanRouter: zeroAddress,
-    Multicall: "0xb8987747629Dd5082B7932F7149926213AE0cB20",
+    Multicall: "0x922ac746Eda42e1ce6989e5B964638C96dc753c7",
     LayerZeroEndpoint: zeroAddress,
     ArbitrumNodeInterface: zeroAddress,
     GelatoRelayAddress: zeroAddress,
 
-    // V1 legacy (not deployed on localhost)
+    // V1 legacy (not deployed on Base Sepolia)
     Vault: zeroAddress,
-    Reader: zeroAddress,
+    Reader: "0xb53122a72ceA22F71Cf75dc70A2Ed2526246253c",
     PositionRouter: zeroAddress,
-    ReferralStorage: "0x98669D30cef7dfF68c4af49e0181cd5b22A01e2D",
+    ReferralStorage: "0x38D58E8AFd79F4EcEF1414252fc0bB0151a4FD30",
     VaultReader: zeroAddress,
     GlpManager: zeroAddress,
     RewardRouter: zeroAddress,
@@ -513,7 +513,7 @@ export const CONTRACTS = {
     StakedGmxTracker: zeroAddress,
     FeeGmxTracker: zeroAddress,
     GLP: zeroAddress,
-    GMX: "0x851356ae760d987E095750cCeb3bC6014560891C",
+    GMX: zeroAddress,
     ES_GMX: zeroAddress,
     BN_GMX: zeroAddress,
     USDG: zeroAddress,
@@ -526,12 +526,12 @@ export const CONTRACTS = {
     GmxVester: zeroAddress,
     GlpVester: zeroAddress,
     AffiliateVester: zeroAddress,
-    Router: zeroAddress,
-    GovToken: zeroAddress,
+    Router: "0x189D42feB4F7238d3B908eD3B45aBc69A43c9bED",
+    GovToken: "0x9e3C8a704e31df4D79672b30706BD2587461b256",
     ES_GMX_IOU: zeroAddress,
     OrderBook: zeroAddress,
     UniswapGmxEthPool: zeroAddress,
-    Timelock: "0xdb037f6A0c0c578b4695d53432ED9580EdAbeb22",
+    Timelock: "0xc59f83749Ab34e45a2b29fbd533266E3d7209FE5",
 
     // BASE_SEPOLIA specific tokens
     NATIVE_TOKEN: "0xEa347A7CB535cBE125099A4C3B992149aE08e55d",

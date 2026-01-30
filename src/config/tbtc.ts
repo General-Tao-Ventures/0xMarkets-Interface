@@ -1,5 +1,7 @@
-export const TBTC_INFORMATION_URL = "https://x.com/GMX_IO/status/1833896397709463921";
+// TODO: Update with 0xMarkets incentive information when available
+export const TBTC_INFORMATION_URL = "https://docs.0xmarkets.io";
 
-export const isTbtcIncentivizedMarket = function (marketAddress: string) {
-  return marketAddress === "0xd62068697bCc92AF253225676D618B0C9f17C663";
+export const isTbtcIncentivizedMarket = function (_marketAddress: string) {
+  // No incentivized markets on 0xMarkets yet
+  return false;
 };

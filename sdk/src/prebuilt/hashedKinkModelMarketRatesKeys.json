@@ -25,6 +25,7 @@
       "aboveOptimalUsageBorrowingFactorShort": "0x9e1a14e48896d7b69cbcd1632d3dd4061324a789f9be86617408fe12ec5700e6"
     }
   },
+  "31337": {},
   "42161": {
     "0x47c031236e19d024b42f8AE6780E44A573170703": {
       "optimalUsageFactorLong": "0x81cc37ff3833298b6114d8317fd6c5996dc7a8ab53fefd3edb9f415ca4267824",
@@ -1191,6 +1192,7 @@
       "aboveOptimalUsageBorrowingFactorShort": "0x15d1b15dc1999636db607f963394239311b8b4119e830801d9bc28df041d3bbc"
     }
   },
+  "84532": {},
   "421614": {
     "0x482Df3D320C964808579b585a8AC7Dd5D144eFaF": {
       "optimalUsageFactorLong": "0x6758150d36bd49f2cf7e45b455012350f4c1146c13bdbd4cdc28ea55cd71e316",

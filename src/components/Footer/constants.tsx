@@ -25,22 +25,20 @@ export function getFooterLinks(isHome) {
     home: [
       { label: t`Terms and Conditions`, link: "/terms-and-conditions" },
       { label: t`Referral Terms`, link: "/referral-terms" },
-      { label: t`Media Kit`, link: "https://docs.gmx.io/docs/community/media-kit", external: true },
-      // { label: "Jobs", link: "/jobs", isAppLink: true },
+      { label: t`Media Kit`, link: "https://docs.0xmarkets.io/media-kit", external: true },
     ],
     app: [
-      { label: t`Media Kit`, link: "https://docs.gmx.io/docs/community/media-kit", external: true },
+      { label: t`Media Kit`, link: "https://docs.0xmarkets.io/media-kit", external: true },
       { label: t`Charts by TradingView`, link: "https://www.tradingview.com/", external: true },
-      // { label: "Jobs", link: "/jobs" },
     ],
   };
   return FOOTER_LINKS[isHome ? "home" : "app"];
 }
 
+// TODO: Update with 0xMarkets social links
 export const SOCIAL_LINKS: SocialLink[] = [
-  { link: "https://twitter.com/GMX_IO", name: "Twitter", icon: <XIcon className="size-16" /> },
-  { link: "https://gmxio.substack.com/", name: "Substack", icon: <SubstackIcon className="size-16" /> },
-  { link: "https://github.com/gmx-io", name: "Github", icon: <GithubIcon className="size-16" /> },
-  { link: "https://t.me/GMX_IO", name: "Telegram", icon: <TelegramIcon className="size-16" /> },
-  { link: "https://discord.gg/H5PeQru3Aa", name: "Discord", icon: <DiscordIcon className="size-16" /> },
+  { link: "https://twitter.com/0xMarkets", name: "Twitter", icon: <XIcon className="size-16" /> },
+  { link: "https://github.com/0xMarkets", name: "Github", icon: <GithubIcon className="size-16" /> },
+  { link: "https://t.me/0xMarkets", name: "Telegram", icon: <TelegramIcon className="size-16" /> },
+  { link: "https://discord.gg/0xMarkets", name: "Discord", icon: <DiscordIcon className="size-16" /> },
 ];

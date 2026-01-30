@@ -5,8 +5,8 @@ function SEO(props) {
   const { children, ...customMeta } = props;
   const meta = {
     title: t`0xMarkets | Decentralized Perpetual Exchange`,
-    description: t`Trade spot or perpetual BTC, ETH, AVAX and other top cryptocurrencies with up to 100x leverage directly from your wallet on Arbitrum and Avalanche.`,
-    image: "https://gmx.io/og.png",
+    description: t`Trade spot or perpetual BTC, ETH, and other top cryptocurrencies with up to 100x leverage directly from your wallet.`,
+    image: "https://app.0xmarkets.io/og.png",
     type: "exchange",
     ...customMeta,
   };
@@ -22,7 +22,7 @@ function SEO(props) {
         <meta property="og:title" content={meta.title} />
         <meta property="og:image" content={meta.image} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@gmx_io" />
+        <meta name="twitter:site" content="@0xMarkets" />
         <meta name="twitter:title" content={meta.title} />
         <meta name="twitter:description" content={meta.description} />
         <meta name="twitter:image" content={meta.image} />

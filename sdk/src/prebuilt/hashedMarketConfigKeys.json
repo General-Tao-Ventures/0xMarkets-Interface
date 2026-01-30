@@ -163,6 +163,7 @@
       "virtualShortTokenId": "0xad11454a7b68db8683667df39c97a96eeae88909e5fb849428193697b0dc2492"
     }
   },
+  "31337": {},
   "42161": {
     "0x47c031236e19d024b42f8AE6780E44A573170703": {
       "isDisabled": "0xe8b3327a4f36a032e9c4b5c62bd478f8f7dcb358be17e031c08af181054f89e9",
@@ -7999,6 +8000,7 @@
       "virtualShortTokenId": "0xb315f0a55a09b93c77ef9d370a2278b19027c88ccc7afd8b899b98bb033ffed6"
     }
   },
+  "84532": {},
   "421614": {
     "0x482Df3D320C964808579b585a8AC7Dd5D144eFaF": {
       "isDisabled": "0xce6c0c2ecb98c1d352f3d852f960de84f48fe3867311b66232f955f673daf585",

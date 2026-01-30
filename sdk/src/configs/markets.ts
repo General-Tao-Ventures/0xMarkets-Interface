@@ -1103,19 +1103,13 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
   // Add your markets here after creating them via the deployment scripts
   [LOCALHOST]: {},
   [BASE_SEPOLIA]: {
-    // EUR/USD [mUSDC-mUSDC]
-    "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554": {
-      marketTokenAddress: "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554",
-      indexTokenAddress: "0xfba59E25FB69199D21d109C4b6680DFb3aF883fe",
-      longTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
-      shortTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
-    },
-    // WBTC/USD [mUSDC-mUSDC]
-    "0xd37dc80216c897fB2dD020C6CE25C71832e7543d": {
-      marketTokenAddress: "0xd37dc80216c897fB2dD020C6CE25C71832e7543d",
-      indexTokenAddress: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
-      longTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
-      shortTokenAddress: "0xA36a6765cc50b1F4678fA91770dcfCf48727730F",
-    },
+    // Markets will be added here after creation via MarketFactory
+    // Expected markets (per contracts config):
+    // - EUR/USD [USDC-USDC]
+    // - GBP/USD [USDC-USDC]
+    // - GOLD/USD [USDC-USDC]
+    // - JPY/USD [USDC-USDC]
+    // - WBTC/USD [USDC-USDC]
+    // - WETH/USD [USDC-USDC]
   },
 };

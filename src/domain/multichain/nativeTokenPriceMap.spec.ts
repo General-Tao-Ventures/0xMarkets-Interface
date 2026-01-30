@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import { SETTLEMENT_CHAINS, SOURCE_CHAINS } from "config/multichain";
 import {
+  BASE_SEPOLIA,
   getChainName,
   SOURCE_BASE_MAINNET,
   SOURCE_OPTIMISM_SEPOLIA,
@@ -17,6 +18,7 @@ const SOURCE_CHAIN_NATIVE_SYMBOL_MAP: Record<SourceChainId, string> = {
   [SOURCE_OPTIMISM_SEPOLIA]: "ETH",
   [SOURCE_SEPOLIA]: "ETH",
   [SOURCE_BASE_MAINNET]: "ETH",
+  [BASE_SEPOLIA]: "ETH",
 };
 
 describe("NATIVE_TOKEN_PRICE_MAP", () => {

@@ -3,36 +3,25 @@ import { isDevelopment } from "./env";
 import { getSubgraphUrlKey } from "./localStorage";
 
 const SUBGRAPH_URLS = {
+  // TODO: Deploy 0xMarkets indexers for other chains when ready
   [ARBITRUM]: {
-    stats: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/gmx-arbitrum-stats/api",
-    referrals: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/gmx-arbitrum-referrals/api",
-    nissohVault: "https://api.thegraph.com/subgraphs/name/nissoh/gmx-vault",
-    syntheticsStats: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-arbitrum-stats/api",
-    subsquid: "https://gmx.squids.live/gmx-synthetics-arbitrum:prod/api/graphql",
+    // Placeholder - will need 0xMarkets indexer deployment
   },
 
   [AVALANCHE]: {
-    stats: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/gmx-avalanche-stats/api",
-    referrals: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/gmx-avalanche-referrals/api",
-    syntheticsStats: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-avalanche-stats/api",
-    subsquid: "https://gmx.squids.live/gmx-synthetics-avalanche:prod/api/graphql",
+    // Placeholder - will need 0xMarkets indexer deployment
   },
 
   [AVALANCHE_FUJI]: {
-    stats: "https://api.thegraph.com/subgraphs/name/gmx-io/gmx-avalanche-stats",
-    referrals: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/gmx-fuji-referrals/api",
-    syntheticsStats: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-fuji-stats/api",
-    subsquid: "https://gmx.squids.live/gmx-synthetics-fuji:prod/api/graphql",
+    // Placeholder - will need 0xMarkets indexer deployment
   },
 
   [ARBITRUM_SEPOLIA]: {
-    subsquid: "https://gmx.squids.live/gmx-synthetics-arb-sepolia:prod/api/graphql",
+    // Placeholder - will need 0xMarkets indexer deployment
   },
 
   [BOTANIX]: {
-    subsquid: "https://gmx.squids.live/gmx-synthetics-botanix:prod/api/graphql",
-    stats: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-botanix-stats/api",
-    syntheticsStats: "https://subgraph.satsuma-prod.com/3b2ced13c8d9/gmx/synthetics-botanix-stats/api",
+    // Placeholder - will need 0xMarkets indexer deployment
   },
 
   [BASE_SEPOLIA]: {

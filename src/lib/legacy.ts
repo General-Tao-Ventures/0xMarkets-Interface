@@ -1254,7 +1254,7 @@ export function getHomeUrl() {
     return "http://localhost:3010";
   }
 
-  return "https://gmx.io";
+  return "https://0xmarkets.io";
 }
 
 export function getAppBaseUrl() {
@@ -1270,7 +1270,7 @@ export function getRootShareApiUrl() {
     return "https://gmxs.vercel.app";
   }
 
-  return "https://share.gmx.io";
+  return "https://share.0xmarkets.io";
 }
 
 export function getTradePageUrl() {

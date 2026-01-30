@@ -14,6 +14,7 @@ import {
   ARBITRUM_SEPOLIA,
   AVALANCHE,
   AVALANCHE_FUJI,
+  BASE_SEPOLIA,
   BOTANIX,
   LOCALHOST,
   ContractsChainId,
@@ -72,6 +73,7 @@ export const NETWORKS_BY_CHAIN_IDS: Record<ContractsChainId, string> = {
   [AVALANCHE]: "avalanche",
   [AVALANCHE_FUJI]: "fuji",
   [ARBITRUM_SEPOLIA]: "arbitrum-sepolia",
+  [BASE_SEPOLIA]: "base-sepolia",
   [BOTANIX]: "botanix",
   [LOCALHOST]: "localhost",
 };

@@ -1,4 +1,4 @@
-import { arbitrumSepolia, base } from "viem/chains";
+import { arbitrumSepolia, base, baseSepolia } from "viem/chains";
 
 import {
   AnyChainId,
@@ -6,6 +6,7 @@ import {
   ARBITRUM_SEPOLIA,
   AVALANCHE,
   AVALANCHE_FUJI,
+  BASE_SEPOLIA,
   BOTANIX,
   LOCALHOST,
   getExplorerUrl,
@@ -25,6 +26,7 @@ export const CHAIN_ID_TO_TX_URL_BUILDER: Record<
   [ARBITRUM_SEPOLIA]: (txId: string) => `${getExplorerUrl(ARBITRUM_SEPOLIA)}tx/${txId}`,
   [AVALANCHE_FUJI]: (txId: string) => `${getExplorerUrl(AVALANCHE_FUJI)}tx/${txId}`,
   [SOURCE_SEPOLIA]: (txId: string) => `${getExplorerUrl(SOURCE_SEPOLIA)}tx/${txId}`,
+  [BASE_SEPOLIA]: (txId: string) => `${getExplorerUrl(BASE_SEPOLIA)}tx/${txId}`,
   [BOTANIX]: (txId: string) => `${getExplorerUrl(BOTANIX)}tx/${txId}`,
   [LOCALHOST]: (txId: string) => `${getExplorerUrl(LOCALHOST)}tx/${txId}`,
   layerzero: (txId: string) => `${getExplorerUrl("layerzero")}tx/${txId}`,
@@ -40,5 +42,6 @@ export const CHAIN_ID_TO_EXPLORER_NAME: Record<AnyChainId, string> = {
   [SOURCE_OPTIMISM_SEPOLIA]: "OP Sepolia Etherscan",
   [SOURCE_SEPOLIA]: "Sepolia Etherscan",
   [BOTANIX]: "Botanix Explorer",
+  [BASE_SEPOLIA]: baseSepolia.blockExplorers.default.name,
   [LOCALHOST]: "Localhost",
 };

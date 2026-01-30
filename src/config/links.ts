@@ -1,7 +1,7 @@
 import { ARBITRUM, AVALANCHE } from "config/chains";
 import { TOKENS_BY_SYMBOL_MAP } from "sdk/configs/tokens";
 
-export const PRODUCTION_HOST = "https://app.gmx.io";
+export const PRODUCTION_HOST = "https://app.0xmarkets.io";
 
 const oneInchTokensMap = {
   [ARBITRUM]: {
@@ -32,26 +32,27 @@ export function get1InchSwapUrlFromAddresses(chainId: number, fromAddress?: stri
 }
 
 export function getLeaderboardLink(chainId) {
+  // TODO: Update with 0xMarkets leaderboard when available
   if (chainId === ARBITRUM) {
-    return "https://www.gmx.house/arbitrum/leaderboard";
+    return "https://app.0xmarkets.io/leaderboard";
   }
   if (chainId === AVALANCHE) {
-    return "https://www.gmx.house/avalanche/leaderboard";
+    return "https://app.0xmarkets.io/leaderboard";
   }
-  return "https://www.gmx.house";
+  return "https://app.0xmarkets.io/leaderboard";
 }
 
 export const DOCS_LINKS = {
-  multiplierPoints: "https://docs.gmx.io/docs/tokenomics/rewards/#multiplier-points",
-  fundingFees: "https://docs.gmx.io/docs/trading/v2/#funding-fees",
-  adaptiveFunding: "https://docs.gmx.io/docs/trading/v2/#adaptive-funding",
-  borrowingFees: "https://docs.gmx.io/docs/trading/v2/#borrowing-fees",
+  // TODO: Update with 0xMarkets documentation when available
+  multiplierPoints: "https://docs.0xmarkets.io/docs/tokenomics/rewards/#multiplier-points",
+  fundingFees: "https://docs.0xmarkets.io/docs/trading/v2/#funding-fees",
+  adaptiveFunding: "https://docs.0xmarkets.io/docs/trading/v2/#adaptive-funding",
+  borrowingFees: "https://docs.0xmarkets.io/docs/trading/v2/#borrowing-fees",
 };
 
-export const ARBITRUM_INCENTIVES_V2_URL =
-  "https://gmxio.notion.site/GMX-STIP-Bridge-Incentives-6967a56615b644eabc10f9a1a81b83ab";
-export const AVALANCHE_INCENTIVES_V2_URL =
-  "https://gmxio.notion.site/GMX-Summer-Boost-provide-liquidity-and-trade-perpetuals-to-grab-your-share-of-AVAX-rewards-13638f2e28934460a242f72def4f7d36";
+// TODO: Update with 0xMarkets incentives pages when available
+export const ARBITRUM_INCENTIVES_V2_URL = "https://docs.0xmarkets.io/incentives";
+export const AVALANCHE_INCENTIVES_V2_URL = "https://docs.0xmarkets.io/incentives";
 
 export function getIncentivesV2Url(chainId: number): string {
   if (chainId === ARBITRUM) {

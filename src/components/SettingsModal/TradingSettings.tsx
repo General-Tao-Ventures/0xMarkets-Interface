@@ -241,7 +241,7 @@ export function TradingSettings({
                 </Trans>
                 <br />
                 <br />
-                <ExternalLink href="https://docs.gmx.io/docs/trading/v2/#network-fee-buffer">
+                <ExternalLink href="https://docs.0xmarkets.io/docs/trading/v2/#network-fee-buffer">
                   <Trans>Read more</Trans>
                 </ExternalLink>
               </div>
@@ -264,7 +264,7 @@ export function TradingSettings({
                 </Trans>
                 <br />
                 <br />
-                <ExternalLink href="https://docs.gmx.io/docs/trading/v2/#auto-cancel-tp--sl">
+                <ExternalLink href="https://docs.0xmarkets.io/docs/trading/v2/#auto-cancel-tp--sl">
                   <Trans>Read more</Trans>
                 </ExternalLink>
                 .

@@ -25,7 +25,7 @@ export function InterviewModal({ type, isVisible, setIsVisible }: Props) {
           <div className="mb-20 mt-20 flex flex-col gap-8">
             <div className="flex items-center gap-12 text-14">
               <ArrowBulletIcon />
-              <ExternalLink href="https://t.me/GMXPartners">
+              <ExternalLink href="https://t.me/0xMarkets">
                 <Trans>Telegram account</Trans>
               </ExternalLink>
             </div>
@@ -46,7 +46,7 @@ export function InterviewModal({ type, isVisible, setIsVisible }: Props) {
           <div className="mb-20 mt-20 flex flex-col gap-8">
             <div className="flex items-center gap-12 text-14">
               <ArrowBulletIcon />
-              <ExternalLink href="https://t.me/GMXPartners">
+              <ExternalLink href="https://t.me/0xMarkets">
                 <Trans>Telegram account</Trans>
               </ExternalLink>
             </div>
