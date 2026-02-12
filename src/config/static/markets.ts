@@ -641,8 +641,28 @@ const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig
   },
   [LOCALHOST]: {},
   [BASE_SEPOLIA]: {
-    // EUR/USD
-    "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554": {
+    // EUR/USD [USDC-USDC]
+    "0xE2047A2cF79e06E274251e95a14881a936402B96": {
+      enabled: true,
+    },
+    // GBP/USD [USDC-USDC]
+    "0x3bb4b5e4cd9A9DD65eF937BB6a39dE9ce7428774": {
+      enabled: true,
+    },
+    // GOLD/USD [USDC-USDC]
+    "0x658AbF50A93a0e88E1C1eb182F60D53569cd7046": {
+      enabled: true,
+    },
+    // USD/JPY [USDC-USDC]
+    "0xB12faB48410601D1E7D0Cb5a004E158D2dE1594c": {
+      enabled: true,
+    },
+    // WBTC/USD [USDC-USDC]
+    "0x8BeE943Ff5926A48179E483fb481d899C2a39000": {
+      enabled: true,
+    },
+    // WETH/USD [USDC-USDC]
+    "0x24A5DbDb66BA0cE6Fa639F236B1b8C7d898b50cB": {
       enabled: true,
     },
   },

@@ -107,6 +107,7 @@ export async function buildMarketsValuesRequest(
       indexToken: market.indexTokenAddress,
       longToken: market.longTokenAddress,
       shortToken: market.shortTokenAddress,
+      reversed: false,
     };
 
     request[`${marketAddress}-reader`] = {

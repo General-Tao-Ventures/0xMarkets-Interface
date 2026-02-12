@@ -1103,13 +1103,47 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
   // Add your markets here after creating them via the deployment scripts
   [LOCALHOST]: {},
   [BASE_SEPOLIA]: {
-    // Markets will be added here after creation via MarketFactory
-    // Expected markets (per contracts config):
-    // - EUR/USD [USDC-USDC]
-    // - GBP/USD [USDC-USDC]
-    // - GOLD/USD [USDC-USDC]
-    // - JPY/USD [USDC-USDC]
-    // - WBTC/USD [USDC-USDC]
-    // - WETH/USD [USDC-USDC]
+    // EUR/USD [USDC-USDC]
+    "0xE2047A2cF79e06E274251e95a14881a936402B96": {
+      marketTokenAddress: "0xE2047A2cF79e06E274251e95a14881a936402B96",
+      indexTokenAddress: "0xfe58fF6D332C93Fd916137aF9f55DdAD736E3F8a",
+      longTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      shortTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    },
+    // GBP/USD [USDC-USDC]
+    "0x3bb4b5e4cd9A9DD65eF937BB6a39dE9ce7428774": {
+      marketTokenAddress: "0x3bb4b5e4cd9A9DD65eF937BB6a39dE9ce7428774",
+      indexTokenAddress: "0x7969E13b7c6A973c1C11EAf7f3e5FF2831ffe033",
+      longTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      shortTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    },
+    // GOLD/USD [USDC-USDC]
+    "0x658AbF50A93a0e88E1C1eb182F60D53569cd7046": {
+      marketTokenAddress: "0x658AbF50A93a0e88E1C1eb182F60D53569cd7046",
+      indexTokenAddress: "0x172B2Dd0C937F56728eBAABB26d1DD810c6077f1",
+      longTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      shortTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    },
+    // USD/JPY [USDC-USDC]
+    "0xB12faB48410601D1E7D0Cb5a004E158D2dE1594c": {
+      marketTokenAddress: "0xB12faB48410601D1E7D0Cb5a004E158D2dE1594c",
+      indexTokenAddress: "0x4723D56F6C3a31C43DEFc3cA4D5225755911DdAD",
+      longTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      shortTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    },
+    // WBTC/USD [USDC-USDC]
+    "0x8BeE943Ff5926A48179E483fb481d899C2a39000": {
+      marketTokenAddress: "0x8BeE943Ff5926A48179E483fb481d899C2a39000",
+      indexTokenAddress: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
+      longTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      shortTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    },
+    // WETH/USD [USDC-USDC]
+    "0x24A5DbDb66BA0cE6Fa639F236B1b8C7d898b50cB": {
+      marketTokenAddress: "0x24A5DbDb66BA0cE6Fa639F236B1b8C7d898b50cB",
+      indexTokenAddress: "0xEa347A7CB535cBE125099A4C3B992149aE08e55d",
+      longTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      shortTokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    },
   },
 };

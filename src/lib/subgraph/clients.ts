@@ -86,6 +86,8 @@ export function getGmxGraphClient(chainId: number) {
     return null;
   } else if (chainId === BOTANIX) {
     return null;
+  } else if (chainId === BASE_SEPOLIA) {
+    return null;
   }
 
   throw new Error(`Unsupported chain ${chainId}`);
@@ -99,6 +101,8 @@ export function getReferralsGraphClient(chainId) {
   } else if (chainId === AVALANCHE_FUJI) {
     return avalancheFujiReferralsGraphClient;
   } else if (chainId === BOTANIX) {
+    return null;
+  } else if (chainId === BASE_SEPOLIA) {
     return null;
   }
   throw new Error(`Unsupported chain ${chainId}`);

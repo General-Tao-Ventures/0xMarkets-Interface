@@ -329,7 +329,13 @@ export class Markets extends Module {
       })
       .then((res) => {
         return res.data.markets.markets.returnValues.map(
-          (market: { marketToken: string; indexToken: string; longToken: string; shortToken: string }) => {
+          (market: {
+            marketToken: string;
+            indexToken: string;
+            longToken: string;
+            shortToken: string;
+            reversed: boolean;
+          }) => {
             return {
               marketTokenAddress: market.marketToken,
               indexTokenAddress: market.indexToken,
