@@ -30,7 +30,8 @@ const SUBGRAPH_URLS = {
 
   common: {
     [ETH_MAINNET]: {
-      chainLink: "https://api.thegraph.com/subgraphs/name/deividask/chainlink",
+      // The Graph hosted service is sunset; this subgraph is no longer reachable.
+      // chainLink: "https://api.thegraph.com/subgraphs/name/deividask/chainlink",
     },
   },
 };

@@ -1,8 +1,8 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/keeper/:path*",
-      "destination": "http://142.93.203.222:37017/:path*"
+  "functions": {
+    "api/keeper/[...path].ts": {
+      "memory": 128,
+      "maxDuration": 10
     }
-  ]
+  }
 }
