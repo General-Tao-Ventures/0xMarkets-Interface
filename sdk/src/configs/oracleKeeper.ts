@@ -14,7 +14,7 @@ const ORACLE_KEEPER_URLS: Record<ContractsChainId, string> = {
   // For localhost, you may need to run your own oracle keeper or use mock prices
   [LOCALHOST]: "http://127.0.0.1:3000",
 
-  [BASE_SEPOLIA]: "http://34.65.37.180:37017",
+  [BASE_SEPOLIA]: "http://142.93.203.222:37017",
 };
 
 const ORACLE_KEEPER_FALLBACK_URLS: Record<ContractsChainId, string[]> = {
@@ -30,7 +30,7 @@ const ORACLE_KEEPER_FALLBACK_URLS: Record<ContractsChainId, string[]> = {
 
   [LOCALHOST]: ["http://127.0.0.1:3000"],
 
-  [BASE_SEPOLIA]: ["http://34.65.37.180:37017"],
+  [BASE_SEPOLIA]: ["http://142.93.203.222:37017"],
 };
 
 export function getOracleKeeperUrl(chainId: number) {
