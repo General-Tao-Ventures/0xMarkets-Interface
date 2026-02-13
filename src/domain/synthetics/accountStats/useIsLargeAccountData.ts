@@ -62,7 +62,7 @@ function useIsLargeAccountVolumeStats(params: { account?: string }) {
 
           return `
               day${index}: periodAccountStats(
-                where: { id_eq: "${account}", from: ${from}, to: ${to} }
+                where: { account_eq: "${account}", periodStart_gte: ${from}, periodEnd_lte: ${to} }
               ) {
                 volume
               }

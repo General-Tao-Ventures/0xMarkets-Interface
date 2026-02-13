@@ -1093,6 +1093,161 @@ export interface DepositActionsConnection {
   totalCount: Scalars['Int']['output'];
 }
 
+export interface Distribution {
+  __typename?: 'Distribution';
+  amounts: Array<Scalars['String']['output']>;
+  amountsInUsd: Array<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  receiver: Scalars['String']['output'];
+  timestamp: Scalars['Int']['output'];
+  tokens: Array<Scalars['String']['output']>;
+  transaction: Transaction;
+  typeId: Scalars['String']['output'];
+}
+
+export interface DistributionEdge {
+  __typename?: 'DistributionEdge';
+  cursor: Scalars['String']['output'];
+  node: Distribution;
+}
+
+export enum DistributionOrderByInput {
+  id_ASC = 'id_ASC',
+  id_ASC_NULLS_FIRST = 'id_ASC_NULLS_FIRST',
+  id_ASC_NULLS_LAST = 'id_ASC_NULLS_LAST',
+  id_DESC = 'id_DESC',
+  id_DESC_NULLS_FIRST = 'id_DESC_NULLS_FIRST',
+  id_DESC_NULLS_LAST = 'id_DESC_NULLS_LAST',
+  receiver_ASC = 'receiver_ASC',
+  receiver_ASC_NULLS_FIRST = 'receiver_ASC_NULLS_FIRST',
+  receiver_ASC_NULLS_LAST = 'receiver_ASC_NULLS_LAST',
+  receiver_DESC = 'receiver_DESC',
+  receiver_DESC_NULLS_FIRST = 'receiver_DESC_NULLS_FIRST',
+  receiver_DESC_NULLS_LAST = 'receiver_DESC_NULLS_LAST',
+  timestamp_ASC = 'timestamp_ASC',
+  timestamp_ASC_NULLS_FIRST = 'timestamp_ASC_NULLS_FIRST',
+  timestamp_ASC_NULLS_LAST = 'timestamp_ASC_NULLS_LAST',
+  timestamp_DESC = 'timestamp_DESC',
+  timestamp_DESC_NULLS_FIRST = 'timestamp_DESC_NULLS_FIRST',
+  timestamp_DESC_NULLS_LAST = 'timestamp_DESC_NULLS_LAST',
+  transaction_blockNumber_ASC = 'transaction_blockNumber_ASC',
+  transaction_blockNumber_ASC_NULLS_FIRST = 'transaction_blockNumber_ASC_NULLS_FIRST',
+  transaction_blockNumber_ASC_NULLS_LAST = 'transaction_blockNumber_ASC_NULLS_LAST',
+  transaction_blockNumber_DESC = 'transaction_blockNumber_DESC',
+  transaction_blockNumber_DESC_NULLS_FIRST = 'transaction_blockNumber_DESC_NULLS_FIRST',
+  transaction_blockNumber_DESC_NULLS_LAST = 'transaction_blockNumber_DESC_NULLS_LAST',
+  transaction_hash_ASC = 'transaction_hash_ASC',
+  transaction_hash_ASC_NULLS_FIRST = 'transaction_hash_ASC_NULLS_FIRST',
+  transaction_hash_ASC_NULLS_LAST = 'transaction_hash_ASC_NULLS_LAST',
+  transaction_hash_DESC = 'transaction_hash_DESC',
+  transaction_hash_DESC_NULLS_FIRST = 'transaction_hash_DESC_NULLS_FIRST',
+  transaction_hash_DESC_NULLS_LAST = 'transaction_hash_DESC_NULLS_LAST',
+  transaction_id_ASC = 'transaction_id_ASC',
+  transaction_id_ASC_NULLS_FIRST = 'transaction_id_ASC_NULLS_FIRST',
+  transaction_id_ASC_NULLS_LAST = 'transaction_id_ASC_NULLS_LAST',
+  transaction_id_DESC = 'transaction_id_DESC',
+  transaction_id_DESC_NULLS_FIRST = 'transaction_id_DESC_NULLS_FIRST',
+  transaction_id_DESC_NULLS_LAST = 'transaction_id_DESC_NULLS_LAST',
+  transaction_timestamp_ASC = 'transaction_timestamp_ASC',
+  transaction_timestamp_ASC_NULLS_FIRST = 'transaction_timestamp_ASC_NULLS_FIRST',
+  transaction_timestamp_ASC_NULLS_LAST = 'transaction_timestamp_ASC_NULLS_LAST',
+  transaction_timestamp_DESC = 'transaction_timestamp_DESC',
+  transaction_timestamp_DESC_NULLS_FIRST = 'transaction_timestamp_DESC_NULLS_FIRST',
+  transaction_timestamp_DESC_NULLS_LAST = 'transaction_timestamp_DESC_NULLS_LAST',
+  typeId_ASC = 'typeId_ASC',
+  typeId_ASC_NULLS_FIRST = 'typeId_ASC_NULLS_FIRST',
+  typeId_ASC_NULLS_LAST = 'typeId_ASC_NULLS_LAST',
+  typeId_DESC = 'typeId_DESC',
+  typeId_DESC_NULLS_FIRST = 'typeId_DESC_NULLS_FIRST',
+  typeId_DESC_NULLS_LAST = 'typeId_DESC_NULLS_LAST'
+}
+
+export interface DistributionWhereInput {
+  AND?: InputMaybe<Array<DistributionWhereInput>>;
+  OR?: InputMaybe<Array<DistributionWhereInput>>;
+  amountsInUsd_containsAll?: InputMaybe<Array<Scalars['String']['input']>>;
+  amountsInUsd_containsAny?: InputMaybe<Array<Scalars['String']['input']>>;
+  amountsInUsd_containsNone?: InputMaybe<Array<Scalars['String']['input']>>;
+  amountsInUsd_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  amounts_containsAll?: InputMaybe<Array<Scalars['String']['input']>>;
+  amounts_containsAny?: InputMaybe<Array<Scalars['String']['input']>>;
+  amounts_containsNone?: InputMaybe<Array<Scalars['String']['input']>>;
+  amounts_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  id_contains?: InputMaybe<Scalars['String']['input']>;
+  id_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  id_endsWith?: InputMaybe<Scalars['String']['input']>;
+  id_eq?: InputMaybe<Scalars['String']['input']>;
+  id_gt?: InputMaybe<Scalars['String']['input']>;
+  id_gte?: InputMaybe<Scalars['String']['input']>;
+  id_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  id_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  id_lt?: InputMaybe<Scalars['String']['input']>;
+  id_lte?: InputMaybe<Scalars['String']['input']>;
+  id_not_contains?: InputMaybe<Scalars['String']['input']>;
+  id_not_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  id_not_endsWith?: InputMaybe<Scalars['String']['input']>;
+  id_not_eq?: InputMaybe<Scalars['String']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  id_not_startsWith?: InputMaybe<Scalars['String']['input']>;
+  id_startsWith?: InputMaybe<Scalars['String']['input']>;
+  receiver_contains?: InputMaybe<Scalars['String']['input']>;
+  receiver_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  receiver_endsWith?: InputMaybe<Scalars['String']['input']>;
+  receiver_eq?: InputMaybe<Scalars['String']['input']>;
+  receiver_gt?: InputMaybe<Scalars['String']['input']>;
+  receiver_gte?: InputMaybe<Scalars['String']['input']>;
+  receiver_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  receiver_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  receiver_lt?: InputMaybe<Scalars['String']['input']>;
+  receiver_lte?: InputMaybe<Scalars['String']['input']>;
+  receiver_not_contains?: InputMaybe<Scalars['String']['input']>;
+  receiver_not_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  receiver_not_endsWith?: InputMaybe<Scalars['String']['input']>;
+  receiver_not_eq?: InputMaybe<Scalars['String']['input']>;
+  receiver_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  receiver_not_startsWith?: InputMaybe<Scalars['String']['input']>;
+  receiver_startsWith?: InputMaybe<Scalars['String']['input']>;
+  timestamp_eq?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  timestamp_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  timestamp_lt?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_not_eq?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  tokens_containsAll?: InputMaybe<Array<Scalars['String']['input']>>;
+  tokens_containsAny?: InputMaybe<Array<Scalars['String']['input']>>;
+  tokens_containsNone?: InputMaybe<Array<Scalars['String']['input']>>;
+  tokens_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  transaction?: InputMaybe<TransactionWhereInput>;
+  transaction_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  typeId_contains?: InputMaybe<Scalars['String']['input']>;
+  typeId_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  typeId_endsWith?: InputMaybe<Scalars['String']['input']>;
+  typeId_eq?: InputMaybe<Scalars['String']['input']>;
+  typeId_gt?: InputMaybe<Scalars['String']['input']>;
+  typeId_gte?: InputMaybe<Scalars['String']['input']>;
+  typeId_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  typeId_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  typeId_lt?: InputMaybe<Scalars['String']['input']>;
+  typeId_lte?: InputMaybe<Scalars['String']['input']>;
+  typeId_not_contains?: InputMaybe<Scalars['String']['input']>;
+  typeId_not_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  typeId_not_endsWith?: InputMaybe<Scalars['String']['input']>;
+  typeId_not_eq?: InputMaybe<Scalars['String']['input']>;
+  typeId_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  typeId_not_startsWith?: InputMaybe<Scalars['String']['input']>;
+  typeId_startsWith?: InputMaybe<Scalars['String']['input']>;
+}
+
+export interface DistributionsConnection {
+  __typename?: 'DistributionsConnection';
+  edges: Array<DistributionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+}
+
 export interface FeesInfo {
   __typename?: 'FeesInfo';
   id: Scalars['String']['output'];
@@ -3374,6 +3529,87 @@ export interface PeriodAccountStatsConnection {
   totalCount: Scalars['Int']['output'];
 }
 
+export interface PlatformStat {
+  __typename?: 'PlatformStat';
+  depositedUsers: Scalars['Int']['output'];
+  id: Scalars['String']['output'];
+  timestamp: Scalars['Int']['output'];
+}
+
+export interface PlatformStatEdge {
+  __typename?: 'PlatformStatEdge';
+  cursor: Scalars['String']['output'];
+  node: PlatformStat;
+}
+
+export enum PlatformStatOrderByInput {
+  depositedUsers_ASC = 'depositedUsers_ASC',
+  depositedUsers_ASC_NULLS_FIRST = 'depositedUsers_ASC_NULLS_FIRST',
+  depositedUsers_ASC_NULLS_LAST = 'depositedUsers_ASC_NULLS_LAST',
+  depositedUsers_DESC = 'depositedUsers_DESC',
+  depositedUsers_DESC_NULLS_FIRST = 'depositedUsers_DESC_NULLS_FIRST',
+  depositedUsers_DESC_NULLS_LAST = 'depositedUsers_DESC_NULLS_LAST',
+  id_ASC = 'id_ASC',
+  id_ASC_NULLS_FIRST = 'id_ASC_NULLS_FIRST',
+  id_ASC_NULLS_LAST = 'id_ASC_NULLS_LAST',
+  id_DESC = 'id_DESC',
+  id_DESC_NULLS_FIRST = 'id_DESC_NULLS_FIRST',
+  id_DESC_NULLS_LAST = 'id_DESC_NULLS_LAST',
+  timestamp_ASC = 'timestamp_ASC',
+  timestamp_ASC_NULLS_FIRST = 'timestamp_ASC_NULLS_FIRST',
+  timestamp_ASC_NULLS_LAST = 'timestamp_ASC_NULLS_LAST',
+  timestamp_DESC = 'timestamp_DESC',
+  timestamp_DESC_NULLS_FIRST = 'timestamp_DESC_NULLS_FIRST',
+  timestamp_DESC_NULLS_LAST = 'timestamp_DESC_NULLS_LAST'
+}
+
+export interface PlatformStatWhereInput {
+  AND?: InputMaybe<Array<PlatformStatWhereInput>>;
+  OR?: InputMaybe<Array<PlatformStatWhereInput>>;
+  depositedUsers_eq?: InputMaybe<Scalars['Int']['input']>;
+  depositedUsers_gt?: InputMaybe<Scalars['Int']['input']>;
+  depositedUsers_gte?: InputMaybe<Scalars['Int']['input']>;
+  depositedUsers_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  depositedUsers_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  depositedUsers_lt?: InputMaybe<Scalars['Int']['input']>;
+  depositedUsers_lte?: InputMaybe<Scalars['Int']['input']>;
+  depositedUsers_not_eq?: InputMaybe<Scalars['Int']['input']>;
+  depositedUsers_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  id_contains?: InputMaybe<Scalars['String']['input']>;
+  id_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  id_endsWith?: InputMaybe<Scalars['String']['input']>;
+  id_eq?: InputMaybe<Scalars['String']['input']>;
+  id_gt?: InputMaybe<Scalars['String']['input']>;
+  id_gte?: InputMaybe<Scalars['String']['input']>;
+  id_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  id_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  id_lt?: InputMaybe<Scalars['String']['input']>;
+  id_lte?: InputMaybe<Scalars['String']['input']>;
+  id_not_contains?: InputMaybe<Scalars['String']['input']>;
+  id_not_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  id_not_endsWith?: InputMaybe<Scalars['String']['input']>;
+  id_not_eq?: InputMaybe<Scalars['String']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  id_not_startsWith?: InputMaybe<Scalars['String']['input']>;
+  id_startsWith?: InputMaybe<Scalars['String']['input']>;
+  timestamp_eq?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  timestamp_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  timestamp_lt?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_not_eq?: InputMaybe<Scalars['Int']['input']>;
+  timestamp_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+}
+
+export interface PlatformStatsConnection {
+  __typename?: 'PlatformStatsConnection';
+  edges: Array<PlatformStatEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+}
+
 export interface Position {
   __typename?: 'Position';
   account: Scalars['String']['output'];
@@ -3844,6 +4080,161 @@ export interface PositionsVolumesConnection {
   totalCount: Scalars['Int']['output'];
 }
 
+export interface Price {
+  __typename?: 'Price';
+  id: Scalars['String']['output'];
+  isSnapshot: Scalars['Boolean']['output'];
+  maxPrice: Scalars['BigInt']['output'];
+  minPrice: Scalars['BigInt']['output'];
+  snapshotTimestamp: Scalars['Int']['output'];
+  token: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+}
+
+export interface PriceEdge {
+  __typename?: 'PriceEdge';
+  cursor: Scalars['String']['output'];
+  node: Price;
+}
+
+export enum PriceOrderByInput {
+  id_ASC = 'id_ASC',
+  id_ASC_NULLS_FIRST = 'id_ASC_NULLS_FIRST',
+  id_ASC_NULLS_LAST = 'id_ASC_NULLS_LAST',
+  id_DESC = 'id_DESC',
+  id_DESC_NULLS_FIRST = 'id_DESC_NULLS_FIRST',
+  id_DESC_NULLS_LAST = 'id_DESC_NULLS_LAST',
+  isSnapshot_ASC = 'isSnapshot_ASC',
+  isSnapshot_ASC_NULLS_FIRST = 'isSnapshot_ASC_NULLS_FIRST',
+  isSnapshot_ASC_NULLS_LAST = 'isSnapshot_ASC_NULLS_LAST',
+  isSnapshot_DESC = 'isSnapshot_DESC',
+  isSnapshot_DESC_NULLS_FIRST = 'isSnapshot_DESC_NULLS_FIRST',
+  isSnapshot_DESC_NULLS_LAST = 'isSnapshot_DESC_NULLS_LAST',
+  maxPrice_ASC = 'maxPrice_ASC',
+  maxPrice_ASC_NULLS_FIRST = 'maxPrice_ASC_NULLS_FIRST',
+  maxPrice_ASC_NULLS_LAST = 'maxPrice_ASC_NULLS_LAST',
+  maxPrice_DESC = 'maxPrice_DESC',
+  maxPrice_DESC_NULLS_FIRST = 'maxPrice_DESC_NULLS_FIRST',
+  maxPrice_DESC_NULLS_LAST = 'maxPrice_DESC_NULLS_LAST',
+  minPrice_ASC = 'minPrice_ASC',
+  minPrice_ASC_NULLS_FIRST = 'minPrice_ASC_NULLS_FIRST',
+  minPrice_ASC_NULLS_LAST = 'minPrice_ASC_NULLS_LAST',
+  minPrice_DESC = 'minPrice_DESC',
+  minPrice_DESC_NULLS_FIRST = 'minPrice_DESC_NULLS_FIRST',
+  minPrice_DESC_NULLS_LAST = 'minPrice_DESC_NULLS_LAST',
+  snapshotTimestamp_ASC = 'snapshotTimestamp_ASC',
+  snapshotTimestamp_ASC_NULLS_FIRST = 'snapshotTimestamp_ASC_NULLS_FIRST',
+  snapshotTimestamp_ASC_NULLS_LAST = 'snapshotTimestamp_ASC_NULLS_LAST',
+  snapshotTimestamp_DESC = 'snapshotTimestamp_DESC',
+  snapshotTimestamp_DESC_NULLS_FIRST = 'snapshotTimestamp_DESC_NULLS_FIRST',
+  snapshotTimestamp_DESC_NULLS_LAST = 'snapshotTimestamp_DESC_NULLS_LAST',
+  token_ASC = 'token_ASC',
+  token_ASC_NULLS_FIRST = 'token_ASC_NULLS_FIRST',
+  token_ASC_NULLS_LAST = 'token_ASC_NULLS_LAST',
+  token_DESC = 'token_DESC',
+  token_DESC_NULLS_FIRST = 'token_DESC_NULLS_FIRST',
+  token_DESC_NULLS_LAST = 'token_DESC_NULLS_LAST',
+  type_ASC = 'type_ASC',
+  type_ASC_NULLS_FIRST = 'type_ASC_NULLS_FIRST',
+  type_ASC_NULLS_LAST = 'type_ASC_NULLS_LAST',
+  type_DESC = 'type_DESC',
+  type_DESC_NULLS_FIRST = 'type_DESC_NULLS_FIRST',
+  type_DESC_NULLS_LAST = 'type_DESC_NULLS_LAST'
+}
+
+export interface PriceWhereInput {
+  AND?: InputMaybe<Array<PriceWhereInput>>;
+  OR?: InputMaybe<Array<PriceWhereInput>>;
+  id_contains?: InputMaybe<Scalars['String']['input']>;
+  id_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  id_endsWith?: InputMaybe<Scalars['String']['input']>;
+  id_eq?: InputMaybe<Scalars['String']['input']>;
+  id_gt?: InputMaybe<Scalars['String']['input']>;
+  id_gte?: InputMaybe<Scalars['String']['input']>;
+  id_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  id_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  id_lt?: InputMaybe<Scalars['String']['input']>;
+  id_lte?: InputMaybe<Scalars['String']['input']>;
+  id_not_contains?: InputMaybe<Scalars['String']['input']>;
+  id_not_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  id_not_endsWith?: InputMaybe<Scalars['String']['input']>;
+  id_not_eq?: InputMaybe<Scalars['String']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  id_not_startsWith?: InputMaybe<Scalars['String']['input']>;
+  id_startsWith?: InputMaybe<Scalars['String']['input']>;
+  isSnapshot_eq?: InputMaybe<Scalars['Boolean']['input']>;
+  isSnapshot_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  isSnapshot_not_eq?: InputMaybe<Scalars['Boolean']['input']>;
+  maxPrice_eq?: InputMaybe<Scalars['BigInt']['input']>;
+  maxPrice_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  maxPrice_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  maxPrice_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  maxPrice_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  maxPrice_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  maxPrice_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  maxPrice_not_eq?: InputMaybe<Scalars['BigInt']['input']>;
+  maxPrice_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  minPrice_eq?: InputMaybe<Scalars['BigInt']['input']>;
+  minPrice_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  minPrice_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  minPrice_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  minPrice_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  minPrice_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  minPrice_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  minPrice_not_eq?: InputMaybe<Scalars['BigInt']['input']>;
+  minPrice_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  snapshotTimestamp_eq?: InputMaybe<Scalars['Int']['input']>;
+  snapshotTimestamp_gt?: InputMaybe<Scalars['Int']['input']>;
+  snapshotTimestamp_gte?: InputMaybe<Scalars['Int']['input']>;
+  snapshotTimestamp_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  snapshotTimestamp_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  snapshotTimestamp_lt?: InputMaybe<Scalars['Int']['input']>;
+  snapshotTimestamp_lte?: InputMaybe<Scalars['Int']['input']>;
+  snapshotTimestamp_not_eq?: InputMaybe<Scalars['Int']['input']>;
+  snapshotTimestamp_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  token_contains?: InputMaybe<Scalars['String']['input']>;
+  token_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  token_endsWith?: InputMaybe<Scalars['String']['input']>;
+  token_eq?: InputMaybe<Scalars['String']['input']>;
+  token_gt?: InputMaybe<Scalars['String']['input']>;
+  token_gte?: InputMaybe<Scalars['String']['input']>;
+  token_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  token_lt?: InputMaybe<Scalars['String']['input']>;
+  token_lte?: InputMaybe<Scalars['String']['input']>;
+  token_not_contains?: InputMaybe<Scalars['String']['input']>;
+  token_not_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  token_not_endsWith?: InputMaybe<Scalars['String']['input']>;
+  token_not_eq?: InputMaybe<Scalars['String']['input']>;
+  token_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  token_not_startsWith?: InputMaybe<Scalars['String']['input']>;
+  token_startsWith?: InputMaybe<Scalars['String']['input']>;
+  type_contains?: InputMaybe<Scalars['String']['input']>;
+  type_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  type_endsWith?: InputMaybe<Scalars['String']['input']>;
+  type_eq?: InputMaybe<Scalars['String']['input']>;
+  type_gt?: InputMaybe<Scalars['String']['input']>;
+  type_gte?: InputMaybe<Scalars['String']['input']>;
+  type_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  type_isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  type_lt?: InputMaybe<Scalars['String']['input']>;
+  type_lte?: InputMaybe<Scalars['String']['input']>;
+  type_not_contains?: InputMaybe<Scalars['String']['input']>;
+  type_not_containsInsensitive?: InputMaybe<Scalars['String']['input']>;
+  type_not_endsWith?: InputMaybe<Scalars['String']['input']>;
+  type_not_eq?: InputMaybe<Scalars['String']['input']>;
+  type_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  type_not_startsWith?: InputMaybe<Scalars['String']['input']>;
+  type_startsWith?: InputMaybe<Scalars['String']['input']>;
+}
+
+export interface PricesConnection {
+  __typename?: 'PricesConnection';
+  edges: Array<PriceEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+}
+
 export interface Query {
   __typename?: 'Query';
   accountStatById?: Maybe<AccountStat>;
@@ -3861,6 +4252,9 @@ export interface Query {
   depositActionById?: Maybe<DepositAction>;
   depositActions: Array<DepositAction>;
   depositActionsConnection: DepositActionsConnection;
+  distributionById?: Maybe<Distribution>;
+  distributions: Array<Distribution>;
+  distributionsConnection: DistributionsConnection;
   feesInfoById?: Maybe<FeesInfo>;
   feesInfos: Array<FeesInfo>;
   feesInfosConnection: FeesInfosConnection;
@@ -3876,12 +4270,18 @@ export interface Query {
   periodAccountStatById?: Maybe<PeriodAccountStat>;
   periodAccountStats: Array<PeriodAccountStat>;
   periodAccountStatsConnection: PeriodAccountStatsConnection;
+  platformStatById?: Maybe<PlatformStat>;
+  platformStats: Array<PlatformStat>;
+  platformStatsConnection: PlatformStatsConnection;
   positionById?: Maybe<Position>;
   positions: Array<Position>;
   positionsConnection: PositionsConnection;
   positionsVolumeById?: Maybe<PositionsVolume>;
   positionsVolumes: Array<PositionsVolume>;
   positionsVolumesConnection: PositionsVolumesConnection;
+  priceById?: Maybe<Price>;
+  prices: Array<Price>;
+  pricesConnection: PricesConnection;
   squidStatus?: Maybe<SquidStatus>;
   tradeActionById?: Maybe<TradeAction>;
   tradeActions: Array<TradeAction>;
@@ -4006,6 +4406,27 @@ export interface QuerydepositActionsConnectionArgs {
 }
 
 
+export interface QuerydistributionByIdArgs {
+  id: Scalars['String']['input'];
+}
+
+
+export interface QuerydistributionsArgs {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Array<DistributionOrderByInput>>;
+  where?: InputMaybe<DistributionWhereInput>;
+}
+
+
+export interface QuerydistributionsConnectionArgs {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy: Array<DistributionOrderByInput>;
+  where?: InputMaybe<DistributionWhereInput>;
+}
+
+
 export interface QueryfeesInfoByIdArgs {
   id: Scalars['String']['input'];
 }
@@ -4111,6 +4532,27 @@ export interface QueryperiodAccountStatsConnectionArgs {
 }
 
 
+export interface QueryplatformStatByIdArgs {
+  id: Scalars['String']['input'];
+}
+
+
+export interface QueryplatformStatsArgs {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Array<PlatformStatOrderByInput>>;
+  where?: InputMaybe<PlatformStatWhereInput>;
+}
+
+
+export interface QueryplatformStatsConnectionArgs {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy: Array<PlatformStatOrderByInput>;
+  where?: InputMaybe<PlatformStatWhereInput>;
+}
+
+
 export interface QuerypositionByIdArgs {
   id: Scalars['String']['input'];
 }
@@ -4150,6 +4592,27 @@ export interface QuerypositionsVolumesConnectionArgs {
   first?: InputMaybe<Scalars['Int']['input']>;
   orderBy: Array<PositionsVolumeOrderByInput>;
   where?: InputMaybe<PositionsVolumeWhereInput>;
+}
+
+
+export interface QuerypriceByIdArgs {
+  id: Scalars['String']['input'];
+}
+
+
+export interface QuerypricesArgs {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Array<PriceOrderByInput>>;
+  where?: InputMaybe<PriceWhereInput>;
+}
+
+
+export interface QuerypricesConnectionArgs {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy: Array<PriceOrderByInput>;
+  where?: InputMaybe<PriceWhereInput>;
 }
 
 
@@ -5663,22 +6126,4 @@ export interface WithdrawalActionsConnection {
   edges: Array<WithdrawalActionEdge>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
-}
-
-/**
- * Placeholder Distribution type for user incentives.
- * TODO: Add to Subsquid schema when 0xMarkets incentives are implemented.
- */
-export interface Distribution {
-  __typename?: 'Distribution';
-  id: Scalars['String']['output'];
-  typeId: Scalars['String']['output'];
-  amounts: Array<Scalars['String']['output']>;
-  amountsInUsd: Array<Scalars['String']['output']>;
-  tokens: Array<Scalars['String']['output']>;
-  receiver: Scalars['String']['output'];
-  transaction: {
-    timestamp: Scalars['Int']['output'];
-    hash: Scalars['String']['output'];
-  };
 }

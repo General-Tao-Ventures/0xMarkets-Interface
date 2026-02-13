@@ -28,6 +28,9 @@ import { TableTh, TableTheadTr } from "components/Table/Table";
 import { ButtonRowScrollFadeContainer, TableScrollFadeContainer } from "components/TableScrollFade/TableScrollFade";
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 
+import { useCarthaVaults } from "domain/synthetics/markets/useCarthaVaults";
+
+import { CarthaVaultCards } from "./CarthaVaultListItem";
 import { FeeApyLabel } from "./FeeApyLabel";
 import { GmListItem } from "./GmListItem";
 import { GmTokensTotalBalanceInfo } from "./GmTokensTotalBalanceInfo";
@@ -65,6 +68,8 @@ export function GmList({
   const { orderBy, direction, getSorterProps } = useSorterHandlers<SortField>("gm-list");
   const [searchText, setSearchText] = useState("");
   const { tab, favoriteTokens, toggleFavoriteToken } = useTokensFavorites("gm-list");
+
+  const carthaVaults = useCarthaVaults(chainId);
 
   const isLoading = !marketsInfo || !marketTokensData;
 
@@ -111,6 +116,8 @@ export function GmList({
       />
     ));
 
+  const hasCarthaVaults = carthaVaults.length > 0;
+
   const isMobile = usePoolsIsMobilePage();
 
   return (
@@ -151,6 +158,9 @@ export function GmList({
       }
     >
       <div className="flex grow flex-col">
+        {/* Cartha vault cards — above the table */}
+        {hasCarthaVaults && <CarthaVaultCards vaults={carthaVaults} />}
+
         {isMobile ? (
           <div className="flex flex-col gap-4">
             {rows}

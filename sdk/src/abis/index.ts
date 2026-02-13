@@ -1,6 +1,8 @@
 import { Abi, erc20Abi } from "viem";
 
 import ArbitrumNodeInterface from "./ArbitrumNodeInterface.json";
+import CarthaParentVault from "./CarthaParentVault.json";
+import CarthaVault from "./CarthaVault.json";
 import ClaimHandler from "./ClaimHandler.json";
 import CustomErrors from "./CustomErrors.json";
 import DataStore from "./DataStore.json";
@@ -53,6 +55,8 @@ import WETH from "./WETH.json";
 export type AbiId =
   | "AbstractSubaccountApprovalNonceable"
   | "ArbitrumNodeInterface"
+  | "CarthaParentVault"
+  | "CarthaVault"
   | "ClaimHandler"
   | "CustomErrors"
   | "DataStore"
@@ -152,6 +156,8 @@ const AbstractSubaccountApprovalNonceable = [
 export const abis: Record<AbiId, readonly (Abi[number] & JsonFragment)[]> = {
   AbstractSubaccountApprovalNonceable,
   ArbitrumNodeInterface: ArbitrumNodeInterface.abi,
+  CarthaParentVault: CarthaParentVault.abi,
+  CarthaVault: CarthaVault.abi,
   ClaimHandler: ClaimHandler.abi,
   CustomErrors: CustomErrors.abi,
   DataStore: DataStore.abi,

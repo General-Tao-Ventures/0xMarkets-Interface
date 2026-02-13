@@ -165,7 +165,7 @@ const fetchAccounts = async (
   const allAccounts = await client.query<LeaderboardAccountsJson>({
     query: gql`
       query PeriodAccountStats($requiredMaxCapital: String, $from: Int, $to: Int, $account: String) {
-        all: periodAccountStats(limit: 100000, where: { maxCapital_gte: $requiredMaxCapital, from: $from, to: $to }) {
+        all: periodAccountStats(limit: 100000, where: { maxCapital_gte: $requiredMaxCapital, periodStart_eq: $from, periodEnd_eq: $to }) {
           id
           closedCount
           cumsumCollateral
@@ -183,7 +183,7 @@ const fetchAccounts = async (
           startUnrealizedFees
           startUnrealizedPriceImpact
         }
-        account: periodAccountStats(limit: 1, where: { id_eq: $account, from: $from, to: $to }) {
+        account: periodAccountStats(limit: 1, where: { id_eq: $account, periodStart_eq: $from, periodEnd_eq: $to }) {
           id
           closedCount
           cumsumCollateral
