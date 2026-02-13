@@ -30,7 +30,7 @@ export const ENV_AVALANCHE_RPC_URLS = import.meta.env.VITE_APP_AVALANCHE_RPC_URL
 export const ENV_BOTANIX_RPC_URLS = import.meta.env.VITE_APP_BOTANIX_RPC_URLS;
 
 // TODO take it from web3
-export const DEFAULT_CHAIN_ID = ARBITRUM;
+export const DEFAULT_CHAIN_ID = BASE_SEPOLIA;
 export const CHAIN_ID = DEFAULT_CHAIN_ID;
 
 export const IS_NETWORK_DISABLED: Record<ContractsChainId, boolean> = {
