@@ -1,12 +1,12 @@
 import { gql } from "@apollo/client";
 import useSWR from "swr";
 
-import { getSyntheticsGraphClient } from "lib/subgraph";
+import { getSubsquidGraphClient } from "lib/subgraph";
 import { CONFIG_UPDATE_INTERVAL } from "lib/timeConstants";
 
 const query = gql`
   query totalUsers {
-    userStats(where: { id: "total" }) {
+    userStats(where: { id_eq: "total" }) {
       uniqueUsers
     }
   }
@@ -15,14 +15,15 @@ const query = gql`
 export default function useUsers(chainId: number) {
   async function fetchUsersInfo(chainId: number) {
     try {
-      const client = getSyntheticsGraphClient(chainId);
-      const { data } = await client!.query({
+      const client = getSubsquidGraphClient(chainId);
+      if (!client) return { totalUsers: 0n };
+      const { data } = await client.query({
         query,
         fetchPolicy: "no-cache",
       });
       const { userStats } = data;
       return {
-        totalUsers: BigInt(userStats[0].uniqueUsers),
+        totalUsers: userStats[0] ? BigInt(userStats[0].uniqueUsers) : 0n,
       };
     } catch (error) {
       // eslint-disable-next-line no-console
