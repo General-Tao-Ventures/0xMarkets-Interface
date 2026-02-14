@@ -1,6 +1,12 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/keeper/:path*",
+      "destination": "/api/keeper?_path=:path*"
+    }
+  ],
   "functions": {
-    "api/keeper/[...path].ts": {
+    "api/keeper.ts": {
       "memory": 128,
       "maxDuration": 10
     }

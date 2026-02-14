@@ -3,12 +3,23 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 const KEEPER_URL = "http://142.93.203.222:37017";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { path } = req.query;
-  const pathStr = Array.isArray(path) ? path.join("/") : path || "";
+  // Path is forwarded via rewrite: /api/keeper/prices/tickers → /api/keeper?_path=prices/tickers
+  const rawPath = req.query._path;
+  const pathStr = Array.isArray(rawPath) ? rawPath.join("/") : rawPath || "";
 
-  const incomingUrl = new URL(req.url!, `https://${req.headers.host}`);
+  // Rebuild query string excluding the internal _path param
+  const params = new URLSearchParams();
+  for (const [key, val] of Object.entries(req.query)) {
+    if (key === "_path") continue;
+    if (Array.isArray(val)) {
+      val.forEach((v) => params.append(key, v));
+    } else if (val !== undefined) {
+      params.append(key, val);
+    }
+  }
+
   const target = new URL(`/${pathStr}`, KEEPER_URL);
-  target.search = incomingUrl.search;
+  target.search = params.toString();
 
   try {
     const response = await fetch(target.toString(), {
