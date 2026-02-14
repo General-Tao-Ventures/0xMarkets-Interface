@@ -3,7 +3,6 @@ import random from "lodash/random";
 import { isLocal } from "config/env";
 import { Bar, FromNewToOldArray } from "domain/tradingview/types";
 import { getOracleKeeperFallbackUrls, getOracleKeeperUrl } from "sdk/configs/oracleKeeper";
-import { getNormalizedTokenSymbol } from "sdk/configs/tokens";
 import { buildUrl } from "sdk/utils/buildUrl";
 
 import {
@@ -171,8 +170,6 @@ export class OracleKeeperFetcher implements OracleFetcher {
   }
 
   async fetchOracleCandles(tokenSymbol: string, period: string, limit: number): Promise<FromNewToOldArray<Bar>> {
-    tokenSymbol = getNormalizedTokenSymbol(tokenSymbol);
-
     return fetch(buildUrl(this.url!, "/prices/candles", { tokenSymbol, period, limit }))
       .then((res) => res.json())
       .then((res) => {
