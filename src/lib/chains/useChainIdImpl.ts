@@ -6,8 +6,7 @@ import {
   type ContractsChainId,
   type SettlementChainId,
   type SourceChainId,
-  ARBITRUM,
-  ARBITRUM_SEPOLIA,
+  BASE_SEPOLIA,
   isContractsChain,
 } from "config/chains";
 import { isDevelopment } from "config/env";
@@ -17,12 +16,7 @@ import { getRainbowKitConfig } from "lib/wallets/rainbowKitConfig";
 
 const IS_DEVELOPMENT = isDevelopment();
 
-let INITIAL_CHAIN_ID: ContractsChainId;
-if (IS_DEVELOPMENT) {
-  INITIAL_CHAIN_ID = ARBITRUM_SEPOLIA;
-} else {
-  INITIAL_CHAIN_ID = ARBITRUM;
-}
+const INITIAL_CHAIN_ID: ContractsChainId = BASE_SEPOLIA;
 
 /**
  * This returns default chainId if chainId is not supported or not found
