@@ -4,7 +4,6 @@ import { useGmMarketsApy } from "domain/synthetics/markets/useGmMarketsApy";
 import { usePerformanceAnnualized } from "domain/synthetics/markets/usePerformanceAnnualized";
 import { usePerformanceSnapshots } from "domain/synthetics/markets/usePerformanceSnapshots";
 import { usePoolsTimeRange } from "domain/synthetics/markets/usePoolsTimeRange";
-import { useCarthaVaults } from "domain/synthetics/markets/useCarthaVaults";
 import useV2Stats from "domain/synthetics/stats/useV2Stats";
 import { useChainId } from "lib/chains";
 import { formatUsd } from "lib/numbers";
@@ -80,17 +79,8 @@ export default function Pools() {
 function PoolsTvl() {
   const { chainId } = useChainId();
   const v2Stats = useV2Stats(chainId);
-  const carthaVaults = useCarthaVaults(chainId);
 
-  const gmTvl = v2Stats?.totalGMLiquidity ?? 0n;
-
-  // Cartha vault totalAssets is USDC (6 decimals), formatUsd expects 30 decimals
-  const carthaTvl = carthaVaults.reduce(
-    (sum, vault) => sum + vault.totalAssets * 10n ** 24n,
-    0n
-  );
-
-  const tvl = gmTvl + carthaTvl;
+  const tvl = v2Stats?.totalGMLiquidity ?? 0n;
 
   return (
     <div className="flex flex-col gap-8">
