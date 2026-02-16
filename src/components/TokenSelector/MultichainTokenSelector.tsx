@@ -10,7 +10,7 @@ import { stripBlacklistedWords } from "domain/tokens/utils";
 import { formatBalanceAmount, formatUsd } from "lib/numbers";
 import { EMPTY_ARRAY, EMPTY_OBJECT } from "lib/objects";
 import { searchBy } from "lib/searchBy";
-import { getToken } from "sdk/configs/tokens";
+import { getToken, isValidToken } from "sdk/configs/tokens";
 
 import Button from "components/Button/Button";
 import { SlideModal } from "components/Modal/SlideModal";
@@ -63,7 +63,7 @@ export function MultichainTokenSelector({
 }: Props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
-  let token: Token | undefined = getToken(chainId, tokenAddress);
+  let token: Token | undefined = isValidToken(chainId, tokenAddress) ? getToken(chainId, tokenAddress) : undefined;
 
   const onSelectTokenAddress = (tokenAddress: string, isGmxAccount: boolean) => {
     setIsModalVisible(false);
