@@ -2,6 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ArbitrumNodeInterface } from "./ArbitrumNodeInterface";
+export type { CarthaParentVault } from "./CarthaParentVault";
+export type { CarthaVault } from "./CarthaVault";
 export type { ClaimHandler } from "./ClaimHandler";
 export type { CustomErrors } from "./CustomErrors";
 export type { DataStore } from "./DataStore";
@@ -53,6 +55,8 @@ export type { Vester } from "./Vester";
 export type { WETH } from "./WETH";
 export * as factories from "./factories";
 export { ArbitrumNodeInterface__factory } from "./factories/ArbitrumNodeInterface__factory";
+export { CarthaParentVault__factory } from "./factories/CarthaParentVault__factory";
+export { CarthaVault__factory } from "./factories/CarthaVault__factory";
 export { ClaimHandler__factory } from "./factories/ClaimHandler__factory";
 export { CustomErrors__factory } from "./factories/CustomErrors__factory";
 export { DataStore__factory } from "./factories/DataStore__factory";
