@@ -19,27 +19,27 @@ type MarketUiConfig = {
 const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig>> = {
   [BASE_SEPOLIA]: {
     // EUR/USD [USDC-USDC]
-    "0xd3c882AbD5854267d509b944429faA82f3d36088": {
+    "0xD25DaA1A1c740c070A6DC6F0287bD14398C090E4": {
       enabled: true,
     },
     // GBP/USD [USDC-USDC]
-    "0x981977239025C8F2E133f87b79bEcc587B0e7562": {
+    "0x36C1EF9F39f42d7e84FB054D15E4d3171b7977BF": {
       enabled: true,
     },
     // GOLD/USD [USDC-USDC]
-    "0xf008E4b0962Bf5907d7dB11e88C9EA423D4e2563": {
+    "0xBA69c6dc7F28E1299e20D5D1d0a48529cB189980": {
       enabled: true,
     },
     // USD/JPY [USDC-USDC]
-    "0xF28b8572AD4c0BfF5EdfB6579b1Fa6fF0A9Eef5A": {
+    "0x4834B9a77b32ca7F1d8A20cf7CA886d92Be98aeF": {
       enabled: true,
     },
     // WBTC/USD [USDC-USDC]
-    "0x3c3D358701B4df855b3B88D4c840f694c9db8324": {
+    "0xA4c80F91f4F4b4095220048cb24186e20e48B9D4": {
       enabled: true,
     },
     // WETH/USD [USDC-USDC]
-    "0x41a281111Aa12a968564a33f9293D9B7b0dDFf19": {
+    "0x4DF435E8D40740291571Df779e48662C9521ed7d": {
       enabled: true,
     },
   },
