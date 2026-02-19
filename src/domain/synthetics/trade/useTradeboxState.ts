@@ -19,7 +19,7 @@ import { useLocalStorageSerializeKey } from "lib/localStorage";
 import { EMPTY_OBJECT, getByKey } from "lib/objects";
 import { useSafeState } from "lib/useSafeState";
 import { getContract } from "sdk/configs/contracts";
-import { getToken, isSimilarToken } from "sdk/configs/tokens";
+import { getToken, isValidToken, isSimilarToken } from "sdk/configs/tokens";
 import { TradeMode, TradeType } from "sdk/types/trade";
 import { TwapDuration } from "sdk/types/twap";
 import { createTradeFlags } from "sdk/utils/trade";
@@ -914,7 +914,7 @@ function fallbackPositionTokens({
   if (!isNextPayTokenValid) {
     let fallbackPayTokenAddress = prevState.tokens.fromTokenAddress;
 
-    if (nextPayTokenAddress) {
+    if (nextPayTokenAddress && isValidToken(chainId, nextPayTokenAddress)) {
       const desirablePayToken = getToken(chainId, nextPayTokenAddress);
 
       if (desirablePayToken) {
@@ -936,7 +936,7 @@ function fallbackPositionTokens({
   if (!isNextIndexTokenValid) {
     let fallbackIndexTokenAddress = prevState.tokens.indexTokenAddress;
 
-    if (nextIndexTokenAddress) {
+    if (nextIndexTokenAddress && isValidToken(chainId, nextIndexTokenAddress)) {
       const desirableIndexToken = getToken(chainId, nextIndexTokenAddress);
 
       if (desirableIndexToken) {
