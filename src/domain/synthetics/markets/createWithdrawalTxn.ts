@@ -10,8 +10,6 @@ import { OrderMetricId } from "lib/metrics/types";
 import { BlockTimestampData } from "lib/useBlockTimestampRequest";
 import { abis } from "sdk/abis";
 import type { ContractsChainId } from "sdk/configs/chains";
-import type { IWithdrawalUtils } from "typechain-types/ExchangeRouter";
-
 import { validateSignerAddress } from "components/Errors/errorToasts";
 
 import { SwapPricingType } from "../orders";
@@ -61,21 +59,18 @@ export async function createWithdrawalTxn(chainId: ContractsChainId, signer: Sig
       method: "createWithdrawal",
       params: [
         {
-          addresses: {
-            receiver: p.account,
-            callbackContract: ethers.ZeroAddress,
-            market: p.marketTokenAddress,
-            longTokenSwapPath: p.longTokenSwapPath,
-            shortTokenSwapPath: p.shortTokenSwapPath,
-            uiFeeReceiver: UI_FEE_RECEIVER_ACCOUNT ?? ethers.ZeroAddress,
-          },
+          receiver: p.account,
+          callbackContract: ethers.ZeroAddress,
+          uiFeeReceiver: UI_FEE_RECEIVER_ACCOUNT ?? ethers.ZeroAddress,
+          market: p.marketTokenAddress,
+          longTokenSwapPath: p.longTokenSwapPath,
+          shortTokenSwapPath: p.shortTokenSwapPath,
           minLongTokenAmount,
           minShortTokenAmount,
           shouldUnwrapNativeToken: isNativeWithdrawal,
           executionFee: p.executionFee,
           callbackGasLimit: 0n,
-          dataList: [],
-        } satisfies IWithdrawalUtils.CreateWithdrawalParamsStruct,
+        },
       ],
     },
   ];

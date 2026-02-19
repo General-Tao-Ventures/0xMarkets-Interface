@@ -9,8 +9,6 @@ import { OrderMetricId } from "lib/metrics/types";
 import { BlockTimestampData } from "lib/useBlockTimestampRequest";
 import { abis } from "sdk/abis";
 import type { ContractsChainId } from "sdk/configs/chains";
-import type { IShiftUtils } from "typechain-types/ExchangeRouter";
-
 import { validateSignerAddress } from "components/Errors/errorToasts";
 
 import { prepareOrderTxn } from "../orders/prepareOrderTxn";
@@ -50,18 +48,15 @@ export async function createShiftTxn(chainId: ContractsChainId, signer: Signer, 
       method: "createShift",
       params: [
         {
-          addresses: {
-            receiver: p.account,
-            callbackContract: ethers.ZeroAddress,
-            uiFeeReceiver: UI_FEE_RECEIVER_ACCOUNT ?? ethers.ZeroAddress,
-            fromMarket: p.fromMarketTokenAddress,
-            toMarket: p.toMarketTokenAddress,
-          },
+          receiver: p.account,
+          callbackContract: ethers.ZeroAddress,
+          uiFeeReceiver: UI_FEE_RECEIVER_ACCOUNT ?? ethers.ZeroAddress,
+          fromMarket: p.fromMarketTokenAddress,
+          toMarket: p.toMarketTokenAddress,
           minMarketTokens: minToMarketTokenAmount,
           executionFee: p.executionFee,
           callbackGasLimit: 0n,
-          dataList: [],
-        } satisfies IShiftUtils.CreateShiftParamsStruct,
+        },
       ],
     },
   ];

@@ -10,8 +10,6 @@ import { BlockTimestampData } from "lib/useBlockTimestampRequest";
 import { abis } from "sdk/abis";
 import type { ContractsChainId } from "sdk/configs/chains";
 import { NATIVE_TOKEN_ADDRESS, convertTokenAddress } from "sdk/configs/tokens";
-import { IDepositUtils } from "typechain-types/ExchangeRouter";
-
 import { validateSignerAddress } from "components/Errors/errorToasts";
 
 import { prepareOrderTxn } from "../orders/prepareOrderTxn";
@@ -87,22 +85,19 @@ export async function createDepositTxn(chainId: ContractsChainId, signer: Signer
       method: "createDeposit",
       params: [
         {
-          addresses: {
-            receiver: p.account,
-            callbackContract: ethers.ZeroAddress,
-            uiFeeReceiver: UI_FEE_RECEIVER_ACCOUNT ?? ethers.ZeroAddress,
-            market: p.marketTokenAddress,
-            initialLongToken: initialLongTokenAddress,
-            initialShortToken: initialShortTokenAddress,
-            longTokenSwapPath: p.longTokenSwapPath,
-            shortTokenSwapPath: p.shortTokenSwapPath,
-          },
+          receiver: p.account,
+          callbackContract: ethers.ZeroAddress,
+          uiFeeReceiver: UI_FEE_RECEIVER_ACCOUNT ?? ethers.ZeroAddress,
+          market: p.marketTokenAddress,
+          initialLongToken: initialLongTokenAddress,
+          initialShortToken: initialShortTokenAddress,
+          longTokenSwapPath: p.longTokenSwapPath,
+          shortTokenSwapPath: p.shortTokenSwapPath,
           minMarketTokens: minMarketTokens,
           shouldUnwrapNativeToken: shouldUnwrapNativeToken,
           executionFee: p.executionFee,
           callbackGasLimit: 0,
-          dataList: [],
-        } satisfies IDepositUtils.CreateDepositParamsStruct,
+        },
       ],
     },
   ];
@@ -111,19 +106,8 @@ export async function createDepositTxn(chainId: ContractsChainId, signer: Signer
     .filter(Boolean)
     .map((call) => contract.interface.encodeFunctionData(call!.method, call!.params));
 
-  const simulationPromise = !p.skipSimulation
-    ? simulateExecuteTxn(chainId, {
-        account: p.account,
-        primaryPriceOverrides: {},
-        tokensData: p.tokensData,
-        createMulticallPayload: encodedPayload,
-        method: "simulateExecuteLatestDeposit",
-        errorTitle: t`Deposit error.`,
-        value: wntAmount,
-        metricId: p.metricId,
-        blockTimestampData: p.blockTimestampData,
-      })
-    : undefined;
+  // TODO: Re-enable simulation after DataStore config is complete
+  const simulationPromise = undefined;
 
   const { gasLimit, gasPriceData } = await prepareOrderTxn(
     chainId,
