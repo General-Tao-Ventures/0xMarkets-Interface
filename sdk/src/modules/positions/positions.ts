@@ -1,6 +1,5 @@
 import { zeroAddress, zeroHash } from "viem";
 
-import { BOTANIX } from "configs/chains";
 import { getContract } from "configs/contracts";
 import {
   hashedPositionKey,
@@ -334,15 +333,6 @@ export class Positions extends Module {
   }
 
   private async getUserRefferalCode() {
-    if (this.chainId === BOTANIX) {
-      return {
-        attachedOnChain: false,
-        userReferralCode: undefined,
-        userReferralCodeString: undefined,
-        referralCodeForTxn: zeroHash,
-      };
-    }
-
     const referralStorageAddress = getContract(this.chainId, "ReferralStorage");
 
     const onChainCode = await this.sdk.executeMulticall({

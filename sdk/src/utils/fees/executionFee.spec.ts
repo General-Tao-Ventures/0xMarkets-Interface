@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { NATIVE_TOKEN_ADDRESS } from "configs/tokens";
 import type { GasLimitsConfig } from "types/fees";
 import type { TokensData } from "types/tokens";
@@ -9,7 +9,7 @@ import { expandDecimals } from "utils/numbers";
 import { getExecutionFee } from "./executionFee";
 
 describe("getExecutionFee", () => {
-  const chainId = ARBITRUM;
+  const chainId = BASE_SEPOLIA;
   const gasLimits = {
     estimatedGasFeeBaseAmount: 600000n,
     estimatedGasFeePerOraclePrice: 250000n,

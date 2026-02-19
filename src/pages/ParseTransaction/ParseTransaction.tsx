@@ -10,12 +10,7 @@ import { Hash, PublicClient, isHash } from "viem";
 import { usePublicClient } from "wagmi";
 
 import {
-  ARBITRUM,
-  ARBITRUM_SEPOLIA,
-  AVALANCHE,
-  AVALANCHE_FUJI,
   BASE_SEPOLIA,
-  BOTANIX,
   LOCALHOST,
   ContractsChainId,
   getExplorerUrl,
@@ -69,12 +64,7 @@ import {
 import { LogEntryComponentProps } from "./types";
 
 export const NETWORKS_BY_CHAIN_IDS: Record<ContractsChainId, string> = {
-  [ARBITRUM]: "arbitrum",
-  [AVALANCHE]: "avalanche",
-  [AVALANCHE_FUJI]: "fuji",
-  [ARBITRUM_SEPOLIA]: "arbitrum-sepolia",
   [BASE_SEPOLIA]: "base-sepolia",
-  [BOTANIX]: "botanix",
   [LOCALHOST]: "localhost",
 };
 
@@ -84,8 +74,8 @@ export function ParseTransactionPage() {
   const { tx, network } = useParams<{ tx: string; network: string }>();
   const [, copyToClipboard] = useCopyToClipboard();
 
-  /** Default is Arbitrum to prevent page crashes in hooks, wrong networks handled on :207 */
-  const chainId = NETWORKS[network as string] ?? ARBITRUM;
+  /** Default is Base Sepolia to prevent page crashes in hooks, wrong networks handled below */
+  const chainId = NETWORKS[network as string] ?? BASE_SEPOLIA;
 
   const client = usePublicClient({
     chainId,
@@ -120,7 +110,7 @@ export function ParseTransactionPage() {
   if (!network || typeof network !== "string" || !NETWORKS[network as string]) {
     return (
       <div className="text-body-large m-auto pt-24 text-center text-red-400 xl:px-[10%]">
-        Specify network: arbitrum, avalanche, fuji, botanix, arbitrum-sepolia
+        Specify network: base-sepolia, localhost
       </div>
     );
   }

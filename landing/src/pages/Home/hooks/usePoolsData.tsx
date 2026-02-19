@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { getServerUrl } from "config/backend";
 import { PerformanceInfo, useOracleKeeperFetcher } from "lib/oracleKeeperFetcher";
 import { getSubsquidGraphClient } from "lib/subgraph";
-import { ARBITRUM, AVALANCHE } from "sdk/configs/chainIds";
+import { BASE_SEPOLIA } from "sdk/configs/chainIds";
 import { MarketInfo } from "sdk/types/subsquid";
 
 export type PoolsData = {
@@ -18,30 +18,24 @@ export type PoolsData = {
 
 // combined by the requests used
 export function usePoolsData(): Partial<PoolsData> {
-  const { data: arbitrumPerformance } = usePerformanceByChainId(ARBITRUM);
-  const { data: avalanchePerformance } = usePerformanceByChainId(AVALANCHE);
-  const { data: arbitrumApys } = useApysByChainId(ARBITRUM);
-  const { data: avalancheApys } = useApysByChainId(AVALANCHE);
+  const { data: performance } = usePerformanceByChainId(BASE_SEPOLIA);
+  const { data: apys } = useApysByChainId(BASE_SEPOLIA);
   const { data: positionStats } = usePositionStats();
   const { data: marketInfos } = useMarketInfos();
 
   const { sortedAggregatedMarketInfos, totalLiquidity, openInterest } = marketInfos ?? {};
 
   const glvApy = useMemo(() => {
-    if (arbitrumPerformance && avalanchePerformance && arbitrumApys && avalancheApys) {
+    if (performance && apys) {
       let result = 0;
-      const aggregatedPerformance = [...arbitrumPerformance, ...avalanchePerformance];
-      for (const performance of aggregatedPerformance) {
-        const performanceApy = parseFloat(performance.uniswapV2Performance);
-        if (performance.entity === "Glv" && performanceApy > result) {
+      for (const perf of performance) {
+        const performanceApy = parseFloat(perf.uniswapV2Performance);
+        if (perf.entity === "Glv" && performanceApy > result) {
           result = performanceApy;
         }
       }
       if (result < 0.1) {
-        const glvApys = {
-          ...arbitrumApys.glvs,
-          ...avalancheApys.glvs,
-        };
+        const glvApys = apys.glvs ?? {};
 
         for (const glvKey of Object.keys(glvApys)) {
           const glv = glvApys[glvKey];
@@ -53,45 +47,30 @@ export function usePoolsData(): Partial<PoolsData> {
       return { glvApy: result };
     }
     return {};
-  }, [arbitrumPerformance, avalanchePerformance, arbitrumApys, avalancheApys]);
+  }, [performance, apys]);
 
-  // Helper - aggregated performance from arbitrum and avalanche for optimization
-  const aggregatedPerformance = useMemo(() => {
-    if (!arbitrumPerformance || !avalanchePerformance) {
+  // Helper - performance lookup for optimization
+  const performanceLookup = useMemo(() => {
+    if (!performance) {
       return null;
     }
-    const result: {
-      arbitrum: Record<string, PerformanceInfo & { performanceApy: number }>;
-      avalanche: Record<string, PerformanceInfo & { performanceApy: number }>;
-    } = {
-      arbitrum: {},
-      avalanche: {},
-    };
-    for (const performance of arbitrumPerformance) {
-      if (performance.entity === "Market") {
-        const performanceApy = parseFloat(performance.uniswapV2Performance);
-        result.arbitrum[performance.address] = { ...performance, performanceApy };
-      }
-    }
-    for (const performance of avalanchePerformance) {
-      if (performance.entity === "Market") {
-        const performanceApy = parseFloat(performance.uniswapV2Performance);
-        result.avalanche[performance.address] = { ...performance, performanceApy };
+    const result: Record<string, PerformanceInfo & { performanceApy: number }> = {};
+    for (const perf of performance) {
+      if (perf.entity === "Market") {
+        const performanceApy = parseFloat(perf.uniswapV2Performance);
+        result[perf.address] = { ...perf, performanceApy };
       }
     }
     return result;
-  }, [arbitrumPerformance, avalanchePerformance]);
+  }, [performance]);
 
   // GM APY
   const gmApy = useMemo(() => {
-    if (sortedAggregatedMarketInfos && aggregatedPerformance && arbitrumApys && avalancheApys) {
+    if (sortedAggregatedMarketInfos && performanceLookup && apys) {
       let gmApy = 0;
       for (const marketIndex in sortedAggregatedMarketInfos) {
         const market = sortedAggregatedMarketInfos[marketIndex];
-        const marketApy =
-          market.chainId === ARBITRUM
-            ? aggregatedPerformance.arbitrum[market.id]?.performanceApy ?? 0
-            : aggregatedPerformance.avalanche[market.id]?.performanceApy ?? 0;
+        const marketApy = performanceLookup[market.id]?.performanceApy ?? 0;
         if (Number(marketIndex) < 20 && marketApy > gmApy) {
           gmApy = marketApy;
         }
@@ -99,10 +78,7 @@ export function usePoolsData(): Partial<PoolsData> {
       // If the GM APY is less than 0.1, we need to calculate the GM APY based on the market APYs
       if (gmApy <= 0.1) {
         for (const market of sortedAggregatedMarketInfos) {
-          const marketApy =
-            market.chainId === ARBITRUM
-              ? arbitrumApys.markets[market.id]?.apy ?? 0
-              : avalancheApys.markets[market.id]?.apy ?? 0;
+          const marketApy = apys.markets[market.id]?.apy ?? 0;
           if (marketApy > gmApy) {
             gmApy = marketApy;
           }
@@ -111,7 +87,7 @@ export function usePoolsData(): Partial<PoolsData> {
       return { gmApy };
     }
     return {};
-  }, [sortedAggregatedMarketInfos, aggregatedPerformance, arbitrumApys, avalancheApys]);
+  }, [sortedAggregatedMarketInfos, performanceLookup, apys]);
   const result: Partial<PoolsData> = {
     ...gmApy,
     ...glvApy,
@@ -147,45 +123,26 @@ const marketInfoQuery = {
 };
 
 function useMarketInfos() {
-  const arbitrumClient = getSubsquidGraphClient(ARBITRUM)!;
-  const avalancheClient = getSubsquidGraphClient(AVALANCHE)!;
+  const client = getSubsquidGraphClient(BASE_SEPOLIA);
   return useSWR(["marketInfos"], async () => {
-    const arbitrumReq = arbitrumClient?.query(marketInfoQuery);
-    const avalancheReq = avalancheClient?.query(marketInfoQuery);
-    const [arbitrumRes, avalancheRes] = await Promise.all([arbitrumReq, avalancheReq]);
-    const arbitrumMarketInfos = arbitrumRes.data?.marketInfos;
-    const avalancheMarketInfos = avalancheRes.data?.marketInfos;
-    const arbitrumPlatformStats = arbitrumRes.data?.platformStats[0];
-    const avalanchePlatformStats = avalancheRes.data?.platformStats[0];
+    if (!client) return undefined;
+    const res = await client.query(marketInfoQuery);
+    const marketInfos = res.data?.marketInfos ?? [];
+    const platformStats = res.data?.platformStats?.[0];
     let totalLiquidity = 0n;
     let openInterest = 0n;
     const sortedAggregatedMarketInfos: (MarketInfo & { chainId: number })[] = [];
-    let arbIndex = 0;
-    let avaxIndex = 0;
-    while (arbIndex < arbitrumMarketInfos.length || avaxIndex < avalancheMarketInfos.length) {
-      const arbMarketInfo = arbitrumMarketInfos[arbIndex];
-      const avaxMarketInfo = avalancheMarketInfos[avaxIndex];
-      const arbPoolValue = arbMarketInfo ? BigInt(arbMarketInfo.poolValue) : null;
-      const avaxPoolValue = avaxMarketInfo ? BigInt(avaxMarketInfo.poolValue) : null;
-      if ((arbPoolValue ?? -1n) > (avaxPoolValue ?? -1n)) {
-        sortedAggregatedMarketInfos.push({ ...arbMarketInfo, chainId: ARBITRUM });
-        openInterest +=
-          BigInt(arbMarketInfo.longOpenInterestUsd ?? 0n) + BigInt(arbMarketInfo.shortOpenInterestUsd ?? 0n);
-        totalLiquidity += BigInt(arbMarketInfo.poolValue);
-        arbIndex++;
-      } else {
-        sortedAggregatedMarketInfos.push({ ...avaxMarketInfo, chainId: AVALANCHE });
-        openInterest +=
-          BigInt(avaxMarketInfo.longOpenInterestUsd ?? 0n) + BigInt(avaxMarketInfo.shortOpenInterestUsd ?? 0n);
-        totalLiquidity += BigInt(avaxMarketInfo.poolValue);
-        avaxIndex++;
-      }
+    for (const marketInfo of marketInfos) {
+      sortedAggregatedMarketInfos.push({ ...marketInfo, chainId: BASE_SEPOLIA });
+      openInterest +=
+        BigInt(marketInfo.longOpenInterestUsd ?? 0n) + BigInt(marketInfo.shortOpenInterestUsd ?? 0n);
+      totalLiquidity += BigInt(marketInfo.poolValue);
     }
     return {
       sortedAggregatedMarketInfos,
       totalLiquidity,
       openInterest,
-      totalDepositedUsers: arbitrumPlatformStats.depositedUsers + avalanchePlatformStats.depositedUsers,
+      totalDepositedUsers: platformStats?.depositedUsers ?? 0,
     };
   });
 }
@@ -202,15 +159,11 @@ function usePositionStats() {
   return useSWR(
     ["positionStats"],
     async () => {
-      const arbitrumReq = fetchPositionStatsByChainId(ARBITRUM);
-      const avalancheReq = fetchPositionStatsByChainId(AVALANCHE);
-      const [arbitrumRes, avalancheRes] = await Promise.all([arbitrumReq, avalancheReq]);
+      const res = await fetchPositionStatsByChainId(BASE_SEPOLIA);
       return {
         openInterest:
-          BigInt(arbitrumRes.totalLongPositionSizes) +
-          BigInt(arbitrumRes.totalShortPositionSizes) +
-          BigInt(avalancheRes.totalLongPositionSizes) +
-          BigInt(avalancheRes.totalShortPositionSizes),
+          BigInt(res.totalLongPositionSizes) +
+          BigInt(res.totalShortPositionSizes),
       };
     },
     {}

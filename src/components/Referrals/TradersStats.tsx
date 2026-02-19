@@ -1,8 +1,7 @@
 import { t, Trans } from "@lingui/macro";
 import { useRef, useState } from "react";
 
-import { ARBITRUM, AVALANCHE, AVALANCHE_FUJI, getExplorerUrl, ContractsChainId } from "config/chains";
-import { isDevelopment } from "config/env";
+import { getExplorerUrl, ContractsChainId } from "config/chains";
 import { TotalReferralsStats, useTiers } from "domain/referrals";
 import { formatDate } from "lib/dates";
 import { shortenAddress } from "lib/legacy";
@@ -46,9 +45,6 @@ function TradersStats({ referralsData, traderTier, chainId, userReferralCodeStri
   const { chains, total } = referralsData || {};
   const {
     [chainId]: currentReferralsData,
-    [ARBITRUM]: arbitrumData,
-    [AVALANCHE]: avalancheData,
-    [AVALANCHE_FUJI]: fujiData,
   } = chains || {};
 
   const { getCurrentData, currentPage, setCurrentPage, pageCount } = usePagination(
@@ -114,39 +110,15 @@ function TradersStats({ referralsData, traderTier, chainId, userReferralCodeStri
           tooltipContent={
             <>
               <StatsTooltipRow
-                label={t`V1 Arbitrum`}
-                value={getUsdValue(arbitrumData?.traderReferralTotalStats.v1Data.volume)}
+                label={t`V1 Volume`}
+                value={getUsdValue(currentReferralsData?.traderReferralTotalStats.v1Data.volume)}
                 valueClassName="numbers"
               />
               <StatsTooltipRow
-                label={t`V1 Avalanche`}
-                value={getUsdValue(avalancheData?.traderReferralTotalStats.v1Data.volume)}
+                label={t`V2 Volume`}
+                value={getUsdValue(currentReferralsData?.traderReferralTotalStats.v2Data.volume)}
                 valueClassName="numbers"
               />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V1 Avalanche Fuji`}
-                  value={getUsdValue(fujiData?.traderReferralTotalStats.v1Data.volume)}
-                  valueClassName="numbers"
-                />
-              )}
-              <StatsTooltipRow
-                label={t`V2 Arbitrum`}
-                value={getUsdValue(arbitrumData?.traderReferralTotalStats.v2Data.volume)}
-                valueClassName="numbers"
-              />
-              <StatsTooltipRow
-                label={t`V2 Avalanche`}
-                value={getUsdValue(avalancheData?.traderReferralTotalStats.v2Data.volume)}
-                valueClassName="numbers"
-              />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V2 Avalanche Fuji`}
-                  value={getUsdValue(fujiData?.traderReferralTotalStats.v2Data.volume)}
-                  valueClassName="numbers"
-                />
-              )}
               <div className="Tooltip-divider" />
               <StatsTooltipRow label={t`Total`} value={getUsdValue(total?.traderVolume)} valueClassName="numbers" />
             </>
@@ -159,39 +131,15 @@ function TradersStats({ referralsData, traderTier, chainId, userReferralCodeStri
           tooltipContent={
             <>
               <StatsTooltipRow
-                label={t`V1 Arbitrum`}
-                value={getUsdValue(arbitrumData?.traderReferralTotalStats.v1Data.discountUsd)}
+                label={t`V1 Rebates`}
+                value={getUsdValue(currentReferralsData?.traderReferralTotalStats.v1Data.discountUsd)}
                 valueClassName="numbers"
               />
               <StatsTooltipRow
-                label={t`V1 Avalanche`}
-                value={getUsdValue(avalancheData?.traderReferralTotalStats.v1Data.discountUsd)}
+                label={t`V2 Rebates`}
+                value={getUsdValue(currentReferralsData?.traderReferralTotalStats.v2Data.discountUsd)}
                 valueClassName="numbers"
               />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V1 Avalanche Fuji`}
-                  value={getUsdValue(avalancheData?.traderReferralTotalStats.v1Data.discountUsd)}
-                  valueClassName="numbers"
-                />
-              )}
-              <StatsTooltipRow
-                label={t`V2 Arbitrum`}
-                value={getUsdValue(arbitrumData?.traderReferralTotalStats.v2Data.discountUsd)}
-                valueClassName="numbers"
-              />
-              <StatsTooltipRow
-                label={t`V2 Avalanche`}
-                value={getUsdValue(avalancheData?.traderReferralTotalStats.v2Data.discountUsd)}
-                valueClassName="numbers"
-              />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V2 Avalanche Fuji`}
-                  value={getUsdValue(fujiData?.traderReferralTotalStats.v2Data.discountUsd)}
-                  valueClassName="numbers"
-                />
-              )}
               <div className="Tooltip-divider" />
               <StatsTooltipRow label={t`Total`} value={getUsdValue(total?.discountUsd)} valueClassName="numbers" />
             </>

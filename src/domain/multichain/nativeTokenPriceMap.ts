@@ -1,8 +1,5 @@
-import { AVALANCHE, SettlementChainId, SOURCE_BASE_MAINNET, SourceChainId } from "config/static/chains";
-import { getTokenBySymbol } from "sdk/configs/tokens";
+import { SettlementChainId, SourceChainId } from "config/static/chains";
 
-export const NATIVE_TOKEN_PRICE_MAP: Partial<Record<SourceChainId, Partial<Record<SettlementChainId, string>>>> = {
-  [SOURCE_BASE_MAINNET]: {
-    [AVALANCHE]: getTokenBySymbol(AVALANCHE, "ETH").address,
-  },
-};
+// On Base, source and settlement chains both use ETH as native token,
+// so no cross-chain native token price mapping is needed.
+export const NATIVE_TOKEN_PRICE_MAP: Partial<Record<SourceChainId, Partial<Record<SettlementChainId, string>>>> = {};

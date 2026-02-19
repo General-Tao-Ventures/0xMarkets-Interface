@@ -211,7 +211,9 @@ export function getChainlinkChartPricesFromGraph(tokenSymbol: string, period: st
         value
       }
     }`);
-    requests.push(chainlinkClient.query({ query }));
+    if (chainlinkClient) {
+      requests.push(chainlinkClient.query({ query }));
+    }
   }
 
   return Promise.all(requests)

@@ -1,7 +1,7 @@
 import { withRetry, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { ARBITRUM, AVALANCHE, BOTANIX, getChainName, CONTRACTS_CHAIN_IDS } from "configs/chains";
+import { BASE_SEPOLIA, getChainName, CONTRACTS_CHAIN_IDS } from "configs/chains";
 import { getOracleKeeperUrl } from "configs/oracleKeeper";
 import { TOKENS } from "configs/tokens";
 
@@ -28,9 +28,7 @@ const IGNORED_TOKENS = ["ESGMX", "GLP", "GM", "GLV"];
 const getIgnoredTokensByChain = (chainId: number) => {
   return IGNORED_TOKENS.concat(
     {
-      [ARBITRUM]: ["FRAX", "MIM"],
-      [AVALANCHE]: ["MIM", "WBTC"],
-      [BOTANIX]: ["GMX"],
+      [BASE_SEPOLIA]: [],
     }[chainId] ?? []
   );
 };

@@ -1,9 +1,8 @@
-import { ARBITRUM, AVALANCHE } from "config/chains";
+import { BASE_SEPOLIA } from "config/chains";
 
 export type VolumeInfo = {
   totalVolume: bigint;
-  [AVALANCHE]: { totalVolume: bigint };
-  [ARBITRUM]: { totalVolume: bigint };
+  [BASE_SEPOLIA]: { totalVolume: bigint };
 };
 
 export type VolumeStat = {

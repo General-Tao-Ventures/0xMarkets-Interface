@@ -1,7 +1,8 @@
 import { Image } from "@davatar/react";
 import { useEnsAvatar } from "wagmi";
 
-import { ETH_MAINNET } from "config/chains";
+// Hardcode Ethereum mainnet chain ID for ENS resolution
+const ETH_MAINNET = 1;
 
 export type Props = {
   size: number;

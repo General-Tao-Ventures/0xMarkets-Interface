@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
 
-import { BOTANIX } from "config/chains";
 import { REFERRALS_SELECTED_TAB_KEY } from "config/localStorage";
 import { usePendingTxns } from "context/PendingTxnsContext/PendingTxnsContext";
 import {
@@ -24,7 +23,6 @@ import { serializeBigIntsInObject } from "lib/numbers";
 import useWallet from "lib/wallets/useWallet";
 
 import AppPageLayout from "components/AppPageLayout/AppPageLayout";
-import { BotanixBanner } from "components/BotanixBanner/BotanixBanner";
 import { ChainContentHeader } from "components/ChainContentHeader/ChainContentHeader";
 import ExternalLink from "components/ExternalLink/ExternalLink";
 import Loader from "components/Loader/Loader";
@@ -81,8 +79,6 @@ function Referrals() {
       pendingTxns,
     });
   }
-
-  const isBotanix = chainId === BOTANIX;
 
   function renderAffiliatesTab() {
     const ownsSomeChainCode = Boolean(referralsData?.chains?.[chainId]?.codes?.length);
@@ -145,32 +141,26 @@ function Referrals() {
             isTop
             title={t`Referrals`}
             subtitle={
-              !isBotanix ? (
-                <Trans>
-                  Get fee discounts and earn rebates through the 0xMarkets referral program.
-                  <br />
-                  For more information, please read the{" "}
-                  <ExternalLink href="https://docs.0xmarkets.io/docs/referrals">referral program details</ExternalLink>.
-                </Trans>
-              ) : undefined
+              <Trans>
+                Get fee discounts and earn rebates through the 0xMarkets referral program.
+                <br />
+                For more information, please read the{" "}
+                <ExternalLink href="https://docs.0xmarkets.io/docs/referrals">referral program details</ExternalLink>.
+              </Trans>
             }
             qa="referrals-page"
           />
-          {isBotanix ? (
-            <BotanixBanner />
-          ) : (
-            <div>
-              <Tabs
-                type="inline-primary"
-                className="mb-16"
-                options={tabsOptions}
-                selectedValue={activeTab}
-                onChange={setActiveTab}
-              />
+          <div>
+            <Tabs
+              type="inline-primary"
+              className="mb-16"
+              options={tabsOptions}
+              selectedValue={activeTab}
+              onChange={setActiveTab}
+            />
 
-              {activeTab === AFFILIATES ? renderAffiliatesTab() : renderTradersTab()}
-            </div>
-          )}
+            {activeTab === AFFILIATES ? renderAffiliatesTab() : renderTradersTab()}
+          </div>
         </div>
       </SEO>
     </AppPageLayout>

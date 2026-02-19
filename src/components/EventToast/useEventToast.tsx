@@ -3,7 +3,7 @@ import { useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useLocalStorage } from "react-use";
 
-import { ARBITRUM } from "config/chains";
+import { BASE_SEPOLIA } from "config/chains";
 import { appEventsData, homeEventsData, MKR_USD_DELISTING_EVENT_ID } from "config/events";
 import useIncentiveStats from "domain/synthetics/common/useIncentiveStats";
 import { useMarketsInfoRequest } from "domain/synthetics/markets";
@@ -23,7 +23,7 @@ function useEventToast() {
   const { chainId, srcChainId } = useChainId();
   const { tokensData } = useTokensDataRequest(chainId, srcChainId);
   const { marketsInfoData } = useMarketsInfoRequest(chainId, { tokensData });
-  const arbIncentiveStats = useIncentiveStats(ARBITRUM);
+  const incentiveStats = useIncentiveStats(BASE_SEPOLIA);
 
   const isAdaptiveFundingActiveSomeMarkets = useMemo(() => {
     if (!marketsInfoData) return;
@@ -52,7 +52,7 @@ function useEventToast() {
   }, [positions.positionsData]);
 
   useEffect(() => {
-    const someIncentivesOn = Boolean(arbIncentiveStats?.lp?.isActive || arbIncentiveStats?.trading?.isActive);
+    const someIncentivesOn = Boolean(incentiveStats?.lp?.isActive || incentiveStats?.trading?.isActive);
     const validationParams = {
       "v2-adaptive-funding": isAdaptiveFundingActiveSomeMarkets,
       "v2-adaptive-funding-coming-soon":
@@ -99,7 +99,7 @@ function useEventToast() {
     chainId,
     isAdaptiveFundingActiveSomeMarkets,
     isAdaptiveFundingActiveAllMarkets,
-    arbIncentiveStats,
+    incentiveStats,
     hasMKRPosition,
   ]);
 }

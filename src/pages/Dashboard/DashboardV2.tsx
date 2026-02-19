@@ -1,11 +1,6 @@
 import { Trans, t } from "@lingui/macro";
 import { Link } from "react-router-dom";
 
-import { ARBITRUM, AVALANCHE } from "config/chains";
-
-// Chain IDs for V1 position stats
-export const ACTIVE_CHAIN_IDS = [ARBITRUM, AVALANCHE];
-
 import { SyntheticsStateContextProvider } from "context/SyntheticsStateContext/SyntheticsStateContextProvider";
 import { useChainId } from "lib/chains";
 import { getPageTitle } from "lib/legacy";

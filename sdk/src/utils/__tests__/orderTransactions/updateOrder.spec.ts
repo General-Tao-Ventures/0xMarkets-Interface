@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { getTokenBySymbol, getWrappedToken } from "configs/tokens";
 import { OrderType } from "types/orders";
 import { parseValue, USD_DECIMALS } from "utils/numbers";
@@ -13,7 +13,7 @@ beforeAll(() => {
 });
 
 describe("Update Order Payloads", () => {
-  const CHAIN_ID = ARBITRUM;
+  const CHAIN_ID = BASE_SEPOLIA;
   const ORDER_KEY = "0x1234567890123456789012345678901234567890123456789012345678901234";
   const EXECUTION_GAS_LIMIT = 1_000_000n;
   const EXECUTION_FEE_AMOUNT = EXECUTION_GAS_LIMIT * MOCK_GAS_PRICE;

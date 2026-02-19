@@ -1,4 +1,3 @@
-import { ARBITRUM } from "config/chains";
 import { isDevelopment } from "config/env";
 import type { GlobalExpressParams } from "domain/synthetics/express";
 import { getByKey } from "lib/objects";
@@ -70,7 +69,7 @@ export const selectExpressGlobalParams = createSelector(function selectExpressGl
   const gasPaymentToken = getByKey(tokensData, gasPaymentTokenAddress);
   const relayerFeeToken = getByKey(tokensData, relayerFeeTokenAddress);
 
-  const hasL1Gas = chainId === ARBITRUM;
+  const hasL1Gas = false;
 
   if (
     (hasL1Gas && !l1Reference) ||

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { MarketInfo, MarketsInfoData } from "types/markets";
 import { TokenData, TokensData } from "types/tokens";
 import { getByKey } from "utils/objects";
@@ -105,7 +105,7 @@ describe("increaseOrderHelper", () => {
 
       expect(findSwapPathSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          chainId: ARBITRUM,
+          chainId: BASE_SEPOLIA,
           fromTokenAddress: payToken.address,
           toTokenAddress: collateralToken.address,
           marketsInfoData: expect.any(Object),

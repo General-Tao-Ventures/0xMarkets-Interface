@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useCopyToClipboard } from "react-use";
 import type { Address } from "viem";
 
-import { ARBITRUM, AVALANCHE, AVALANCHE_FUJI } from "config/chains";
+import { BASE_SEPOLIA } from "config/chains";
 import { MarketInfo } from "domain/synthetics/markets";
 import { useChainId } from "lib/chains";
 import { formatDateTime } from "lib/dates";
@@ -92,9 +92,7 @@ const RebateGroupRow = memo(({ rebateGroup }: { rebateGroup: RebateGroup }) => {
     (e) => {
       e.stopPropagation();
       const networkStr = {
-        [ARBITRUM]: "arbitrum",
-        [AVALANCHE]: "avalanche",
-        [AVALANCHE_FUJI]: "avalancheFuji",
+        [BASE_SEPOLIA]: "baseSepolia",
       }[chainId];
       copyToClipboard(
         `MARKET=${rebateGroup.marketInfo?.marketTokenAddress} TOKEN=${rebateGroup.tokenData?.address} TIME_KEY=${

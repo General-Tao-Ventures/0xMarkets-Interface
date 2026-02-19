@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { TOKENS } from "configs/tokens";
 
 import { MarketInfo } from "../../types/markets";
@@ -27,7 +27,7 @@ import {
 import { expandDecimals } from "../numbers";
 
 function getToken(symbol: string) {
-  return TOKENS[ARBITRUM].find((token) => token.symbol === symbol) as Token;
+  return TOKENS[BASE_SEPOLIA].find((token) => token.symbol === symbol) as Token;
 }
 
 describe("getMarketFullName", () => {

@@ -8,14 +8,14 @@ import { LANGUAGE_LOCALSTORAGE_KEY } from "config/localStorage";
 import { defaultLocale, dynamicActivate } from "lib/i18n";
 import { useOracleKeeperFetcher } from "lib/oracleKeeperFetcher";
 import WalletProvider from "lib/wallets/WalletProvider";
-import { ARBITRUM } from "sdk/configs/chainIds";
+import { BASE_SEPOLIA } from "sdk/configs/chainIds";
 
 import SEO from "components/Seo/SEO";
 
 import { LandingRoutes } from "./LandingRoutes";
 
 export default function App() {
-  const fetcher = useOracleKeeperFetcher(ARBITRUM);
+  const fetcher = useOracleKeeperFetcher(BASE_SEPOLIA);
   useEffect(() => {
     const defaultLanguage = localStorage.getItem(LANGUAGE_LOCALSTORAGE_KEY) || defaultLocale;
     dynamicActivate(defaultLanguage);

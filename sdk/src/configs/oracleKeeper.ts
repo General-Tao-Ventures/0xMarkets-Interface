@@ -1,40 +1,17 @@
-import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BOTANIX, LOCALHOST, ContractsChainId, BASE_SEPOLIA } from "./chains";
+import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
 
 const isLocalhost = typeof self !== "undefined" && self.location?.host?.includes("localhost");
 
 const BASE_SEPOLIA_KEEPER_URL = isLocalhost ? "http://127.0.0.1:37017" : "/api/keeper";
 
 const ORACLE_KEEPER_URLS: Record<ContractsChainId, string> = {
-  [ARBITRUM]: "https://arbitrum-api.gmxinfra.io",
-
-  [AVALANCHE]: "https://avalanche-api.gmxinfra.io",
-
-  [AVALANCHE_FUJI]: "https://synthetics-api-avax-fuji-upovm.ondigitalocean.app",
-
-  [BOTANIX]: "https://botanix-api.gmxinfra.io",
-
-  [ARBITRUM_SEPOLIA]: "https://dolphin-app-a2dup.ondigitalocean.app",
-
-  // For localhost, you may need to run your own oracle keeper or use mock prices
-  [LOCALHOST]: "http://127.0.0.1:3000",
-
   [BASE_SEPOLIA]: BASE_SEPOLIA_KEEPER_URL,
+  [LOCALHOST]: "http://127.0.0.1:37017",
 };
 
 const ORACLE_KEEPER_FALLBACK_URLS: Record<ContractsChainId, string[]> = {
-  [ARBITRUM]: ["https://arbitrum-api-fallback.gmxinfra.io", "https://arbitrum-api-fallback.gmxinfra2.io"],
-
-  [AVALANCHE]: ["https://avalanche-api-fallback.gmxinfra.io", "https://avalanche-api-fallback.gmxinfra2.io"],
-
-  [AVALANCHE_FUJI]: ["https://synthetics-api-avax-fuji-upovm.ondigitalocean.app"],
-
-  [BOTANIX]: ["https://botanix-api-fallback.gmxinfra.io", "https://botanix-api-fallback.gmxinfra2.io"],
-
-  [ARBITRUM_SEPOLIA]: ["https://dolphin-app-a2dup.ondigitalocean.app"],
-
-  [LOCALHOST]: ["http://127.0.0.1:3000"],
-
   [BASE_SEPOLIA]: [BASE_SEPOLIA_KEEPER_URL],
+  [LOCALHOST]: ["http://127.0.0.1:37017"],
 };
 
 export function getOracleKeeperUrl(chainId: number) {

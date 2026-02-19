@@ -3,7 +3,7 @@ import mapKeys from "lodash/mapKeys";
 import upperFirst from "lodash/upperFirst";
 import { memo, SVGProps, useState } from "react";
 
-import { ARBITRUM, AVALANCHE, AVALANCHE_FUJI, getChainName } from "config/chains";
+import { BASE_SEPOLIA, getChainName } from "config/chains";
 import { colors } from "config/colors";
 import { useTheme } from "context/ThemeContext/ThemeContext";
 import { ColorTree } from "lib/generateColorConfig";
@@ -216,7 +216,7 @@ export default memo(function UiPage() {
         <h2 className="mb-16 mt-24 text-24 font-medium">Token categories</h2>
 
         <div className="flex flex-col gap-16">
-          {[ARBITRUM, AVALANCHE, AVALANCHE_FUJI].map((chainId) => (
+          {[BASE_SEPOLIA].map((chainId) => (
             <div key={chainId}>
               <h3 className="text-h3">{getChainName(chainId)}</h3>
               {["meme", "layer1", "layer2", "defi"].map((category) => (

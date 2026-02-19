@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ARBITRUM } from "config/chains";
+import { BASE_SEPOLIA } from "config/chains";
 import { USD_DECIMALS } from "config/factors";
 import { getPositionFee } from "domain/synthetics/fees";
 import { expectEqualWithPrecision, mockPositionInfo } from "domain/synthetics/testUtils/mocks";
@@ -43,7 +43,7 @@ describe("getExternalSwapInputsByFromValue", () => {
       findSwapPath: mockFindSwapPath,
       uiFeeFactor,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     expect(result.strategy).toBe("byFromValue");
@@ -65,7 +65,7 @@ describe("getExternalSwapInputsByFromValue", () => {
       findSwapPath: mockFindSwapPath,
       uiFeeFactor: 30n,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     expect(result.internalSwapTotalFeeItem).toEqual(undefined);
@@ -143,7 +143,7 @@ describe("getExternalSwapInputsByLeverageSize", () => {
       isLong: true,
       userReferralInfo: undefined,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     // Check input/output values
@@ -166,7 +166,7 @@ describe("getExternalSwapInputsByLeverageSize", () => {
       findSwapPath: mockFindSwapPath,
       uiFeeFactor,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     expectEqualWithPrecision(reverseResult.usdIn, result.usdIn);
@@ -249,7 +249,7 @@ describe("getExternalSwapInputsByLeverageSize", () => {
       isLong: true,
       userReferralInfo: undefined,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     // Check input/output values
@@ -273,7 +273,7 @@ describe("getExternalSwapInputsByLeverageSize", () => {
       findSwapPath: mockFindSwapPath,
       uiFeeFactor,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     expectEqualWithPrecision(reverseResult.usdIn, result.usdIn);
@@ -302,7 +302,7 @@ describe("getExternalSwapInputsByLeverageSize", () => {
       isLong: true,
       userReferralInfo: undefined,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     expectEqualWithPrecision(result.amountIn, baseAmountIn);
@@ -323,7 +323,7 @@ describe("getExternalSwapInputsByLeverageSize", () => {
       isLong: true,
       userReferralInfo: undefined,
       marketsInfoData: undefined,
-      chainId: ARBITRUM,
+      chainId: BASE_SEPOLIA,
     });
 
     expect(result.amountIn).toBe(0n);

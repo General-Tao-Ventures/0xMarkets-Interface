@@ -5,7 +5,20 @@ import { USD_DECIMALS } from "config/factors";
 import { getMarketIndexName } from "domain/synthetics/markets/utils";
 import { formatAmountHuman } from "lib/numbers";
 import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
-import { TOKEN_COLOR_MAP } from "sdk/configs/tokens";
+const TOKEN_COLOR_MAP: Record<string, string> = {
+  ETH: "#6062a6",
+  BTC: "#F7931A",
+  WETH: "#6062a6",
+  WBTC: "#F7931A",
+  USDC: "#2775CA",
+  USDT: "#50AF95",
+  mUSDC: "#2775CA",
+  EUR: "#003399",
+  GBP: "#CF142B",
+  GOLD: "#FFD700",
+  JPY: "#BC002D",
+  default: "#6062a6",
+};
 
 import { TableTd, TableTh, TableTheadTr, TableTr } from "components/Table/Table";
 import TokenIcon from "components/TokenIcon/TokenIcon";

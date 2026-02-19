@@ -1,7 +1,6 @@
 import { AbstractSigner, Provider, Signer, Wallet } from "ethers";
 import { encodeFunctionData, size, zeroAddress, zeroHash } from "viem";
 
-import { BOTANIX } from "config/chains";
 import { getContract } from "config/contracts";
 import { GMX_SIMULATION_ORIGIN } from "config/dataStore";
 import { BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS } from "config/factors";
@@ -429,10 +428,6 @@ export function getIsValidExpressParams({
   gasPaymentValidations: GasPaymentValidations;
   subaccountValidations: SubaccountValidations | undefined;
 }): boolean {
-  if (chainId === BOTANIX && !isSponsoredCall) {
-    return false;
-  }
-
   return gasPaymentValidations.isValid && (!subaccountValidations || subaccountValidations.isValid);
 }
 

@@ -12,7 +12,6 @@ import { getContract } from "config/contracts";
 import { getChainIcon } from "config/icons";
 import {
   CHAIN_ID_PREFERRED_DEPOSIT_TOKEN,
-  DEBUG_MULTICHAIN_SAME_CHAIN_DEPOSIT,
   MULTICHAIN_FUNDING_SLIPPAGE_BPS,
   MULTICHAIN_TRANSFER_SUPPORTED_TOKENS,
   StargateErrorsAbi,
@@ -521,7 +520,7 @@ export const DepositView = () => {
   ]);
 
   const handleDeposit = useCallback(async () => {
-    if (DEBUG_MULTICHAIN_SAME_CHAIN_DEPOSIT && (walletChainId as SettlementChainId) === settlementChainId) {
+    if ((walletChainId as SettlementChainId) === settlementChainId) {
       await handleSameChainDeposit();
     } else {
       setIsSubmitting(true);

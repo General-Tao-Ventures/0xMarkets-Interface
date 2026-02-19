@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { TOKENS } from "configs/tokens";
 import { Token, TokensData } from "types/tokens";
 
@@ -19,7 +19,7 @@ import {
 } from "../tokens";
 
 function getToken(symbol: string) {
-  return TOKENS[ARBITRUM].find((token) => token.symbol === symbol) as Token;
+  return TOKENS[BASE_SEPOLIA].find((token) => token.symbol === symbol) as Token;
 }
 
 describe("parseContractPrice", () => {

@@ -2,15 +2,11 @@ import { useCallback } from "react";
 
 import type { LandingPageLaunchAppEvent } from "lib/userAnalytics/types";
 import { userAnalytics } from "lib/userAnalytics/UserAnalytics";
-import { ARBITRUM, AVALANCHE, BOTANIX, SOURCE_BASE_MAINNET } from "sdk/configs/chainIds";
+import { BASE_SEPOLIA } from "sdk/configs/chainIds";
 
 import { useHomePageContext } from "../contexts/HomePageContext";
 
 export enum RedirectChainIds {
-  Arbitum,
-  Avalanche,
-  Botanix,
-  Solana,
   Base,
 }
 
@@ -20,11 +16,7 @@ type Props = {
 };
 
 const REDIRECT_MAP = {
-  [RedirectChainIds.Solana]: "https://gmxsol.io/",
-  [RedirectChainIds.Base]: makeLink(SOURCE_BASE_MAINNET),
-  [RedirectChainIds.Arbitum]: makeLink(ARBITRUM),
-  [RedirectChainIds.Avalanche]: makeLink(AVALANCHE),
-  [RedirectChainIds.Botanix]: makeLink(BOTANIX),
+  [RedirectChainIds.Base]: makeLink(BASE_SEPOLIA),
 };
 
 export function useGoToTrade({ buttonPosition, chainId }: Props) {
@@ -34,7 +26,7 @@ export function useGoToTrade({ buttonPosition, chainId }: Props) {
       {
         event: "LandingPageAction",
         data: {
-          action: chainId === RedirectChainIds.Solana ? "SolanaNavigation" : "LaunchApp",
+          action: "LaunchApp",
           buttonPosition: buttonPosition,
           shouldSeeConfirmationDialog: shouldShowRedirectModal(),
         },

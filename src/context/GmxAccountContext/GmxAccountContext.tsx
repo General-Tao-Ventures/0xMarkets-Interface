@@ -2,11 +2,10 @@ import { PropsWithChildren, useCallback, useMemo, useState } from "react";
 import { createContext } from "use-context-selector";
 import { useAccount } from "wagmi";
 
-import { isDevelopment } from "config/env";
 import { SELECTED_NETWORK_LOCAL_STORAGE_KEY, SELECTED_SETTLEMENT_CHAIN_ID_KEY } from "config/localStorage";
 import { DEFAULT_SETTLEMENT_CHAIN_ID_MAP, isSettlementChain } from "config/multichain";
 import { areChainsRelated } from "domain/multichain/areChainsRelated";
-import { ARBITRUM, ARBITRUM_SEPOLIA, SettlementChainId, SourceChainId } from "sdk/configs/chains";
+import { BASE_SEPOLIA, SettlementChainId, SourceChainId } from "sdk/configs/chains";
 
 export type GmxAccountModalView =
   | "main"
@@ -53,7 +52,7 @@ export type GmxAccountContext = {
 
 export const context = createContext<GmxAccountContext | null>(null);
 
-const DEFAULT_SETTLEMENT_CHAIN_ID: SettlementChainId = isDevelopment() ? ARBITRUM_SEPOLIA : ARBITRUM;
+const DEFAULT_SETTLEMENT_CHAIN_ID: SettlementChainId = BASE_SEPOLIA;
 
 const getSettlementChainIdFromLocalStorage = () => {
   const settlementChainIdFromLocalStorage = localStorage.getItem(SELECTED_SETTLEMENT_CHAIN_ID_KEY);

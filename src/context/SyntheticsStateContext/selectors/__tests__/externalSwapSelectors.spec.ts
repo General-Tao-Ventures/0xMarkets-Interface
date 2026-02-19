@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AVALANCHE } from "config/chains";
+import { BASE_SEPOLIA } from "sdk/configs/chains";
 import { getSwapPriceImpactForExternalSwapThresholdBps } from "config/externalSwaps";
 import { mockExternalSwapQuote } from "domain/synthetics/testUtils/mocks";
 import { FindSwapPath } from "domain/synthetics/trade";
@@ -65,7 +65,7 @@ describe("externalSwapSelectors", () => {
     defaultState = {
       pageType: "trade",
       globals: {
-        chainId: AVALANCHE,
+        chainId: BASE_SEPOLIA,
         marketsInfo: {
           marketsInfoData,
         },

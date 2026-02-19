@@ -6,7 +6,7 @@ import {
   AB_HIGH_LEVERAGE_WARNING_MAJOR_TOKEN_LEVERAGE,
   AB_HIGH_LEVERAGE_WARNING_PROBABILITY,
 } from "config/ab";
-import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, BASE_SEPOLIA, BOTANIX, LOCALHOST, ContractsChainId } from "config/chains";
+import { BASE_SEPOLIA, LOCALHOST, ContractsChainId } from "config/chains";
 import { getHighLeverageWarningDismissedTimestampKey } from "config/localStorage";
 import { selectAccount, selectChainId } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { selectIsLeverageSliderEnabled } from "context/SyntheticsStateContext/selectors/settingsSelectors";
@@ -21,13 +21,7 @@ import { useIsAddressInGroup } from "lib/userAnalytics/getIsAddressInGroup";
 import { getToken } from "sdk/configs/tokens";
 
 const IS_MAJOR_TOKEN_MAP: Record<ContractsChainId, string[]> = {
-  [ARBITRUM]: ["BTC", "ETH", "SOL"],
-  [AVALANCHE]: ["AVAX", "ETH", "BTC"],
-  [BOTANIX]: ["BTC"],
-
-  [ARBITRUM_SEPOLIA]: ["ETH"],
-  [AVALANCHE_FUJI]: [],
-  [BASE_SEPOLIA]: ["ETH"],
+  [BASE_SEPOLIA]: ["ETH", "BTC"],
   [LOCALHOST]: ["ETH", "BTC"],
 };
 

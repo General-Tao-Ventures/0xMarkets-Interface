@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { useCopyToClipboard } from "react-use";
 import { useAccount } from "wagmi";
 
-import { BOTANIX, getExplorerUrl } from "config/chains";
+import { getExplorerUrl } from "config/chains";
 import { isSettlementChain } from "config/multichain";
 import { useGmxAccountModalOpen, useGmxAccountSelectedTransferGuid } from "context/GmxAccountContext/hooks";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
@@ -162,7 +162,7 @@ const Toolbar = ({ account }: { account: string }) => {
     }, 200);
   };
 
-  const showNotify = settlementChainId !== BOTANIX;
+  const showNotify = true;
   const buttonClassName = isSmallMobile ? cx("size-32 !p-0") : cx("size-40 !p-0");
 
   return (

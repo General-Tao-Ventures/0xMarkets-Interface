@@ -8,12 +8,7 @@ import { Address } from "viem";
 
 import {
   AnyChainId,
-  ARBITRUM,
-  ARBITRUM_SEPOLIA,
-  AVALANCHE,
-  AVALANCHE_FUJI,
   BASE_SEPOLIA,
-  BOTANIX,
   LOCALHOST,
   CONTRACTS_CHAIN_IDS,
   ContractsChainId,
@@ -47,13 +42,8 @@ export const RPC_TRACKER_UPDATE_EVENT = "rpc-tracker-update-event";
 const PROBE_SAMPLE_FIELD = "minCollateralFactor";
 // Markets used for `PROBE_SAMPLE_FIELD` reading
 const PROBE_SAMPLE_MARKET: Record<ContractsChainId, Address> = {
-  [ARBITRUM]: "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336", // ETH/USD
-  [AVALANCHE]: "0xB7e69749E3d2EDd90ea59A4932EFEa2D41E245d7", // ETH/USD
-  [AVALANCHE_FUJI]: "0xbf338a6C595f06B7Cfff2FA8c958d49201466374", // ETH/USD
-  [BOTANIX]: "0x6682BB60590a045A956541B1433f016Ed22E361d", // STBTC-STBTC
-  [ARBITRUM_SEPOLIA]: "0xb6fC4C9eB02C35A134044526C62bb15014Ac0Bcc", // ETH/USD
-  [LOCALHOST]: "0x0000000000000000000000000000000000000000", // Placeholder - add actual market address after deployment
   [BASE_SEPOLIA]: "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554", // EUR/USD
+  [LOCALHOST]: "0x0000000000000000000000000000000000000000", // Placeholder - add actual market address after deployment
 };
 
 type ProbeData = {

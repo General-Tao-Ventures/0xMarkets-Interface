@@ -1,39 +1,17 @@
 import {
   AnyChainId,
-  ARBITRUM,
-  ARBITRUM_SEPOLIA,
-  AVALANCHE,
-  AVALANCHE_FUJI,
-  BOTANIX,
-  LOCALHOST,
   SOURCE_BASE_MAINNET,
-  SOURCE_OPTIMISM_SEPOLIA,
-  SOURCE_SEPOLIA,
   BASE_SEPOLIA,
+  LOCALHOST,
 } from "config/chains";
 
 import gmIcon from "img/gm_icon.svg";
-import arbitrum from "img/ic_arbitrum_24.svg";
-import arbitrumSepolia from "img/ic_arbitrum_sepolia_24.svg";
-import avalanche from "img/ic_avalanche_24.svg";
-import avalancheTestnet from "img/ic_avalanche_testnet_24.svg";
 import base from "img/ic_base_24.svg";
-import botanix from "img/ic_botanix_24.svg";
 import esGMXIcon from "img/ic_esgmx_40.svg";
-import esGMXArbitrumIcon from "img/ic_esgmx_arbitrum.svg";
-import esGMXAvaxIcon from "img/ic_esgmx_avalanche.svg";
 import glpIcon from "img/ic_glp_40.svg";
-import glpArbitrum from "img/ic_glp_arbitrum.svg";
-import glpAvax from "img/ic_glp_avalanche.svg";
 import glvIcon from "img/ic_glv_40.svg";
-import gmArbitrum from "img/ic_gm_arbitrum.svg";
-import gmAvax from "img/ic_gm_avax.svg";
 import gmxIcon from "img/ic_gmx_40.svg";
-import gmxArbitrum from "img/ic_gmx_arbitrum.svg";
-import gmxAvax from "img/ic_gmx_avax.svg";
 import gmxOutlineIcon from "img/ic_gmxv1flat.svg";
-import optimismSepolia from "img/ic_op_24.svg";
-import sepolia from "img/ic_sepolia_24.svg";
 
 type ChainIcons = {
   network?: string;
@@ -46,47 +24,6 @@ type ChainIcons = {
 };
 
 const ICONS: Record<number | "common", ChainIcons> = {
-  [ARBITRUM]: {
-    network: arbitrum,
-    gmx: gmxArbitrum,
-    glp: glpArbitrum,
-    esgmx: esGMXArbitrumIcon,
-    gm: gmArbitrum,
-  },
-  [ARBITRUM_SEPOLIA]: {
-    network: arbitrumSepolia,
-    gmx: gmxArbitrum,
-    glp: glpArbitrum,
-    esgmx: esGMXArbitrumIcon,
-    gm: gmArbitrum,
-  },
-  [AVALANCHE]: {
-    network: avalanche,
-    gmx: gmxAvax,
-    glp: glpAvax,
-    esgmx: esGMXAvaxIcon,
-    gm: gmAvax,
-  },
-  [AVALANCHE_FUJI]: {
-    network: avalancheTestnet,
-    gm: gmAvax,
-    gmx: gmxAvax,
-    glp: glpAvax,
-  },
-  [BOTANIX]: {
-    network: botanix,
-    glp: glpIcon,
-    gmx: gmxIcon,
-    gm: gmIcon,
-    esgmx: esGMXIcon,
-  },
-  [LOCALHOST]: {
-    network: arbitrum,
-    gmx: gmxArbitrum,
-    glp: glpArbitrum,
-    esgmx: esGMXArbitrumIcon,
-    gm: gmArbitrum,
-  },
   [BASE_SEPOLIA]: {
     network: base,
     gmx: gmxIcon,
@@ -105,17 +42,10 @@ const ICONS: Record<number | "common", ChainIcons> = {
 };
 
 export const CHAIN_ID_TO_NETWORK_ICON: Record<AnyChainId | 0, string> = {
-  [ARBITRUM]: arbitrum,
-  [AVALANCHE]: avalanche,
   0: gmxIcon,
   [SOURCE_BASE_MAINNET]: base,
-  [AVALANCHE_FUJI]: avalancheTestnet,
-  [ARBITRUM_SEPOLIA]: arbitrumSepolia,
-  [SOURCE_OPTIMISM_SEPOLIA]: optimismSepolia,
-  [SOURCE_SEPOLIA]: sepolia,
-  [BOTANIX]: botanix,
-  [LOCALHOST]: arbitrum,  
   [BASE_SEPOLIA]: base,
+  [LOCALHOST]: base,
 };
 
 /**

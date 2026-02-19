@@ -2,8 +2,7 @@ import { Trans, t } from "@lingui/macro";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
-import { ARBITRUM, AVALANCHE, AVALANCHE_FUJI, ContractsChainId, getExplorerUrl, SourceChainId } from "config/chains";
-import { isDevelopment } from "config/env";
+import { ContractsChainId, getExplorerUrl, SourceChainId } from "config/chains";
 import { RebateDistributionType, ReferralCodeStats, TotalReferralsStats, useTiers } from "domain/referrals";
 import { useMarketsInfoRequest } from "domain/synthetics/markets";
 import { useAffiliateRewards } from "domain/synthetics/referrals/useAffiliateRewards";
@@ -94,9 +93,6 @@ function AffiliatesStats({
   const { total, chains } = referralsData || {};
   const {
     [chainId]: currentReferralsData,
-    [ARBITRUM]: arbitrumData,
-    [AVALANCHE]: avalancheData,
-    [AVALANCHE_FUJI]: fujiData,
   } = chains || {};
 
   const { affiliateDistributions, affiliateTierInfo, affiliateReferralCodesStats } = currentReferralsData || {};
@@ -176,22 +172,10 @@ function AffiliatesStats({
           tooltipContent={
             <>
               <StatsTooltipRow
-                label={t`Traders Referred on Arbitrum`}
-                value={arbitrumData.affiliateTotalStats.registeredReferralsCount}
+                label={t`Traders Referred`}
+                value={currentReferralsData?.affiliateTotalStats.registeredReferralsCount}
                 showDollar={false}
               />
-              <StatsTooltipRow
-                label={t`Traders Referred on Avalanche`}
-                value={avalancheData.affiliateTotalStats.registeredReferralsCount}
-                showDollar={false}
-              />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`Traders Referred on Avalanche Fuji`}
-                  value={fujiData.affiliateTotalStats.registeredReferralsCount}
-                  showDollar={false}
-                />
-              )}
               <div className="Tooltip-divider" />
               <StatsTooltipRow label={t`Total`} value={total?.registeredReferralsCount} showDollar={false} />
             </>
@@ -204,39 +188,15 @@ function AffiliatesStats({
           tooltipContent={
             <>
               <StatsTooltipRow
-                label={t`V1 Arbitrum`}
-                value={getUsdValue(arbitrumData?.affiliateTotalStats.v1Data.volume)}
+                label={t`V1 Volume`}
+                value={getUsdValue(currentReferralsData?.affiliateTotalStats.v1Data.volume)}
                 valueClassName="numbers"
               />
               <StatsTooltipRow
-                label={t`V1 Avalanche`}
-                value={getUsdValue(avalancheData?.affiliateTotalStats.v1Data.volume)}
+                label={t`V2 Volume`}
+                value={getUsdValue(currentReferralsData?.affiliateTotalStats.v2Data.volume)}
                 valueClassName="numbers"
               />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V1 Avalanche Fuji`}
-                  value={getUsdValue(fujiData?.affiliateTotalStats.v1Data.volume)}
-                  valueClassName="numbers"
-                />
-              )}
-              <StatsTooltipRow
-                label={t`V2 Arbitrum`}
-                value={getUsdValue(arbitrumData?.affiliateTotalStats.v2Data.volume)}
-                valueClassName="numbers"
-              />
-              <StatsTooltipRow
-                label={t`V2 Avalanche`}
-                value={getUsdValue(avalancheData?.affiliateTotalStats.v2Data.volume)}
-                valueClassName="numbers"
-              />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V2 Avalanche Fuji`}
-                  value={getUsdValue(fujiData?.affiliateTotalStats.v2Data.volume)}
-                  valueClassName="numbers"
-                />
-              )}
               <div className="Tooltip-divider" />
               <StatsTooltipRow label={t`Total`} value={getUsdValue(total?.affiliateVolume)} valueClassName="numbers" />
             </>
@@ -249,39 +209,15 @@ function AffiliatesStats({
           tooltipContent={
             <>
               <StatsTooltipRow
-                label={t`V1 Arbitrum`}
-                value={getUsdValue(arbitrumData?.affiliateTotalStats.v1Data.affiliateRebateUsd)}
+                label={t`V1 Rebates`}
+                value={getUsdValue(currentReferralsData?.affiliateTotalStats.v1Data.affiliateRebateUsd)}
                 valueClassName="numbers"
               />
               <StatsTooltipRow
-                label={t`V1 Avalanche`}
-                value={getUsdValue(avalancheData?.affiliateTotalStats.v1Data.affiliateRebateUsd)}
+                label={t`V2 Rebates`}
+                value={getUsdValue(currentReferralsData?.affiliateTotalStats.v2Data.affiliateRebateUsd)}
                 valueClassName="numbers"
               />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V1 Avalanche Fuji`}
-                  value={getUsdValue(fujiData?.affiliateTotalStats.v1Data.affiliateRebateUsd)}
-                  valueClassName="numbers"
-                />
-              )}
-              <StatsTooltipRow
-                label={t`V2 Arbitrum`}
-                value={getUsdValue(arbitrumData?.affiliateTotalStats.v2Data.affiliateRebateUsd)}
-                valueClassName="numbers"
-              />
-              <StatsTooltipRow
-                label={t`V2 Avalanche`}
-                value={getUsdValue(avalancheData?.affiliateTotalStats.v2Data.affiliateRebateUsd)}
-                valueClassName="numbers"
-              />
-              {isDevelopment() && (
-                <StatsTooltipRow
-                  label={t`V2 Avalanche Fuji`}
-                  value={getUsdValue(fujiData?.affiliateTotalStats.v2Data.affiliateRebateUsd)}
-                  valueClassName="numbers"
-                />
-              )}
               <div className="Tooltip-divider" />
               <StatsTooltipRow
                 label={t`Total`}

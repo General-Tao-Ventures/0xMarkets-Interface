@@ -1,6 +1,6 @@
 import { Trans } from "@lingui/macro";
 
-import { BOTANIX, getChainName } from "config/chains";
+import { getChainName } from "config/chains";
 import { DEFAULT_SLIPPAGE_AMOUNT } from "config/factors";
 import { getIsExpressSupported } from "config/features";
 import { CHAIN_ID_TO_NETWORK_ICON } from "config/icons";
@@ -276,16 +276,13 @@ export function TradingSettings({
           />
         </ToggleSwitch>
 
-        {/* External swaps are enabled by default on Botanix */}
-        {chainId !== BOTANIX && (
-          <ToggleSwitch
-            isChecked={settings.externalSwapsEnabled}
-            setIsChecked={settings.setExternalSwapsEnabled}
-            className="font-medium"
-          >
-            <Trans>Enable External Swaps</Trans>
-          </ToggleSwitch>
-        )}
+        <ToggleSwitch
+          isChecked={settings.externalSwapsEnabled}
+          setIsChecked={settings.setExternalSwapsEnabled}
+          className="font-medium"
+        >
+          <Trans>Enable External Swaps</Trans>
+        </ToggleSwitch>
       </SettingsSection>
     </div>
   );

@@ -1,6 +1,6 @@
 import { Trans } from "@lingui/macro";
 
-import { BOTANIX, getExplorerUrl } from "config/chains";
+import { BASE_SEPOLIA, getExplorerUrl } from "config/chains";
 import { StakeOrUnstakeParams } from "domain/synthetics/orders/createStakeOrUnStakeTxn";
 import { formatTokenAmount } from "lib/numbers";
 
@@ -12,8 +12,8 @@ export function StakeNotification({
   isStake,
   isWrapBeforeStake,
 }: StakeOrUnstakeParams & { txnHash: string }) {
-  const fromTokenSymbol = isStake ? (isWrapBeforeStake ? "BTC" : "PBTC") : "STBTC";
-  const toTokenSymbol = isStake ? "STBTC" : "PBTC";
+  const fromTokenSymbol = isStake ? (isWrapBeforeStake ? "ETH" : "WETH") : "WETH";
+  const toTokenSymbol = isStake ? "WETH" : "ETH";
   const fromAmount = formatTokenAmount(amount, 18, fromTokenSymbol, { isStable: false });
   const toAmount = formatTokenAmount(amount, 18, toTokenSymbol, { isStable: false });
 
@@ -23,7 +23,7 @@ export function StakeNotification({
         Swap {fromAmount} for {toAmount}
       </Trans>
 
-      <ExternalLink href={`${getExplorerUrl(BOTANIX)}tx/${txnHash}`}>
+      <ExternalLink href={`${getExplorerUrl(BASE_SEPOLIA)}tx/${txnHash}`}>
         <Trans>View</Trans>
       </ExternalLink>
     </span>

@@ -1,4 +1,6 @@
-import { ACTIVE_CHAIN_IDS } from "./DashboardV2";
+import { BASE_SEPOLIA } from "config/chains";
+
+const ACTIVE_CHAIN_IDS = [BASE_SEPOLIA];
 
 export function getPositionStats(
   positionStats?: {

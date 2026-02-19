@@ -6,7 +6,7 @@ import { useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useMedia } from "react-use";
 
-import { ARBITRUM, AVALANCHE_FUJI, getExplorerUrl } from "config/chains";
+import { getExplorerUrl } from "config/chains";
 import { selectGmMarkets } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import { GLP_DISTRIBUTION_ID, GLP_DISTRIBUTION_TEST_ID } from "domain/synthetics/claims/useUserClaimableAmounts";
@@ -36,7 +36,6 @@ import { TableTd, TableTh, TableTheadTr, TableTr } from "components/Table/Table"
 import { TableScrollFadeContainer } from "components/TableScrollFade/TableScrollFade";
 import Tooltip from "components/Tooltip/Tooltip";
 
-import { AboutGlpIncident } from "./AboutGlpIncident";
 import ClaimableAmounts from "./ClaimableAmounts";
 
 type NormalizedIncentiveData = ReturnType<typeof getNormalizedIncentive>;
@@ -116,13 +115,7 @@ export default function UserIncentiveDistributionList() {
       <div className="flex flex-grow flex-col gap-18">
         {account ? (
           <Card title={t`Claimable Balance`} bodyPadding={false} divider={false}>
-            {chainId !== AVALANCHE_FUJI ? (
-              <ClaimableAmounts />
-            ) : (
-              <p className="p-18 text-gray-500">
-                <Trans>Claims are not available on Avalanche Fuji</Trans>
-              </p>
-            )}
+            <ClaimableAmounts />
           </Card>
         ) : null}
         <Card title={t`Distribution History`} bodyPadding={false} divider={false}>
@@ -174,7 +167,7 @@ export default function UserIncentiveDistributionList() {
           <BottomTablePagination page={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
         </Card>
       </div>
-      {chainId === ARBITRUM ? <AboutGlpIncident /> : null}
+      {/* AboutGlpIncident was Arbitrum-specific, no longer applicable */}
     </div>
   );
 }

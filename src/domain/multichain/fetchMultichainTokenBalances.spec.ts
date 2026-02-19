@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { ARBITRUM, SOURCE_BASE_MAINNET } from "config/chains";
+import { BASE_SEPOLIA, SOURCE_BASE_MAINNET } from "config/chains";
 import { getMulticallBatchingLoggingEnabledKey } from "config/localStorage";
 import { NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
 
@@ -21,7 +21,7 @@ describe("fetchMultichainTokenBalances", () => {
 
   it("should fetch real token balances", async () => {
     const account = "0x0000000000000000000000000000000000000000";
-    const result = await fetchMultichainTokenBalances(ARBITRUM, account);
+    const result = await fetchMultichainTokenBalances(BASE_SEPOLIA, account);
     expect(result[SOURCE_BASE_MAINNET][NATIVE_TOKEN_ADDRESS]).toBeGreaterThan(0n);
   }, 10_000);
 });

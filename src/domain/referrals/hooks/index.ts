@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { Hash, zeroAddress } from "viem";
 
-import { BOTANIX } from "config/chains";
 import { getContract } from "config/contracts";
 import { REFERRAL_CODE_KEY } from "config/localStorage";
 import { callContract, contractFetcher } from "lib/contracts";
@@ -99,7 +98,7 @@ export function useAffiliateTier(signer, chainId, account) {
   } = useSWR<bigint>(
     account && [`ReferralStorage:referrerTiers`, chainId, referralStorageAddress, "referrerTiers", account],
     {
-      fetcher: chainId !== BOTANIX ? (contractFetcher(signer, "ReferralStorage") as any) : undefined,
+      fetcher: contractFetcher(signer, "ReferralStorage") as any,
       refreshInterval: CONFIG_UPDATE_INTERVAL,
     }
   );
@@ -118,7 +117,7 @@ export function useTiers(signer: Signer | undefined, chainId: ContractsChainId, 
       ? [`ReferralStorage:referrerTiers`, chainId, referralStorageAddress, "tiers", tierLevel.toString()]
       : null,
     {
-      fetcher: chainId !== BOTANIX ? (contractFetcher(signer, "ReferralStorage") as any) : undefined,
+      fetcher: contractFetcher(signer, "ReferralStorage") as any,
       refreshInterval: CONFIG_UPDATE_INTERVAL,
     }
   );
@@ -175,7 +174,7 @@ export function useUserReferralCode(signer, chainId, account, skipLocalReferralC
   const { data: onChainCode, error: onChainCodeError } = useSWR<string>(
     account && ["ReferralStorage", chainId, referralStorageAddress, "traderReferralCodes", account],
     {
-      fetcher: chainId !== BOTANIX ? (contractFetcher(signer, "ReferralStorage") as any) : undefined,
+      fetcher: contractFetcher(signer, "ReferralStorage") as any,
       refreshInterval: CONFIG_UPDATE_INTERVAL,
     }
   );
@@ -185,7 +184,7 @@ export function useUserReferralCode(signer, chainId, account, skipLocalReferralC
       ? ["ReferralStorage", chainId, referralStorageAddress, "codeOwners", localStorageCode]
       : null,
     {
-      fetcher: chainId !== BOTANIX ? (contractFetcher(signer, "ReferralStorage") as any) : undefined,
+      fetcher: contractFetcher(signer, "ReferralStorage") as any,
       refreshInterval: CONFIG_UPDATE_INTERVAL,
     }
   );
@@ -266,7 +265,7 @@ export function useReferrerTier(signer, chainId, account) {
   const { data: referrerTier, mutate: mutateReferrerTier } = useSWR<bigint>(
     validAccount && [`ReferralStorage:referrerTiers`, chainId, referralStorageAddress, "referrerTiers", validAccount],
     {
-      fetcher: chainId !== BOTANIX ? (contractFetcher(signer, "ReferralStorage") as any) : undefined,
+      fetcher: contractFetcher(signer, "ReferralStorage") as any,
     }
   );
   return {
@@ -284,7 +283,7 @@ export function useCodeOwner(signer, chainId, account, code) {
   } = useSWR<string>(
     account && code && [`ReferralStorage:codeOwners`, chainId, referralStorageAddress, "codeOwners", code],
     {
-      fetcher: chainId !== BOTANIX ? (contractFetcher(signer, "ReferralStorage") as any) : undefined,
+      fetcher: contractFetcher(signer, "ReferralStorage") as any,
       refreshInterval: CONFIG_UPDATE_INTERVAL,
     }
   );

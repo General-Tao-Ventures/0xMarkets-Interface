@@ -14,8 +14,22 @@ import { convertToUsd, useTokensDataRequest } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
 import { BN_ZERO, formatAmountHuman } from "lib/numbers";
 import { EMPTY_OBJECT } from "lib/objects";
-import { TOKEN_COLOR_MAP } from "sdk/configs/tokens";
 import { bigMath } from "sdk/utils/bigmath";
+
+const TOKEN_COLOR_MAP: Record<string, string> = {
+  ETH: "#627EEA",
+  BTC: "#F7931A",
+  WBTC: "#F7931A",
+  WETH: "#627EEA",
+  USDC: "#2775CA",
+  mUSDC: "#2775CA",
+  USDT: "#26A17B",
+  EUR: "#003399",
+  GBP: "#00247D",
+  GOLD: "#FFD700",
+  JPY: "#BC002D",
+  default: "#888888",
+};
 
 import { AppCard, AppCardSection, AppCardSplit } from "components/AppCard/AppCard";
 import Button from "components/Button/Button";

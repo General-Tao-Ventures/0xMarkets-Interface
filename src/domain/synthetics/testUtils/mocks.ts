@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 
-import { AVALANCHE } from "config/chains";
+import { BASE_SEPOLIA } from "config/chains";
 import { MarketInfo, getMarketIndexName, getMarketPoolName } from "domain/synthetics/markets";
 import { convertToTokenAmount } from "domain/synthetics/tokens/utils";
 import { getTokenBySymbol } from "sdk/configs/tokens";
@@ -116,8 +116,8 @@ export const MOCK_TXN_DATA = {
 export function mockExternalSwapQuote(overrides: Partial<ExternalSwapQuote> = {}): ExternalSwapQuote {
   return {
     aggregator: ExternalSwapAggregator.OpenOcean,
-    inTokenAddress: getTokenBySymbol(AVALANCHE, "BTC").address,
-    outTokenAddress: getTokenBySymbol(AVALANCHE, "USDC").address,
+    inTokenAddress: getTokenBySymbol(BASE_SEPOLIA, "WBTC").address,
+    outTokenAddress: getTokenBySymbol(BASE_SEPOLIA, "USDC").address,
     receiver: "0x1234567890123456789012345678901234567890",
     amountIn: 1000000n,
     amountOut: 900000n,

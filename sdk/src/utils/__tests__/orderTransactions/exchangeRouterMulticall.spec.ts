@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { getContract } from "configs/contracts";
 import { MARKETS } from "configs/markets";
 import { getTokenBySymbol, getWrappedToken, NATIVE_TOKEN_ADDRESS } from "configs/tokens";
@@ -21,7 +21,7 @@ beforeAll(() => {
 });
 
 describe("Exchange Router Multicall", () => {
-  const CHAIN_ID = ARBITRUM;
+  const CHAIN_ID = BASE_SEPOLIA;
   const RECEIVER = "0x1234567890123456789012345678901234567890";
   const UI_FEE_RECEIVER = "0x0987654321098765432109876543210987654321";
   const EXECUTION_GAS_LIMIT = 1_000_000n;

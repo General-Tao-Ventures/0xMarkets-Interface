@@ -10,7 +10,6 @@ import { useChainId } from "lib/chains";
 import { AccountDashboard } from "pages/AccountDashboard/AccountDashboard";
 import { buildAccountDashboardUrl } from "pages/AccountDashboard/buildAccountDashboardUrl";
 import { AccountsRouter } from "pages/Actions/ActionsRouter";
-import ClaimEsGmx from "pages/ClaimEsGmx/ClaimEsGmx";
 import DashboardV2 from "pages/Dashboard/DashboardV2";
 import Ecosystem from "pages/Ecosystem/Ecosystem";
 import Jobs from "pages/Jobs/Jobs";
@@ -140,11 +139,7 @@ export function MainRoutes({ openSettings }: { openSettings: () => void }) {
         <NftWallet />
       </Route>
 
-      <Route exact path="/claim_es_gmx">
-        <ClaimEsGmx />
-      </Route>
-
-      <Route exact path="/actions/:v/:account">
+<Route exact path="/actions/:v/:account">
         {({ match }) => (
           <Redirect
             to={buildAccountDashboardUrl(match?.params.account as Address, chainId, match?.params.v === "v1" ? 1 : 2)}

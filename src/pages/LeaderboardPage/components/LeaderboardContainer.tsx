@@ -1,9 +1,7 @@
 import { Trans, t } from "@lingui/macro";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { getChainName } from "config/chains";
 import {
-  useLeaderboardChainId,
   useLeaderboardDataTypeState,
   useLeaderboardIsCompetition,
   useLeaderboardPageKey,
@@ -19,14 +17,9 @@ import {
 } from "context/SyntheticsStateContext/selectors/leaderboardSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import { CompetitionType } from "domain/synthetics/leaderboard";
-import { LEADERBOARD_PAGES } from "domain/synthetics/leaderboard/constants";
-import { useChainId } from "lib/chains";
 import { mustNeverExist } from "lib/types";
 import { useBreakpoints } from "lib/useBreakpoints";
-import { switchNetwork } from "lib/wallets";
-import useWallet from "lib/wallets/useWallet";
 
-import ExternalLink from "components/ExternalLink/ExternalLink";
 import SearchInput from "components/SearchInput/SearchInput";
 import { BodyScrollFadeContainer } from "components/TableScrollFade/TableScrollFade";
 import Tabs from "components/Tabs/Tabs";
@@ -48,11 +41,6 @@ export function LeaderboardContainer() {
   const [activeCompetitionIndex, setActiveCompetitionIndex] = useState(0);
 
   const leaderboardPageKey = useLeaderboardPageKey();
-
-  const { chainId } = useChainId();
-  const { active } = useWallet();
-
-  const page = LEADERBOARD_PAGES[leaderboardPageKey];
 
   const [, setLeaderboardTimeframeType] = useLeaderboardTimeframeTypeState();
   const [, setLeaderboardDataType] = useLeaderboardDataTypeState();
@@ -82,7 +70,6 @@ export function LeaderboardContainer() {
   );
 
   const pageKey = useLeaderboardPageKey();
-  const leaderboardChainId = useLeaderboardChainId();
 
   useEffect(() => {
     setActiveLeaderboardTimeframeIndex(0);
@@ -110,49 +97,15 @@ export function LeaderboardContainer() {
   const searchAddress = useSelector(selectLeaderboardSearchAddress);
   const setSearchAddress = useSelector(selectLeaderboardSetSearchAddress);
 
-  const handleSwitchNetworkClick = useCallback(() => {
-    switchNetwork(leaderboardChainId, active);
-  }, [active, leaderboardChainId]);
-
-  const wrongNetworkSwitcher = useMemo(() => {
-    if (leaderboardPageKey === "leaderboard") return null;
-    if (chainId === leaderboardChainId) return null;
-    if (!page.isCompetition) return null;
-
-    return (
-      <div className="Leaderboard__another-network">
-        <Trans>
-          This competition is held on the {getChainName(page.chainId)} network.{" "}
-          <span className="link-underline" onClick={handleSwitchNetworkClick}>
-            Change your network
-          </span>{" "}
-          to participate.
-        </Trans>
-      </div>
-    );
-  }, [chainId, handleSwitchNetworkClick, leaderboardChainId, leaderboardPageKey, page]);
-
   const description = useMemo(() => {
     switch (leaderboardPageKey) {
       case "leaderboard":
         return t`Leaderboard for traders on 0xMarkets.`;
 
-      case "march_13-20_2024":
-      case "march_20-27_2024":
-        return (
-          <>
-            Powered by the Arbitrum DAO STIP.&nbsp;
-            <ExternalLink href="https://open.substack.com/pub/gmxio/p/the-gmx-eip4844-trading-competition">
-              <Trans>Read the rules</Trans>
-            </ExternalLink>
-            .{wrongNetworkSwitcher}{" "}
-          </>
-        );
-
       default:
         throw mustNeverExist(leaderboardPageKey);
     }
-  }, [leaderboardPageKey, wrongNetworkSwitcher]);
+  }, [leaderboardPageKey]);
 
   const leaderboardDataTypeTabsOptions = useMemo(() => {
     return leaderboardDataTypeTabs.map((value) => ({

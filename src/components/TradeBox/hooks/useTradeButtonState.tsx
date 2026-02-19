@@ -3,7 +3,7 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { getBridgingOptionsForToken } from "config/bridging";
-import { BOTANIX, SettlementChainId } from "config/chains";
+import { SettlementChainId } from "config/chains";
 import { BASIS_POINTS_DIVISOR } from "config/factors";
 import { get1InchSwapUrlFromAddresses } from "config/links";
 import { MULTICHAIN_TRANSFER_SUPPORTED_TOKENS } from "config/multichain";
@@ -738,31 +738,6 @@ function NoSwapPathTooltipContent({
 
   if (!fromToken) {
     return <Trans>No swap path available.</Trans>;
-  }
-
-  if (chainId === BOTANIX) {
-    if (collateralToken) {
-      return (
-        <Trans>
-          No swap path available.{" "}
-          <span onClick={makeHandleSwapClick(fromToken.symbol, "STBTC")} className="Tradebox-handle">
-            Swap {fromToken.symbol} to STBTC
-          </span>{" "}
-          to use {collateralToken.symbol} as collateral.
-        </Trans>
-      );
-    }
-
-    const swapToTokenSymbol = fromToken.symbol === "STBTC" ? "PBTC" : "STBTC";
-    return (
-      <Trans>
-        No swap path available.{" "}
-        <span onClick={makeHandleSwapClick(fromToken.symbol, swapToTokenSymbol)} className="Tradebox-handle">
-          Swap {fromToken.symbol} to {swapToTokenSymbol}
-        </span>
-        , then to {toToken?.symbol}.
-      </Trans>
-    );
   }
 
   return (

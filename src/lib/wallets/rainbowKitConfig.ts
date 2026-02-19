@@ -13,10 +13,9 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import once from "lodash/once";
 import { http } from "viem";
-import { arbitrum, arbitrumSepolia, avalanche, avalancheFuji, base, optimismSepolia, sepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 
-import { botanix } from "config/chains";
-import { isDevelopment } from "config/env";
+import { localhost } from "config/chains";
 
 import binanceWallet from "./connecters/binanceW3W/binanceWallet";
 
@@ -52,21 +51,14 @@ export const getRainbowKitConfig = once(() =>
     appName: APP_NAME,
     projectId: WALLET_CONNECT_PROJECT_ID,
     chains: [
-      arbitrum,
-      avalanche,
-      botanix as Chain,
       base,
-      ...(isDevelopment() ? [avalancheFuji, arbitrumSepolia, optimismSepolia, sepolia] : []),
+      baseSepolia,
+      localhost as Chain,
     ],
     transports: {
-      [arbitrum.id]: http(),
-      [avalanche.id]: http(),
-      [avalancheFuji.id]: http(),
-      [arbitrumSepolia.id]: http(),
       [base.id]: http(),
-      [optimismSepolia.id]: http(),
-      [sepolia.id]: http(),
-      [botanix.id]: http(),
+      [baseSepolia.id]: http(),
+      [localhost.id]: http(),
     },
     wallets: [...popularWalletList, ...othersWalletList],
   })

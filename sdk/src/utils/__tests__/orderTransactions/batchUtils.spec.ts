@@ -1,7 +1,7 @@
 import { zeroAddress, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { getTokenBySymbol, getWrappedToken, NATIVE_TOKEN_ADDRESS } from "configs/tokens";
 import { OrderType } from "types/orders";
 import { ERC20Address } from "types/tokens";
@@ -22,7 +22,7 @@ import {
 import { mockExternalSwap } from "../../../test/mock";
 
 // Common tokens and addresses
-const CHAIN_ID = ARBITRUM;
+const CHAIN_ID = BASE_SEPOLIA;
 const ACCOUNT = "0x1234567890123456789012345678901234567890";
 const WETH = getWrappedToken(CHAIN_ID);
 const USDC = getTokenBySymbol(CHAIN_ID, "USDC");

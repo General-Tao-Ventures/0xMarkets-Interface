@@ -4,11 +4,9 @@ import cx from "classnames";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 
-import { AVALANCHE } from "config/chains";
 import { useLeaderboardPageKey } from "context/SyntheticsStateContext/hooks/leaderboardHooks";
 import { LeaderboardPageKey, LeaderboardTimeframe } from "domain/synthetics/leaderboard";
 import { LEADERBOARD_PAGES, LEADERBOARD_PAGES_ORDER } from "domain/synthetics/leaderboard/constants";
-import { useChainId } from "lib/chains";
 import { getTimeframeLabel } from "lib/dates";
 import { mustNeverExist } from "lib/types";
 
@@ -32,28 +30,14 @@ const sortingPoints: Record<LeaderboardNavigationItem["chip"], number> = {
   none: 0,
 };
 
-function getChip(pageKey: LeaderboardPageKey): LeaderboardNavigationItem["chip"] {
-  if (pageKey === "leaderboard") return "none";
-
-  const timeframe = LEADERBOARD_PAGES[pageKey].timeframe;
-  const isStartInFuture = timeframe.from > Date.now() / 1000;
-  const isEndInFuture = timeframe.to === undefined || timeframe.to > Date.now() / 1000;
-
-  if (isStartInFuture) return "soon";
-  if (isEndInFuture) return "live";
-  return "over";
+function getChip(_pageKey: LeaderboardPageKey): LeaderboardNavigationItem["chip"] {
+  return "none";
 }
 
 function getLabel(pageKey: LeaderboardPageKey) {
   switch (pageKey) {
     case "leaderboard":
       return t`Global`;
-
-    case "march_13-20_2024":
-      return t`EIP-4844`;
-
-    case "march_20-27_2024":
-      return t`EIP-4844`;
 
     default:
       throw mustNeverExist(pageKey);
@@ -62,7 +46,6 @@ function getLabel(pageKey: LeaderboardPageKey) {
 
 export function LeaderboardNavigation() {
   const pageKey = useLeaderboardPageKey();
-  const { chainId } = useChainId();
   const navigationItems = useMemo(() => {
     const allItems: LeaderboardNavigationItem[] = LEADERBOARD_PAGES_ORDER.map((key) => LEADERBOARD_PAGES[key])
       .filter((page) => !page.isCompetition || page.enabled)
@@ -101,7 +84,7 @@ export function LeaderboardNavigation() {
           : null;
 
       filteredItems = [...nonConcludedItems];
-      if (concludedTab && chainId !== AVALANCHE) {
+      if (concludedTab) {
         filteredItems.push(concludedTab);
       }
     }
@@ -121,7 +104,7 @@ export function LeaderboardNavigation() {
 
       return sortingPointA - sortingPointB;
     });
-  }, [pageKey, chainId]);
+  }, [pageKey]);
 
   return (
     <BodyScrollFadeContainer className="flex gap-20">

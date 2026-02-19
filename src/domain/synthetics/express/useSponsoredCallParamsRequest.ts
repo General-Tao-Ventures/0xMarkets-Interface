@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 
 import { getIsFlagEnabled } from "config/ab";
-import { ARBITRUM_SEPOLIA, BOTANIX } from "config/chains";
+import { BASE_SEPOLIA } from "config/chains";
 import { convertToUsd, TokensData } from "domain/tokens";
 import { metrics } from "lib/metrics";
 import { getByKey } from "lib/objects";
@@ -21,7 +21,7 @@ export function useIsSponsoredCallBalanceAvailable(
   const { data: isSponsoredCallAllowed } = useSWR<boolean>(tokensData ? [chainId, "isSponsoredCallAllowed"] : null, {
     refreshInterval: FREQUENT_UPDATE_INTERVAL,
     fetcher: async () => {
-      if (chainId === ARBITRUM_SEPOLIA) {
+      if (chainId === BASE_SEPOLIA) {
         return false;
       }
 
@@ -42,7 +42,7 @@ export function useIsSponsoredCallBalanceAvailable(
         const amountInExecution = BigInt(mainBalance.amountInExecution);
 
         const balanceLeft = remainingBalance - amountInExecution;
-        const mainTokenSymbol = chainId === BOTANIX ? "USDC.E" : mainBalanceToken.symbol;
+        const mainTokenSymbol = mainBalanceToken.symbol;
 
         const mainBalanceTokenData = getByKey(tokensData, getTokenBySymbol(chainId, mainTokenSymbol).address);
 

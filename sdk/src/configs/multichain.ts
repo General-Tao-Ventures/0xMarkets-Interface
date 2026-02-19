@@ -1,12 +1,4 @@
-import {
-  ARBITRUM_SEPOLIA,
-  ARBITRUM,
-  AVALANCHE,
-  SOURCE_OPTIMISM_SEPOLIA,
-  SOURCE_SEPOLIA,
-  SOURCE_BASE_MAINNET,
-  BASE_SEPOLIA
-} from "./chainIds";
+import { SOURCE_BASE_MAINNET, BASE_SEPOLIA } from "./chainIds";
 import { SettlementChainId, SourceChainId } from "./chains";
 
 function ensureExhaustive<T extends number>(value: Record<T, true>): T[] {
@@ -14,15 +6,10 @@ function ensureExhaustive<T extends number>(value: Record<T, true>): T[] {
 }
 
 export const SETTLEMENT_CHAINS: SettlementChainId[] = ensureExhaustive<SettlementChainId>({
-  [ARBITRUM_SEPOLIA]: true,
-  [ARBITRUM]: true,
-  [AVALANCHE]: true,
   [BASE_SEPOLIA]: true,
 });
 
 export const SOURCE_CHAINS: SourceChainId[] = ensureExhaustive<SourceChainId>({
-  [SOURCE_OPTIMISM_SEPOLIA]: true,
-  [SOURCE_SEPOLIA]: true,
   [SOURCE_BASE_MAINNET]: true,
   [BASE_SEPOLIA]: true,
 });

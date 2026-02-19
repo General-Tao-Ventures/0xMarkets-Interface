@@ -5,8 +5,6 @@ import {
   BASE_SEPOLIA,
   getChainName,
   SOURCE_BASE_MAINNET,
-  SOURCE_OPTIMISM_SEPOLIA,
-  SOURCE_SEPOLIA,
   SourceChainId,
 } from "sdk/configs/chains";
 import { getNativeToken } from "sdk/configs/tokens";
@@ -15,8 +13,6 @@ import { areChainsRelated } from "./areChainsRelated";
 import { NATIVE_TOKEN_PRICE_MAP } from "./nativeTokenPriceMap";
 
 const SOURCE_CHAIN_NATIVE_SYMBOL_MAP: Record<SourceChainId, string> = {
-  [SOURCE_OPTIMISM_SEPOLIA]: "ETH",
-  [SOURCE_SEPOLIA]: "ETH",
   [SOURCE_BASE_MAINNET]: "ETH",
   [BASE_SEPOLIA]: "ETH",
 };

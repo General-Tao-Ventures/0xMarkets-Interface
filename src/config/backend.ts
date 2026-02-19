@@ -1,13 +1,8 @@
-import { ARBITRUM, AVALANCHE } from "./chains";
-
 // TODO: Set up 0xMarkets stats API
 export const GMX_STATS_API_URL = "https://stats.0xmarkets.io/api";
 
 const BACKEND_URLS = {
   default: "https://gmx-server-mainnet.uw.r.appspot.com",
-
-  [ARBITRUM]: "https://gmx-server-mainnet.uw.r.appspot.com",
-  [AVALANCHE]: "https://gmx-avax-server.uc.r.appspot.com",
 };
 
 export function getServerBaseUrl(chainId: number) {

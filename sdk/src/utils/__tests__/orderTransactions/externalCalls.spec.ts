@@ -1,7 +1,7 @@
 import { encodeFunctionData, erc20Abi } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { ARBITRUM } from "configs/chains";
+import { BASE_SEPOLIA } from "configs/chains";
 import { getTokenBySymbol, getWrappedToken } from "configs/tokens";
 import { ERC20Address } from "types/tokens";
 import { expandDecimals, MaxUint256, parseValue, USD_DECIMALS } from "utils/numbers";
@@ -10,7 +10,7 @@ import { combineExternalCalls, getExternalCallsPayload } from "utils/orderTransa
 import { mockExternalSwap } from "../../../test/mock";
 
 describe("External Calls", () => {
-  const CHAIN_ID = ARBITRUM;
+  const CHAIN_ID = BASE_SEPOLIA;
   const ACCOUNT = "0x1234567890123456789012345678901234567890" as `0x${string}`;
   const WETH = getWrappedToken(CHAIN_ID);
   const USDC = getTokenBySymbol(CHAIN_ID, "USDC");
