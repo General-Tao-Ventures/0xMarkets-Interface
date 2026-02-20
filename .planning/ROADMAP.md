@@ -42,7 +42,11 @@ Plans:
   3. Two concurrent deposits from different users both complete without interfering with each other
   4. An expired deposit is detected and cancelled on-chain, freeing the user's locked funds
   5. Failed deposits have a specific error reason recorded that is visible in the keeper logs or DB
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md -- Retry logic with exponential backoff + error recording in DB
+- [ ] 02-02-PLAN.md -- Expired deposit detection and on-chain cancellation
 
 ### Phase 3: UI Feedback
 **Goal**: Users see accurate, real-time deposit status and actionable error messages throughout the flow
@@ -63,5 +67,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Execution | 2/2 | Complete | 2026-02-20 |
-| 2. Keeper Resilience | 0/TBD | Not started | - |
+| 2. Keeper Resilience | 0/2 | In progress | - |
 | 3. UI Feedback | 0/TBD | Not started | - |
