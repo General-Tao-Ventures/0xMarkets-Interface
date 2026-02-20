@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Core Execution** - End-to-end deposit execution works for a fresh deposit
 - [x] **Phase 2: Keeper Resilience** - Keeper handles failures, restarts, concurrency, and expired deposits
-- [ ] **Phase 3: UI Feedback** - User sees accurate deposit status and actionable error messages
+- [x] **Phase 3: UI Feedback** - User sees accurate deposit status and actionable error messages
 
 ## Phase Details
 
@@ -61,7 +61,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md -- Keeper deposit status API endpoint with CORS
-- [ ] 03-02-PLAN.md -- Enhanced GmStatusNotification with elapsed time, timeout warnings, cancel button, and error messages
+- [x] 03-02-PLAN.md -- Enhanced GmStatusNotification with elapsed time, timeout warnings, cancel button, and error messages
 
 ## Progress
 
@@ -72,4 +72,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Core Execution | 2/2 | Complete | 2026-02-20 |
 | 2. Keeper Resilience | 2/2 | Complete | 2026-02-20 |
-| 3. UI Feedback | 1/2 | In progress | - |
+| 3. UI Feedback | 2/2 | Complete | 2026-02-20 |
