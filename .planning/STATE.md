@@ -5,36 +5,37 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** User can deposit USDC into ETH/USD pool and receive GM tokens with clear feedback at every step
-**Current focus:** Phase 1 — Core Execution
+**Current focus:** Phase 2 — Keeper Resilience (Phase 1 Complete)
 
 ## Current Position
 
-Phase: 1 of 3 (Core Execution)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-20 — Plan 01-01 complete
+Phase: 2 of 3 (Keeper Resilience)
+Plan: 0 of TBD in current phase
+Status: Phase 1 complete — ready for Phase 2 planning
+Last activity: 2026-02-20 — Phase 1 verified end-to-end
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 4 min
-- Total execution time: 4 min
+- Total plans completed: 2
+- Average duration: 12 min
+- Total execution time: 24 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-core-execution | 1 complete | 4 min | 4 min |
+| 01-core-execution | 2 complete | 24 min | 12 min |
 
 **Recent Trend:**
-- Last 5 plans: 4 min
+- Last 5 plans: 4 min, 20 min
 - Trend: —
 
 *Updated after each plan completion*
-| Phase 01-core-execution P01 | 4 | 2 tasks | 3 files |
+| Phase 01-core-execution P01 | 4 min | 2 tasks | 3 files |
+| Phase 01-core-execution P02 | 20 min | deploy + E2E test | 1 file fix |
 
 ## Accumulated Context
 
@@ -48,9 +49,16 @@ Recent decisions affecting current work:
 - Plan 01-01: Ghost deposits marked CANCELLED not FAILED — EmptyDeposit() means zeroed-on-chain (not a real execution failure)
 - Plan 01-01: buildOracleParams throws on empty tokens instead of returning silent empty params
 - Plan 01-01: waitForTransactionReceipt added after executeDeposit submission before marking EXECUTED
-- [Phase 01-core-execution]: Ghost deposits marked CANCELLED not FAILED — EmptyDeposit() is a stale ghost key, not an execution failure
-- [Phase 01-core-execution]: buildOracleParams throws on empty tokens instead of returning silent empty oracle params that cause mysterious contract reverts
-- [Phase 01-core-execution]: WebSocket disconnect fails individual deposit execution, not whole keeper — scanner retries on next 10s cycle
+- Plan 01-02: ETH/USD market uses mUSDC as BOTH longToken and shortToken — WETH is only indexToken for price
+- Plan 01-02: InvalidSwapOutputToken(WETH, mUSDC) caused by test script using wrong initialLongToken — keeper pipeline was correct all along
+- Plan 01-02: End-to-end verified: deposit detected, prices pushed, executed in 13s, 0.99995009 GM minted
+
+### Key Verification Results
+
+- Deposit TX: 0x90d2d1481b1c804c21c8c88ee2538ab7acf5c64a00c8e482b7f91ca67bb9ed46 (block 37908181)
+- Execution TX: 0x5cb80e75583195968c814c87533f1781a2bec4044f068c77d3ed00456528d2b7 (block 37908189)
+- Keeper executed deposit in 13 seconds (well within 300s oracle freshness window)
+- GM tokens minted: 0.99995009 to wallet 0xe96128886A27067D373ea44B3F3c8f25A182F886
 
 ### Pending Todos
 
@@ -58,11 +66,11 @@ None.
 
 ### Blockers/Concerns
 
-- Keeper must be restarted on DO server (142.93.203.222) after any keeper-service changes — SSH + Docker rebuild required (Plan 02 handles deployment)
+- "Dropping duplicate message" WebSocket spam floods keeper logs — not blocking execution but makes debugging harder (Phase 2 candidate)
 - Single keeper wallet means nonce management is critical for concurrent deposits (LIFE-04)
 
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 01-core-execution/01-01-PLAN.md
+Stopped at: Phase 1 complete, Phase 2 not yet planned
 Resume file: None

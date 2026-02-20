@@ -12,7 +12,7 @@ Three phases that take the ETH/USD pool deposit flow from a broken keeper execut
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Core Execution** - End-to-end deposit execution works for a fresh deposit
+- [x] **Phase 1: Core Execution** - End-to-end deposit execution works for a fresh deposit
 - [ ] **Phase 2: Keeper Resilience** - Keeper handles failures, restarts, concurrency, and expired deposits
 - [ ] **Phase 3: UI Feedback** - User sees accurate deposit status and actionable error messages
 
@@ -29,8 +29,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Test deposit script + fix deposit executor guards
-- [ ] 01-02-PLAN.md -- Deploy to DO server + end-to-end verification
+- [x] 01-01-PLAN.md -- Test deposit script + fix deposit executor guards
+- [x] 01-02-PLAN.md -- Deploy to DO server + end-to-end verification
 
 ### Phase 2: Keeper Resilience
 **Goal**: The keeper handles transient failures, restarts, concurrency, and expired deposits without manual intervention
@@ -62,6 +62,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Execution | 0/2 | Planning complete | - |
+| 1. Core Execution | 2/2 | Complete | 2026-02-20 |
 | 2. Keeper Resilience | 0/TBD | Not started | - |
 | 3. UI Feedback | 0/TBD | Not started | - |
