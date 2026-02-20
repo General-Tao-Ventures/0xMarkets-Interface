@@ -17,15 +17,18 @@ import {
   getMarketIndexName,
   getMarketPoolName,
 } from "domain/synthetics/markets";
+import { cancelDepositTxn } from "domain/synthetics/markets/cancelDepositTxn";
 import { isGlvInfo } from "domain/synthetics/markets/glv";
 import { TokenData, TokensData } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
 import { getByKey } from "lib/objects";
+import useWallet from "lib/wallets/useWallet";
 import { convertTokenAddress } from "sdk/configs/tokens";
 
 import { TransactionStatus, TransactionStatusType } from "components/TransactionStatus/TransactionStatus";
 
 import { StatusNotification } from "./StatusNotification";
+import { useDepositElapsed } from "./useDepositTimeout";
 import { useToastAutoClose } from "./useToastAutoClose";
 
 export type Props = {
@@ -52,6 +55,25 @@ function select<A, B, C>(
   }
 }
 
+const KEEPER_API_URL = "http://142.93.203.222:37018";
+
+function getActionableMessage(errorReason: string | null): string {
+  if (!errorReason) return t`Your deposit was cancelled. Your USDC has been returned.`;
+
+  const lower = errorReason.toLowerCase();
+
+  if (lower.includes("oracletimestamps") || lower.includes("expired") || lower.includes("expiration")) {
+    return t`Deposit expired before the keeper could execute it. Your USDC has been returned. Try again.`;
+  }
+  if (lower.includes("emptydeposit") || lower.includes("0x95b66fe9")) {
+    return t`Your deposit was already processed. Check your wallet balance.`;
+  }
+  if (lower.includes("execution reverted")) {
+    return t`Deposit execution failed on-chain. Your USDC has been returned. Please try again.`;
+  }
+  return t`Your deposit was cancelled. Your USDC has been returned.`;
+}
+
 export function GmStatusNotification({
   toastTimestamp,
   pendingDepositData,
@@ -61,6 +83,7 @@ export function GmStatusNotification({
   tokensData,
 }: Props) {
   const { chainId } = useChainId();
+  const { signer } = useWallet();
   const {
     depositStatuses,
     withdrawalStatuses,
@@ -101,6 +124,11 @@ export function GmStatusNotification({
     Boolean(shiftStatus?.cancelledTxnHash),
     operation
   );
+
+  const depositCreatedAt = depositStatus?.createdAt;
+  const elapsedSeconds = useDepositElapsed(depositCreatedAt);
+  const [keeperErrorReason, setKeeperErrorReason] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const pendingDepositKey = useMemo(() => {
     if (pendingDepositData) {
@@ -284,22 +312,27 @@ export function GmStatusNotification({
     let txnHash: string | undefined;
 
     if (operation === "deposit") {
-      text = t`Fulfilling buy request.`;
-
-      if (depositStatus?.createdTxnHash) {
-        status = "loading";
-      }
-
-      if (depositStatus?.executedTxnHash) {
+      if (depositStatus?.cancelledTxnHash) {
+        text = getActionableMessage(keeperErrorReason);
+        status = "error";
+        txnHash = depositStatus.cancelledTxnHash;
+      } else if (depositStatus?.executedTxnHash) {
         text = t`Buy order executed.`;
         status = "success";
-        txnHash = depositStatus?.executedTxnHash;
-      }
-
-      if (depositStatus?.cancelledTxnHash) {
-        text = t`Buy order cancelled.`;
-        status = "error";
-        txnHash = depositStatus?.cancelledTxnHash;
+        txnHash = depositStatus.executedTxnHash;
+      } else if (depositStatus?.createdTxnHash) {
+        status = "loading";
+        if (elapsedSeconds < 15) {
+          text = t`Waiting for keeper to execute...`;
+        } else if (elapsedSeconds < 60) {
+          text = t`Keeper executing... (${elapsedSeconds}s)`;
+        } else if (elapsedSeconds < 120) {
+          text = t`Taking longer than expected... (${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s)`;
+        } else {
+          text = t`Still waiting... (${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s)`;
+        }
+      } else {
+        text = t`Fulfilling buy request.`;
       }
     } else if (operation === "withdrawal") {
       text = t`Fulfilling sell request.`;
@@ -344,6 +377,8 @@ export function GmStatusNotification({
     depositStatus?.cancelledTxnHash,
     depositStatus?.createdTxnHash,
     depositStatus?.executedTxnHash,
+    elapsedSeconds,
+    keeperErrorReason,
     operation,
     shiftStatus?.cancelledTxnHash,
     shiftStatus?.createdTxnHash,
@@ -422,10 +457,59 @@ export function GmStatusNotification({
     }
   }, [hasError, toastTimestamp]);
 
+  useEffect(() => {
+    if (depositStatus?.cancelledTxnHash && depositStatusKey) {
+      fetch(`${KEEPER_API_URL}/api/deposits/${depositStatusKey}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.errorReason) setKeeperErrorReason(data.errorReason);
+        })
+        .catch(() => {});
+    }
+  }, [depositStatus?.cancelledTxnHash, depositStatusKey]);
+
+  const handleCancelDeposit = async () => {
+    if (!signer || !depositStatusKey || isCancelling) return;
+    setIsCancelling(true);
+    try {
+      await cancelDepositTxn(chainId, signer, depositStatusKey);
+    } catch {
+      setIsCancelling(false);
+    }
+  };
+
   return (
     <StatusNotification title={title}>
       {creationStatus}
       {executionStatus}
+      {operation === "deposit" &&
+        depositStatus?.createdTxnHash &&
+        !depositStatus?.executedTxnHash &&
+        !depositStatus?.cancelledTxnHash &&
+        elapsedSeconds >= 60 && (
+          <div className="mt-4 text-13">
+            {elapsedSeconds < 120 ? (
+              <div className="text-yellow-500">
+                <Trans>This is taking longer than usual. The keeper may be busy.</Trans>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-yellow-500">
+                  <Trans>Deposit may be stuck.</Trans>
+                </span>
+                {signer && depositStatusKey && (
+                  <button
+                    className="ml-8 rounded bg-red-500/20 px-8 py-2 text-12 text-red-400 hover:bg-red-500/30 disabled:opacity-50"
+                    onClick={handleCancelDeposit}
+                    disabled={isCancelling}
+                  >
+                    {isCancelling ? t`Cancelling...` : t`Cancel Deposit`}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
     </StatusNotification>
   );
 }
