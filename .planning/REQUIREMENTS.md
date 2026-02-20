@@ -9,8 +9,8 @@ Requirements for this fix. Each maps to roadmap phases.
 
 ### Keeper Execution
 
-- [ ] **EXEC-01**: Keeper executes fresh deposits end-to-end (createDeposit tx mines → keeper pushes prices → executeDeposit succeeds → user receives GM tokens)
-- [ ] **EXEC-02**: Prices are pushed on-chain within MAX_ORACLE_PRICE_AGE window (300s) before calling executeDeposit
+- [x] **EXEC-01**: Keeper executes fresh deposits end-to-end (createDeposit tx mines → keeper pushes prices → executeDeposit succeeds → user receives GM tokens)
+- [x] **EXEC-02**: Prices are pushed on-chain within MAX_ORACLE_PRICE_AGE window (300s) before calling executeDeposit
 - [ ] **EXEC-03**: Keeper retries transient failures (nonce collisions, RPC timeouts) with exponential backoff
 - [ ] **EXEC-04**: Failed deposits are marked in DB with specific error reason for debugging
 
@@ -55,8 +55,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXEC-01 | Phase 1 | Pending |
-| EXEC-02 | Phase 1 | Pending |
+| EXEC-01 | Phase 1 | Complete |
+| EXEC-02 | Phase 1 | Complete |
 | EXEC-03 | Phase 2 | Pending |
 | EXEC-04 | Phase 2 | Pending |
 | LIFE-01 | Phase 2 | Pending |
