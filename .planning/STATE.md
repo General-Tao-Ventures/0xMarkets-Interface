@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 2 of 3 (Keeper Resilience)
-Plan: 0 of TBD in current phase
-Status: Phase 1 complete — ready for Phase 2 planning
-Last activity: 2026-02-20 — Phase 1 verified end-to-end
+Plan: 1 of 2 in current phase
+Status: Executing Phase 2 plans
+Last activity: 2026-02-20 — Plan 02-01 complete
 
 Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 12 min
-- Total execution time: 24 min
+- Total plans completed: 3
+- Average duration: 9 min
+- Total execution time: 26 min
 
 **By Phase:**
 
@@ -36,6 +36,7 @@ Progress: [███░░░░░░░] 33%
 *Updated after each plan completion*
 | Phase 01-core-execution P01 | 4 min | 2 tasks | 3 files |
 | Phase 01-core-execution P02 | 20 min | deploy + E2E test | 1 file fix |
+| Phase 02-keeper-resilience P01 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -52,6 +53,8 @@ Recent decisions affecting current work:
 - Plan 01-02: ETH/USD market uses mUSDC as BOTH longToken and shortToken — WETH is only indexToken for price
 - Plan 01-02: InvalidSwapOutputToken(WETH, mUSDC) caused by test script using wrong initialLongToken — keeper pipeline was correct all along
 - Plan 01-02: End-to-end verified: deposit detected, prices pushed, executed in 13s, 0.99995009 GM minted
+- [Phase 02-keeper-resilience]: Unknown errors retried (not fail-fast) — safer to assume retryable when error is unclassified
+- [Phase 02-keeper-resilience]: Ghost/stale CANCELLED writes stay in executeOnce as early returns (not thrown errors) — not execution failures
 
 ### Key Verification Results
 
@@ -72,5 +75,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Phase 1 complete, Phase 2 not yet planned
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
