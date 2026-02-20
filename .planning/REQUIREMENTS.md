@@ -16,9 +16,9 @@ Requirements for this fix. Each maps to roadmap phases.
 
 ### Deposit Lifecycle
 
-- [ ] **LIFE-01**: Expired deposits are detected and auto-cancelled on-chain (freeing locked funds)
+- [x] **LIFE-01**: Expired deposits are detected and auto-cancelled on-chain (freeing locked funds)
 - [ ] **LIFE-02**: Deposit status tracked through full lifecycle: pending → executing → complete/failed/expired
-- [ ] **LIFE-03**: Deposits created while keeper is restarting are picked up on next scan cycle
+- [x] **LIFE-03**: Deposits created while keeper is restarting are picked up on next scan cycle
 - [x] **LIFE-04**: Concurrent deposits from different users don't cause nonce collisions
 
 ### UI Feedback
@@ -59,9 +59,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXEC-02 | Phase 1 | Complete |
 | EXEC-03 | Phase 2 | Complete |
 | EXEC-04 | Phase 2 | Complete |
-| LIFE-01 | Phase 2 | Pending |
+| LIFE-01 | Phase 2 | Complete |
 | LIFE-02 | Phase 3 | Pending |
-| LIFE-03 | Phase 2 | Pending |
+| LIFE-03 | Phase 2 | Complete |
 | LIFE-04 | Phase 2 | Complete |
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 3 | Pending |
