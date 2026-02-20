@@ -60,7 +60,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Keeper deposit status API endpoint with CORS
+- [x] 03-01-PLAN.md -- Keeper deposit status API endpoint with CORS
 - [ ] 03-02-PLAN.md -- Enhanced GmStatusNotification with elapsed time, timeout warnings, cancel button, and error messages
 
 ## Progress
@@ -72,4 +72,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Core Execution | 2/2 | Complete | 2026-02-20 |
 | 2. Keeper Resilience | 2/2 | Complete | 2026-02-20 |
-| 3. UI Feedback | 0/2 | In progress | - |
+| 3. UI Feedback | 1/2 | In progress | - |

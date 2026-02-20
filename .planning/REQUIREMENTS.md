@@ -24,7 +24,7 @@ Requirements for this fix. Each maps to roadmap phases.
 ### UI Feedback
 
 - [ ] **UI-01**: Clear status messaging during "Fulfilling buy request" phase (not just an infinite spinner)
-- [ ] **UI-02**: Actionable error messages when deposit fails (user knows what happened and what to do)
+- [x] **UI-02**: Actionable error messages when deposit fails (user knows what happened and what to do)
 - [ ] **UI-03**: Timeout detection — if deposit sits pending too long, show warning with option to cancel
 
 ## v2 Requirements
@@ -64,7 +64,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIFE-03 | Phase 2 | Complete |
 | LIFE-04 | Phase 2 | Complete |
 | UI-01 | Phase 3 | Pending |
-| UI-02 | Phase 3 | Pending |
+| UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 3 | Pending |
 
 **Coverage:**
