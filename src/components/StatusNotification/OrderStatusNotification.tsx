@@ -37,6 +37,7 @@ import { getTokenVisualMultiplier, getWrappedToken } from "sdk/configs/tokens";
 import ExternalLink from "components/ExternalLink/ExternalLink";
 import { TransactionStatus, TransactionStatusType } from "components/TransactionStatus/TransactionStatus";
 
+import { useDepositElapsed } from "./useDepositTimeout";
 import { useToastAutoClose } from "./useToastAutoClose";
 
 // eslint-disable-next-line import/order
@@ -72,6 +73,10 @@ export function OrderStatusNotification({
   const orderStatus = getByKey(orderStatuses, orderStatusKey);
 
   const pendingExpressTxn = getByKey(pendingExpressTxns, pendingExpressTxnKey);
+
+  // Track elapsed time since the order was submitted on-chain (awaiting keeper execution)
+  const orderCreatedAt = orderStatus?.createdTxnHash ? orderStatus.createdAt : undefined;
+  const elapsedSeconds = useDepositElapsed(orderCreatedAt);
 
   const isGelatoTaskFailed = useMemo(() => {
     const gelatoTaskStatus = getByKey(gelatoTaskStatuses, pendingExpressTxn?.taskId);
@@ -288,6 +293,16 @@ export function OrderStatusNotification({
 
     if (orderStatus?.createdTxnHash) {
       status = "loading";
+
+      if (elapsedSeconds < 15) {
+        text = t`Fulfilling order request`;
+      } else if (elapsedSeconds < 60) {
+        text = t`Keeper executing... (${elapsedSeconds}s)`;
+      } else if (elapsedSeconds < 120) {
+        text = t`Taking longer than expected... (${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s)`;
+      } else {
+        text = t`Still waiting... (${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s)`;
+      }
     }
 
     if (orderStatus?.executedTxnHash) {
@@ -306,7 +321,14 @@ export function OrderStatusNotification({
     }
 
     return <TransactionStatus status={status} txnHash={hideTxLink !== "execution" ? txnHash : undefined} text={text} />;
-  }, [orderData, orderStatus?.cancelledTxnHash, orderStatus?.createdTxnHash, orderStatus?.executedTxnHash, hideTxLink]);
+  }, [
+    orderData,
+    orderStatus?.cancelledTxnHash,
+    orderStatus?.createdTxnHash,
+    orderStatus?.executedTxnHash,
+    hideTxLink,
+    elapsedSeconds,
+  ]);
 
   useEffect(
     function getOrderStatusKey() {
