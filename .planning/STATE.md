@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 4 of 6 (Stable Foundation)
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-21 — v1.1 roadmap created, Phase 4 is next
+Plan: 2 of 2 (awaiting human-action: on-chain market config deployment)
+Status: Checkpoint — human-action required
+Last activity: 2026-02-21 — 04-02 market config values added, awaiting on-chain deployment
 
-Progress: [██░░░░░░░░] ~17% (v1.0 complete, v1.1 not started)
+Progress: [████░░░░░░] ~33% (v1.0 complete, Phase 4 Plan 2 in-progress)
 
 ## Performance Metrics
 
@@ -37,7 +37,7 @@ Progress: [██░░░░░░░░] ~17% (v1.0 complete, v1.1 not started
 ### Known Issues
 
 - Division by zero crash on trade page (`bigmath.ts:6` → `validation.ts:442` → `selectTradeboxTradeErrors.ts:93`) — zero market config values (FIX-01 target)
-- "Insufficient liquidity" warnings — market reserve factors and OI limits partially configured (FIX-02 target)
+- "Insufficient liquidity" warnings — market reserve factors and OI limits partially configured (FIX-02 target) — config ready, awaiting on-chain deployment
 - "Dropping duplicate message" WebSocket spam in keeper logs — cosmetic (FIX-03 target)
 - Metrics batch_report endpoint returning errors — suppression needed (FIX-04 target)
 - Single keeper wallet nonce management — critical for concurrent operations (POS phase)
@@ -53,5 +53,12 @@ None currently. Phase 4 work (FIX-01..04) is well-defined from known issues.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-stable-foundation/04-CONTEXT.md
+Stopped at: 04-02 checkpoint:human-action — deploy market config on-chain via `npx hardhat update-market-config --network baseSepolia`
+Resume file: .planning/phases/04-stable-foundation/04-02-SUMMARY.md
+
+## Decisions
+
+- 04-02: Crypto markets (WETH, WBTC) get 1M USDC pool cap + 500K USD OI limits; baseMarketConfig defaults inherited at deploy time
+- 04-02: Synthetic markets (EUR, GBP, JPY, GOLD) spread syntheticMarketConfig + explicit capacity limits
+- 04-02: GOLD gets 750K pool / 375K OI (higher than 500K/250K forex) — more popular commodity asset
+- 04-02: Deploy command confirmed: `npx hardhat update-market-config --network baseSepolia`

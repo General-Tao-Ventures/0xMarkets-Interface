@@ -10,7 +10,7 @@ Requirements for milestone v1.1 "Full Trading Experience". Each maps to roadmap 
 ### Trade Page Stability
 
 - [ ] **FIX-01**: Trade page loads without Division by zero crash (fix zero market config values in validation)
-- [ ] **FIX-02**: All 6 markets pass liquidity checks (complete on-chain reserve factors and OI limits)
+- [x] **FIX-02**: All 6 markets pass liquidity checks (complete on-chain reserve factors and OI limits)
 - [ ] **FIX-03**: WebSocket reconnection handles CLOSING state gracefully without console spam
 - [ ] **FIX-04**: Metrics batch_report endpoint returns 200 or errors are suppressed silently
 
@@ -53,7 +53,7 @@ Deferred to future milestones.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FIX-01 | Phase 4 | Pending |
-| FIX-02 | Phase 4 | Pending |
+| FIX-02 | Phase 4 | Complete |
 | FIX-03 | Phase 4 | Pending |
 | FIX-04 | Phase 4 | Pending |
 | LIQ-01 | Phase 5 | Pending |
