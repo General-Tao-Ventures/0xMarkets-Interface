@@ -1,12 +1,24 @@
-# Fix Buy GM Flow — ETH/USD Pool
+# 0xMarkets Interface
 
 ## What This Is
 
-End-to-end "Buy GM" (deposit/liquidity provision) flow for the ETH/USD pool on 0xMarkets. A user deposits USDC into a pool, the order-execution-keeper detects the on-chain deposit request and executes it via the DepositHandler contract, and the user receives GM (market) tokens. The deposit flow now works end-to-end with retry logic, expired deposit cancellation, and real-time UI feedback.
+A perpetual futures trading interface on Base Sepolia. Users can provide liquidity (Buy/Sell GM), trade leveraged long/short positions across 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY), execute token swaps, and manage positions with limit orders, stop-loss, and take-profit. Backed by an order-execution-keeper that detects on-chain requests and executes them.
 
 ## Core Value
 
-A user can deposit USDC into the ETH/USD pool and receive GM tokens within a reasonable timeframe, with clear feedback at every step.
+A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
+
+## Current Milestone: v1.1 Full Trading Experience
+
+**Goal:** Enable the full trading loop — open positions, manage orders, execute swaps, and withdraw liquidity across all 6 markets.
+
+**Target features:**
+- Fix Division by zero crash on trade page (market config values likely zero)
+- Long/short positions on all 6 markets
+- Token swaps using pool liquidity
+- Order types: market, limit, stop-loss, take-profit
+- Sell GM (withdraw liquidity from pools)
+- End-to-end order execution via existing keeper infrastructure
 
 ## Requirements
 
@@ -30,15 +42,21 @@ A user can deposit USDC into the ETH/USD pool and receive GM tokens within a rea
 
 <!-- Current scope. Building toward these. -->
 
-(None — next milestone will define new requirements)
+- [ ] Trade page loads without crashing (fix Division by zero in validation)
+- [ ] User can open long/short positions on all 6 markets
+- [ ] User can close positions and receive collateral back
+- [ ] User can place limit orders, stop-loss, and take-profit orders
+- [ ] User can execute token swaps
+- [ ] User can withdraw liquidity (Sell GM) from pools
+- [ ] On-chain market configuration supports all trading operations
 
 ### Out of Scope
 
-- Other pool types beyond ETH/USD — focus on one pool first
-- Withdrawal (Sell GM) flow fixes — separate effort
-- Order execution fixes — separate effort
-- New pool creation or market configuration
+- New pool creation or market configuration UI
 - Mobile-specific UI improvements
+- Advanced analytics or charting
+- Social/copy trading features
+- Multi-chain support beyond Base Sepolia
 
 ## Context
 
@@ -81,4 +99,4 @@ A user can deposit USDC into the ETH/USD pool and receive GM tokens within a rea
 | Elapsed time escalation: 15s→60s→120s | Progressive urgency: silent → counter → warning → cancel | ✓ Good — matches UX expectations |
 
 ---
-*Last updated: 2026-02-21 after v1.0 milestone*
+*Last updated: 2026-02-21 after v1.1 milestone started*
