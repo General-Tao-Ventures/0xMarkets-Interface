@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 6 of 6 (Position Management) — IN PROGRESS
-Plan: 2/4 complete
-Status: 06-02 complete — close position flow unblocked, full/partial close via PositionSeller modal working
-Last activity: 2026-02-21 — 06-02 complete
+Plan: 3/4 complete
+Status: 06-03 complete — limit order + SL/TP price shortcut buttons added; core order infrastructure verified functional
+Last activity: 2026-02-21 — 06-03 complete
 
-Progress: [█████████░] ~88% (v1.0 complete, Phase 4 complete, Phase 5 complete, Phase 6 in progress)
+Progress: [█████████░] ~91% (v1.0 complete, Phase 4 complete, Phase 5 complete, Phase 6 in progress)
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Progress: [█████████░] ~88% (v1.0 complete, Phase 4 complete
 | Phase | Duration (min) | Tasks | Files |
 |-------|---------------|-------|-------|
 | Phase 06-position-management P02 | 12 | 1 | 1 |
+| Phase 06-position-management P03 | 7 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -65,8 +66,8 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 06-02-PLAN.md — close position flow via PositionSeller modal
-Next: Phase 6-03 (limit orders) — limit price input, pending orders display, cancel flow
+Stopped at: Completed 06-03-PLAN.md — limit orders and SL/TP price shortcuts
+Next: Phase 6-04 (final position management features)
 
 ## Decisions
 
@@ -89,3 +90,6 @@ Next: Phase 6-03 (limit orders) — limit price input, pending orders display, c
 - 06-01: Elapsed time thresholds for order execution notification: <15s no time, 15-59s seconds, 60-119s minutes+seconds with "longer than expected", 120s+ "still waiting"
 - 06-01: Local dev oracle keeper URL points to cloud IP (142.93.203.222:37017) not localhost
 - 06-02: isExpressLoading gate removed from PositionSeller Close button — button stays enabled while express params compute; submit awaits expressParamsPromise and falls back to direct wallet txn if express unavailable (mirrors 06-01 TradeBox fix)
+- [Phase 06-03]: Limit price shortcuts use BigInt basis-point math to avoid float precision errors
+- [Phase 06-03]: SL price shortcuts are [-10%, -5%], TP shortcuts are [+5%, +10%] from mark price
+- [Phase 06-03]: Limit shortcuts shown only in TradeMode.Limit; referencePrice obtained via selectTradeboxMarkPrice in SideOrderEntries
