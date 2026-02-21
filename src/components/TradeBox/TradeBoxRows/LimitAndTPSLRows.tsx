@@ -90,7 +90,13 @@ function SideOrders({ type }: { type: "stopLoss" | "takeProfit" | "limit" }) {
         valueClassName="-my-5"
         value={
           <div className="profit-loss-wrapper" ref={containerRef}>
-            <SideOrderEntries entriesInfo={entriesInfo} displayMode={type === "limit" ? "sizeUsd" : "percentage"} />
+            <SideOrderEntries
+              entriesInfo={entriesInfo}
+              displayMode={type === "limit" ? "sizeUsd" : "percentage"}
+              priceShortcuts={
+                type === "stopLoss" ? [-10, -5] : type === "takeProfit" ? [5, 10] : undefined
+              }
+            />
           </div>
         }
       />
