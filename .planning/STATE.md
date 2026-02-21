@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 5 of 6 (Liquidity & Swaps) — IN PROGRESS
-Plan: 2/2 in progress (Task 1 complete, awaiting human verification at Task 2 checkpoint)
-Status: 05-02 Task 1 complete — All Pools / My Pools tabs + utilization + PnL shipped; awaiting human verify
-Last activity: 2026-02-21 — 05-02 pools tab switching, utilization column, PnL in My Pools
+Phase: 5 of 6 (Liquidity & Swaps) — COMPLETE
+Plan: 2/2 complete
+Status: 05-02 complete — All Pools / My Pools tabs + utilization + PnL verified by user
+Last activity: 2026-02-21 — 05-02 human verification passed; Phase 5 complete
 
-Progress: [████████░░] ~70% (v1.0 complete, Phase 4 complete, Phase 5 nearly complete)
+Progress: [█████████░] ~80% (v1.0 complete, Phase 4 complete, Phase 5 complete)
 
 ## Performance Metrics
 
@@ -35,7 +35,7 @@ Progress: [████████░░] ~70% (v1.0 complete, Phase 4 complete
 | Phase | Plans | Status |
 |-------|-------|--------|
 | 4. Stable Foundation | 2/2 | Complete |
-| 5. Liquidity & Swaps | 1.5/2 | In Progress |
+| 5. Liquidity & Swaps | 2/2 | Complete |
 
 *Updated after each plan completion*
 
@@ -58,8 +58,8 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: 05-02 Task 2 checkpoint — awaiting human verification of pools tabs, My Pools PnL, and utilization display
-Next: Verify checkpoint then complete Phase 5 (05-02 is the last plan)
+Stopped at: Phase 5 complete — 05-02 human verify passed
+Next: Phase 6 (Swaps) — swap UI, token routing, cross-market swaps
 
 ## Decisions
 
