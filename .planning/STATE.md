@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 5 of 6 (Liquidity & Swaps) — IN PROGRESS
-Plan: 1/2 complete
-Status: 05-01 complete — Sell GM flow (withdrawal UX) shipped
-Last activity: 2026-02-21 — 05-01 Buy GM/Sell GM buttons and cancelWithdrawalTxn
+Plan: 2/2 in progress (Task 1 complete, awaiting human verification at Task 2 checkpoint)
+Status: 05-02 Task 1 complete — All Pools / My Pools tabs + utilization + PnL shipped; awaiting human verify
+Last activity: 2026-02-21 — 05-02 pools tab switching, utilization column, PnL in My Pools
 
-Progress: [███████░░░] ~60% (v1.0 complete, Phase 4 complete, Phase 5 in progress)
+Progress: [████████░░] ~70% (v1.0 complete, Phase 4 complete, Phase 5 nearly complete)
 
 ## Performance Metrics
 
@@ -35,7 +35,7 @@ Progress: [███████░░░] ~60% (v1.0 complete, Phase 4 complete
 | Phase | Plans | Status |
 |-------|-------|--------|
 | 4. Stable Foundation | 2/2 | Complete |
-| 5. Liquidity & Swaps | 1/2 | In Progress |
+| 5. Liquidity & Swaps | 1.5/2 | In Progress |
 
 *Updated after each plan completion*
 
@@ -58,8 +58,8 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 05-01-PLAN.md — Buy GM/Sell GM buttons + cancelWithdrawalTxn + enhanced withdrawal notification
-Next: Phase 5 Plan 02 (if exists) or Phase 6
+Stopped at: 05-02 Task 2 checkpoint — awaiting human verification of pools tabs, My Pools PnL, and utilization display
+Next: Verify checkpoint then complete Phase 5 (05-02 is the last plan)
 
 ## Decisions
 
@@ -74,3 +74,7 @@ Next: Phase 5 Plan 02 (if exists) or Phase 6
 - 05-01: operation=Withdrawal query param drives PoolsDetailsContext — no context changes needed, useEffect already parses searchParams
 - 05-01: useDepositElapsed called twice (deposit + withdrawal) — hook is generic, takes createdAt: number | undefined
 - 05-01: withdrawalElapsedSeconds thresholds match deposit: 15s/60s/120s for progressive disclosure
+- 05-02: Utilization = (longInterestUsd + shortInterestUsd) / poolValueMax — uses USD values already on MarketInfo
+- 05-02: GLV markets show '—' for utilization (no direct interest fields, isGlvInfo check guards)
+- 05-02: My Pools filter applied post-sorting in GmList to keep useFilterSortPools unmodified
+- 05-02: showPnl boolean prop on GmListItem (not activeTab) — cleaner interface

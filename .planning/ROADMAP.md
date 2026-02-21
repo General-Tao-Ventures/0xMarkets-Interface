@@ -93,5 +93,5 @@ Plans:
 | 2. End-to-End Deposit Execution | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 3. Deposit UX & Status Visibility | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 5. Liquidity & Swaps | 1/2 | In Progress|  | - |
+| 5. Liquidity & Swaps | 2/2 | Complete   | 2026-02-21 | - |
 | 6. Position Management | v1.1 | 0/? | Not started | - |
