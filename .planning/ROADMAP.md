@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. A createDeposit transaction that mines on Base Sepolia is detected by the keeper within one scan cycle
   2. The keeper pushes Pyth Lazer prices on-chain and calls executeDeposit within the 300-second oracle freshness window
   3. The executeDeposit transaction succeeds on-chain and the user's wallet reflects GM token balance
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md -- Test deposit script + fix deposit executor guards
@@ -70,6 +70,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Execution | 2/2 | Complete | 2026-02-20 |
+| 1. Core Execution | 2/2 | Complete   | 2026-02-21 |
 | 2. Keeper Resilience | 2/2 | Complete | 2026-02-20 |
 | 3. UI Feedback | 2/2 | Complete | 2026-02-20 |
