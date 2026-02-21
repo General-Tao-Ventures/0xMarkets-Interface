@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 4 of 6 (Stable Foundation)
-Plan: 2 of 2 (awaiting human-action: on-chain market config deployment)
-Status: Checkpoint — human-action required
-Last activity: 2026-02-21 — 04-02 market config values added, awaiting on-chain deployment
+Phase: 4 of 6 (Stable Foundation) — COMPLETE
+Plan: 2/2 complete
+Status: Phase 4 complete — ready for Phase 5 (Liquidity & Swaps)
+Last activity: 2026-02-21 — 04-02 on-chain deployment confirmed by user
 
-Progress: [████░░░░░░] ~33% (v1.0 complete, Phase 4 Plan 2 in-progress)
+Progress: [██████░░░░] ~50% (v1.0 complete, Phase 4 complete)
 
 ## Performance Metrics
 
@@ -36,7 +36,6 @@ Progress: [████░░░░░░] ~33% (v1.0 complete, Phase 4 Plan 2 i
 
 ### Known Issues
 
-- "Insufficient liquidity" warnings — market reserve factors and OI limits partially configured (FIX-02 target) — config ready, awaiting on-chain deployment
 - Single keeper wallet nonce management — critical for concurrent operations (POS phase)
 - 17 pre-existing failing SDK test files (21 tests) — pre-existing, unrelated to Phase 4 changes (deferred)
 
@@ -51,8 +50,8 @@ None currently. Phase 4 work (FIX-01..04) is well-defined from known issues.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 04-01-PLAN.md — crash fixes and WebSocket/metrics cleanup done
-Resume file: .planning/phases/04-stable-foundation/04-02-SUMMARY.md
+Stopped at: Completed 04-02-PLAN.md — on-chain market config deployed, Phase 4 complete
+Next: Phase 5 (Liquidity & Swaps) — planning required
 
 ## Decisions
 

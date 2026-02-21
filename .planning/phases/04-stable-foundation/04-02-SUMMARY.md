@@ -44,14 +44,14 @@ completed: 2026-02-21
 
 # Phase 4 Plan 02: On-Chain Market Config Summary
 
-**Per-market USDC capacity limits and OI caps added to all 6 baseSepolia markets in contracts config, awaiting on-chain deployment via `npx hardhat update-market-config --network baseSepolia`**
+**Per-market USDC capacity limits and OI caps deployed on-chain to all 6 baseSepolia markets via DataStore — no more "Insufficient liquidity" warnings on trade page**
 
 ## Performance
 
 - **Duration:** ~15 min
 - **Started:** 2026-02-21T08:50:10Z
 - **Completed:** 2026-02-21T09:05:00Z
-- **Tasks:** 1/2 complete (Task 2 is human-action checkpoint — on-chain deployment)
+- **Tasks:** 2/2 complete
 - **Files modified:** 1
 
 ## Accomplishments
@@ -63,8 +63,8 @@ completed: 2026-02-21
 
 ## Task Commits
 
-1. **Task 1: Add per-market config values to baseSepolia markets** - `45d841be` (feat)
-2. **Task 2: Deploy market config to Base Sepolia DataStore** - PENDING (human-action checkpoint)
+1. **Task 1: Add per-market config values to baseSepolia markets** - `45d841be` (feat, in 0xmarkets_contract)
+2. **Task 2: Deploy market config to Base Sepolia DataStore** - Human deployment complete (on-chain, no code commit)
 
 ## Files Created/Modified
 - `/Users/ken/Projects/0xM/0xmarkets_contract/config/markets.ts` - Added per-market capacity limits and OI caps for all 6 baseSepolia markets
@@ -85,17 +85,19 @@ TypeScript check command `npx tsc --noEmit` conflicts with `emitDeclarationOnly`
 
 ## User Setup Required
 
-**On-chain deployment required.** After verifying the config changes:
-
-1. `cd /Users/ken/Projects/0xM/0xmarkets_contract`
-2. Ensure `.env` has `DEPLOYER_PRIVATE_KEY` set (account with CONFIG_KEEPER role on DataStore)
-3. Run: `npx hardhat update-market-config --network baseSepolia`
-4. Verify on-chain: load trade page in browser, confirm no "Insufficient liquidity" warnings on all 6 markets
+None - on-chain deployment completed by user on 2026-02-21.
 
 ## Next Phase Readiness
-- Config file is ready — deployment is the only remaining step
-- Once deployed, frontend multicall will read non-zero values for all critical market config fields
-- FIX-02 (Insufficient liquidity warnings) will be resolved after on-chain deployment
+- All 6 markets fully configured on-chain — Phase 4 (Stable Foundation) is complete
+- Frontend multicall reads non-zero values for reserveFactor, maxOpenInterest, and pool amounts on all markets
+- FIX-01 through FIX-04 all resolved — ready for Phase 5 (Liquidity & Swaps)
+
+## Self-Check: PASSED
+
+- FOUND: `/Users/ken/Projects/0xM/0xmarkets_contract/config/markets.ts` (modified)
+- FOUND: `/Users/ken/Projects/0xM/0xMarkets-Interface/.planning/phases/04-stable-foundation/04-02-SUMMARY.md` (created)
+- FOUND: commit `45d841be` in 0xmarkets_contract repo (Task 1)
+- FOUND: commit `41d38b7e0` in 0xMarkets-Interface repo (metadata)
 
 ---
 *Phase: 04-stable-foundation*
