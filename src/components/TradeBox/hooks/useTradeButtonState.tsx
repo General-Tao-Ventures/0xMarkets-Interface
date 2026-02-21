@@ -444,18 +444,10 @@ export function useTradeboxButtonState({
       };
     }
 
-    if (isExpressLoading) {
-      return {
-        ...commonState,
-        text: (
-          <>
-            {t`Loading Express params`}
-            <SpinnerIcon className="ml-4 animate-spin" />
-          </>
-        ),
-        disabled: true,
-      };
-    }
+    // Note: We intentionally skip the "Loading Express params" blocking state.
+    // The expressParamsPromise is awaited on submit, so express params are still used
+    // when available. For non-subaccount wallets, users should not be blocked by
+    // express loading — we fall back to direct wallet transactions if needed.
 
     if (isApproving && tokensToApprove.length) {
       return {
