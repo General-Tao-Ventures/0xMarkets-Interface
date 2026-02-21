@@ -18,6 +18,7 @@ import {
   getMarketPoolName,
 } from "domain/synthetics/markets";
 import { cancelDepositTxn } from "domain/synthetics/markets/cancelDepositTxn";
+import { cancelWithdrawalTxn } from "domain/synthetics/markets/cancelWithdrawalTxn";
 import { isGlvInfo } from "domain/synthetics/markets/glv";
 import { TokenData, TokensData } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
@@ -74,6 +75,20 @@ function getActionableMessage(errorReason: string | null): string {
   return t`Your deposit was cancelled. Your USDC has been returned.`;
 }
 
+function getWithdrawalActionableMessage(errorReason: string | null): string {
+  if (!errorReason) return t`Your withdrawal was cancelled. Your GM tokens have been returned.`;
+
+  const lower = errorReason.toLowerCase();
+
+  if (lower.includes("oracletimestamps") || lower.includes("expired") || lower.includes("expiration")) {
+    return t`Withdrawal expired before the keeper could execute it. Your GM tokens have been returned. Try again.`;
+  }
+  if (lower.includes("emptywithdrawal") || lower.includes("execution reverted")) {
+    return t`Withdrawal execution failed on-chain. Your GM tokens have been returned. Please try again.`;
+  }
+  return t`Your withdrawal was cancelled. Your GM tokens have been returned.`;
+}
+
 export function GmStatusNotification({
   toastTimestamp,
   pendingDepositData,
@@ -127,8 +142,12 @@ export function GmStatusNotification({
 
   const depositCreatedAt = depositStatus?.createdAt;
   const elapsedSeconds = useDepositElapsed(depositCreatedAt);
+  const withdrawalCreatedAt = withdrawalStatus?.createdAt;
+  const withdrawalElapsedSeconds = useDepositElapsed(withdrawalCreatedAt);
   const [keeperErrorReason, setKeeperErrorReason] = useState<string | null>(null);
+  const [withdrawalErrorReason, setWithdrawalErrorReason] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isCancellingWithdrawal, setIsCancellingWithdrawal] = useState(false);
 
   const pendingDepositKey = useMemo(() => {
     if (pendingDepositData) {
@@ -335,22 +354,27 @@ export function GmStatusNotification({
         text = t`Fulfilling buy request.`;
       }
     } else if (operation === "withdrawal") {
-      text = t`Fulfilling sell request.`;
-
-      if (withdrawalStatus?.createdTxnHash) {
-        status = "loading";
-      }
-
-      if (withdrawalStatus?.executedTxnHash) {
+      if (withdrawalStatus?.cancelledTxnHash) {
+        text = getWithdrawalActionableMessage(withdrawalErrorReason);
+        status = "error";
+        txnHash = withdrawalStatus.cancelledTxnHash;
+      } else if (withdrawalStatus?.executedTxnHash) {
         text = t`Sell order executed.`;
         status = "success";
-        txnHash = withdrawalStatus?.executedTxnHash;
-      }
-
-      if (withdrawalStatus?.cancelledTxnHash) {
-        text = t`Sell order cancelled.`;
-        status = "error";
-        txnHash = withdrawalStatus?.cancelledTxnHash;
+        txnHash = withdrawalStatus.executedTxnHash;
+      } else if (withdrawalStatus?.createdTxnHash) {
+        status = "loading";
+        if (withdrawalElapsedSeconds < 15) {
+          text = t`Waiting for keeper to execute...`;
+        } else if (withdrawalElapsedSeconds < 60) {
+          text = t`Keeper executing... (${withdrawalElapsedSeconds}s)`;
+        } else if (withdrawalElapsedSeconds < 120) {
+          text = t`Taking longer than expected... (${Math.floor(withdrawalElapsedSeconds / 60)}m ${withdrawalElapsedSeconds % 60}s)`;
+        } else {
+          text = t`Still waiting... (${Math.floor(withdrawalElapsedSeconds / 60)}m ${withdrawalElapsedSeconds % 60}s)`;
+        }
+      } else {
+        text = t`Fulfilling sell request.`;
       }
     } else {
       text = t`Fulfilling shift request.`;
@@ -383,6 +407,8 @@ export function GmStatusNotification({
     shiftStatus?.cancelledTxnHash,
     shiftStatus?.createdTxnHash,
     shiftStatus?.executedTxnHash,
+    withdrawalElapsedSeconds,
+    withdrawalErrorReason,
     withdrawalStatus?.cancelledTxnHash,
     withdrawalStatus?.createdTxnHash,
     withdrawalStatus?.executedTxnHash,
@@ -468,6 +494,17 @@ export function GmStatusNotification({
     }
   }, [depositStatus?.cancelledTxnHash, depositStatusKey]);
 
+  useEffect(() => {
+    if (withdrawalStatus?.cancelledTxnHash && withdrawalStatusKey) {
+      fetch(`${KEEPER_API_URL}/api/withdrawals/${withdrawalStatusKey}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.errorReason) setWithdrawalErrorReason(data.errorReason);
+        })
+        .catch(() => {});
+    }
+  }, [withdrawalStatus?.cancelledTxnHash, withdrawalStatusKey]);
+
   const handleCancelDeposit = async () => {
     if (!signer || !depositStatusKey || isCancelling) return;
     setIsCancelling(true);
@@ -475,6 +512,16 @@ export function GmStatusNotification({
       await cancelDepositTxn(chainId, signer, depositStatusKey);
     } catch {
       setIsCancelling(false);
+    }
+  };
+
+  const handleCancelWithdrawal = async () => {
+    if (!signer || !withdrawalStatusKey || isCancellingWithdrawal) return;
+    setIsCancellingWithdrawal(true);
+    try {
+      await cancelWithdrawalTxn(chainId, signer, withdrawalStatusKey);
+    } catch {
+      setIsCancellingWithdrawal(false);
     }
   };
 
@@ -504,6 +551,34 @@ export function GmStatusNotification({
                     disabled={isCancelling}
                   >
                     {isCancelling ? t`Cancelling...` : t`Cancel Deposit`}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      {operation === "withdrawal" &&
+        withdrawalStatus?.createdTxnHash &&
+        !withdrawalStatus?.executedTxnHash &&
+        !withdrawalStatus?.cancelledTxnHash &&
+        withdrawalElapsedSeconds >= 60 && (
+          <div className="mt-4 text-13">
+            {withdrawalElapsedSeconds < 120 ? (
+              <div className="text-yellow-500">
+                <Trans>This is taking longer than usual. The keeper may be busy.</Trans>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-yellow-500">
+                  <Trans>Withdrawal may be stuck.</Trans>
+                </span>
+                {signer && withdrawalStatusKey && (
+                  <button
+                    className="ml-8 rounded bg-red-500/20 px-8 py-2 text-12 text-red-400 hover:bg-red-500/30 disabled:opacity-50"
+                    onClick={handleCancelWithdrawal}
+                    disabled={isCancellingWithdrawal}
+                  >
+                    {isCancellingWithdrawal ? t`Cancelling...` : t`Cancel Withdrawal`}
                   </button>
                 )}
               </div>
