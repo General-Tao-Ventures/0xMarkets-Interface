@@ -20,7 +20,6 @@ export function useDisconnectAndClose() {
         action: "Disconnect",
       },
     });
-    disconnect();
     localStorage.removeItem(SHOULD_EAGER_CONNECT_LOCALSTORAGE_KEY);
     localStorage.removeItem(CURRENT_PROVIDER_LOCALSTORAGE_KEY);
     setIsVisible(false);

@@ -8,6 +8,7 @@ import {
   okxWallet,
   rabbyWallet,
   safeWallet,
+  talismanWallet,
   trustWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
@@ -34,6 +35,7 @@ const popularWalletList: WalletList = [
       injectedWallet,
       // The Safe option will only appear in the Safe Wallet browser environment.
       safeWallet,
+      talismanWallet,
       geminiRainbowKitConnector,
     ],
   },
