@@ -52,23 +52,23 @@ Deferred to future milestones.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FIX-01 | — | Pending |
-| FIX-02 | — | Pending |
-| FIX-03 | — | Pending |
-| FIX-04 | — | Pending |
-| POS-01 | — | Pending |
-| POS-02 | — | Pending |
-| POS-03 | — | Pending |
-| POS-04 | — | Pending |
-| SWAP-01 | — | Pending |
-| LIQ-01 | — | Pending |
-| LIQ-02 | — | Pending |
+| FIX-01 | Phase 4 | Pending |
+| FIX-02 | Phase 4 | Pending |
+| FIX-03 | Phase 4 | Pending |
+| FIX-04 | Phase 4 | Pending |
+| LIQ-01 | Phase 5 | Pending |
+| LIQ-02 | Phase 5 | Pending |
+| SWAP-01 | Phase 5 | Pending |
+| POS-01 | Phase 6 | Pending |
+| POS-02 | Phase 6 | Pending |
+| POS-03 | Phase 6 | Pending |
+| POS-04 | Phase 6 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after initial definition*
+*Last updated: 2026-02-21 — traceability mapped to Phases 4-6*
