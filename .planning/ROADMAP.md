@@ -81,7 +81,13 @@ Plans:
   2. User can close a full or partial position and the collateral returns to their wallet
   3. User can place a limit order to open a position at a specified price, and it executes when the market reaches that price
   4. User can attach stop-loss and take-profit orders to an existing open position
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Market order submission and position display (end-to-end)
+- [ ] 06-02-PLAN.md — Close positions (full and partial) via PositionSeller
+- [ ] 06-03-PLAN.md — Limit orders and SL/TP order attachment
+- [ ] 06-04-PLAN.md — Human verification of all position management flows
 
 ## Progress
 
@@ -93,5 +99,5 @@ Plans:
 | 2. End-to-End Deposit Execution | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 3. Deposit UX & Status Visibility | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 5. Liquidity & Swaps | 2/2 | Complete   | 2026-02-21 | - |
-| 6. Position Management | v1.1 | 0/? | Not started | - |
+| 5. Liquidity & Swaps | v1.1 | 2/2 | Complete | 2026-02-21 |
+| 6. Position Management | v1.1 | 0/4 | Not started | - |
