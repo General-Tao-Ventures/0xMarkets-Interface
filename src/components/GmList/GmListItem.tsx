@@ -37,7 +37,6 @@ import FavoriteStar from "components/FavoriteStar/FavoriteStar";
 import { TableTdActionable, TableTrActionable } from "components/Table/Table";
 import TokenIcon from "components/TokenIcon/TokenIcon";
 
-import MenuDotsIcon from "img/ic_menu_dots.svg?react";
 
 import { GmTokensBalanceInfo } from "./GmTokensTotalBalanceInfo";
 import GmAssetDropdown from "../GmAssetDropdown/GmAssetDropdown";
@@ -219,9 +218,24 @@ export function GmListItem({
           />
         </div>
 
-        <Button variant="secondary" className="mt-12" to={`/pools/details?market=${marketOrGlvTokenAddress}`}>
-          <Trans>View Details</Trans>
-        </Button>
+        <div className="mt-12 flex gap-8">
+          <Button
+            variant="primary-action"
+            className="flex-1"
+            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Deposit`}
+          >
+            <Trans>Buy GM</Trans>
+          </Button>
+          <Button
+            variant="secondary"
+            className="flex-1 text-green-500"
+            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Withdrawal`}
+          >
+            <span className="text-red-400">
+              <Trans>Sell GM</Trans>
+            </span>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -307,14 +321,24 @@ export function GmListItem({
       </TableTdActionable>
 
       <TableTdActionable className="w-[10%] pr-16">
-        <Button
-          className="flex flex-grow items-center gap-4"
-          variant="ghost"
-          to={`/pools/details?market=${marketOrGlvTokenAddress}`}
-        >
-          <Trans>Details</Trans>
-          <MenuDotsIcon className="size-14" />
-        </Button>
+        <div className="flex items-center gap-6">
+          <Button
+            variant="primary-action"
+            className="text-12 px-10 py-6"
+            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Deposit`}
+          >
+            <Trans>Buy GM</Trans>
+          </Button>
+          <Button
+            variant="secondary"
+            className="text-12 px-10 py-6"
+            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Withdrawal`}
+          >
+            <span className="text-red-400">
+              <Trans>Sell GM</Trans>
+            </span>
+          </Button>
+        </div>
       </TableTdActionable>
     </TableTrActionable>
   );
