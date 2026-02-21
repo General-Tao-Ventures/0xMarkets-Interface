@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** User can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
-**Current focus:** v1.1 Full Trading Experience — Phase 5: Liquidity & Swaps
+**Current focus:** v1.1 Full Trading Experience — Phase 6: Position Management
 
 ## Current Position
 
-Phase: 5 of 6 (Liquidity & Swaps) — COMPLETE
-Plan: 2/2 complete
-Status: 05-02 complete — All Pools / My Pools tabs + utilization + PnL verified by user
-Last activity: 2026-02-21 — 05-02 human verification passed; Phase 5 complete
+Phase: 6 of 6 (Position Management) — IN PROGRESS
+Plan: 1/4 complete
+Status: 06-01 complete — market order submission unblocked, position display + order notifications verified
+Last activity: 2026-02-21 — 06-01 complete
 
-Progress: [█████████░] ~80% (v1.0 complete, Phase 4 complete, Phase 5 complete)
+Progress: [█████████░] ~85% (v1.0 complete, Phase 4 complete, Phase 5 complete, Phase 6 in progress)
 
 ## Performance Metrics
 
@@ -36,6 +36,7 @@ Progress: [█████████░] ~80% (v1.0 complete, Phase 4 complete
 |-------|-------|--------|
 | 4. Stable Foundation | 2/2 | Complete |
 | 5. Liquidity & Swaps | 2/2 | Complete |
+| 6. Position Management | 1/4 | In Progress |
 
 *Updated after each plan completion*
 
@@ -58,8 +59,8 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Phase 5 complete — 05-02 human verify passed
-Next: Phase 6 (Swaps) — swap UI, token routing, cross-market swaps
+Stopped at: Completed 06-01-PLAN.md — market order submission + notifications
+Next: Phase 6-02 (close position) — PositionSeller, full/partial close flow
 
 ## Decisions
 
@@ -78,3 +79,6 @@ Next: Phase 6 (Swaps) — swap UI, token routing, cross-market swaps
 - 05-02: GLV markets show '—' for utilization (no direct interest fields, isGlvInfo check guards)
 - 05-02: My Pools filter applied post-sorting in GmList to keep useFilterSortPools unmodified
 - 05-02: showPnl boolean prop on GmListItem (not activeTab) — cleaner interface
+- 06-01: Express loading state does not block trade button — button stays enabled; expressParamsPromise awaited on submit, falls back to direct wallet txn if express unavailable
+- 06-01: Elapsed time thresholds for order execution notification: <15s no time, 15-59s seconds, 60-119s minutes+seconds with "longer than expected", 120s+ "still waiting"
+- 06-01: Local dev oracle keeper URL points to cloud IP (142.93.203.222:37017) not localhost

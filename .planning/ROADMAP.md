@@ -69,8 +69,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Sell GM flow: action buttons, withdrawal notifications, and cancel support
-- [ ] 05-02-PLAN.md — Pool stats: All Pools / My Pools tabs, utilization, and PnL display
+- [x] 05-01-PLAN.md — Sell GM flow: action buttons, withdrawal notifications, and cancel support
+- [x] 05-02-PLAN.md — Pool stats: All Pools / My Pools tabs, utilization, and PnL display
 
 ### Phase 6: Position Management
 **Goal**: Users can open, manage, and close leveraged positions with all order types across all 6 markets
@@ -84,7 +84,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Market order submission and position display (end-to-end)
+- [x] 06-01-PLAN.md — Market order submission and position display (end-to-end)
 - [ ] 06-02-PLAN.md — Close positions (full and partial) via PositionSeller
 - [ ] 06-03-PLAN.md — Limit orders and SL/TP order attachment
 - [ ] 06-04-PLAN.md — Human verification of all position management flows
@@ -100,4 +100,4 @@ Plans:
 | 3. Deposit UX & Status Visibility | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 6. Position Management | v1.1 | 0/4 | Not started | - |
+| 6. Position Management | v1.1 | 1/4 | In Progress | - |
