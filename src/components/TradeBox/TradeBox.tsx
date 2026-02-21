@@ -573,6 +573,24 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     );
   }, [markPrice, setTriggerPriceInputValue, toToken?.visualMultiplier]);
 
+  const handleLimitPricePercentageShortcut = useCallback(
+    (pct: number) => {
+      if (markPrice === undefined) {
+        return;
+      }
+
+      // pct is e.g. -5, -1, 1, 5 — scale to basis points to avoid float math
+      const bps = BigInt(Math.round(pct * 100));
+      const adjustedPrice = (markPrice * (10000n + bps)) / 10000n;
+      const displayDecimals = calculateDisplayDecimals(adjustedPrice, undefined, toToken?.visualMultiplier);
+
+      setTriggerPriceInputValue(
+        formatAmount(adjustedPrice, USD_DECIMALS, displayDecimals, undefined, undefined, toToken?.visualMultiplier)
+      );
+    },
+    [markPrice, setTriggerPriceInputValue, toToken?.visualMultiplier]
+  );
+
   const handleTriggerMarkPriceClick = useCallback(
     () => setTriggerRatioInputValue(formatAmount(markRatio?.ratio, USD_DECIMALS, 10)),
     [markRatio?.ratio, setTriggerRatioInputValue]
@@ -827,6 +845,25 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     );
   }
 
+  function renderLimitPriceShortcuts() {
+    const LIMIT_PRICE_SHORTCUTS = [-5, -1, 1, 5];
+
+    return (
+      <div className="flex items-center gap-4">
+        {LIMIT_PRICE_SHORTCUTS.map((pct) => (
+          <button
+            key={pct}
+            type="button"
+            className="cursor-pointer rounded-4 bg-slate-700 px-6 py-2 text-body-small text-typography-secondary gmx-hover:bg-slate-600 gmx-hover:text-typography-primary"
+            onClick={() => handleLimitPricePercentageShortcut(pct)}
+          >
+            {pct > 0 ? `+${pct}%` : `${pct}%`}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   function renderTriggerRatioInput() {
     return (
       <BuyInputSection
@@ -982,6 +1019,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
               {isTrigger && renderDecreaseSizeInput()}
               {isSwap && isLimit && renderTriggerRatioInput()}
               {isPosition && (isLimit || isTrigger) && renderTriggerPriceInput()}
+              {isPosition && isLimit && tradeMode === TradeMode.Limit && renderLimitPriceShortcuts()}
             </div>
 
             {showSectionBetweenInputsAndButton && (
