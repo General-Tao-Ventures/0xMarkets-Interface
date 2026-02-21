@@ -135,7 +135,7 @@ export class OracleKeeperFetcher implements OracleFetcher {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
-    });
+    }).catch(() => new Response());
   }
 
   fetchPostFeedback(body: UserFeedbackBody, debug): Promise<Response> {
@@ -150,7 +150,7 @@ export class OracleKeeperFetcher implements OracleFetcher {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
-    });
+    }).catch(() => new Response());
   }
 
   fetchApys(period: ApyPeriod): Promise<ApyInfo> {

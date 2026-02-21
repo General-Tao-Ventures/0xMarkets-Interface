@@ -234,21 +234,37 @@ export function WebsocketContextProvider({ children }: { children: ReactNode }) 
         // wait ws provider to be connected and avoid too often reconnects
         const isReconnectingIntervalPassed =
           initializedTime.current && Date.now() - initializedTime.current > WS_RECONNECT_INTERVAL;
+
+        // If provider is already CLOSING/CLOSED, skip listener count check (it causes duplicate message spam)
+        // and trigger silent reconnect if the reconnect interval has passed
+        if (isProviderInClosedState(wsProvider)) {
+          if (isReconnectingIntervalPassed) {
+            const nextProvider = getWsProvider(chainId);
+            setWsProvider(nextProvider);
+            initializedTime.current = Date.now();
+            // eslint-disable-next-line no-console
+            console.log("ws provider reconnecting (closed state detected)", initializedTime.current);
+            metrics.pushEvent<WsProviderHealthCheckFailed>({
+              event: "wsProvider.healthCheckFailed",
+              isError: false,
+              data: {
+                requiredListenerCount: 0,
+                listenerCount: 0,
+              },
+            });
+          } else {
+            healthCheckTimerId.current = setTimeout(nextHealthCheck, WS_HEALTH_CHECK_INTERVAL);
+          }
+          return;
+        }
+
         const listenerCount = await wsProvider.listenerCount();
         const requiredListenerCount = getTotalSubscribersEventsCount(chainId, wsProvider, {
           v2: !lostFocusRef.current.hasV2LostFocus,
         });
 
-        if (isDevelopment() && isReconnectingIntervalPassed) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `ws provider health check, state: ${wsProvider.websocket.readyState}, subs: ${listenerCount} / ${requiredListenerCount}`
-          );
-        }
-
         if (
-          (isProviderInClosedState(wsProvider) && isReconnectingIntervalPassed) ||
-          (listenerCount < requiredListenerCount && isReconnectingIntervalPassed)
+          listenerCount < requiredListenerCount && isReconnectingIntervalPassed
         ) {
           closeWsConnection(wsProvider);
           const nextProvider = getWsProvider(chainId);

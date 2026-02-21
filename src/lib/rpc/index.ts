@@ -151,10 +151,12 @@ export function closeWsConnection(wsProvider: WebSocketProvider) {
     );
   }
 
+  // Always remove listeners first to prevent duplicate message processing during shutdown
+  wsProvider.removeAllListeners();
+
   if (isProviderInClosedState(wsProvider)) {
     return;
   }
 
-  wsProvider.removeAllListeners();
   wsProvider.websocket.close();
 }
