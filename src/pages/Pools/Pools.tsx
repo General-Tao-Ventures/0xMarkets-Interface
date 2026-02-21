@@ -1,3 +1,5 @@
+import { t, Trans } from "@lingui/macro";
+import { useState } from "react";
 import cx from "classnames";
 
 import { useGmMarketsApy } from "domain/synthetics/markets/useGmMarketsApy";
@@ -11,12 +13,19 @@ import { formatUsd } from "lib/numbers";
 import AppPageLayout from "components/AppPageLayout/AppPageLayout";
 import { ChainContentHeader } from "components/ChainContentHeader/ChainContentHeader";
 import { GmList } from "components/GmList/GmList";
+import Tabs from "components/Tabs/Tabs";
 
 import PoolsTimeRangeFilter from "./PoolsTimeRangeFilter";
 import { usePoolsIsMobilePage } from "./usePoolsIsMobilePage";
 
+const POOLS_TAB_OPTIONS = [
+  { value: "all" as const, label: "All Pools" },
+  { value: "my" as const, label: "My Pools" },
+];
+
 export default function Pools() {
   const { timeRange, setTimeRange } = usePoolsTimeRange();
+  const [poolsTab, setPoolsTab] = useState<"all" | "my">("all");
 
   const { chainId, srcChainId } = useChainId();
 
@@ -60,6 +69,15 @@ export default function Pools() {
         </div>
       </div>
 
+      <div className="mb-16">
+        <Tabs
+          options={POOLS_TAB_OPTIONS}
+          selectedValue={poolsTab}
+          onChange={setPoolsTab}
+          type="inline"
+        />
+      </div>
+
       <div className="flex grow flex-col gap-16 lg:overflow-hidden">
         <GmList
           glvTokensApyData={glvApyInfoData}
@@ -70,6 +88,7 @@ export default function Pools() {
           performance={performance}
           performanceSnapshots={performanceSnapshots}
           isDeposit
+          activeTab={poolsTab}
         />
       </div>
     </AppPageLayout>

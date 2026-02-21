@@ -43,6 +43,7 @@ export type Props = {
   performance: PerformanceData | undefined;
   performanceSnapshots: PerformanceSnapshotsData | undefined;
   isDeposit: boolean;
+  activeTab?: "all" | "my";
 };
 
 export type SortField = "price" | "totalSupply" | "wallet" | "apy" | "performance" | "unspecified";
@@ -54,6 +55,7 @@ export function GmList({
   isDeposit,
   performance,
   performanceSnapshots,
+  activeTab = "all",
 }: Props) {
   const chainId = useSelector(selectChainId);
   const srcChainId = useSelector(selectSrcChainId);
@@ -82,9 +84,15 @@ export function GmList({
     performance,
   });
 
+  // For "My Pools" tab: further filter to tokens where user has a balance
+  const displayTokens = useMemo(() => {
+    if (activeTab !== "my") return filteredGmTokens;
+    return filteredGmTokens.filter((token) => token.balance && token.balance > 0n);
+  }, [filteredGmTokens, activeTab]);
+
   const { currentPage, currentData, pageCount, setCurrentPage } = usePagination(
-    `${chainId} ${direction} ${orderBy} ${searchText}`,
-    filteredGmTokens,
+    `${chainId} ${direction} ${orderBy} ${searchText} ${activeTab}`,
+    displayTokens,
     DEFAULT_PAGE_SIZE
   );
 
@@ -92,6 +100,8 @@ export function GmList({
     if (!active) return;
     return getTotalGmInfo(marketTokensData);
   }, [marketTokensData, active]);
+
+  const showPnl = activeTab === "my";
 
   const rows =
     currentData.length > 0 &&
@@ -108,10 +118,18 @@ export function GmList({
         performanceSnapshots={performanceSnapshots}
         isFavorite={favoriteTokens.includes(token.address)}
         onFavoriteClick={toggleFavoriteToken}
+        showPnl={showPnl}
       />
     ));
 
   const isMobile = usePoolsIsMobilePage();
+
+  // Empty state messages for My Pools tab
+  const myPoolsEmptyText = !active
+    ? t`Connect wallet to see your pools`
+    : t`You have no pool positions`;
+
+  const emptyText = activeTab === "my" ? myPoolsEmptyText : t`No pools matched`;
 
   return (
     <PoolsCard
@@ -155,7 +173,7 @@ export function GmList({
           <div className="flex flex-col gap-4">
             {rows}
             {!currentData.length && !isLoading && (
-              <EmptyTableContent emptyText={t`No pools matched`} isLoading={isLoading} isEmpty={!currentData.length} />
+              <EmptyTableContent emptyText={emptyText} isLoading={isLoading} isEmpty={!currentData.length} />
             )}
 
             {isLoading && <Loader />}
@@ -190,6 +208,15 @@ export function GmList({
                       </Sorter>
                     </TableTh>
                     <TableTh>
+                      <TooltipWithPortal
+                        handle={t`UTIL`}
+                        className="normal-case"
+                        position="bottom-end"
+                        content={<Trans>Utilization: percentage of pool liquidity currently used by open positions.</Trans>}
+                        variant="iconStroke"
+                      />
+                    </TableTh>
+                    <TableTh>
                       <Sorter {...getSorterProps("performance")}>
                         <PerformanceLabel upperCase variant="iconStroke" />
                       </Sorter>
@@ -215,7 +242,7 @@ export function GmList({
 
               {!currentData.length && !isLoading && (
                 <EmptyTableContent
-                  emptyText={t`No pools matched`}
+                  emptyText={emptyText}
                   isLoading={isLoading}
                   isEmpty={!currentData.length}
                 />

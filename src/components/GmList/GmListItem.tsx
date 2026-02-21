@@ -24,11 +24,13 @@ import { useDaysConsideredInMarketsApr } from "domain/synthetics/markets/useDays
 import { PerformanceData } from "domain/synthetics/markets/usePerformanceAnnualized";
 import { PerformanceSnapshot, PerformanceSnapshotsData } from "domain/synthetics/markets/usePerformanceSnapshots";
 import { useUserEarnings } from "domain/synthetics/markets/useUserEarnings";
+import { GlvOrMarketInfo, MarketInfo } from "domain/synthetics/markets/types";
 import { TokenData, convertToUsd, getTokenData } from "domain/synthetics/tokens";
-import { bigintToNumber, formatPercentage, PRECISION_DECIMALS } from "lib/numbers";
+import { bigintToNumber, formatPercentage, formatUsd, PRECISION_DECIMALS } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
 import { getNormalizedTokenSymbol } from "sdk/configs/tokens";
+import { bigMath } from "sdk/utils/bigmath";
 
 import { AmountWithUsdHuman } from "components/AmountWithUsd/AmountWithUsd";
 import { AprInfo } from "components/AprInfo/AprInfo";
@@ -46,6 +48,23 @@ import { PerformanceLabel } from "./PerformanceLabel";
 
 export const tokenAddressStyle = { fontSize: 5 };
 
+/**
+ * Compute utilization as a percentage (0–100) for a market.
+ * Utilization = (longInterestUsd + shortInterestUsd) / poolValueMax * 100
+ * Returns null for GLV markets or when pool value is zero.
+ */
+function computeUtilization(marketOrGlv: GlvOrMarketInfo | undefined): number | null {
+  if (!marketOrGlv || isGlvInfo(marketOrGlv)) return null;
+  const market = marketOrGlv as MarketInfo;
+  const poolValue = market.poolValueMax;
+  if (!poolValue || poolValue === 0n) return null;
+  const totalInterest = market.longInterestUsd + market.shortInterestUsd;
+  // Both values are in USD with PRECISION (30 decimals), same scale — safe to divide
+  const utilizationBps = bigMath.mulDiv(totalInterest, 10000n, poolValue);
+  const util = Number(utilizationBps) / 100;
+  return Math.min(util, 100); // cap at 100% in edge cases
+}
+
 export function GmListItem({
   token,
   marketsTokensApyData,
@@ -57,6 +76,7 @@ export function GmListItem({
   onFavoriteClick,
   performance,
   performanceSnapshots,
+  showPnl = false,
 }: {
   token: TokenData;
   marketsTokensApyData: MarketTokensAPRData | undefined;
@@ -68,6 +88,7 @@ export function GmListItem({
   onFavoriteClick: ((address: string) => void) | undefined;
   performance: PerformanceData | undefined;
   performanceSnapshots: PerformanceSnapshotsData | undefined;
+  showPnl?: boolean;
 }) {
   const chainId = useSelector(selectChainId);
   const srcChainId = useSelector(selectSrcChainId);
@@ -128,6 +149,15 @@ export function GmListItem({
 
   const marketPerformance = performance?.[token.address];
   const marketPerformanceSnapshots = performanceSnapshots?.[token.address];
+
+  // Utilization calculation
+  const utilization = computeUtilization(marketOrGlv);
+  const utilizationDisplay = utilization !== null ? `${utilization.toFixed(1)}%` : "—";
+
+  // PnL display
+  const pnlValue = marketEarnings?.total;
+  const pnlDisplay = pnlValue !== undefined ? formatUsd(pnlValue, { displayDecimals: 2 }) : null;
+  const pnlPositive = pnlValue !== undefined && pnlValue >= 0n;
 
   if (isMobile) {
     return (
@@ -202,6 +232,20 @@ export function GmListItem({
                 singleLine={true}
               />
             }
+          />
+          {showPnl && pnlDisplay !== null && (
+            <SyntheticsInfoRow
+              label={<Trans>PnL</Trans>}
+              value={
+                <span className={pnlPositive ? "text-green-500" : "text-red-400"}>
+                  {pnlDisplay}
+                </span>
+              }
+            />
+          )}
+          <SyntheticsInfoRow
+            label={<Trans>Utilization</Trans>}
+            value={utilizationDisplay}
           />
           <SyntheticsInfoRow
             label={<FeeApyLabel />}
@@ -290,17 +334,28 @@ export function GmListItem({
         />
       </TableTdActionable>
       <TableTdActionable className="w-[11%]">
-        <GmTokensBalanceInfo
-          token={token}
-          daysConsidered={daysConsidered}
-          earnedRecently={marketEarnings?.recent}
-          earnedTotal={marketEarnings?.total}
-          isGlv={isGlv}
-        />
+        <div className="flex flex-col gap-4">
+          <GmTokensBalanceInfo
+            token={token}
+            daysConsidered={daysConsidered}
+            earnedRecently={marketEarnings?.recent}
+            earnedTotal={marketEarnings?.total}
+            isGlv={isGlv}
+          />
+          {showPnl && pnlDisplay !== null && (
+            <div className={`text-12 ${pnlPositive ? "text-green-500" : "text-red-400"}`}>
+              <Trans>PnL:</Trans> {pnlDisplay}
+            </div>
+          )}
+        </div>
       </TableTdActionable>
 
       <TableTdActionable className="w-[11%]">
         <AprInfo apy={apy} incentiveApr={incentiveApr} lidoApr={lidoApr} marketAddress={token.address} />
+      </TableTdActionable>
+
+      <TableTdActionable className="w-[8%]">
+        <span className="numbers">{utilizationDisplay}</span>
       </TableTdActionable>
 
       <TableTdActionable className="w-[18%]">
