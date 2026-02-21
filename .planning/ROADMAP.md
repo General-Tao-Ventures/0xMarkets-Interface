@@ -58,14 +58,19 @@ Plans:
 - [x] 04-02-PLAN.md — On-chain market configuration for all 6 Base Sepolia markets
 
 ### Phase 5: Liquidity & Swaps
-**Goal**: Users can withdraw liquidity from pools and swap tokens, completing the full liquidity lifecycle
+**Goal**: Users can withdraw liquidity from pools and view pool statistics, completing the liquidity lifecycle
 **Depends on**: Phase 4
 **Requirements**: LIQ-01, LIQ-02, SWAP-01
+**SWAP-01 Deferred**: User explicitly deferred swaps ("we don't need the swap route, we just want long and short"). SWAP-01 will be addressed in a future milestone.
 **Success Criteria** (what must be TRUE):
   1. User can submit a Sell GM transaction and receive underlying tokens back in their wallet
   2. Pools page displays utilization percentage, fees earned, and APY for each active pool
-  3. User can swap between supported tokens using pool liquidity and the swap executes end-to-end
-**Plans**: TBD
+  3. Pools page has "My Pools" tab showing user's pools with PnL
+**Plans**: 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Sell GM flow: action buttons, withdrawal notifications, and cancel support
+- [ ] 05-02-PLAN.md — Pool stats: All Pools / My Pools tabs, utilization, and PnL display
 
 ### Phase 6: Position Management
 **Goal**: Users can open, manage, and close leveraged positions with all order types across all 6 markets
@@ -88,5 +93,5 @@ Plans:
 | 2. End-to-End Deposit Execution | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 3. Deposit UX & Status Visibility | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 5. Liquidity & Swaps | v1.1 | 0/? | Not started | - |
+| 5. Liquidity & Swaps | v1.1 | 0/2 | In progress | - |
 | 6. Position Management | v1.1 | 0/? | Not started | - |
