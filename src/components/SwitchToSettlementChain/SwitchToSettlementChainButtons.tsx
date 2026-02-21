@@ -12,13 +12,17 @@ import { needSwitchToSettlementChain } from "./utils";
 export function SwitchToSettlementChainButtons({ children }: { children: React.ReactNode }) {
   const { chainId: walletChainId, isConnected } = useAccount();
 
-  if (!needSwitchToSettlementChain(walletChainId)) {
+  const settlements = needSwitchToSettlementChain(walletChainId)
+    ? MULTICHAIN_SOURCE_TO_SETTLEMENTS_MAPPING[walletChainId]
+    : undefined;
+
+  if (!settlements?.length) {
     return children;
   }
 
   return (
     <div className="flex flex-col gap-8">
-      {MULTICHAIN_SOURCE_TO_SETTLEMENTS_MAPPING[walletChainId].map((chainId) => (
+      {settlements.map((chainId) => (
         <Button
           key={chainId}
           type="button"

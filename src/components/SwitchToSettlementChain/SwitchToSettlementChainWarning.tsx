@@ -15,11 +15,16 @@ export function SwitchToSettlementChainWarning({ topic }: { topic: "liquidity" |
     return null;
   }
 
-  const multipleChains = MULTICHAIN_SOURCE_TO_SETTLEMENTS_MAPPING[walletChainId].length > 1;
+  const settlements = MULTICHAIN_SOURCE_TO_SETTLEMENTS_MAPPING[walletChainId];
+  if (!settlements?.length) {
+    return null;
+  }
+
+  const multipleChains = settlements.length > 1;
   const chainNames = multipleChains
-    ? MULTICHAIN_SOURCE_TO_SETTLEMENTS_MAPPING[walletChainId].slice(0, -1).map(getChainName).join(", ")
-    : getChainName(MULTICHAIN_SOURCE_TO_SETTLEMENTS_MAPPING[walletChainId][0]);
-  const lastChainName = getChainName(MULTICHAIN_SOURCE_TO_SETTLEMENTS_MAPPING[walletChainId].slice(-1)[0]);
+    ? settlements.slice(0, -1).map(getChainName).join(", ")
+    : getChainName(settlements[0]);
+  const lastChainName = getChainName(settlements.slice(-1)[0]);
 
   let message: React.ReactNode = "";
   if (topic === "liquidity") {
