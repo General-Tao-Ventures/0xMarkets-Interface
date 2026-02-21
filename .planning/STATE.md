@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 6 of 6 (Position Management) — IN PROGRESS
-Plan: 1/4 complete
-Status: 06-01 complete — market order submission unblocked, position display + order notifications verified
-Last activity: 2026-02-21 — 06-01 complete
+Plan: 2/4 complete
+Status: 06-02 complete — close position flow unblocked, full/partial close via PositionSeller modal working
+Last activity: 2026-02-21 — 06-02 complete
 
-Progress: [█████████░] ~85% (v1.0 complete, Phase 4 complete, Phase 5 complete, Phase 6 in progress)
+Progress: [█████████░] ~88% (v1.0 complete, Phase 4 complete, Phase 5 complete, Phase 6 in progress)
 
 ## Performance Metrics
 
@@ -36,9 +36,15 @@ Progress: [█████████░] ~85% (v1.0 complete, Phase 4 complete
 |-------|-------|--------|
 | 4. Stable Foundation | 2/2 | Complete |
 | 5. Liquidity & Swaps | 2/2 | Complete |
-| 6. Position Management | 1/4 | In Progress |
+| 6. Position Management | 2/4 | In Progress |
 
 *Updated after each plan completion*
+
+**Execution Metrics (v1.1):**
+
+| Phase | Duration (min) | Tasks | Files |
+|-------|---------------|-------|-------|
+| Phase 06-position-management P02 | 12 | 1 | 1 |
 
 ## Accumulated Context
 
@@ -59,8 +65,8 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 06-01-PLAN.md — market order submission + notifications
-Next: Phase 6-02 (close position) — PositionSeller, full/partial close flow
+Stopped at: Completed 06-02-PLAN.md — close position flow via PositionSeller modal
+Next: Phase 6-03 (limit orders) — limit price input, pending orders display, cancel flow
 
 ## Decisions
 
@@ -82,3 +88,4 @@ Next: Phase 6-02 (close position) — PositionSeller, full/partial close flow
 - 06-01: Express loading state does not block trade button — button stays enabled; expressParamsPromise awaited on submit, falls back to direct wallet txn if express unavailable
 - 06-01: Elapsed time thresholds for order execution notification: <15s no time, 15-59s seconds, 60-119s minutes+seconds with "longer than expected", 120s+ "still waiting"
 - 06-01: Local dev oracle keeper URL points to cloud IP (142.93.203.222:37017) not localhost
+- 06-02: isExpressLoading gate removed from PositionSeller Close button — button stays enabled while express params compute; submit awaits expressParamsPromise and falls back to direct wallet txn if express unavailable (mirrors 06-01 TradeBox fix)

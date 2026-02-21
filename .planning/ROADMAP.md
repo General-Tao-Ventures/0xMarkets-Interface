@@ -100,4 +100,4 @@ Plans:
 | 3. Deposit UX & Status Visibility | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 6. Position Management | v1.1 | 1/4 | In Progress | - |
+| 6. Position Management | 2/4 | In Progress|  | - |

@@ -17,7 +17,7 @@ Requirements for milestone v1.1 "Full Trading Experience". Each maps to roadmap 
 ### Position Management
 
 - [x] **POS-01**: User can open long and short positions via market order on any of the 6 markets
-- [ ] **POS-02**: User can close full or partial positions and receive collateral back
+- [x] **POS-02**: User can close full or partial positions and receive collateral back
 - [ ] **POS-03**: User can place limit orders to open positions at a target price
 - [ ] **POS-04**: User can set stop-loss and take-profit orders on existing positions
 
@@ -60,7 +60,7 @@ Deferred to future milestones.
 | LIQ-02 | Phase 5 | Complete |
 | SWAP-01 | Phase 5 | Pending |
 | POS-01 | Phase 6 | Complete |
-| POS-02 | Phase 6 | Pending |
+| POS-02 | Phase 6 | Complete |
 | POS-03 | Phase 6 | Pending |
 | POS-04 | Phase 6 | Pending |
 
