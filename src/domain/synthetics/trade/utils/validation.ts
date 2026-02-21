@@ -266,6 +266,10 @@ export function getIncreaseError(p: {
     return [t`Select a market`];
   }
 
+  if (marketInfo.minCollateralFactor === 0n) {
+    return [t`Market unavailable`];
+  }
+
   if (!initialCollateralToken) {
     return [t`Select a Pay token`];
   }
@@ -437,6 +441,11 @@ export function getIsMaxLeverageExceeded(
 
   if (minCollateralFactorForMarket > minCollateralFactor) {
     minCollateralFactor = minCollateralFactorForMarket;
+  }
+
+  if (minCollateralFactor === 0n) {
+    // Market not configured — cannot compute max leverage, treat as not exceeded
+    return false;
   }
 
   const maxLeverage = bigMath.mulDiv(PRECISION, BASIS_POINTS_DIVISOR_BIGINT, minCollateralFactor);

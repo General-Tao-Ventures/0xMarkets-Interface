@@ -3,6 +3,12 @@ export const bigMath = {
     return x < 0n ? -x : x;
   },
   mulDiv(x: bigint, y: bigint, z: bigint, roundUpMagnitude = false) {
+    if (z === 0n) {
+      // eslint-disable-next-line no-console
+      console.warn("bigMath: division by zero prevented in mulDiv");
+      return 0n;
+    }
+
     const result = (x * y) / z;
 
     if (roundUpMagnitude && this.mulmod(x, y, z) > 0n) {
@@ -34,12 +40,27 @@ export const bigMath = {
     return sum / count;
   },
   divRound(x: bigint, y: bigint) {
+    if (y === 0n) {
+      // eslint-disable-next-line no-console
+      console.warn("bigMath: division by zero prevented in divRound");
+      return 0n;
+    }
     return x / y + ((x % y) * 2n > y ? 1n : 0n);
   },
   divRoundUp(x: bigint, y: bigint) {
+    if (y === 0n) {
+      // eslint-disable-next-line no-console
+      console.warn("bigMath: division by zero prevented in divRoundUp");
+      return 0n;
+    }
     return (x + y - 1n) / y;
   },
   mulmod(x: bigint, y: bigint, m: bigint): bigint {
+    if (m === 0n) {
+      // eslint-disable-next-line no-console
+      console.warn("bigMath: division by zero prevented in mulmod");
+      return 0n;
+    }
     return (x * y) % m;
   },
 };

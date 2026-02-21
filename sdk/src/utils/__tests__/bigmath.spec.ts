@@ -15,6 +15,28 @@ describe("bigMath", () => {
       expect(bigMath.mulDiv(10n, 10n, 2n)).toBe(50n);
       expect(bigMath.mulDiv(10n, 10n, 3n)).toBe(33n);
     });
+
+    it("should return 0n when divisor is zero", () => {
+      expect(bigMath.mulDiv(10n, 5n, 0n)).toBe(0n);
+    });
+  });
+
+  describe("divRound", () => {
+    it("should return 0n when divisor is zero", () => {
+      expect(bigMath.divRound(10n, 0n)).toBe(0n);
+    });
+  });
+
+  describe("divRoundUp", () => {
+    it("should return 0n when divisor is zero", () => {
+      expect(bigMath.divRoundUp(10n, 0n)).toBe(0n);
+    });
+  });
+
+  describe("mulmod", () => {
+    it("should return 0n when modulus is zero", () => {
+      expect(bigMath.mulmod(10n, 5n, 0n)).toBe(0n);
+    });
   });
 
   describe("max", () => {
