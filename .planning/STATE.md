@@ -53,5 +53,5 @@ None currently. Phase 4 work (FIX-01..04) is well-defined from known issues.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: v1.1 roadmap written — ready to plan Phase 4
-Resume file: None
+Stopped at: Phase 4 context gathered
+Resume file: .planning/phases/04-stable-foundation/04-CONTEXT.md
