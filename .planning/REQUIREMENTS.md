@@ -27,7 +27,7 @@ Requirements for milestone v1.1 "Full Trading Experience". Each maps to roadmap 
 
 ### Liquidity
 
-- [ ] **LIQ-01**: User can withdraw liquidity from pools (Sell GM) and receive underlying tokens
+- [x] **LIQ-01**: User can withdraw liquidity from pools (Sell GM) and receive underlying tokens
 - [ ] **LIQ-02**: Pools page displays utilization, fees earned, and APY stats
 
 ## Future Requirements
@@ -56,7 +56,7 @@ Deferred to future milestones.
 | FIX-02 | Phase 4 | Complete |
 | FIX-03 | Phase 4 | Complete |
 | FIX-04 | Phase 4 | Complete |
-| LIQ-01 | Phase 5 | Pending |
+| LIQ-01 | Phase 5 | Complete |
 | LIQ-02 | Phase 5 | Pending |
 | SWAP-01 | Phase 5 | Pending |
 | POS-01 | Phase 6 | Pending |

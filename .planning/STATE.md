@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** User can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
-**Current focus:** v1.1 Full Trading Experience — Phase 4: Stable Foundation
+**Current focus:** v1.1 Full Trading Experience — Phase 5: Liquidity & Swaps
 
 ## Current Position
 
-Phase: 4 of 6 (Stable Foundation) — COMPLETE
-Plan: 2/2 complete
-Status: Phase 4 complete — ready for Phase 5 (Liquidity & Swaps)
-Last activity: 2026-02-21 — 04-02 on-chain deployment confirmed by user
+Phase: 5 of 6 (Liquidity & Swaps) — IN PROGRESS
+Plan: 1/2 complete
+Status: 05-01 complete — Sell GM flow (withdrawal UX) shipped
+Last activity: 2026-02-21 — 05-01 Buy GM/Sell GM buttons and cancelWithdrawalTxn
 
-Progress: [██████░░░░] ~50% (v1.0 complete, Phase 4 complete)
+Progress: [███████░░░] ~60% (v1.0 complete, Phase 4 complete, Phase 5 in progress)
 
 ## Performance Metrics
 
 **Velocity (v1.0):**
-- Total plans completed: 6
+- Total plans completed: 7
 - v1.0 phases: 3, all complete
 
 **By Phase (v1.0):**
@@ -30,6 +30,13 @@ Progress: [██████░░░░] ~50% (v1.0 complete, Phase 4 complete
 | 2. Deposit Execution | 2/2 | Complete |
 | 3. Deposit UX | 2/2 | Complete |
 
+**By Phase (v1.1):**
+
+| Phase | Plans | Status |
+|-------|-------|--------|
+| 4. Stable Foundation | 2/2 | Complete |
+| 5. Liquidity & Swaps | 1/2 | In Progress |
+
 *Updated after each plan completion*
 
 ## Accumulated Context
@@ -38,6 +45,7 @@ Progress: [██████░░░░] ~50% (v1.0 complete, Phase 4 complete
 
 - Single keeper wallet nonce management — critical for concurrent operations (POS phase)
 - 17 pre-existing failing SDK test files (21 tests) — pre-existing, unrelated to Phase 4 changes (deferred)
+- Pre-existing TypeScript error in useOrders.ts (OrderInfoStructOutput export mismatch) — unrelated to current work
 
 ### Pending Todos
 
@@ -45,13 +53,13 @@ None.
 
 ### Blockers/Concerns
 
-None currently. Phase 4 work (FIX-01..04) is well-defined from known issues.
+None currently.
 
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 04-02-PLAN.md — on-chain market config deployed, Phase 4 complete
-Next: Phase 5 (Liquidity & Swaps) — planning required
+Stopped at: Completed 05-01-PLAN.md — Buy GM/Sell GM buttons + cancelWithdrawalTxn + enhanced withdrawal notification
+Next: Phase 5 Plan 02 (if exists) or Phase 6
 
 ## Decisions
 
@@ -63,3 +71,6 @@ Next: Phase 5 (Liquidity & Swaps) — planning required
 - 04-02: Synthetic markets (EUR, GBP, JPY, GOLD) spread syntheticMarketConfig + explicit capacity limits
 - 04-02: GOLD gets 750K pool / 375K OI (higher than 500K/250K forex) — more popular commodity asset
 - 04-02: Deploy command confirmed: `npx hardhat update-market-config --network baseSepolia`
+- 05-01: operation=Withdrawal query param drives PoolsDetailsContext — no context changes needed, useEffect already parses searchParams
+- 05-01: useDepositElapsed called twice (deposit + withdrawal) — hook is generic, takes createdAt: number | undefined
+- 05-01: withdrawalElapsedSeconds thresholds match deposit: 15s/60s/120s for progressive disclosure
