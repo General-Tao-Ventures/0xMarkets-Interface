@@ -51,7 +51,11 @@ Plans:
   2. All 6 markets display valid liquidity, reserve factors, and open interest limits (no zero values causing validation failures)
   3. WebSocket connection recovers silently from CLOSING state without console spam
   4. Metrics endpoint errors are suppressed — no 404/500 noise in the console blocking normal use
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Frontend defensive guards, WebSocket suppression, and metrics endpoint
+- [ ] 04-02-PLAN.md — On-chain market configuration for all 6 Base Sepolia markets
 
 ### Phase 5: Liquidity & Swaps
 **Goal**: Users can withdraw liquidity from pools and swap tokens, completing the full liquidity lifecycle
@@ -83,6 +87,6 @@ Plans:
 | 1. Keeper Oracle Integration | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 2. End-to-End Deposit Execution | v1.0 | 2/2 | Complete | 2026-02-21 |
 | 3. Deposit UX & Status Visibility | v1.0 | 2/2 | Complete | 2026-02-21 |
-| 4. Stable Foundation | v1.1 | 0/? | Not started | - |
+| 4. Stable Foundation | v1.1 | 0/2 | Planned | - |
 | 5. Liquidity & Swaps | v1.1 | 0/? | Not started | - |
 | 6. Position Management | v1.1 | 0/? | Not started | - |
