@@ -4,50 +4,46 @@
 
 See: .planning/PROJECT.md (updated 2026-02-23)
 
-**Core value:** User can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
-**Current focus:** All milestones complete (v1.0, v1.1, v1.2). Ready for next milestone.
+**Core value:** All keeper-executed operations complete in under 10 seconds, consistently
+**Current focus:** Phase 10 — Event-Driven Detection
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-23 — Milestone v1.3 started
+Phase: 10 of 12 (Event-Driven Detection)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-02-23 — Roadmap created for v1.3
+
+Progress: [░░░░░░░░░░] 0% (v1.3)
 
 ## Performance Metrics
 
-**Velocity (v1.0):**
-- Total plans completed: 6
-- Phases: 3, all complete
-
-**Velocity (v1.1):**
-- Total plans completed: 8
-- Phases: 3, all complete
-
-**Velocity (v1.2):**
-- Total plans completed: 7
-- Phases: 3, all complete
+**Velocity (v1.0-v1.2):**
+- Total plans completed: 21
+- Phases: 9, all complete
 
 **By Phase:**
 
 | Phase | Milestone | Plans | Status |
 |-------|-----------|-------|--------|
-| 1. Keeper Oracle | v1.0 | 2/2 | Complete |
-| 2. Deposit Execution | v1.0 | 2/2 | Complete |
-| 3. Deposit UX | v1.0 | 2/2 | Complete |
-| 4. Stable Foundation | v1.1 | 2/2 | Complete |
-| 5. Liquidity & Swaps | v1.1 | 2/2 | Complete |
-| 6. Position Management | v1.1 | 4/4 | Complete |
-| 7. Public Deployment | v1.2 | 2/2 | Complete |
-| 8. Keeper Monitoring | v1.2 | 3/3 | Complete |
-| 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete |
+| 1-3 | v1.0 | 6/6 | Complete |
+| 4-6 | v1.1 | 8/8 | Complete |
+| 7-9 | v1.2 | 7/7 | Complete |
+| 10 | v1.3 | 0/? | Not started |
+| 11 | v1.3 | 0/? | Not started |
+| 12 | v1.3 | 0/? | Not started |
 
 ## Accumulated Context
+
+### Research Flags
+
+- Phase 11: Oracle price contract behavior is a key unknown — does `executeDeposit` with inline oracle params make separate `updatePriceOnChain()` TX redundant? Must investigate during planning.
+- Phase 10: viem `fallback([webSocket(), http()])` does NOT produce WebSocket-type client (Issue #776). Must use dedicated WebSocket-only PublicClient for event subscriptions.
 
 ### Known Issues
 
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
-- batch_report 404 from metrics — GMX analytics endpoint not implemented in our keeper (cosmetic)
+- batch_report 404 from metrics — cosmetic
 
 ### Pending Todos
 
@@ -64,5 +60,5 @@ Archived with v1.2 milestone. See .planning/PROJECT.md for key decisions table.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: v1.3 milestone requirements being defined
-Next: Complete requirements definition and roadmap creation
+Stopped at: v1.3 roadmap created — 3 phases (10-12), 9 requirements mapped
+Next: `/gsd:plan-phase 10`

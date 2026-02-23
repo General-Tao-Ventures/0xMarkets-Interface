@@ -47,21 +47,21 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DETECT-01 | TBD | Pending |
-| DETECT-02 | TBD | Pending |
-| DETECT-03 | TBD | Pending |
-| EXEC-01 | TBD | Pending |
-| EXEC-02 | TBD | Pending |
-| EXEC-03 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
+| DETECT-01 | Phase 10 | Pending |
+| DETECT-02 | Phase 10 | Pending |
+| DETECT-03 | Phase 10 | Pending |
+| EXEC-01 | Phase 10 | Pending |
+| EXEC-02 | Phase 11 | Pending |
+| EXEC-03 | Phase 11 | Pending |
+| INFRA-01 | Phase 10 | Pending |
+| INFRA-02 | Phase 12 | Pending |
+| INFRA-03 | Phase 12 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 (pending roadmap creation)
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-23*
-*Last updated: 2026-02-23 after initial definition*
+*Last updated: 2026-02-23 after roadmap creation*

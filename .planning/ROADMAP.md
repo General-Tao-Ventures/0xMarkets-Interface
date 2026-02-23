@@ -5,6 +5,7 @@
 - ✅ **v1.0 Fix Buy GM Flow** — Phases 1-3 ([shipped 2026-02-21](milestones/v1.0-ROADMAP.md))
 - ✅ **v1.1 Full Trading Experience** — Phases 4-6 ([shipped 2026-02-22](milestones/v1.1-ROADMAP.md))
 - ✅ **v1.2 Demo-Ready Deployment** — Phases 7-9 ([shipped 2026-02-23](milestones/v1.2-ROADMAP.md))
+- 🚧 **v1.3 Keeper Execution Speed** — Phases 10-12 (in progress)
 
 ## Phases
 
@@ -35,7 +36,62 @@
 
 </details>
 
+### 🚧 v1.3 Keeper Execution Speed (In Progress)
+
+**Milestone Goal:** All keeper-executed operations (deposits, withdrawals, orders) complete in under 10 seconds, consistently.
+
+- [ ] **Phase 10: Event-Driven Detection** - WebSocket event listeners with execution queue and polling fallback
+- [ ] **Phase 11: Execution Pipeline Optimization** - Oracle pre-caching and redundant read elimination
+- [ ] **Phase 12: Observability & Tuning** - Heartbeat health model and latency metrics
+
+## Phase Details
+
+### Phase 10: Event-Driven Detection
+**Goal**: Keeper detects new operations within 2 seconds via WebSocket event subscriptions, with nonce-safe sequential execution and automatic gap recovery
+**Depends on**: Phase 9 (v1.2 complete)
+**Requirements**: DETECT-01, DETECT-02, DETECT-03, INFRA-01, EXEC-01
+**Success Criteria** (what must be TRUE):
+  1. A deposit/withdrawal/order created on-chain is detected by the keeper within 2 seconds (not 5-10s polling average)
+  2. When the WebSocket connection drops, the keeper continues detecting operations via polling fallback without manual intervention
+  3. After a keeper restart, any operations created during downtime are detected and executed (no missed events)
+  4. Three concurrent deposits submitted in rapid succession all execute without nonce collision errors
+  5. The keeper startup log confirms WebSocket transport is active (not silently falling back to HTTP polling)
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+- [ ] 10-02: TBD
+
+### Phase 11: Execution Pipeline Optimization
+**Goal**: Oracle price overhead reduced from 2-8 seconds to near-zero by pre-caching Pyth Lazer prices and eliminating redundant chain reads
+**Depends on**: Phase 10
+**Requirements**: EXEC-02, EXEC-03
+**Success Criteria** (what must be TRUE):
+  1. Keeper execution does not send a separate oracle price update transaction before each operation — prices are pre-cached or inlined
+  2. The executor does not re-read operation data from the chain that the scanner already fetched (no redundant RPC calls visible in logs)
+  3. End-to-end execution time from detection to confirmation is under 5 seconds for deposits, withdrawals, and orders
+**Plans**: TBD
+
+Plans:
+- [ ] 11-01: TBD
+
+### Phase 12: Observability & Tuning
+**Goal**: Health monitoring accurately reflects keeper liveness in an event-driven architecture, with execution latency percentiles for performance tracking
+**Depends on**: Phase 11
+**Requirements**: INFRA-02, INFRA-03
+**Success Criteria** (what must be TRUE):
+  1. Health endpoint returns 200 during idle periods when no user operations are occurring (no false alerts from stale execution timestamps)
+  2. Health endpoint reports p50 and p95 execution latency percentiles that can be consumed by monitoring tools
+  3. BetterStack does not fire false-positive alerts during 5+ minutes of keeper inactivity
+**Plans**: TBD
+
+Plans:
+- [ ] 12-01: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 10 → 11 → 12
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -48,3 +104,6 @@
 | 7. Public Deployment | v1.2 | 2/2 | Complete | 2026-02-23 |
 | 8. Keeper Monitoring | v1.2 | 3/3 | Complete | 2026-02-23 |
 | 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete | 2026-02-23 |
+| 10. Event-Driven Detection | v1.3 | 0/? | Not started | - |
+| 11. Execution Pipeline Optimization | v1.3 | 0/? | Not started | - |
+| 12. Observability & Tuning | v1.3 | 0/? | Not started | - |
