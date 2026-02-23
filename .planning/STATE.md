@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** All keeper-executed operations complete in under 10 seconds, consistently
-**Current focus:** Phase 10 — Event-Driven Detection
+**Current focus:** Phase 11 — Execution Pipeline Optimization
 
 ## Current Position
 
-Phase: 10 of 12 (Event-Driven Detection)
-Plan: 2 of 2
-Status: Phase 10 complete, Phase 11 next
-Last activity: 2026-02-23 — Completed 10-02 (Event Listener + Main Loop Rewire)
+Phase: 11 of 12 (Execution Pipeline Optimization)
+Plan: 1 of 2
+Status: Plan 11-01 complete, Plan 11-02 next
+Last activity: 2026-02-23 — Completed 11-01 (Background Oracle Updater)
 
-Progress: [██░░░░░░░░] 20% (v1.3)
+Progress: [████░░░░░░] 40% (v1.3)
 
 ## Performance Metrics
 
@@ -30,16 +30,17 @@ Progress: [██░░░░░░░░] 20% (v1.3)
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10 | v1.3 | 2/2 | Complete |
-| 11 | v1.3 | 0/? | Not started |
+| 11 | v1.3 | 1/2 | In progress |
 | 12 | v1.3 | 0/? | Not started |
 | Phase 10 P01 | 3min | 2 tasks | 6 files |
 | Phase 10 P02 | 3min | 2 tasks | 3 files |
+| Phase 11 P01 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
 ### Research Flags
 
-- Phase 11: Oracle price contract behavior is a key unknown — does `executeDeposit` with inline oracle params make separate `updatePriceOnChain()` TX redundant? Must investigate during planning.
+- Phase 11: RESOLVED — PythLazerFeedProvider.getOraclePrice() reads from storedPrices mapping; separate updatePriceOnChain() TX IS required but moved to proactive background loop.
 - Phase 10: viem `fallback([webSocket(), http()])` does NOT produce WebSocket-type client (Issue #776). Must use dedicated WebSocket-only PublicClient for event subscriptions.
 
 ### Known Issues
@@ -66,9 +67,12 @@ Archived with v1.2 milestone. See .planning/PROJECT.md for key decisions table.
 - Phase 10-02: drainQueue() single-consumer loop replaces isExecuting mutex for LIFE-04 sequential execution
 - Phase 10-02: Polling hardcoded to 30s (not config.scanIntervalSeconds) -- events are primary detection
 - Phase 10-02: Block persistence batched (every 10 events or 5-block gap) to avoid DB write per event
+- Phase 11-01: 10s per-token background update interval balances freshness vs gas cost
+- Phase 11-01: Nonce coordination via disable/enable pattern around drainQueue execution (simplest approach)
+- Phase 11-01: 5s safety margin on MAX_ORACLE_PRICE_AGE for block propagation delay
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 10-02-PLAN.md (Event Listener + Main Loop Rewire)
-Next: Plan Phase 11 (next milestone phase)
+Stopped at: Completed 11-01-PLAN.md (Background Oracle Updater)
+Next: Execute 11-02-PLAN.md (Scanner Data Passthrough)
