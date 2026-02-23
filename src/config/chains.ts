@@ -160,7 +160,7 @@ export function getExplorerUrl(chainId: number | "layerzero" | "layerzero-testne
     case SOURCE_BASE_MAINNET:
       return "https://basescan.org/";
     case BASE_SEPOLIA:
-      return "https://basescan.org/";
+      return "https://sepolia.basescan.org/";
     case "layerzero":
       return "https://layerzeroscan.com/";
     case "layerzero-testnet":

@@ -400,7 +400,7 @@ export function SyntheticsPage(p: Props) {
             )}
           </>
         ) : (
-          <div className="w-[40rem] shrink-0 max-xl:w-[36rem] border border border-slate-800 bg-slate-750 rounded-8">
+          <div className="w-[40rem] shrink-0 max-xl:w-[36rem] border border-slate-800 bg-slate-750 rounded-8">
             <TradeBoxResponsiveContainer />
 
             {isSwap && !isTwap && (
