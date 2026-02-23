@@ -56,7 +56,7 @@ function select<A, B, C>(
   }
 }
 
-const KEEPER_API_URL = "http://142.93.203.222:37018";
+const KEEPER_API_URL = "/api/order-keeper";
 
 function getActionableMessage(errorReason: string | null): string {
   if (!errorReason) return t`Your deposit was cancelled. Your USDC has been returned.`;

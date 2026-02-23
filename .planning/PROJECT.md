@@ -61,7 +61,7 @@ The full trading loop works end-to-end on Base Sepolia but currently requires ru
 - **Chain:** Base Sepolia (84532)
 - **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22)
 - **Codebase:** ~43 files modified in v1.1, +3,428 lines
-- **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222), managed via Docker Compose at `/opt/0xmarkets/`
+- **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222), managed directly via SSH and Docker Compose at `/opt/0xmarkets/`
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
 - **Oracle mode:** Pyth Lazer — binary WebSocket price feeds, prices stored on-chain via PythLazerFeedProvider

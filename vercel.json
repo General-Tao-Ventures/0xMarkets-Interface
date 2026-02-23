@@ -3,10 +3,18 @@
     {
       "source": "/api/keeper/:path*",
       "destination": "/api/keeper?_path=:path*"
+    },
+    {
+      "source": "/api/order-keeper/:path*",
+      "destination": "/api/order-keeper?_path=:path*"
     }
   ],
   "functions": {
     "api/keeper.ts": {
+      "memory": 128,
+      "maxDuration": 10
+    },
+    "api/order-keeper.ts": {
       "memory": 128,
       "maxDuration": 10
     }

@@ -33,6 +33,7 @@ import { useChainId } from "lib/chains";
 import { defaultLocale, dynamicActivate } from "lib/i18n";
 import { RainbowKitProviderWrapper } from "lib/wallets/WalletProvider";
 
+import { KeeperStatusBanner } from "components/KeeperStatusBanner/KeeperStatusBanner";
 import SEO from "components/Seo/SEO";
 
 import { AppRoutes } from "./AppRoutes";
@@ -59,7 +60,12 @@ function App() {
     dynamicActivate(defaultLanguage);
   }, []);
 
-  let app = <AppRoutes />;
+  let app = (
+    <>
+      <KeeperStatusBanner />
+      <AppRoutes />
+    </>
+  );
   app = <SorterContextProvider>{app}</SorterContextProvider>;
   app = <TokensFavoritesContextProvider>{app}</TokensFavoritesContextProvider>;
   app = <SyntheticsEventsProvider>{app}</SyntheticsEventsProvider>;
