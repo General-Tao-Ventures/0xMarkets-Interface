@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 7 of 9 (Public Deployment)
-Plan: —
-Status: Ready to plan
-Last activity: 2026-02-22 — Roadmap created for v1.2 (phases 7-9)
+Plan: 1/2 complete
+Status: In progress
+Last activity: 2026-02-23 — Completed plan 07-01 (Vercel deployment + env-driven keeper proxies)
 
-Progress: [██████░░░░] 60% (6/9 phases complete across all milestones)
+Progress: [██████░░░░] 62% (6.5/9 phases complete across all milestones)
 
 ## Performance Metrics
 
@@ -36,7 +36,7 @@ Progress: [██████░░░░] 60% (6/9 phases complete across all m
 | 4. Stable Foundation | v1.1 | 2/2 | Complete |
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete |
 | 6. Position Management | v1.1 | 4/4 | Complete |
-| 7. Public Deployment | v1.2 | 0/2 | Not started |
+| 7. Public Deployment | v1.2 | 1/2 | In progress |
 | 8. Keeper Monitoring | v1.2 | 0/2 | Not started |
 | 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started |
 
@@ -56,11 +56,17 @@ None.
 
 ### Blockers/Concerns
 
-None currently.
+- Vercel Deployment Protection (password) is enabled on the project — user must disable via Vercel Dashboard (Settings -> Deployment Protection) to make app publicly accessible. This is a dashboard setting, not a code change.
+
+### Decisions
+
+- Relative URL pattern for keeper proxies (/api/keeper, /api/order-keeper) works in both Vite dev (via proxy) and Vercel prod (via serverless functions)
+- process.env.KEEPER_URL fallback to hardcoded IP enables zero-config local development
+- Deployment protection must be disabled via Vercel Dashboard for public access
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-public-deployment/07-CONTEXT.md
-Next: `/gsd:plan-phase 7`
+Last session: 2026-02-23
+Stopped at: Completed 07-01-PLAN.md (Vercel deployment + env-driven keeper proxies + KeeperStatusBanner)
+Resume file: .planning/phases/07-public-deployment/07-01-SUMMARY.md
+Next: Execute plan 07-02 (Cloud keeper sync)
