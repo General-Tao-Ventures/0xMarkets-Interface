@@ -20,9 +20,9 @@ Requirements for milestone v1.2 "Demo-Ready Deployment". Each maps to roadmap ph
 
 ### UI Polish
 
-- [ ] **UI-01**: UI audit completed — all rough edges identified and fixed
-- [ ] **UI-02**: Loading states, error messages, and empty states are professional
-- [ ] **UI-03**: Trade page has consistent visual styling across all 6 markets
+- [x] **UI-01**: UI audit completed — all rough edges identified and fixed
+- [x] **UI-02**: Loading states, error messages, and empty states are professional
+- [x] **UI-03**: Trade page has consistent visual styling across all 6 markets
 
 ### Tech Debt
 
@@ -60,9 +60,9 @@ Deferred to future milestones.
 | MON-01 | Phase 8 | Complete |
 | MON-02 | Phase 8 | Complete |
 | MON-03 | Phase 8 | Complete |
-| UI-01 | Phase 9 | Pending |
-| UI-02 | Phase 9 | Pending |
-| UI-03 | Phase 9 | Pending |
+| UI-01 | Phase 9 | Complete |
+| UI-02 | Phase 9 | Complete |
+| UI-03 | Phase 9 | Complete |
 | DEBT-01 | Phase 9 | Complete |
 | DEBT-02 | Phase 9 | Complete |
 | DEBT-03 | Phase 9 | Complete |

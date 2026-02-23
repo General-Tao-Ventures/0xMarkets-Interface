@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 9 of 9 in progress (UI Polish & Tech Debt — plan 2 of 2 complete)
-Status: Phase 9 plan 2 complete — tech debt resolved (pendingImpactAmount documented, tsc clean, tests clean, keeper efficiency investigated)
-Last activity: 2026-02-23 — Phase 9 plan 2 complete
+Phase: 9 of 9 complete (UI Polish & Tech Debt — all 2 plans complete)
+Status: Phase 9 complete — UI polish (loading spinner, explorer URL fix, BaseScan toast links) and tech debt (pendingImpactAmount, tsc, tests, keeper efficiency) all done
+Last activity: 2026-02-23 — Phase 9 plan 1 complete
 
-Progress: [█████████░] 95% (8/9 phases complete, phase 9 plan 2/2 done)
+Progress: [██████████] 100% (9/9 phases complete)
 
 ## Performance Metrics
 
@@ -37,7 +37,8 @@ Progress: [█████████░] 95% (8/9 phases complete, phase 9 pla
 | 6. Position Management | v1.1 | 4/4 | Complete |
 | 7. Public Deployment | v1.2 | 2/2 | Complete |
 | 8. Keeper Monitoring | v1.2 | 3/3 | Complete |
-| 9. UI Polish & Tech Debt | v1.2 | 1/2 | In progress |
+| 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete |
+| Phase 09 P01 | 4min | 2 tasks | 4 files |
 | Phase 09 P02 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
@@ -78,9 +79,11 @@ None.
 - [Phase 08-keeper-monitoring]: order-execution-keeper Dockerfile follows same multi-stage pattern as keeper-service (base -> deps -> build -> production)
 - [Phase 09]: pendingImpactAmount documented rather than removed — used in real calculations, 0n default is correct when contract lacks the field
 - [Phase 09]: Keeper optimization: order-keeper 10s scan, price-keeper 30s scan — recommend 5s/15s for demo latency
+- [Phase 09]: EmptyTableContent spinner via Tailwind animate-spin — consistent across positions, orders, and claims tables
+- [Phase 09]: Base Sepolia explorer URL fixed from basescan.org to sepolia.basescan.org — affected all explorer links globally
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 09-02-PLAN.md — Tech debt resolution (pendingImpactAmount, tsc, tests, keeper efficiency)
-Next: Phase 9 plan 1 (UI polish) if not yet complete
+Stopped at: Completed 09-01-PLAN.md — UI polish (loading spinner, explorer URL, BaseScan toast links)
+Next: All phases complete. v1.2 Demo-Ready Deployment milestone finished.
