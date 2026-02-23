@@ -94,11 +94,12 @@ Plans:
   1. A GET request to the keeper health endpoint returns status 200 with service state (up/down, last execution time)
   2. Keeper logs include structured fields (timestamp, level, service, event) readable in DO log viewer
   3. An alert fires within 5 minutes of a keeper process going down or stopping execution
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: Health check endpoints and structured logging for both keeper services
-- [ ] 08-02: Uptime alerting and execution monitoring
+- [ ] 08-01-PLAN.md -- Pino structured logging + real health endpoint for order-execution-keeper-service
+- [ ] 08-02-PLAN.md -- Pino structured logging + real health endpoint for keeper-service
+- [ ] 08-03-PLAN.md -- Dockerfile for order-keeper + BetterStack uptime monitoring setup
 
 #### Phase 9: UI Polish & Tech Debt
 **Goal**: The UI is demo-ready for investors and the codebase has no unresolved workarounds blocking future development
@@ -126,6 +127,6 @@ Plans:
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 6. Position Management | v1.1 | 4/4 | Complete | 2026-02-22 |
-| 7. Public Deployment | 2/2 | Complete   | 2026-02-23 | - |
-| 8. Keeper Monitoring | v1.2 | 0/2 | Not started | - |
+| 7. Public Deployment | v1.2 | 2/2 | Complete | 2026-02-23 |
+| 8. Keeper Monitoring | v1.2 | 0/3 | Not started | - |
 | 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started | - |
