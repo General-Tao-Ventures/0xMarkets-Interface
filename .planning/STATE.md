@@ -9,9 +9,9 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 8 of 9 in progress (Keeper Monitoring — plan 1/2 complete)
-Status: Phase 8 plan 1 complete — pino logging and real /health endpoint added to order-execution-keeper-service
-Last activity: 2026-02-23 — Phase 8 plan 1 complete
+Phase: 8 of 9 in progress (Keeper Monitoring — plan 2/2 complete)
+Status: Phase 8 plan 2 complete — pino logging and real /health endpoint added to keeper-service
+Last activity: 2026-02-23 — Phase 8 plan 2 complete
 
 Progress: [████████░░] 78% (7/9 phases complete, phase 8 in progress)
 
@@ -36,7 +36,7 @@ Progress: [████████░░] 78% (7/9 phases complete, phase 8 in 
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete |
 | 6. Position Management | v1.1 | 4/4 | Complete |
 | 7. Public Deployment | v1.2 | 2/2 | Complete |
-| 8. Keeper Monitoring | v1.2 | 1/2 | In Progress |
+| 8. Keeper Monitoring | v1.2 | 2/2 | Complete |
 | 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started |
 
 ## Accumulated Context
@@ -69,9 +69,12 @@ None.
 - [Phase 08]: pino child loggers with { module: filename } used per-file for log context without string prefixes
 - [Phase 08]: recordScanCycle() is the primary liveness signal — called after every scan cycle even when idle, so a healthy but idle keeper reports healthy
 - [Phase 08]: /health returns 503 when lastExecutionTime is null or more than 2 minutes old
+- [Phase 08-keeper-monitoring]: pino logger singleton in utils/logger.ts with child({ module }) pattern per file
+- [Phase 08-keeper-monitoring]: GET /health returns 503 on startup until first scan cycle completes (lastScanTime null = unhealthy)
+- [Phase 08-keeper-monitoring]: healthState is a plain mutable singleton object (no class) to avoid circular imports
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 08-01-PLAN.md — pino logging + real /health endpoint in order-execution-keeper-service
-Next: Phase 8 plan 2 (keeper monitoring — alert/notification system or similar)
+Stopped at: Completed 08-02-PLAN.md — pino logging + real /health endpoint in keeper-service
+Next: Phase 9 (UI Polish & Tech Debt)

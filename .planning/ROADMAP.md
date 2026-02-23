@@ -128,5 +128,5 @@ Plans:
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 6. Position Management | v1.1 | 4/4 | Complete | 2026-02-22 |
 | 7. Public Deployment | v1.2 | 2/2 | Complete | 2026-02-23 |
-| 8. Keeper Monitoring | 1/3 | In Progress|  | - |
+| 8. Keeper Monitoring | 2/3 | In Progress|  | - |
 | 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started | - |
