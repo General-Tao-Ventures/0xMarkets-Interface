@@ -5,7 +5,6 @@ import {
   AnyChainId,
   FALLBACK_PROVIDERS,
   getAlchemyBaseMainnetWsUrl,
-  getAlchemyBaseSepoliaWsUrl,
   getExpressRpcUrl,
   getFallbackRpcUrl,
   SOURCE_BASE_MAINNET,
@@ -47,11 +46,9 @@ export function getWsProvider(chainId: AnyChainId): WebSocketProvider | JsonRpcP
   }
 
   if (chainId === BASE_SEPOLIA) {
-    return new ethers.WebSocketProvider(
-      getAlchemyBaseSepoliaWsUrl(getIsLargeAccount() ? "largeAccount" : "fallback"),
-      network,
-      { staticNetwork: network }
-    );
+    return new ethers.WebSocketProvider("wss://base-sepolia-rpc.publicnode.com", network, {
+      staticNetwork: network,
+    });
   }
 
   if (chainId === LOCALHOST) {
