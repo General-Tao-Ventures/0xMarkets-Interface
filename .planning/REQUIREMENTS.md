@@ -15,13 +15,13 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 
 ### Execution Pipeline
 
-- [ ] **EXEC-01**: All keeper transactions flow through a serialized execution queue that prevents nonce collisions
+- [x] **EXEC-01**: All keeper transactions flow through a serialized execution queue that prevents nonce collisions
 - [ ] **EXEC-02**: Scanner passes operation data directly to executor without redundant on-chain re-reads
 - [ ] **EXEC-03**: Oracle prices are pre-cached from Pyth Lazer WebSocket stream and used directly in execution
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Both keeper services use WebSocket RPC transport for Base Sepolia event subscriptions
+- [x] **INFRA-01**: Both keeper services use WebSocket RPC transport for Base Sepolia event subscriptions
 - [ ] **INFRA-02**: Health endpoints use heartbeat-based liveness model compatible with event-driven architecture
 - [ ] **INFRA-03**: Health endpoint reports execution latency percentiles (p50, p95) for monitoring
 
@@ -50,10 +50,10 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 | DETECT-01 | Phase 10 | Pending |
 | DETECT-02 | Phase 10 | Pending |
 | DETECT-03 | Phase 10 | Pending |
-| EXEC-01 | Phase 10 | Pending |
+| EXEC-01 | Phase 10 | Complete |
 | EXEC-02 | Phase 11 | Pending |
 | EXEC-03 | Phase 11 | Pending |
-| INFRA-01 | Phase 10 | Pending |
+| INFRA-01 | Phase 10 | Complete |
 | INFRA-02 | Phase 12 | Pending |
 | INFRA-03 | Phase 12 | Pending |
 
