@@ -2,53 +2,45 @@
 
 ## What This Is
 
-A perpetual futures trading interface on Base Sepolia. Users can provide liquidity (Buy/Sell GM), trade leveraged long/short positions across 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY), execute token swaps, and manage positions with limit orders, stop-loss, and take-profit. Backed by an order-execution-keeper that detects on-chain requests and executes them.
+A perpetual futures trading interface on Base Sepolia. Users can provide liquidity (Buy/Sell GM), trade leveraged long/short positions across 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY), and manage positions with limit orders, stop-loss, and take-profit. Backed by an order-execution-keeper that detects on-chain requests and executes them.
 
 ## Core Value
 
 A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
 
-## Current Milestone: v1.1 Full Trading Experience
+## Current State
 
-**Goal:** Enable the full trading loop — open positions, manage orders, execute swaps, and withdraw liquidity across all 6 markets.
+**Shipped:** v1.1 Full Trading Experience (2026-02-22)
+**Previous:** v1.0 Fix Buy GM Flow (2026-02-21)
 
-**Target features:**
-- Fix Division by zero crash on trade page (market config values likely zero)
-- Long/short positions on all 6 markets
-- Token swaps using pool liquidity
-- Order types: market, limit, stop-loss, take-profit
-- Sell GM (withdraw liquidity from pools)
-- End-to-end order execution via existing keeper infrastructure
+The full trading loop works end-to-end on Base Sepolia: deposit liquidity, open long/short positions, close positions, place limit orders, set stop-loss/take-profit, withdraw liquidity. All 6 markets configured and verified by human testing.
 
 ## Requirements
 
 ### Validated
 
-<!-- Shipped and confirmed valuable. -->
-
 - ✓ Interface submits createDeposit transaction successfully — existing
 - ✓ Keeper detects new deposit requests via event scanning — existing
-- ✓ Keeper pushes Pyth Lazer prices on-chain before execution — existing (fixed in previous sessions)
-- ✓ Keeper includes market index token (WETH) in oracle params — existing (fixed in previous sessions)
-- ✓ Toast notifications for deposit completion/failure — existing
-- ✓ Pyth Lazer WebSocket initialization with clientReady pattern — existing (fixed in previous sessions)
-- ✓ Keeper executes deposits end-to-end (createDeposit → executeDeposit → GM tokens received) — v1.0
-- ✓ Expired deposits detected and auto-cancelled with user-friendly messaging — v1.0
-- ✓ Retry logic for transient errors (nonce issues, gas estimation failures) — v1.0
-- ✓ UI surfaces clear deposit status (pending → executing → complete/failed) — v1.0
-- ✓ Error messages are actionable — user knows what happened and what to do next — v1.0
+- ✓ Keeper pushes Pyth Lazer prices on-chain before execution — v1.0
+- ✓ Keeper includes market index token (WETH) in oracle params — v1.0
+- ✓ Keeper executes deposits end-to-end — v1.0
+- ✓ Expired deposits detected and auto-cancelled — v1.0
+- ✓ Retry logic for transient errors — v1.0
+- ✓ UI surfaces clear deposit status — v1.0
+- ✓ Error messages are actionable — v1.0
+- ✓ Trade page loads without crashing — v1.1
+- ✓ All 6 markets fully configured for trading — v1.1
+- ✓ User can open long/short positions on all 6 markets — v1.1
+- ✓ User can close positions and receive collateral back — v1.1
+- ✓ User can place limit orders, stop-loss, and take-profit — v1.1
+- ✓ User can withdraw liquidity (Sell GM) from pools — v1.1
+- ✓ Pool stats display utilization, fees, and PnL — v1.1
 
 ### Active
 
-<!-- Current scope. Building toward these. -->
+<!-- Current scope for next milestone -->
 
-- [ ] Trade page loads without crashing (fix Division by zero in validation)
-- [ ] User can open long/short positions on all 6 markets
-- [ ] User can close positions and receive collateral back
-- [ ] User can place limit orders, stop-loss, and take-profit orders
-- [ ] User can execute token swaps
-- [ ] User can withdraw liquidity (Sell GM) from pools
-- [ ] On-chain market configuration supports all trading operations
+(None yet — define in next milestone)
 
 ### Out of Scope
 
@@ -57,46 +49,49 @@ A user can open and close leveraged trading positions with clear feedback, relia
 - Advanced analytics or charting
 - Social/copy trading features
 - Multi-chain support beyond Base Sepolia
+- Token swaps (SWAP-01) — deferred from v1.1, user prioritized trading
 
 ## Context
 
 - **Chain:** Base Sepolia (84532)
-- **Shipped:** v1.0 Fix Buy GM Flow (2026-02-21)
+- **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22)
+- **Codebase:** ~43 files modified in v1.1, +3,428 lines
 - **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222), managed via Docker Compose at `/opt/0xmarkets/`
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
 - **Oracle mode:** Pyth Lazer — binary WebSocket price feeds, prices stored on-chain via PythLazerFeedProvider
 - **Key contract addresses:**
   - DataStore: `0xBaD049d5FedE7Bd9022F7E750B982349fE17e83E`
-  - PythLazerFeedProvider v3: `0x2F00A6200853B093459BCAAee1De6648D9d672fc`
+  - PythLazerFeedProvider v4: `0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05`
   - DepositHandler: `0x9388B07f807eB870aD36d350d80DC0c214a7f04f`
+  - OrderHandler: `0x6d299Cdf1C710ad87E8D38f50c14D95D7ed67dE1`
   - Reader: `0xb53122a72ceA22F71Cf75dc70A2Ed2526246253c`
   - Keeper wallet: `0x48Cb0d738C9B3F44F60f7338F788fa093FD25828`
 - **Known issues:**
-  - "Dropping duplicate message" WebSocket spam in keeper logs (cosmetic, doesn't affect execution)
-  - Single keeper wallet means nonce management is critical for concurrent deposits
+  - Cloud keepers need ABI + config updates to match local fixes from v1.1 verification
+  - 17 pre-existing failing SDK test files (unrelated to v1.1)
+  - pendingImpactAmount defaulted to 0n (contract struct mismatch from GMX fork)
+  - REQUEST_EXPIRATION_TIME set to 3600s for testnet
 
 ## Constraints
 
 - **Deployment:** Changes to keeper must be deployed to DO server via SSH and Docker rebuild
 - **Oracle freshness:** MAX_ORACLE_PRICE_AGE is 300 seconds — keeper must push prices and execute within this window
-- **Deposit expiry:** Deposits have a max lifetime on-chain; keeper must execute before expiry
 - **Nonce management:** Single keeper wallet means sequential transaction ordering matters
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Pyth Lazer over Pyth Classic | Lower latency price feeds for faster execution | ✓ Good — 13s execution time |
-| Single keeper wallet | Simpler architecture for testnet | ✓ Good — sufficient for testnet |
-| Docker Compose deployment | Simple deployment model for single server | ✓ Good — rsync+rebuild workflow works |
-| Ghost deposits → CANCELLED not FAILED | EmptyDeposit() means zeroed on-chain, not execution failure | ✓ Good — prevents retry loops |
-| buildOracleParams throws on empty tokens | Silent empty params caused mysterious reverts | ✓ Good — errors surface at right level |
-| ETH/USD market: mUSDC as both long+short token | WETH is only indexToken for price, mUSDC is deposit token | ✓ Good — clarified token roles |
-| Unknown errors retried (not fail-fast) | Safer to assume retryable when error is unclassified | ✓ Good — covers edge cases |
-| encodeAbiParameters for CONTROLLER role hash | Must match Solidity abi.encode padding (not encodePacked) | ✓ Good — hash matches on-chain |
-| Manual CORS middleware (not cors package) | Testnet only, minimal footprint | ✓ Good — simple and sufficient |
-| Elapsed time escalation: 15s→60s→120s | Progressive urgency: silent → counter → warning → cancel | ✓ Good — matches UX expectations |
+| Pyth Lazer over Pyth Classic | Lower latency price feeds | ✓ Good — 13s execution |
+| Single keeper wallet | Simpler for testnet | ✓ Good — sufficient |
+| Docker Compose deployment | Simple single-server model | ✓ Good |
+| Ghost deposits → CANCELLED not FAILED | Zeroed on-chain = not execution failure | ✓ Good |
+| Zero divisor returns 0n with console.warn | Page loads while signaling misconfiguration | ✓ Good |
+| Express loading state doesn't block buttons | Submit awaits, falls back to direct wallet | ✓ Good |
+| Limit price shortcuts use BigInt math | Avoid float precision errors | ✓ Good |
+| SWAP-01 deferred | User prioritized trading over swaps | ✓ Good — focused scope |
+| pendingImpactAmount ?? 0n | Contract struct doesn't have this field | ⚠️ Revisit — may need proper removal |
 
 ---
-*Last updated: 2026-02-21 after v1.1 milestone started*
+*Last updated: 2026-02-22 after v1.1 milestone*

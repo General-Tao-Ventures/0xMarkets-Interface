@@ -2,58 +2,48 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-21)
+See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** User can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
-**Current focus:** v1.1 Full Trading Experience — Phase 6: Position Management
+**Current focus:** Next milestone TBD
 
 ## Current Position
 
-Phase: 6 of 6 (Position Management) — IN PROGRESS
-Plan: 3/4 complete
-Status: 06-03 complete — limit order + SL/TP price shortcut buttons added; core order infrastructure verified functional
-Last activity: 2026-02-21 — 06-03 complete
+Milestone: v1.1 Full Trading Experience — SHIPPED 2026-02-22
+Next milestone: Not yet defined — run `/gsd:new-milestone` to start
 
-Progress: [█████████░] ~91% (v1.0 complete, Phase 4 complete, Phase 5 complete, Phase 6 in progress)
+Progress: [██████████] 100% (v1.0 complete, v1.1 complete)
 
 ## Performance Metrics
 
 **Velocity (v1.0):**
-- Total plans completed: 7
-- v1.0 phases: 3, all complete
+- Total plans completed: 6
+- Phases: 3, all complete
 
-**By Phase (v1.0):**
+**Velocity (v1.1):**
+- Total plans completed: 8
+- Phases: 3, all complete
 
-| Phase | Plans | Status |
-|-------|-------|--------|
-| 1. Keeper Oracle | 2/2 | Complete |
-| 2. Deposit Execution | 2/2 | Complete |
-| 3. Deposit UX | 2/2 | Complete |
+**By Phase:**
 
-**By Phase (v1.1):**
-
-| Phase | Plans | Status |
-|-------|-------|--------|
-| 4. Stable Foundation | 2/2 | Complete |
-| 5. Liquidity & Swaps | 2/2 | Complete |
-| 6. Position Management | 2/4 | In Progress |
-
-*Updated after each plan completion*
-
-**Execution Metrics (v1.1):**
-
-| Phase | Duration (min) | Tasks | Files |
-|-------|---------------|-------|-------|
-| Phase 06-position-management P02 | 12 | 1 | 1 |
-| Phase 06-position-management P03 | 7 | 2 tasks | 3 files |
+| Phase | Milestone | Plans | Status |
+|-------|-----------|-------|--------|
+| 1. Keeper Oracle | v1.0 | 2/2 | Complete |
+| 2. Deposit Execution | v1.0 | 2/2 | Complete |
+| 3. Deposit UX | v1.0 | 2/2 | Complete |
+| 4. Stable Foundation | v1.1 | 2/2 | Complete |
+| 5. Liquidity & Swaps | v1.1 | 2/2 | Complete |
+| 6. Position Management | v1.1 | 4/4 | Complete |
 
 ## Accumulated Context
 
 ### Known Issues
 
-- Single keeper wallet nonce management — critical for concurrent operations (POS phase)
-- 17 pre-existing failing SDK test files (21 tests) — pre-existing, unrelated to Phase 4 changes (deferred)
-- Pre-existing TypeScript error in useOrders.ts (OrderInfoStructOutput export mismatch) — unrelated to current work
+- 17 pre-existing failing SDK test files (21 tests) — pre-existing, unrelated to v1.1
+- Pre-existing TypeScript error in useOrders.ts (OrderInfoStructOutput export mismatch)
+- pendingImpactAmount defaulted to 0n — contract struct mismatch, may need proper removal
+- Cloud keepers need ABI + config updates to match local fixes from v1.1 verification
+- REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
 
 ### Pending Todos
 
@@ -65,31 +55,10 @@ None currently.
 
 ## Session Continuity
 
-Last session: 2026-02-21
-Stopped at: Completed 06-03-PLAN.md — limit orders and SL/TP price shortcuts
-Next: Phase 6-04 (final position management features)
+Last session: 2026-02-22
+Stopped at: v1.1 milestone archived
+Next: `/gsd:new-milestone` to define next milestone
 
 ## Decisions
 
-- 04-01: Zero divisor returns 0n with console.warn (not throw) — allows page to load while signaling misconfiguration to devs
-- 04-01: minCollateralFactor === 0n shows "Market unavailable" in trade button — semantic fix at validation layer, bigMath guard is safety net
-- 04-01: WebSocket CLOSING state detected before listenerCount() call — query itself triggers spam, so exit early and reconnect silently
-- 04-01: Keeper discards batch_report data — testnet metrics have no operational value yet
-- 04-02: Crypto markets (WETH, WBTC) get 1M USDC pool cap + 500K USD OI limits; baseMarketConfig defaults inherited at deploy time
-- 04-02: Synthetic markets (EUR, GBP, JPY, GOLD) spread syntheticMarketConfig + explicit capacity limits
-- 04-02: GOLD gets 750K pool / 375K OI (higher than 500K/250K forex) — more popular commodity asset
-- 04-02: Deploy command confirmed: `npx hardhat update-market-config --network baseSepolia`
-- 05-01: operation=Withdrawal query param drives PoolsDetailsContext — no context changes needed, useEffect already parses searchParams
-- 05-01: useDepositElapsed called twice (deposit + withdrawal) — hook is generic, takes createdAt: number | undefined
-- 05-01: withdrawalElapsedSeconds thresholds match deposit: 15s/60s/120s for progressive disclosure
-- 05-02: Utilization = (longInterestUsd + shortInterestUsd) / poolValueMax — uses USD values already on MarketInfo
-- 05-02: GLV markets show '—' for utilization (no direct interest fields, isGlvInfo check guards)
-- 05-02: My Pools filter applied post-sorting in GmList to keep useFilterSortPools unmodified
-- 05-02: showPnl boolean prop on GmListItem (not activeTab) — cleaner interface
-- 06-01: Express loading state does not block trade button — button stays enabled; expressParamsPromise awaited on submit, falls back to direct wallet txn if express unavailable
-- 06-01: Elapsed time thresholds for order execution notification: <15s no time, 15-59s seconds, 60-119s minutes+seconds with "longer than expected", 120s+ "still waiting"
-- 06-01: Local dev oracle keeper URL points to cloud IP (142.93.203.222:37017) not localhost
-- 06-02: isExpressLoading gate removed from PositionSeller Close button — button stays enabled while express params compute; submit awaits expressParamsPromise and falls back to direct wallet txn if express unavailable (mirrors 06-01 TradeBox fix)
-- [Phase 06-03]: Limit price shortcuts use BigInt basis-point math to avoid float precision errors
-- [Phase 06-03]: SL price shortcuts are [-10%, -5%], TP shortcuts are [+5%, +10%] from mark price
-- [Phase 06-03]: Limit shortcuts shown only in TradeMode.Limit; referencePrice obtained via selectTradeboxMarkPrice in SideOrderEntries
+Archived to `.planning/milestones/v1.1-ROADMAP.md` — see Key Decisions section.
