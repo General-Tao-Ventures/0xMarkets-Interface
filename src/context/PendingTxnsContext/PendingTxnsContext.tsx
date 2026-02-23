@@ -91,7 +91,7 @@ export function PendingTxnsContextProvider({ children }: { children: ReactNode }
               toastMsg = (
                 <div>
                   <Trans>
-                    Txn failed. <ExternalLink href={txUrl}>View</ExternalLink>.
+                    Txn failed. <ExternalLink href={txUrl}>View on BaseScan</ExternalLink>.
                   </Trans>
                   <br />
                 </div>
@@ -113,7 +113,7 @@ export function PendingTxnsContextProvider({ children }: { children: ReactNode }
                 <div className="StatusNotification-title">
                   {pendingTxn.message}{" "}
                   <ExternalLink href={txUrl}>
-                    <Trans>View</Trans>
+                    <Trans>View on BaseScan</Trans>
                   </ExternalLink>
                 </div>
                 {pendingTxn.messageDetails && (
