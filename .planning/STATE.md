@@ -5,14 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** User can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
-**Current focus:** Next milestone TBD
+**Current focus:** v1.2 Demo-Ready Deployment — defining requirements
 
 ## Current Position
 
-Milestone: v1.1 Full Trading Experience — SHIPPED 2026-02-22
-Next milestone: Not yet defined — run `/gsd:new-milestone` to start
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-22 — Milestone v1.2 started
 
-Progress: [██████████] 100% (v1.0 complete, v1.1 complete)
+Progress: [░░░░░░░░░░] 0% (v1.2 requirements phase)
 
 ## Performance Metrics
 
@@ -56,8 +58,8 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: v1.1 milestone archived
-Next: `/gsd:new-milestone` to define next milestone
+Stopped at: v1.2 milestone started, defining requirements
+Next: Complete requirements → roadmap → `/gsd:plan-phase 7`
 
 ## Decisions
 

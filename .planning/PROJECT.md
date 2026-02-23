@@ -8,12 +8,13 @@ A perpetual futures trading interface on Base Sepolia. Users can provide liquidi
 
 A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
 
-## Current State
+## Current Milestone: v1.2 Demo-Ready Deployment
 
-**Shipped:** v1.1 Full Trading Experience (2026-02-22)
-**Previous:** v1.0 Fix Buy GM Flow (2026-02-21)
+**Goal:** Make 0xMarkets accessible via public URL with reliable cloud infrastructure and professional UI — demo-ready for investors/partners.
 
-The full trading loop works end-to-end on Base Sepolia: deposit liquidity, open long/short positions, close positions, place limit orders, set stop-loss/take-profit, withdraw liquidity. All 6 markets configured and verified by human testing.
+**Shipped:** v1.1 Full Trading Experience (2026-02-22), v1.0 Fix Buy GM Flow (2026-02-21)
+
+The full trading loop works end-to-end on Base Sepolia but currently requires running keepers locally. This milestone makes everything work from a public Vercel URL with cloud keepers, adds monitoring, and polishes the UI.
 
 ## Requirements
 
@@ -38,9 +39,13 @@ The full trading loop works end-to-end on Base Sepolia: deposit liquidity, open 
 
 ### Active
 
-<!-- Current scope for next milestone -->
+<!-- Current scope for v1.2 -->
 
-(None yet — define in next milestone)
+- [ ] Frontend deployed to Vercel — anyone with URL can access the app
+- [ ] Cloud keepers synced with local v1.1 fixes — full loop works without running locally
+- [ ] Keeper health monitoring — health checks, logging, alerting for keeper uptime
+- [ ] UI/UX polish — professional enough to demo to investors/partners
+- [ ] Tech debt cleanup — failing tests, workarounds, code quality
 
 ### Out of Scope
 
@@ -94,4 +99,4 @@ The full trading loop works end-to-end on Base Sepolia: deposit liquidity, open 
 | pendingImpactAmount ?? 0n | Contract struct doesn't have this field | ⚠️ Revisit — may need proper removal |
 
 ---
-*Last updated: 2026-02-22 after v1.1 milestone*
+*Last updated: 2026-02-22 after starting v1.2 milestone*
