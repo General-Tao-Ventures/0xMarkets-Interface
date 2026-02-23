@@ -61,5 +61,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: v1.2 roadmap created (phases 7-9), ready to plan phase 7
+Stopped at: Phase 7 context gathered
+Resume file: .planning/phases/07-public-deployment/07-CONTEXT.md
 Next: `/gsd:plan-phase 7`
