@@ -2,19 +2,22 @@
 
 ## What This Is
 
-A perpetual futures trading interface on Base Sepolia. Users can provide liquidity (Buy/Sell GM), trade leveraged long/short positions across 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY), and manage positions with limit orders, stop-loss, and take-profit. Backed by an order-execution-keeper that detects on-chain requests and executes them.
+A perpetual futures trading interface on Base Sepolia, deployed at app.0xmarkets.io. Users can provide liquidity (Buy/Sell GM), trade leveraged long/short positions across 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY), and manage positions with limit orders, stop-loss, and take-profit. Backed by cloud-hosted keepers with structured logging, health monitoring, and uptime alerting.
 
 ## Core Value
 
 A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
 
-## Current Milestone: v1.2 Demo-Ready Deployment
+## Current State
 
-**Goal:** Make 0xMarkets accessible via public URL with reliable cloud infrastructure and professional UI — demo-ready for investors/partners.
+**Shipped:** v1.2 Demo-Ready Deployment (2026-02-23)
 
-**Shipped:** v1.1 Full Trading Experience (2026-02-22), v1.0 Fix Buy GM Flow (2026-02-21)
+The full trading loop works end-to-end on Base Sepolia from a public Vercel URL. Cloud keepers on DigitalOcean execute deposits, withdrawals, and orders. Health endpoints and BetterStack uptime monitoring provide observability. UI is polished for investor demos.
 
-The full trading loop works end-to-end on Base Sepolia but currently requires running keepers locally. This milestone makes everything work from a public Vercel URL with cloud keepers, adds monitoring, and polishes the UI.
+**All prior milestones:**
+- v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
+- v1.1 Full Trading Experience (2026-02-22) — all 6 markets, positions, limit orders
+- v1.2 Demo-Ready Deployment (2026-02-23) — Vercel, monitoring, UI polish
 
 ## Requirements
 
@@ -36,53 +39,47 @@ The full trading loop works end-to-end on Base Sepolia but currently requires ru
 - ✓ User can place limit orders, stop-loss, and take-profit — v1.1
 - ✓ User can withdraw liquidity (Sell GM) from pools — v1.1
 - ✓ Pool stats display utilization, fees, and PnL — v1.1
+- ✓ Frontend deployed to Vercel — anyone with URL can access the app — v1.2
+- ✓ Cloud keepers synced with v1.1 fixes — full loop works without running locally — v1.2
+- ✓ Keeper health monitoring — health checks, logging, alerting — v1.2
+- ✓ UI/UX polish — professional enough to demo to investors — v1.2
+- ✓ Tech debt cleanup — failing tests, workarounds, code quality — v1.2
 
 ### Active
 
-<!-- Current scope for v1.2 -->
-
-- [ ] Frontend deployed to Vercel — anyone with URL can access the app
-- [ ] Cloud keepers synced with local v1.1 fixes — full loop works without running locally
-- [ ] Keeper health monitoring — health checks, logging, alerting for keeper uptime
-- [ ] UI/UX polish — professional enough to demo to investors/partners
-- [ ] Tech debt cleanup — failing tests, workarounds, code quality
+(No active requirements — define next milestone with `/gsd:new-milestone`)
 
 ### Out of Scope
 
-- New pool creation or market configuration UI
+- Token swaps (SWAP-01) — deferred from v1.1, user prioritized trading
+- New pool creation or market configuration UI — admin operation
 - Mobile-specific UI improvements
 - Advanced analytics or charting
 - Social/copy trading features
 - Multi-chain support beyond Base Sepolia
-- Token swaps (SWAP-01) — deferred from v1.1, user prioritized trading
+- Mainnet deployment — testnet-first
 
 ## Context
 
 - **Chain:** Base Sepolia (84532)
-- **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22)
-- **Codebase:** ~43 files modified in v1.1, +3,428 lines
-- **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222), managed directly via SSH and Docker Compose at `/opt/0xmarkets/`
+- **Deployed:** app.0xmarkets.io (Vercel)
+- **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22), v1.2 (2026-02-23)
+- **Codebase:** 9 phases, 21 plans, 3 milestones across 3 days
+- **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222) with pino JSON logging, real health endpoints, and BetterStack uptime monitoring
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
-- **Oracle mode:** Pyth Lazer — binary WebSocket price feeds, prices stored on-chain via PythLazerFeedProvider
-- **Key contract addresses:**
-  - DataStore: `0xBaD049d5FedE7Bd9022F7E750B982349fE17e83E`
-  - PythLazerFeedProvider v4: `0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05`
-  - DepositHandler: `0x9388B07f807eB870aD36d350d80DC0c214a7f04f`
-  - OrderHandler: `0x6d299Cdf1C710ad87E8D38f50c14D95D7ed67dE1`
-  - Reader: `0xb53122a72ceA22F71Cf75dc70A2Ed2526246253c`
-  - Keeper wallet: `0x48Cb0d738C9B3F44F60f7338F788fa093FD25828`
+- **Oracle mode:** Pyth Lazer — binary WebSocket price feeds
+- **Test suite:** 136 pass, 1 skipped (live RPC), 0 failures
 - **Known issues:**
-  - Cloud keepers need ABI + config updates to match local fixes from v1.1 verification
-  - 17 pre-existing failing SDK test files (unrelated to v1.1)
-  - pendingImpactAmount defaulted to 0n (contract struct mismatch from GMX fork)
-  - REQUEST_EXPIRATION_TIME set to 3600s for testnet
+  - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
+  - batch_report 404 from metrics (GMX analytics endpoint not implemented — cosmetic)
+  - pendingImpactAmount defaults to 0n (documented workaround — correct behavior)
 
 ## Constraints
 
-- **Deployment:** Changes to keeper must be deployed to DO server via SSH and Docker rebuild
-- **Oracle freshness:** MAX_ORACLE_PRICE_AGE is 300 seconds — keeper must push prices and execute within this window
-- **Nonce management:** Single keeper wallet means sequential transaction ordering matters
+- **Deployment:** Keeper changes deployed to DO server via SSH and Docker rebuild
+- **Oracle freshness:** MAX_ORACLE_PRICE_AGE is 300 seconds
+- **Nonce management:** Single keeper wallet means sequential transaction ordering
 
 ## Key Decisions
 
@@ -93,10 +90,13 @@ The full trading loop works end-to-end on Base Sepolia but currently requires ru
 | Docker Compose deployment | Simple single-server model | ✓ Good |
 | Ghost deposits → CANCELLED not FAILED | Zeroed on-chain = not execution failure | ✓ Good |
 | Zero divisor returns 0n with console.warn | Page loads while signaling misconfiguration | ✓ Good |
-| Express loading state doesn't block buttons | Submit awaits, falls back to direct wallet | ✓ Good |
-| Limit price shortcuts use BigInt math | Avoid float precision errors | ✓ Good |
 | SWAP-01 deferred | User prioritized trading over swaps | ✓ Good — focused scope |
-| pendingImpactAmount ?? 0n | Contract struct doesn't have this field | ⚠️ Revisit — may need proper removal |
+| pendingImpactAmount ?? 0n | Contract struct doesn't have this field, documented | ✓ Good — documented workaround |
+| Env-driven keeper proxies | Relative URLs work in both dev and prod | ✓ Good — zero-config dev |
+| Pino structured logging | JSON logs for observability and debugging | ✓ Good — replaced ~278 console calls |
+| BetterStack free tier for uptime | Pings health endpoints, email alerts on failure | ✓ Good — 5-min detection |
+| healthState mutable singleton | Avoids circular imports across scanner/executor/oracle | ✓ Good |
+| /health returns 503 until first scan | Prevents false-healthy reports on startup | ✓ Good |
 
 ---
-*Last updated: 2026-02-22 after starting v1.2 milestone*
+*Last updated: 2026-02-23 after v1.2 milestone*
