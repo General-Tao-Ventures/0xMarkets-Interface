@@ -40,7 +40,7 @@
 
 **Milestone Goal:** All keeper-executed operations (deposits, withdrawals, orders) complete in under 10 seconds, consistently.
 
-- [ ] **Phase 10: Event-Driven Detection** - WebSocket event listeners with execution queue and polling fallback
+- [x] **Phase 10: Event-Driven Detection** - WebSocket event listeners with execution queue and polling fallback (completed 2026-02-23)
 - [ ] **Phase 11: Execution Pipeline Optimization** - Oracle pre-caching and redundant read elimination
 - [ ] **Phase 12: Observability & Tuning** - Heartbeat health model and latency metrics
 
@@ -104,6 +104,6 @@ Phases execute in numeric order: 10 → 11 → 12
 | 7. Public Deployment | v1.2 | 2/2 | Complete | 2026-02-23 |
 | 8. Keeper Monitoring | v1.2 | 3/3 | Complete | 2026-02-23 |
 | 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete | 2026-02-23 |
-| 10. Event-Driven Detection | 1/2 | In Progress|  | - |
+| 10. Event-Driven Detection | 2/2 | Complete   | 2026-02-23 | - |
 | 11. Execution Pipeline Optimization | v1.3 | 0/? | Not started | - |
 | 12. Observability & Tuning | v1.3 | 0/? | Not started | - |

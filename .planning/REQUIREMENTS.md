@@ -9,9 +9,9 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 
 ### Detection Speed
 
-- [ ] **DETECT-01**: Keeper detects new deposits/withdrawals/orders via WebSocket event listeners within 2 seconds of on-chain creation
-- [ ] **DETECT-02**: Polling fallback continues scanning at reduced interval when WebSocket connection drops
-- [ ] **DETECT-03**: Keeper backfills missed events on WebSocket reconnection using persisted block numbers
+- [x] **DETECT-01**: Keeper detects new deposits/withdrawals/orders via WebSocket event listeners within 2 seconds of on-chain creation
+- [x] **DETECT-02**: Polling fallback continues scanning at reduced interval when WebSocket connection drops
+- [x] **DETECT-03**: Keeper backfills missed events on WebSocket reconnection using persisted block numbers
 
 ### Execution Pipeline
 
@@ -47,9 +47,9 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DETECT-01 | Phase 10 | Pending |
-| DETECT-02 | Phase 10 | Pending |
-| DETECT-03 | Phase 10 | Pending |
+| DETECT-01 | Phase 10 | Complete |
+| DETECT-02 | Phase 10 | Complete |
+| DETECT-03 | Phase 10 | Complete |
 | EXEC-01 | Phase 10 | Complete |
 | EXEC-02 | Phase 11 | Pending |
 | EXEC-03 | Phase 11 | Pending |
