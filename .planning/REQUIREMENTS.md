@@ -10,7 +10,7 @@ Requirements for milestone v1.2 "Demo-Ready Deployment". Each maps to roadmap ph
 ### Deployment
 
 - [x] **DEPLOY-01**: Frontend deployed to Vercel and accessible via public URL
-- [ ] **DEPLOY-02**: Cloud keepers synced with all v1.1 verification fixes (PythLazer address, orderExecutor token fix, scanner retry, expiration config)
+- [x] **DEPLOY-02**: Cloud keepers synced with all v1.1 verification fixes (PythLazer address, orderExecutor token fix, scanner retry, expiration config)
 
 ### Monitoring
 
@@ -56,7 +56,7 @@ Deferred to future milestones.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DEPLOY-01 | Phase 7 | Complete (2026-02-23) |
-| DEPLOY-02 | Phase 7 | Pending |
+| DEPLOY-02 | Phase 7 | Complete |
 | MON-01 | Phase 8 | Pending |
 | MON-02 | Phase 8 | Pending |
 | MON-03 | Phase 8 | Pending |
