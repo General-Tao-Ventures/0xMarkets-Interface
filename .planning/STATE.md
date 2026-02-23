@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 8 of 9 complete (Keeper Monitoring — all 3 plans complete)
-Status: Phase 8 complete — pino logging, health endpoints, Dockerfile, and BetterStack monitoring for both keepers
-Last activity: 2026-02-23 — Phase 8 plan 3 complete
+Phase: 9 of 9 in progress (UI Polish & Tech Debt — plan 2 of 2 complete)
+Status: Phase 9 plan 2 complete — tech debt resolved (pendingImpactAmount documented, tsc clean, tests clean, keeper efficiency investigated)
+Last activity: 2026-02-23 — Phase 9 plan 2 complete
 
-Progress: [█████████░] 89% (8/9 phases complete, phase 9 not started)
+Progress: [█████████░] 95% (8/9 phases complete, phase 9 plan 2/2 done)
 
 ## Performance Metrics
 
@@ -37,15 +37,16 @@ Progress: [█████████░] 89% (8/9 phases complete, phase 9 not
 | 6. Position Management | v1.1 | 4/4 | Complete |
 | 7. Public Deployment | v1.2 | 2/2 | Complete |
 | 8. Keeper Monitoring | v1.2 | 3/3 | Complete |
-| 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started |
+| 9. UI Polish & Tech Debt | v1.2 | 1/2 | In progress |
+| Phase 09 P02 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
 ### Known Issues
 
-- 17 pre-existing failing SDK test files (21 tests) — pre-existing, unrelated to v1.1 (addressed in DEBT-02)
-- Pre-existing TypeScript error in useOrders.ts (OrderInfoStructOutput export mismatch) (DEBT-03)
-- pendingImpactAmount defaulted to 0n — contract struct mismatch, may need proper removal (DEBT-01)
+- ~~17 pre-existing failing SDK test files~~ RESOLVED: 136 pass, 1 skipped (live RPC test), 0 failures (DEBT-02)
+- ~~Pre-existing TypeScript error in useOrders.ts~~ RESOLVED: already fixed in prior phase, confirmed clean (DEBT-03)
+- ~~pendingImpactAmount defaulted to 0n~~ RESOLVED: documented with full usage trace — 0n is correct when contract lacks field (DEBT-01)
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
 - batch_report 404 from metrics — GMX analytics endpoint not implemented in our keeper (cosmetic)
 
@@ -75,9 +76,11 @@ None.
 - [Phase 08-keeper-monitoring]: BetterStack free tier for uptime monitoring — pings health endpoints every 1-2 minutes, email alerts on 2 consecutive failures
 - [Phase 08-keeper-monitoring]: Email alerts configured initially; Slack integration deferred
 - [Phase 08-keeper-monitoring]: order-execution-keeper Dockerfile follows same multi-stage pattern as keeper-service (base -> deps -> build -> production)
+- [Phase 09]: pendingImpactAmount documented rather than removed — used in real calculations, 0n default is correct when contract lacks the field
+- [Phase 09]: Keeper optimization: order-keeper 10s scan, price-keeper 30s scan — recommend 5s/15s for demo latency
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 08-03-PLAN.md — Dockerfile for order-keeper + BetterStack uptime monitoring
-Next: Phase 9 (UI Polish & Tech Debt)
+Stopped at: Completed 09-02-PLAN.md — Tech debt resolution (pendingImpactAmount, tsc, tests, keeper efficiency)
+Next: Phase 9 plan 1 (UI polish) if not yet complete

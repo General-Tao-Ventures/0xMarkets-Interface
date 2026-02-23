@@ -26,10 +26,10 @@ Requirements for milestone v1.2 "Demo-Ready Deployment". Each maps to roadmap ph
 
 ### Tech Debt
 
-- [ ] **DEBT-01**: pendingImpactAmount workaround properly resolved (remove field or fix mapping)
-- [ ] **DEBT-02**: Pre-existing SDK test failures addressed or documented with skip reasons
-- [ ] **DEBT-03**: useOrders.ts TypeScript error resolved
-- [ ] **DEBT-04**: Keeper execution efficiency investigated and optimized
+- [x] **DEBT-01**: pendingImpactAmount workaround properly resolved (remove field or fix mapping)
+- [x] **DEBT-02**: Pre-existing SDK test failures addressed or documented with skip reasons
+- [x] **DEBT-03**: useOrders.ts TypeScript error resolved
+- [x] **DEBT-04**: Keeper execution efficiency investigated and optimized
 
 ## Future Requirements
 
@@ -63,10 +63,10 @@ Deferred to future milestones.
 | UI-01 | Phase 9 | Pending |
 | UI-02 | Phase 9 | Pending |
 | UI-03 | Phase 9 | Pending |
-| DEBT-01 | Phase 9 | Pending |
-| DEBT-02 | Phase 9 | Pending |
-| DEBT-03 | Phase 9 | Pending |
-| DEBT-04 | Phase 9 | Pending |
+| DEBT-01 | Phase 9 | Complete |
+| DEBT-02 | Phase 9 | Complete |
+| DEBT-03 | Phase 9 | Complete |
+| DEBT-04 | Phase 9 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 12 total
