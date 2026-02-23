@@ -56,11 +56,11 @@
   3. After a keeper restart, any operations created during downtime are detected and executed (no missed events)
   4. Three concurrent deposits submitted in rapid succession all execute without nonce collision errors
   5. The keeper startup log confirms WebSocket transport is active (not silently falling back to HTTP polling)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
+- [ ] 10-01-PLAN.md — ExecutionQueue, WebSocket client, EventEmitter ABI, Prisma KeeperState model
+- [ ] 10-02-PLAN.md — EventListener with backfill, main loop rewire to queue-driven execution
 
 ### Phase 11: Execution Pipeline Optimization
 **Goal**: Oracle price overhead reduced from 2-8 seconds to near-zero by pre-caching Pyth Lazer prices and eliminating redundant chain reads
@@ -104,6 +104,6 @@ Phases execute in numeric order: 10 → 11 → 12
 | 7. Public Deployment | v1.2 | 2/2 | Complete | 2026-02-23 |
 | 8. Keeper Monitoring | v1.2 | 3/3 | Complete | 2026-02-23 |
 | 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete | 2026-02-23 |
-| 10. Event-Driven Detection | v1.3 | 0/? | Not started | - |
+| 10. Event-Driven Detection | v1.3 | 0/2 | Planned | - |
 | 11. Execution Pipeline Optimization | v1.3 | 0/? | Not started | - |
 | 12. Observability & Tuning | v1.3 | 0/? | Not started | - |
