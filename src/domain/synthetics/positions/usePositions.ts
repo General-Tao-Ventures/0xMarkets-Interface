@@ -112,6 +112,7 @@ export function usePositions(
           fundingFeeAmount: fees.funding.fundingFeeAmount,
           claimableLongTokenAmount: fees.funding.claimableLongTokenAmount,
           claimableShortTokenAmount: fees.funding.claimableShortTokenAmount,
+          // Not in 0xMarkets contract struct — see sdk/src/types/positions.ts for details
           pendingImpactAmount: numbers.pendingImpactAmount ?? 0n,
           pnl: basePnlUsd,
           positionFeeAmount: fees.positionFeeAmount,

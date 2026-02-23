@@ -183,6 +183,7 @@ export class Positions extends Module {
           collateralAmount: numbers.collateralAmount,
           increasedAtTime: numbers.increasedAtTime,
           decreasedAtTime: numbers.decreasedAtTime,
+          // Not in 0xMarkets contract struct — see sdk/src/types/positions.ts for details
           pendingImpactAmount: numbers.pendingImpactAmount ?? 0n,
           isLong: flags.isLong,
           pendingBorrowingFeesUsd: fees.borrowing.borrowingFeeUsd,

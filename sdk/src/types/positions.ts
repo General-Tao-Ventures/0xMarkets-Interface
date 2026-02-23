@@ -22,6 +22,21 @@ export type Position = {
   positionFeeAmount: bigint;
   traderDiscountAmount: bigint;
   uiFeeAmount: bigint;
+  /**
+   * pendingImpactAmount is not available on-chain in the 0xMarkets contract struct
+   * (removed from the GMX V2 fork). Always defaults to 0n at construction sites:
+   *   - sdk/src/modules/positions/positions.ts (numbers.pendingImpactAmount ?? 0n)
+   *   - src/domain/synthetics/positions/usePositions.ts (numbers.pendingImpactAmount ?? 0n)
+   *
+   * Used in calculations:
+   *   - sdk/src/utils/positions.ts getLiquidationPrice() — adds to priceImpactDeltaUsd
+   *   - sdk/src/utils/fees/priceImpact.ts getProportionalPendingImpactValues() — proportional scaling
+   *   - src/domain/synthetics/positions/utils.ts getPositionNetValue() — adds to priceImpactDeltaUsd
+   *   - sdk/src/utils/trade/decrease.ts, increase.ts — passed through to liquidation calc
+   *
+   * With 0n default, these calculations produce correct results (no impact adjustment).
+   * If the contract adds this field in the future, remove the ?? 0n fallbacks to use real values.
+   */
   pendingImpactAmount: bigint;
   /**
    * Not implemented in parsing
