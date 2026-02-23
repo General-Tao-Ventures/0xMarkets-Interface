@@ -80,11 +80,11 @@ Plans:
   1. Visiting the Vercel URL loads the app without errors for a first-time visitor
   2. A user can complete a full deposit-to-trade cycle with cloud keepers only (no local services)
   3. Cloud keepers detect and execute orders within the same timing as local verification (sub-60s)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: Deploy frontend to Vercel and validate public access
-- [ ] 07-02: Sync cloud keepers with v1.1 fixes and verify end-to-end execution
+- [ ] 07-01-PLAN.md -- Deploy frontend to Vercel with env-driven keeper proxy, keeper-down banner, and custom domain
+- [ ] 07-02-PLAN.md -- Sync cloud keepers with v1.1 fixes and verify end-to-end trading loop
 
 #### Phase 8: Keeper Monitoring
 **Goal**: Keeper health is observable and failures trigger alerts before they affect users
@@ -126,6 +126,6 @@ Plans:
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 6. Position Management | v1.1 | 4/4 | Complete | 2026-02-22 |
-| 7. Public Deployment | v1.2 | 0/2 | Not started | - |
+| 7. Public Deployment | v1.2 | 0/2 | Planning complete | - |
 | 8. Keeper Monitoring | v1.2 | 0/2 | Not started | - |
 | 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started | - |
