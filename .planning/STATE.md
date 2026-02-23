@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** User can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
-**Current focus:** v1.2 Demo-Ready Deployment — Phase 8: Keeper Monitoring
+**Current focus:** v1.2 Demo-Ready Deployment — Phase 9: UI Polish & Tech Debt
 
 ## Current Position
 
-Phase: 8 of 9 in progress (Keeper Monitoring — plan 2/2 complete)
-Status: Phase 8 plan 2 complete — pino logging and real /health endpoint added to keeper-service
-Last activity: 2026-02-23 — Phase 8 plan 2 complete
+Phase: 8 of 9 complete (Keeper Monitoring — all 3 plans complete)
+Status: Phase 8 complete — pino logging, health endpoints, Dockerfile, and BetterStack monitoring for both keepers
+Last activity: 2026-02-23 — Phase 8 plan 3 complete
 
-Progress: [████████░░] 78% (7/9 phases complete, phase 8 in progress)
+Progress: [█████████░] 89% (8/9 phases complete, phase 9 not started)
 
 ## Performance Metrics
 
@@ -36,7 +36,7 @@ Progress: [████████░░] 78% (7/9 phases complete, phase 8 in 
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete |
 | 6. Position Management | v1.1 | 4/4 | Complete |
 | 7. Public Deployment | v1.2 | 2/2 | Complete |
-| 8. Keeper Monitoring | v1.2 | 2/2 | Complete |
+| 8. Keeper Monitoring | v1.2 | 3/3 | Complete |
 | 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started |
 
 ## Accumulated Context
@@ -72,9 +72,12 @@ None.
 - [Phase 08-keeper-monitoring]: pino logger singleton in utils/logger.ts with child({ module }) pattern per file
 - [Phase 08-keeper-monitoring]: GET /health returns 503 on startup until first scan cycle completes (lastScanTime null = unhealthy)
 - [Phase 08-keeper-monitoring]: healthState is a plain mutable singleton object (no class) to avoid circular imports
+- [Phase 08-keeper-monitoring]: BetterStack free tier for uptime monitoring — pings health endpoints every 1-2 minutes, email alerts on 2 consecutive failures
+- [Phase 08-keeper-monitoring]: Email alerts configured initially; Slack integration deferred
+- [Phase 08-keeper-monitoring]: order-execution-keeper Dockerfile follows same multi-stage pattern as keeper-service (base -> deps -> build -> production)
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 08-02-PLAN.md — pino logging + real /health endpoint in keeper-service
+Stopped at: Completed 08-03-PLAN.md — Dockerfile for order-keeper + BetterStack uptime monitoring
 Next: Phase 9 (UI Polish & Tech Debt)
