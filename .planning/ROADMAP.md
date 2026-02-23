@@ -111,11 +111,11 @@ Plans:
   3. All 6 market pages render with consistent visual styling (same fonts, spacing, component sizes)
   4. The TypeScript build completes without errors (useOrders.ts error resolved)
   5. SDK test suite output is clean — all tests either pass or have explicit skip annotations with documented reasons
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: UI audit — identify and fix rough edges across all pages
-- [ ] 09-02: Tech debt resolution — pendingImpactAmount, TypeScript errors, SDK tests, keeper efficiency
+- [ ] 09-01-PLAN.md -- UI audit and polish: visual consistency, loading/empty states, wallet UX
+- [ ] 09-02-PLAN.md -- Tech debt: pendingImpactAmount, TypeScript errors, SDK tests, keeper efficiency
 
 ## Progress
 
