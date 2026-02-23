@@ -14,10 +14,12 @@ export const SOURCE_CHAINS: SourceChainId[] = ensureExhaustive<SourceChainId>({
   [BASE_SEPOLIA]: true,
 });
 
-export function isSettlementChain(chainId: number): chainId is SettlementChainId {
-  return SETTLEMENT_CHAINS.includes(chainId as SettlementChainId);
+export function isSettlementChain(_chainId: number): _chainId is SettlementChainId {
+  // GMX Account / multichain deposit features not used in 0xMarkets
+  return false;
 }
 
-export function isSourceChain(chainId: number | undefined): chainId is SourceChainId {
-  return SOURCE_CHAINS.includes(chainId as SourceChainId);
+export function isSourceChain(_chainId: number | undefined): _chainId is SourceChainId {
+  // GMX Account / multichain deposit features not used in 0xMarkets
+  return false;
 }

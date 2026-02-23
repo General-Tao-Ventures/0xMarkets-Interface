@@ -63,7 +63,15 @@ export default function TokenSelector(props: Props) {
     try {
       tokenInfo = getToken(props.chainId, props.tokenAddress);
     } catch (e) {
-      // ...ignore unsupported tokens
+      // Fall back to first available token if the address is stale/unknown
+      const fallback = props.tokens.find((t) => !t.isTempHidden);
+      if (fallback) {
+        try {
+          tokenInfo = getToken(props.chainId, fallback.address);
+        } catch (_) {
+          // ignore
+        }
+      }
     }
   }
 

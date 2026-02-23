@@ -112,7 +112,7 @@ export function usePositions(
           fundingFeeAmount: fees.funding.fundingFeeAmount,
           claimableLongTokenAmount: fees.funding.claimableLongTokenAmount,
           claimableShortTokenAmount: fees.funding.claimableShortTokenAmount,
-          pendingImpactAmount: numbers.pendingImpactAmount,
+          pendingImpactAmount: numbers.pendingImpactAmount ?? 0n,
           pnl: basePnlUsd,
           positionFeeAmount: fees.positionFeeAmount,
           traderDiscountAmount: fees.referral.traderDiscountAmount,

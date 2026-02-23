@@ -4,8 +4,6 @@ import { ChangeEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef } f
 import { useKey, useLatest, usePrevious } from "react-use";
 
 import { BASIS_POINTS_DIVISOR, USD_DECIMALS } from "config/factors";
-import { isSettlementChain } from "config/multichain";
-import { useOpenMultichainDepositModal } from "context/GmxAccountContext/useOpenMultichainDepositModal";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
 import { useTokensData } from "context/SyntheticsStateContext/hooks/globalsHooks";
 import { selectChartHeaderInfo } from "context/SyntheticsStateContext/selectors/chartSelectors";
@@ -91,7 +89,6 @@ import Tabs from "components/Tabs/Tabs";
 import ToggleSwitch from "components/ToggleSwitch/ToggleSwitch";
 import TokenIcon from "components/TokenIcon/TokenIcon";
 import TokenWithIcon from "components/TokenIcon/TokenWithIcon";
-import { MultichainTokenSelector } from "components/TokenSelector/MultichainTokenSelector";
 import TokenSelector from "components/TokenSelector/TokenSelector";
 import Tooltip from "components/Tooltip/Tooltip";
 import { ValueTransition } from "components/ValueTransition/ValueTransition";
@@ -101,7 +98,6 @@ import SettingsIcon from "img/ic_settings.svg?react";
 
 import { useIsCurtainOpen } from "./Curtain";
 import { ExpressTradingWarningCard } from "./ExpressTradingWarningCard";
-import { useMultichainTokensRequest } from "../GmxAccountModal/hooks";
 import { HighPriceImpactOrFeesWarningCard } from "../HighPriceImpactOrFeesWarningCard/HighPriceImpactOrFeesWarningCard";
 import TradeInfoIcon from "../TradeInfoIcon/TradeInfoIcon";
 import TwapRows from "../TwapRows/TwapRows";
@@ -138,7 +134,6 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
 
   const { swapTokens, infoTokens, sortedLongAndShortTokens, sortedAllMarkets } = availableTokenOptions;
   const tokensData = useTokensData();
-  const { tokenChainDataArray: multichainTokens } = useMultichainTokensRequest();
   const marketsInfoData = useSelector(selectMarketsInfoData);
   const tradeFlags = useSelector(selectTradeboxTradeFlags);
   const { isLong, isSwap, isIncrease, isPosition, isLimit, isTrigger, isMarket, isTwap } = tradeFlags;
@@ -150,7 +145,6 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
 
   const { shouldDisableValidationForTesting: shouldDisableValidation } = useSettings();
 
-  const onDepositTokenAddress = useOpenMultichainDepositModal();
 
   const nativeToken = getByKey(tokensData, NATIVE_TOKEN_ADDRESS);
 
@@ -669,38 +663,21 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
           onClickMax={showClickMax ? onMaxClick : undefined}
           qa="pay"
         >
-          {fromTokenAddress &&
-            (!isSettlementChain(chainId) ? (
-              <TokenSelector
-                label={t`Pay`}
-                chainId={chainId}
-                tokenAddress={fromTokenAddress}
-                onSelectToken={(token) => {
-                  handleSelectFromTokenAddress(token.address, false);
-                }}
-                tokens={swapTokens}
-                infoTokens={infoTokens}
-                showSymbolImage={true}
-                showTokenImgInDropdown={true}
-                missedCoinsPlace={MissedCoinsPlace.payToken}
-                extendedSortSequence={sortedLongAndShortTokens}
-                qa="collateral-selector"
-              />
-            ) : (
-              <MultichainTokenSelector
-                chainId={chainId}
-                srcChainId={srcChainId}
-                label={t`Pay`}
-                tokenAddress={fromTokenAddress}
-                isGmxAccount={isFromTokenGmxAccount}
-                onSelectTokenAddress={handleSelectFromTokenAddress}
-                extendedSortSequence={sortedLongAndShortTokens}
-                qa="collateral-selector"
-                tokensData={tokensData}
-                multichainTokens={multichainTokens}
-                onDepositTokenAddress={onDepositTokenAddress}
-              />
-            ))}
+          <TokenSelector
+            label={t`Pay`}
+            chainId={chainId}
+            tokenAddress={fromTokenAddress ?? swapTokens[0]?.address ?? ""}
+            onSelectToken={(token) => {
+              handleSelectFromTokenAddress(token.address, false);
+            }}
+            tokens={swapTokens}
+            infoTokens={infoTokens}
+            showSymbolImage={true}
+            showTokenImgInDropdown={true}
+            missedCoinsPlace={MissedCoinsPlace.payToken}
+            extendedSortSequence={sortedLongAndShortTokens}
+            qa="collateral-selector"
+          />
         </BuyInputSection>
 
         {isSwap && (

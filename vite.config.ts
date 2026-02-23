@@ -74,6 +74,15 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    server: {
+      proxy: {
+        "/api/keeper": {
+          target: "http://142.93.203.222:37017",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/keeper/, ""),
+        },
+      },
+    },
     test: {
       environment: "happy-dom",
       globalSetup: "./vitest.global-setup.js",

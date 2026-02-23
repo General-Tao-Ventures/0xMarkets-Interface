@@ -197,6 +197,19 @@ export function useTradeboxState(
         const saved = JSON.parse(raw) as StoredTradeOptions;
 
         if (saved.tokens.indexTokenAddress && availableIndexTokensAddresses.includes(saved.tokens.indexTokenAddress)) {
+          const market = availableTokensOptions.sortedAllMarkets?.find(
+            (m) => m.indexToken.address === saved.tokens.indexTokenAddress
+          );
+          // Reset fromTokenAddress if it's missing or stale (not in available swap tokens)
+          if (
+            !saved.tokens.fromTokenAddress ||
+            (availableSwapTokenAddresses.length > 0 &&
+              !availableSwapTokenAddresses.includes(saved.tokens.fromTokenAddress))
+          ) {
+            if (market) {
+              saved.tokens = { ...saved.tokens, fromTokenAddress: market.shortTokenAddress };
+            }
+          }
           setStoredOptionsOnChain(saved);
           setSyncedChainId(chainId);
           return;
@@ -226,6 +239,7 @@ export function useTradeboxState(
     },
     [
       availableIndexTokensAddresses,
+      availableSwapTokenAddresses,
       availableTokensOptions.sortedAllMarkets,
       chainId,
       enabled,
@@ -973,6 +987,12 @@ function fallbackPositionTokens({
   if (!isFallbackPayTokenValid && !isFallbackIndexTokenValid) {
     nextState = fallbackPayToken(prevState.tokens.fromTokenAddress);
     nextState = fallbackIndexTokenAndMarket(prevState.tokens.indexTokenAddress);
+  }
+
+  if (!nextState.tokens.fromTokenAddress && allowedPayTokens.length > 0) {
+    nextState = produce(nextState, (draft) => {
+      draft.tokens.fromTokenAddress = allowedPayTokens[0];
+    });
   }
 
   return nextState;

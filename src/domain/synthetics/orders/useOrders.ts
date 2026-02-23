@@ -20,7 +20,7 @@ import {
   isVisibleOrder,
 } from "sdk/utils/orders";
 import { decodeTwapUiFeeReceiver } from "sdk/utils/twap/uiFeeReceiver";
-import { ReaderUtils } from "typechain-types/SyntheticsReader";
+import { Order as OrderContract } from "typechain-types/SyntheticsReader";
 
 import type {
   MarketFilterLongShortDirection,
@@ -199,13 +199,13 @@ function parseResponse(res: MulticallResult<ReturnType<typeof buildUseOrdersMult
     count,
     orders: orders.map((order, i) => {
       const key = orderKeys[i];
-      const orderData = order.order as ReaderUtils.OrderInfoStructOutput["order"];
+      // getAccountOrders returns PropsStructOutput[] directly (not wrapped in OrderInfoStructOutput)
+      const orderData = order as OrderContract.PropsStructOutput;
 
       return {
         key,
         account: orderData.addresses.account as Address,
         receiver: orderData.addresses.receiver as Address,
-        // cancellationReceiver: orderData.addresses.cancellationReceiver as Address,
         callbackContract: orderData.addresses.callbackContract as Address,
         uiFeeReceiver: orderData.addresses.uiFeeReceiver as Address,
         marketAddress: orderData.addresses.market as Address,
@@ -226,7 +226,7 @@ function parseResponse(res: MulticallResult<ReturnType<typeof buildUseOrdersMult
         orderType: orderData.numbers.orderType as unknown as OrderType,
         decreasePositionSwapType: orderData.numbers.decreasePositionSwapType as unknown as DecreasePositionSwapType,
         autoCancel: orderData.flags.autoCancel as boolean,
-        data: orderData._dataList,
+        data: ((orderData as any)._dataList ?? []) as string[],
       } satisfies Order;
     }),
   };
