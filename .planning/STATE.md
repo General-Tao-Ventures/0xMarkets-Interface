@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 11 of 12 (Execution Pipeline Optimization)
-Plan: 1 of 2
-Status: Plan 11-01 complete, Plan 11-02 next
-Last activity: 2026-02-23 — Completed 11-01 (Background Oracle Updater)
+Plan: 2 of 2
+Status: Phase 11 complete, Phase 12 next
+Last activity: 2026-02-23 — Completed 11-02 (Scanner Data Passthrough)
 
-Progress: [████░░░░░░] 40% (v1.3)
+Progress: [█████░░░░░] 50% (v1.3)
 
 ## Performance Metrics
 
@@ -30,11 +30,12 @@ Progress: [████░░░░░░] 40% (v1.3)
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10 | v1.3 | 2/2 | Complete |
-| 11 | v1.3 | 1/2 | In progress |
+| 11 | v1.3 | 2/2 | Complete |
 | 12 | v1.3 | 0/? | Not started |
 | Phase 10 P01 | 3min | 2 tasks | 6 files |
 | Phase 10 P02 | 3min | 2 tasks | 3 files |
 | Phase 11 P01 | 3min | 2 tasks | 4 files |
+| Phase 11 P02 | 4min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -70,9 +71,12 @@ Archived with v1.2 milestone. See .planning/PROJECT.md for key decisions table.
 - Phase 11-01: 10s per-token background update interval balances freshness vs gas cost
 - Phase 11-01: Nonce coordination via disable/enable pattern around drainQueue execution (simplest approach)
 - Phase 11-01: 5s safety margin on MAX_ORACLE_PRICE_AGE for block propagation delay
+- Phase 11-02: Scanner attaches operation data per-item with try/catch so market read failure never blocks scan
+- Phase 11-02: Executors use type-narrowed optional parameter for safe pre-fetched data access
+- Phase 11-02: Event-sourced items carry no operationData -- executor falls back to chain reads (zero regression)
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 11-01-PLAN.md (Background Oracle Updater)
-Next: Execute 11-02-PLAN.md (Scanner Data Passthrough)
+Stopped at: Completed 11-02-PLAN.md (Scanner Data Passthrough)
+Next: Execute Phase 12

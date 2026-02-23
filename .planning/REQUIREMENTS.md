@@ -16,7 +16,7 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 ### Execution Pipeline
 
 - [x] **EXEC-01**: All keeper transactions flow through a serialized execution queue that prevents nonce collisions
-- [ ] **EXEC-02**: Scanner passes operation data directly to executor without redundant on-chain re-reads
+- [x] **EXEC-02**: Scanner passes operation data directly to executor without redundant on-chain re-reads
 - [x] **EXEC-03**: Oracle prices are pre-cached from Pyth Lazer WebSocket stream and used directly in execution
 
 ### Infrastructure
@@ -51,7 +51,7 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 | DETECT-02 | Phase 10 | Complete |
 | DETECT-03 | Phase 10 | Complete |
 | EXEC-01 | Phase 10 | Complete |
-| EXEC-02 | Phase 11 | Pending |
+| EXEC-02 | Phase 11 | Complete |
 | EXEC-03 | Phase 11 | Complete |
 | INFRA-01 | Phase 10 | Complete |
 | INFRA-02 | Phase 12 | Pending |
