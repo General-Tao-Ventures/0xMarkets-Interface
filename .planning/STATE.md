@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** User can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
-**Current focus:** v1.2 Demo-Ready Deployment — defining requirements
+**Current focus:** v1.2 Demo-Ready Deployment — Phase 7: Public Deployment
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 7 of 9 (Public Deployment)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-02-22 — Milestone v1.2 started
+Status: Ready to plan
+Last activity: 2026-02-22 — Roadmap created for v1.2 (phases 7-9)
 
-Progress: [░░░░░░░░░░] 0% (v1.2 requirements phase)
+Progress: [██████░░░░] 60% (6/9 phases complete across all milestones)
 
 ## Performance Metrics
 
@@ -36,15 +36,18 @@ Progress: [░░░░░░░░░░] 0% (v1.2 requirements phase)
 | 4. Stable Foundation | v1.1 | 2/2 | Complete |
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete |
 | 6. Position Management | v1.1 | 4/4 | Complete |
+| 7. Public Deployment | v1.2 | 0/2 | Not started |
+| 8. Keeper Monitoring | v1.2 | 0/2 | Not started |
+| 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started |
 
 ## Accumulated Context
 
 ### Known Issues
 
-- 17 pre-existing failing SDK test files (21 tests) — pre-existing, unrelated to v1.1
-- Pre-existing TypeScript error in useOrders.ts (OrderInfoStructOutput export mismatch)
-- pendingImpactAmount defaulted to 0n — contract struct mismatch, may need proper removal
-- Cloud keepers need ABI + config updates to match local fixes from v1.1 verification
+- 17 pre-existing failing SDK test files (21 tests) — pre-existing, unrelated to v1.1 (addressed in DEBT-02)
+- Pre-existing TypeScript error in useOrders.ts (OrderInfoStructOutput export mismatch) (DEBT-03)
+- pendingImpactAmount defaulted to 0n — contract struct mismatch, may need proper removal (DEBT-01)
+- Cloud keepers need ABI + config updates to match local fixes from v1.1 verification (DEPLOY-02)
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
 
 ### Pending Todos
@@ -58,9 +61,5 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: v1.2 milestone started, defining requirements
-Next: Complete requirements → roadmap → `/gsd:plan-phase 7`
-
-## Decisions
-
-Archived to `.planning/milestones/v1.1-ROADMAP.md` — see Key Decisions section.
+Stopped at: v1.2 roadmap created (phases 7-9), ready to plan phase 7
+Next: `/gsd:plan-phase 7`

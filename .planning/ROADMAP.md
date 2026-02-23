@@ -4,6 +4,7 @@
 
 - [x] **v1.0 Fix Buy GM Flow** - Phases 1-3 ([shipped 2026-02-21](milestones/v1.0-ROADMAP.md))
 - [x] **v1.1 Full Trading Experience** - Phases 4-6 ([shipped 2026-02-22](milestones/v1.1-ROADMAP.md))
+- [ ] **v1.2 Demo-Ready Deployment** - Phases 7-9 (in progress)
 
 ## Phases
 
@@ -67,6 +68,54 @@ Plans:
 
 </details>
 
+### v1.2 Demo-Ready Deployment (In Progress)
+
+**Milestone Goal:** 0xMarkets is accessible via a public Vercel URL with cloud keepers running, health monitoring, and a UI polished enough to demo to investors.
+
+#### Phase 7: Public Deployment
+**Goal**: Anyone with the URL can access and use the app end-to-end without running anything locally
+**Depends on**: Phase 6
+**Requirements**: DEPLOY-01, DEPLOY-02
+**Success Criteria** (what must be TRUE):
+  1. Visiting the Vercel URL loads the app without errors for a first-time visitor
+  2. A user can complete a full deposit-to-trade cycle with cloud keepers only (no local services)
+  3. Cloud keepers detect and execute orders within the same timing as local verification (sub-60s)
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01: Deploy frontend to Vercel and validate public access
+- [ ] 07-02: Sync cloud keepers with v1.1 fixes and verify end-to-end execution
+
+#### Phase 8: Keeper Monitoring
+**Goal**: Keeper health is observable and failures trigger alerts before they affect users
+**Depends on**: Phase 7
+**Requirements**: MON-01, MON-02, MON-03
+**Success Criteria** (what must be TRUE):
+  1. A GET request to the keeper health endpoint returns status 200 with service state (up/down, last execution time)
+  2. Keeper logs include structured fields (timestamp, level, service, event) readable in DO log viewer
+  3. An alert fires within 5 minutes of a keeper process going down or stopping execution
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01: Health check endpoints and structured logging for both keeper services
+- [ ] 08-02: Uptime alerting and execution monitoring
+
+#### Phase 9: UI Polish & Tech Debt
+**Goal**: The UI is demo-ready for investors and the codebase has no unresolved workarounds blocking future development
+**Depends on**: Phase 7
+**Requirements**: UI-01, UI-02, UI-03, DEBT-01, DEBT-02, DEBT-03, DEBT-04
+**Success Criteria** (what must be TRUE):
+  1. A first-time user can navigate from pools to trading to position management without encountering a confusing state, broken layout, or console error
+  2. Loading states, empty states, and error messages throughout the app look intentional (not placeholder)
+  3. All 6 market pages render with consistent visual styling (same fonts, spacing, component sizes)
+  4. The TypeScript build completes without errors (useOrders.ts error resolved)
+  5. SDK test suite output is clean — all tests either pass or have explicit skip annotations with documented reasons
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: UI audit — identify and fix rough edges across all pages
+- [ ] 09-02: Tech debt resolution — pendingImpactAmount, TypeScript errors, SDK tests, keeper efficiency
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -77,3 +126,6 @@ Plans:
 | 4. Stable Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete | 2026-02-21 |
 | 6. Position Management | v1.1 | 4/4 | Complete | 2026-02-22 |
+| 7. Public Deployment | v1.2 | 0/2 | Not started | - |
+| 8. Keeper Monitoring | v1.2 | 0/2 | Not started | - |
+| 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started | - |
