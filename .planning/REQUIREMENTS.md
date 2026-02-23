@@ -14,8 +14,8 @@ Requirements for milestone v1.2 "Demo-Ready Deployment". Each maps to roadmap ph
 
 ### Monitoring
 
-- [ ] **MON-01**: Keeper services expose health check endpoints
-- [ ] **MON-02**: Keeper logs structured for debugging (not just console.log)
+- [x] **MON-01**: Keeper services expose health check endpoints
+- [x] **MON-02**: Keeper logs structured for debugging (not just console.log)
 - [ ] **MON-03**: Alerting when keeper services go down or stop executing
 
 ### UI Polish
@@ -57,8 +57,8 @@ Deferred to future milestones.
 |-------------|-------|--------|
 | DEPLOY-01 | Phase 7 | Complete (2026-02-23) |
 | DEPLOY-02 | Phase 7 | Complete |
-| MON-01 | Phase 8 | Pending |
-| MON-02 | Phase 8 | Pending |
+| MON-01 | Phase 8 | Complete |
+| MON-02 | Phase 8 | Complete |
 | MON-03 | Phase 8 | Pending |
 | UI-01 | Phase 9 | Pending |
 | UI-02 | Phase 9 | Pending |

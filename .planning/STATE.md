@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 7 of 9 complete (Public Deployment)
-Status: Phase 7 verified — full trading loop works from public URL
-Last activity: 2026-02-23 — Phase 7 complete, app live at app.0xmarkets.io
+Phase: 8 of 9 in progress (Keeper Monitoring — plan 1/2 complete)
+Status: Phase 8 plan 1 complete — pino logging and real /health endpoint added to order-execution-keeper-service
+Last activity: 2026-02-23 — Phase 8 plan 1 complete
 
-Progress: [████████░░] 78% (7/9 phases complete)
+Progress: [████████░░] 78% (7/9 phases complete, phase 8 in progress)
 
 ## Performance Metrics
 
@@ -36,7 +36,7 @@ Progress: [████████░░] 78% (7/9 phases complete)
 | 5. Liquidity & Swaps | v1.1 | 2/2 | Complete |
 | 6. Position Management | v1.1 | 4/4 | Complete |
 | 7. Public Deployment | v1.2 | 2/2 | Complete |
-| 8. Keeper Monitoring | v1.2 | 0/2 | Not started |
+| 8. Keeper Monitoring | v1.2 | 1/2 | In Progress |
 | 9. UI Polish & Tech Debt | v1.2 | 0/2 | Not started |
 
 ## Accumulated Context
@@ -66,9 +66,12 @@ None.
 - Docker ports bound to 0.0.0.0 (not 127.0.0.1) on DO to allow external access from Vercel proxies
 - Base Sepolia WebSocket uses publicnode.com free WSS (Alchemy key was broken)
 - Vercel Deployment Protection disabled via dashboard for public access
+- [Phase 08]: pino child loggers with { module: filename } used per-file for log context without string prefixes
+- [Phase 08]: recordScanCycle() is the primary liveness signal — called after every scan cycle even when idle, so a healthy but idle keeper reports healthy
+- [Phase 08]: /health returns 503 when lastExecutionTime is null or more than 2 minutes old
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Phase 7 complete — app.0xmarkets.io live with full trading loop verified
-Next: Phase 8 (Keeper Monitoring) or Phase 9 (UI Polish & Tech Debt)
+Stopped at: Completed 08-01-PLAN.md — pino logging + real /health endpoint in order-execution-keeper-service
+Next: Phase 8 plan 2 (keeper monitoring — alert/notification system or similar)
