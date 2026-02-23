@@ -47,7 +47,15 @@ The full trading loop works end-to-end on Base Sepolia from a public Vercel URL.
 
 ### Active
 
-(No active requirements — define next milestone with `/gsd:new-milestone`)
+## Current Milestone: v1.3 Keeper Execution Speed
+
+**Goal:** All keeper-executed operations (deposits, withdrawals, orders) complete in under 10 seconds, consistently.
+
+**Target features:**
+- Event-driven operation detection (replace polling with on-chain event listeners)
+- Optimized scan intervals and execution pipeline
+- Consistent sub-10s latency across deposits, withdrawals, and orders
+- Both keeper-service and order-execution-keeper-service optimized
 
 ### Out of Scope
 
@@ -99,4 +107,4 @@ The full trading loop works end-to-end on Base Sepolia from a public Vercel URL.
 | /health returns 503 until first scan | Prevents false-healthy reports on startup | ✓ Good |
 
 ---
-*Last updated: 2026-02-23 after v1.2 milestone*
+*Last updated: 2026-02-23 after v1.3 milestone started*

@@ -9,11 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 
 ## Current Position
 
-Phase: All 9 phases complete across 3 milestones
-Status: v1.2 Demo-Ready Deployment shipped — app live at app.0xmarkets.io
-Last activity: 2026-02-23 — v1.2 milestone archived
-
-Progress: [██████████] 100% (3/3 milestones shipped)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-23 — Milestone v1.3 started
 
 ## Performance Metrics
 
@@ -65,5 +64,5 @@ Archived with v1.2 milestone. See .planning/PROJECT.md for key decisions table.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: v1.2 milestone archived
-Next: `/gsd:new-milestone` to start next development cycle
+Stopped at: v1.3 milestone requirements being defined
+Next: Complete requirements definition and roadmap creation
