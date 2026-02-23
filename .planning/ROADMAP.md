@@ -70,10 +70,11 @@ Plans:
   1. Keeper execution does not send a separate oracle price update transaction before each operation — prices are pre-cached or inlined
   2. The executor does not re-read operation data from the chain that the scanner already fetched (no redundant RPC calls visible in logs)
   3. End-to-end execution time from detection to confirmation is under 5 seconds for deposits, withdrawals, and orders
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 11-01-PLAN.md — Proactive background oracle price updates with conditional freshness check (EXEC-03)
+- [ ] 11-02-PLAN.md — Scanner-to-executor operation data passthrough via extended queue (EXEC-02)
 
 ### Phase 12: Observability & Tuning
 **Goal**: Health monitoring accurately reflects keeper liveness in an event-driven architecture, with execution latency percentiles for performance tracking
