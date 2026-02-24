@@ -5,14 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** All keeper-executed operations complete as fast as possible with proper oracle configuration
-**Current focus:** Defining requirements for v1.4
+**Current focus:** Phase 13 — Oracle Correctness
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 13 of 14 (Oracle Correctness)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-02-24 — Milestone v1.4 started
+Status: Ready to plan
+Last activity: 2026-02-24 — Roadmap created for v1.4
+
+Progress: [░░░░░░░░░░] 0% (v1.4)
 
 ## Performance Metrics
 
@@ -28,24 +30,22 @@ Last activity: 2026-02-24 — Milestone v1.4 started
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
+| 13-14 | v1.4 | 0/TBD | Not started |
 
 ## Accumulated Context
 
 ### Research Flags
 
-- Phase 11: RESOLVED — PythLazerFeedProvider.getOraclePrice() reads from storedPrices mapping; separate updatePriceOnChain() TX IS required but moved to proactive background loop.
-- Phase 10: viem `fallback([webSocket(), http()])` does NOT produce WebSocket-type client (Issue #776). Must use dedicated WebSocket-only PublicClient for event subscriptions.
-
-### Roadmap Evolution
-
-- v1.3 Phase 13 deferred to v1.4 (Production Lazer Deployment)
+- Phase 13: Pyth entitlement verification must happen FIRST — if all 7 feeds have Lazer data, dual-oracle architecture is unnecessary
+- Phase 13: ChainlinkPriceFeedProvider FX compatibility on Base Sepolia unknown — check before writing routing code
+- Phase 11 (RESOLVED): PythLazerFeedProvider.getOraclePrice() reads from storedPrices; separate updatePriceOnChain() TX required but moved to proactive background loop
+- Phase 10 (RESOLVED): viem fallback([webSocket(), http()]) does NOT produce WebSocket-type client; must use dedicated WebSocket-only PublicClient
 
 ### Known Issues
 
+- FX token withdrawals fail with InvalidOracleProvider — Hermes not registered on-chain (Phase 13 target)
+- MaxPriceAgeExceeded when using Lazer-only mode — stored prices go stale (Phase 14 target)
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
-- batch_report 404 from metrics — cosmetic
-- FX token withdrawals fail with InvalidOracleProvider — Hermes not registered on-chain for FX tokens
-- MaxPriceAgeExceeded when using Lazer-only mode — stored prices go stale
 
 ### Pending Todos
 
@@ -62,5 +62,5 @@ Archived with v1.3 milestone. See .planning/PROJECT.md for key decisions table.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: v1.4 milestone initialization
-Next: Define requirements and create roadmap
+Stopped at: v1.4 roadmap created
+Next: Plan Phase 13 (Oracle Correctness)

@@ -5,7 +5,8 @@
 - ✅ **v1.0 Fix Buy GM Flow** — Phases 1-3 ([shipped 2026-02-21](milestones/v1.0-ROADMAP.md))
 - ✅ **v1.1 Full Trading Experience** — Phases 4-6 ([shipped 2026-02-22](milestones/v1.1-ROADMAP.md))
 - ✅ **v1.2 Demo-Ready Deployment** — Phases 7-9 ([shipped 2026-02-23](milestones/v1.2-ROADMAP.md))
-- 🚧 **v1.3 Keeper Execution Speed** — Phases 10-12 (in progress)
+- ✅ **v1.3 Keeper Execution Speed** — Phases 10-12 (shipped 2026-02-24)
+- 🚧 **v1.4 Maximum Keeper Speed** — Phases 13-14 (in progress)
 
 ## Phases
 
@@ -36,64 +37,50 @@
 
 </details>
 
-### 🚧 v1.3 Keeper Execution Speed (In Progress)
+<details>
+<summary>✅ v1.3 Keeper Execution Speed (Phases 10-12) — SHIPPED 2026-02-24</summary>
 
-**Milestone Goal:** All keeper-executed operations (deposits, withdrawals, orders) complete in under 10 seconds, consistently.
+- [x] Phase 10: Event-Driven Detection (2/2 plans) — completed 2026-02-23
+- [x] Phase 11: Execution Pipeline Optimization (2/2 plans) — completed 2026-02-23
+- [x] Phase 12: Observability & Tuning (2/2 plans) — completed 2026-02-24
 
-- [x] **Phase 10: Event-Driven Detection** - WebSocket event listeners with execution queue and polling fallback (completed 2026-02-23)
-- [x] **Phase 11: Execution Pipeline Optimization** - Oracle pre-caching and redundant read elimination (completed 2026-02-23)
-- [x] **Phase 12: Observability & Tuning** - Heartbeat health model and latency metrics (completed 2026-02-24)
+</details>
+
+### 🚧 v1.4 Maximum Keeper Speed (In Progress)
+
+**Milestone Goal:** All keeper-executed operations complete as fast as possible with proper oracle configuration for both crypto and FX markets.
+
+- [ ] **Phase 13: Oracle Correctness** - Per-token oracle routing so all 6 markets execute without reverts
+- [ ] **Phase 14: Execution Speed** - Flashblocks RPC, tighter update intervals, and pipeline timing instrumentation
 
 ## Phase Details
 
-### Phase 10: Event-Driven Detection
-**Goal**: Keeper detects new operations within 2 seconds via WebSocket event subscriptions, with nonce-safe sequential execution and automatic gap recovery
-**Depends on**: Phase 9 (v1.2 complete)
-**Requirements**: DETECT-01, DETECT-02, DETECT-03, INFRA-01, EXEC-01
+### Phase 13: Oracle Correctness
+**Goal**: All 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY) execute deposits, withdrawals, and orders without oracle-related reverts
+**Depends on**: Phase 12
+**Requirements**: ORCL-01, ORCL-02, ORCL-03, ORCL-04
 **Success Criteria** (what must be TRUE):
-  1. A deposit/withdrawal/order created on-chain is detected by the keeper within 2 seconds (not 5-10s polling average)
-  2. When the WebSocket connection drops, the keeper continues detecting operations via polling fallback without manual intervention
-  3. After a keeper restart, any operations created during downtime are detected and executed (no missed events)
-  4. Three concurrent deposits submitted in rapid succession all execute without nonce collision errors
-  5. The keeper startup log confirms WebSocket transport is active (not silently falling back to HTTP polling)
-**Plans**: 2 plans
+  1. Keeper starts up, verifies Pyth Lazer feed entitlements for all 7 tokens, and exits with a clear FATAL log within 30 seconds if any expected feed receives no data
+  2. A deposit on an FX market (EUR, GBP, GOLD, or JPY) executes end-to-end without InvalidOracleProvider revert — the correct on-chain provider is registered and the keeper routes oracle params accordingly
+  3. A deposit on a crypto market (ETH or BTC) continues to execute via Lazer with no regression from the oracle routing changes
+  4. Keeper logs a FATAL error at startup if any token's on-chain `oracleProviderForToken` does not match the keeper's configured provider address, preventing hours of cryptic debugging
+**Plans**: TBD
 
-Plans:
-- [ ] 10-01-PLAN.md — ExecutionQueue, WebSocket client, EventEmitter ABI, Prisma KeeperState model
-- [ ] 10-02-PLAN.md — EventListener with backfill, main loop rewire to queue-driven execution
-
-### Phase 11: Execution Pipeline Optimization
-**Goal**: Oracle price overhead reduced from 2-8 seconds to near-zero by pre-caching Pyth Lazer prices and eliminating redundant chain reads
-**Depends on**: Phase 10
-**Requirements**: EXEC-02, EXEC-03
+### Phase 14: Execution Speed
+**Goal**: Keeper execution latency reduced to the minimum achievable on Base Sepolia, with per-stage timing to prove it
+**Depends on**: Phase 13
+**Requirements**: SPEED-01, SPEED-02, SPEED-03, SPEED-04
 **Success Criteria** (what must be TRUE):
-  1. Keeper execution does not send a separate oracle price update transaction before each operation — prices are pre-cached or inlined
-  2. The executor does not re-read operation data from the chain that the scanner already fetched (no redundant RPC calls visible in logs)
-  3. End-to-end execution time from detection to confirmation is under 5 seconds for deposits, withdrawals, and orders
-**Plans**: 2 plans
-
-Plans:
-- [ ] 11-01-PLAN.md — Proactive background oracle price updates with conditional freshness check (EXEC-03)
-- [ ] 11-02-PLAN.md — Scanner-to-executor operation data passthrough via extended queue (EXEC-02)
-
-### Phase 12: Observability & Tuning
-**Goal**: Health monitoring accurately reflects keeper liveness in an event-driven architecture, with execution latency percentiles for performance tracking
-**Depends on**: Phase 11
-**Requirements**: INFRA-02, INFRA-03
-**Success Criteria** (what must be TRUE):
-  1. Health endpoint returns 200 during idle periods when no user operations are occurring (no false alerts from stale execution timestamps)
-  2. Health endpoint reports p50 and p95 execution latency percentiles that can be consumed by monitoring tools
-  3. BetterStack does not fire false-positive alerts during 5+ minutes of keeper inactivity
-**Plans**: 2 plans
-
-Plans:
-- [ ] 12-01-PLAN.md — LatencyTracker circular buffer with TDD (INFRA-03)
-- [ ] 12-02-PLAN.md — Heartbeat health model refactor + latency wiring (INFRA-02, INFRA-03)
+  1. Transaction confirmation time drops from ~2-4 seconds to under 500ms after switching to Flashblocks-enabled RPC (measurable in keeper logs)
+  2. MaxPriceAgeExceeded errors no longer occur during normal operation — background oracle updates at 5s intervals with 30s safety margin keep prices fresh
+  3. Normal execution path does not include a synchronous `updatePriceOnChain()` transaction — background updater handles freshness, eliminating 2-4s of blocking overhead per execution
+  4. Every execution logs per-stage timing (detection, oracle param build, TX submission, TX confirmation) via `performance.now()` instrumentation, enabling latency regression detection
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 10 → 11 → 12
+Phases execute in numeric order: 13 → 14
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -106,22 +93,8 @@ Phases execute in numeric order: 10 → 11 → 12
 | 7. Public Deployment | v1.2 | 2/2 | Complete | 2026-02-23 |
 | 8. Keeper Monitoring | v1.2 | 3/3 | Complete | 2026-02-23 |
 | 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete | 2026-02-23 |
-| 10. Event-Driven Detection | 2/2 | Complete    | 2026-02-23 | - |
-| 11. Execution Pipeline Optimization | 2/2 | Complete    | 2026-02-23 | - |
+| 10. Event-Driven Detection | v1.3 | 2/2 | Complete | 2026-02-23 |
+| 11. Execution Pipeline Optimization | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
-
-### Phase 13: Production Lazer Deployment and Keeper Optimization
-**Goal**: Keeper starts with verified Pyth Lazer feed entitlements, oracle provider consistency checks, all 7 markets configured, a dedicated metrics endpoint, and Docker HEALTHCHECK for production deployment
-**Depends on**: Phase 12
-**Requirements**: PROD-01, PROD-02, PROD-03, PROD-04, PROD-05
-**Success Criteria** (what must be TRUE):
-  1. Keeper exits with clear error within 30s of startup if Lazer mode is enabled but no feed data arrives (zero-entitlement token detection)
-  2. All 7 Pyth Lazer feed configs (BTC, ETH, USDC, EUR, GBP, GOLD, JPY) are registered when oracle mode includes Lazer
-  3. Keeper logs a clear warning at startup if on-chain oracleProviderForToken does not match configured provider address
-  4. GET /metrics returns JSON with queue stats, per-token feed freshness, and execution rates
-  5. Dockerfile uses HEALTHCHECK directive for Docker-native health monitoring
-**Plans**: 2 plans
-
-Plans:
-- [ ] 13-01-PLAN.md -- Startup verification: feed entitlement check, FX feed re-enablement, oracle provider consistency
-- [ ] 13-02-PLAN.md -- Metrics endpoint, Docker HEALTHCHECK, production env template
+| 13. Oracle Correctness | v1.4 | TBD | Not started | - |
+| 14. Execution Speed | v1.4 | TBD | Not started | - |

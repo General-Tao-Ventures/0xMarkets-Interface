@@ -52,20 +52,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ORCL-01 | — | Pending |
-| ORCL-02 | — | Pending |
-| ORCL-03 | — | Pending |
-| ORCL-04 | — | Pending |
-| SPEED-01 | — | Pending |
-| SPEED-02 | — | Pending |
-| SPEED-03 | — | Pending |
-| SPEED-04 | — | Pending |
+| ORCL-01 | Phase 13 | Pending |
+| ORCL-02 | Phase 13 | Pending |
+| ORCL-03 | Phase 13 | Pending |
+| ORCL-04 | Phase 13 | Pending |
+| SPEED-01 | Phase 14 | Pending |
+| SPEED-02 | Phase 14 | Pending |
+| SPEED-03 | Phase 14 | Pending |
+| SPEED-04 | Phase 14 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 8 total
-- Mapped to phases: 0
-- Unmapped: 8 ⚠️
+- Mapped to phases: 8
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after initial definition*
+*Last updated: 2026-02-24 after roadmap creation*
