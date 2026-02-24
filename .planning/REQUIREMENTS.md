@@ -1,80 +1,71 @@
-# Requirements: 0xMarkets Interface
+# Requirements: 0xMarkets v1.4 Maximum Keeper Speed
 
-**Defined:** 2026-02-23
-**Core Value:** All keeper-executed operations complete in under 10 seconds, consistently
+**Defined:** 2026-02-24
+**Core Value:** All keeper-executed operations complete as fast as possible with proper oracle configuration
 
-## v1.3 Requirements
+## v1.4 Requirements
 
-Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
+Requirements for v1.4 release. Each maps to roadmap phases.
 
-### Detection Speed
+### Oracle Correctness
 
-- [x] **DETECT-01**: Keeper detects new deposits/withdrawals/orders via WebSocket event listeners within 2 seconds of on-chain creation
-- [x] **DETECT-02**: Polling fallback continues scanning at reduced interval when WebSocket connection drops
-- [x] **DETECT-03**: Keeper backfills missed events on WebSocket reconnection using persisted block numbers
+- [ ] **ORCL-01**: Keeper deploys new Pyth Pro API key and verifies per-feed entitlements at startup (exits with clear error if expected feeds receive no data within 10s)
+- [ ] **ORCL-02**: Keeper routes oracle params per-token — Lazer for crypto tokens (WETH, WBTC, USDC), Hermes/Chainlink for FX tokens (EUR, GBP, GOLD, JPY) — based on startup entitlement results
+- [ ] **ORCL-03**: On-chain `oracleProviderForToken` in DataStore is updated for FX tokens to point to the correct provider (ChainlinkPriceFeedProvider or equivalent)
+- [ ] **ORCL-04**: Keeper reads on-chain `oracleProviderForToken` at startup and logs FATAL if any token's configured provider doesn't match keeper's expected provider address
 
-### Execution Pipeline
+### Execution Speed
 
-- [x] **EXEC-01**: All keeper transactions flow through a serialized execution queue that prevents nonce collisions
-- [x] **EXEC-02**: Scanner passes operation data directly to executor without redundant on-chain re-reads
-- [x] **EXEC-03**: Oracle prices are pre-cached from Pyth Lazer WebSocket stream and used directly in execution
-
-### Infrastructure
-
-- [x] **INFRA-01**: Both keeper services use WebSocket RPC transport for Base Sepolia event subscriptions
-- [x] **INFRA-02**: Health endpoints use heartbeat-based liveness model compatible with event-driven architecture
-- [x] **INFRA-03**: Health endpoint reports execution latency percentiles (p50, p95) for monitoring
-
-### Production Deployment
-
-- [ ] **PROD-01**: Keeper verifies Pyth Lazer feed data arrives within startup timeout, exits with clear error if token has zero entitlements
-- [ ] **PROD-02**: All 7 Pyth Lazer feed configs (BTC, ETH, USDC, EUR, GBP, GOLD, JPY) are active in production
-- [ ] **PROD-03**: Keeper verifies on-chain oracleProviderForToken matches configured provider address at startup
-- [ ] **PROD-04**: Docker configuration uses HEALTHCHECK directive and env_file pattern for production deployments
-- [ ] **PROD-05**: Dedicated /metrics endpoint exposes queue stats, feed freshness, and execution rates
+- [ ] **SPEED-01**: Keeper uses Flashblocks-enabled RPC endpoint for TX submission, reducing confirmation time from ~2-4s to ~200ms
+- [ ] **SPEED-02**: MaxPriceAgeExceeded prevented by increasing safety margin to 30s and reducing background oracle update interval from 10s to 5s
+- [ ] **SPEED-03**: Synchronous `updatePriceOnChain()` TX eliminated from normal execution path — background updater keeps prices fresh
+- [ ] **SPEED-04**: Per-stage execution timing (detection → oracle params → TX submission → confirmation) logged via `performance.now()` instrumentation
 
 ## Future Requirements
 
-### Advanced Optimization
+Deferred to v2+. Tracked but not in current roadmap.
 
-- **OPT-01**: Flashblocks-aware RPC endpoint for 200ms preconfirmations
-- **OPT-02**: Multi-wallet keeper for parallel transaction submission
-- **OPT-03**: Mempool monitoring for front-run prevention
+### Advanced Oracle
+
+- **ADV-01**: Pyth Pro tier upgrade for native FX Lazer feeds (eliminates Hermes fallback)
+- **ADV-02**: Oracle cascade fallback — when Lazer cache goes stale per-token, automatically fall back to Hermes for that token only
+- **ADV-03**: Custom multicall contract for atomic price-update + execution in single TX
+
+### Infrastructure
+
+- **INFRA-01**: Multi-wallet parallel execution for higher throughput
+- **INFRA-02**: Background update interval below 3s (requires nonce pressure testing)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Multi-wallet keepers | Overkill for testnet with no competition |
-| Mempool monitoring | No MEV competition on Base Sepolia testnet |
-| Custom multicall contracts | Existing ExchangeRouter.multicall sufficient |
-| Redis message queue | Single-process I/O-bound workload; adds complexity without benefit |
-| Worker threads | Same reason — workload is I/O-bound, not CPU-bound |
+| Pyth Pro $10k tier upgrade | Hermes adequate for testnet FX volume |
+| Multi-wallet parallel execution | Single wallet sufficient at current volume |
+| Custom PythHermesFeedProvider contract | Only needed if Chainlink FX feeds absent on Base Sepolia — check first |
+| Mainnet deployment | Testnet-first strategy unchanged |
+| New market additions | Focus on making existing 6 markets fast and reliable |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DETECT-01 | Phase 10 | Complete |
-| DETECT-02 | Phase 10 | Complete |
-| DETECT-03 | Phase 10 | Complete |
-| EXEC-01 | Phase 10 | Complete |
-| EXEC-02 | Phase 11 | Complete |
-| EXEC-03 | Phase 11 | Complete |
-| INFRA-01 | Phase 10 | Complete |
-| INFRA-02 | Phase 12 | Complete |
-| INFRA-03 | Phase 12 | Complete |
-| PROD-01 | Phase 13 | Pending |
-| PROD-02 | Phase 13 | Pending |
-| PROD-03 | Phase 13 | Pending |
-| PROD-04 | Phase 13 | Pending |
-| PROD-05 | Phase 13 | Pending |
+| ORCL-01 | — | Pending |
+| ORCL-02 | — | Pending |
+| ORCL-03 | — | Pending |
+| ORCL-04 | — | Pending |
+| SPEED-01 | — | Pending |
+| SPEED-02 | — | Pending |
+| SPEED-03 | — | Pending |
+| SPEED-04 | — | Pending |
 
 **Coverage:**
-- v1.3 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0
+- v1.4 requirements: 8 total
+- Mapped to phases: 0
+- Unmapped: 8 ⚠️
 
 ---
-*Requirements defined: 2026-02-23*
-*Last updated: 2026-02-24 after Phase 13 planning*
+*Requirements defined: 2026-02-24*
+*Last updated: 2026-02-24 after initial definition*
