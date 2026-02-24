@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 13 of 14 (Oracle Correctness)
-Plan: 02 of 02 complete
-Status: Phase 13 complete
-Last activity: 2026-02-24 — Completed 13-02 (Metrics Endpoint & Docker Hardening)
+Plan: 03 of 04 complete
+Status: In progress
+Last activity: 2026-02-24 — Completed 13-03 (Per-Token Oracle Routing)
 
-Progress: [##########..........] 50% (v1.4) — 2/4 plans
+Progress: [###############.....] 75% (v1.4) — 3/4 plans
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: [##########..........] 50% (v1.4) — 2/4 plans
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
-| 13-14 | v1.4 | 2/4 | In progress |
+| 13-14 | v1.4 | 3/4 | In progress |
 
 **v1.4 Execution:**
 
@@ -38,6 +38,7 @@ Progress: [##########..........] 50% (v1.4) — 2/4 plans
 |------|----------|-------|-------|
 | Phase 13 P01 | 2min | 2 | 3 |
 | Phase 13 P02 | 3min | 2 | 4 |
+| Phase 13 P03 | 2min | 1 | 3 |
 
 ## Accumulated Context
 
@@ -73,9 +74,12 @@ Archived with v1.3 milestone. See .planning/PROJECT.md for key decisions table.
 - 13-02: Separated /metrics from /health to keep BetterStack probes clean while providing rich operational data
 - 13-02: 120s HEALTHCHECK start-period covers DB migration + Lazer init + 10s data wait + initial scan
 - 13-02: Force-tracked .env.production.example despite .env.* gitignore (template only, no secrets)
+- 13-03: Entitlement state stored as module-level Set<string> with lowercase normalization for case-insensitive matching
+- 13-03: Hermes feeds registered unconditionally (not gated by oracleMode) to enable per-token fallback in lazer mode
+- 13-03: Per-token Lazer failure gracefully moves individual tokens to Hermes rather than failing the entire buildOracleParams call
 
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 13-02-PLAN.md (Phase 13 complete)
-Next: Plan and execute Phase 14
+Stopped at: Completed 13-03-PLAN.md (Per-Token Oracle Routing)
+Next: Execute 13-04-PLAN.md, then Phase 14
