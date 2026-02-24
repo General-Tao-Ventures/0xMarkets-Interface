@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 13 of 14 (Oracle Correctness)
-Plan: 03 of 04 complete
-Status: In progress
-Last activity: 2026-02-24 — Completed 13-03 (Per-Token Oracle Routing)
+Plan: 04 of 04 complete
+Status: Phase 13 complete
+Last activity: 2026-02-24 — Completed 13-04 (On-Chain Oracle Provider Verification)
 
-Progress: [###############.....] 75% (v1.4) — 3/4 plans
+Progress: [####################] 100% (Phase 13) — 4/4 plans
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: [###############.....] 75% (v1.4) — 3/4 plans
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
-| 13-14 | v1.4 | 3/4 | In progress |
+| 13-14 | v1.4 | 4/4 | Phase 13 complete |
 
 **v1.4 Execution:**
 
@@ -39,6 +39,7 @@ Progress: [###############.....] 75% (v1.4) — 3/4 plans
 | Phase 13 P01 | 2min | 2 | 3 |
 | Phase 13 P02 | 3min | 2 | 4 |
 | Phase 13 P03 | 2min | 1 | 3 |
+| Phase 13 P04 | 4min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -51,7 +52,7 @@ Progress: [###############.....] 75% (v1.4) — 3/4 plans
 
 ### Known Issues
 
-- FX token withdrawals fail with InvalidOracleProvider — Hermes not registered on-chain (Phase 13 target)
+- FX token withdrawals fail with InvalidOracleProvider — RESOLVED: on-chain oracleProviderForToken updated for all 7 tokens (13-04)
 - MaxPriceAgeExceeded when using Lazer-only mode — stored prices go stale (Phase 14 target)
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
 
@@ -77,9 +78,12 @@ Archived with v1.3 milestone. See .planning/PROJECT.md for key decisions table.
 - 13-03: Entitlement state stored as module-level Set<string> with lowercase normalization for case-insensitive matching
 - 13-03: Hermes feeds registered unconditionally (not gated by oracleMode) to enable per-token fallback in lazer mode
 - 13-03: Per-token Lazer failure gracefully moves individual tokens to Hermes rather than failing the entire buildOracleParams call
+- 13-04: Script uses same viem client infrastructure as keeper for consistency
+- 13-04: Fix mode guarded behind --fix flag to prevent accidental chain writes during diagnostics
+- 13-04: Script suggests contracts repo deploy command if keeper wallet lacks CONTROLLER role
 
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 13-03-PLAN.md (Per-Token Oracle Routing)
-Next: Execute 13-04-PLAN.md, then Phase 14
+Stopped at: Completed 13-04-PLAN.md (On-Chain Oracle Provider Verification)
+Next: Phase 14 (Execution Speed)

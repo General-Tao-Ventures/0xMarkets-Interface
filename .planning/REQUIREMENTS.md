@@ -11,7 +11,7 @@ Requirements for v1.4 release. Each maps to roadmap phases.
 
 - [x] **ORCL-01**: Keeper deploys new Pyth Pro API key and verifies per-feed entitlements at startup (exits with clear error if expected feeds receive no data within 10s)
 - [x] **ORCL-02**: Keeper routes oracle params per-token — Lazer for crypto tokens (WETH, WBTC, USDC), Hermes/Chainlink for FX tokens (EUR, GBP, GOLD, JPY) — based on startup entitlement results
-- [ ] **ORCL-03**: On-chain `oracleProviderForToken` in DataStore is updated for FX tokens to point to the correct provider (ChainlinkPriceFeedProvider or equivalent)
+- [x] **ORCL-03**: On-chain `oracleProviderForToken` in DataStore is updated for FX tokens to point to the correct provider (ChainlinkPriceFeedProvider or equivalent)
 - [x] **ORCL-04**: Keeper reads on-chain `oracleProviderForToken` at startup and logs FATAL if any token's configured provider doesn't match keeper's expected provider address
 
 ### Execution Speed
@@ -54,7 +54,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | ORCL-01 | Phase 13 | Complete |
 | ORCL-02 | Phase 13 | Complete |
-| ORCL-03 | Phase 13 | Pending |
+| ORCL-03 | Phase 13 | Complete |
 | ORCL-04 | Phase 13 | Complete |
 | SPEED-01 | Phase 14 | Pending |
 | SPEED-02 | Phase 14 | Pending |

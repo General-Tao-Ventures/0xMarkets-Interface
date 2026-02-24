@@ -50,12 +50,12 @@
 
 **Milestone Goal:** All keeper-executed operations complete as fast as possible with proper oracle configuration for both crypto and FX markets.
 
-- [ ] **Phase 13: Oracle Correctness** - Per-token oracle routing so all 6 markets execute without reverts (2/4 plans complete)
+- [x] **Phase 13: Oracle Correctness** - Per-token oracle routing so all 6 markets execute without reverts (4/4 plans complete)
   Plans:
   - [x] 13-01-PLAN.md -- Lazer safety checks (feed verification, provider consistency)
   - [x] 13-02-PLAN.md -- Metrics endpoint and Docker hardening
-  - [ ] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
-  - [ ] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
+  - [x] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
+  - [x] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
 - [ ] **Phase 14: Execution Speed** - Flashblocks RPC, tighter update intervals, and pipeline timing instrumentation
 
 ## Phase Details
@@ -73,8 +73,8 @@
 Plans:
 - [x] 13-01-PLAN.md -- Lazer safety checks (feed verification, provider consistency)
 - [x] 13-02-PLAN.md -- Metrics endpoint and Docker hardening
-- [ ] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
-- [ ] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
+- [x] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
+- [x] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
 
 ### Phase 14: Execution Speed
 **Goal**: Keeper execution latency reduced to the minimum achievable on Base Sepolia, with per-stage timing to prove it
@@ -106,5 +106,5 @@ Phases execute in numeric order: 13 → 14
 | 10. Event-Driven Detection | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 11. Execution Pipeline Optimization | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
-| 13. Oracle Correctness | 3/4 | In Progress|  | - |
+| 13. Oracle Correctness | v1.4 | 4/4 | Complete | 2026-02-24 |
 | 14. Execution Speed | v1.4 | TBD | Not started | - |
