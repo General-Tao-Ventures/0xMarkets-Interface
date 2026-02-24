@@ -23,7 +23,7 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 
 - [x] **INFRA-01**: Both keeper services use WebSocket RPC transport for Base Sepolia event subscriptions
 - [ ] **INFRA-02**: Health endpoints use heartbeat-based liveness model compatible with event-driven architecture
-- [ ] **INFRA-03**: Health endpoint reports execution latency percentiles (p50, p95) for monitoring
+- [x] **INFRA-03**: Health endpoint reports execution latency percentiles (p50, p95) for monitoring
 
 ## Future Requirements
 
@@ -55,7 +55,7 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 | EXEC-03 | Phase 11 | Complete |
 | INFRA-01 | Phase 10 | Complete |
 | INFRA-02 | Phase 12 | Pending |
-| INFRA-03 | Phase 12 | Pending |
+| INFRA-03 | Phase 12 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 9 total

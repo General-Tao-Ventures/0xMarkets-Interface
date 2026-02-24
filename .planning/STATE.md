@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** All keeper-executed operations complete in under 10 seconds, consistently
-**Current focus:** Phase 11 — Execution Pipeline Optimization
+**Current focus:** Phase 12 — Observability and Tuning
 
 ## Current Position
 
-Phase: 11 of 12 (Execution Pipeline Optimization)
-Plan: 2 of 2
-Status: Phase 11 complete, Phase 12 next
-Last activity: 2026-02-23 — Completed 11-02 (Scanner Data Passthrough)
+Phase: 12 of 12 (Observability and Tuning)
+Plan: 1 of ?
+Status: Phase 12 in progress
+Last activity: 2026-02-23 — Completed 12-01 (LatencyTracker)
 
-Progress: [█████░░░░░] 50% (v1.3)
+Progress: [██████░░░░] 60% (v1.3)
 
 ## Performance Metrics
 
@@ -31,11 +31,12 @@ Progress: [█████░░░░░] 50% (v1.3)
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10 | v1.3 | 2/2 | Complete |
 | 11 | v1.3 | 2/2 | Complete |
-| 12 | v1.3 | 0/? | Not started |
+| 12 | v1.3 | 1/? | In progress |
 | Phase 10 P01 | 3min | 2 tasks | 6 files |
 | Phase 10 P02 | 3min | 2 tasks | 3 files |
 | Phase 11 P01 | 3min | 2 tasks | 4 files |
 | Phase 11 P02 | 4min | 2 tasks | 9 files |
+| Phase 12 P01 | 1min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -74,9 +75,11 @@ Archived with v1.2 milestone. See .planning/PROJECT.md for key decisions table.
 - Phase 11-02: Scanner attaches operation data per-item with try/catch so market read failure never blocks scan
 - Phase 11-02: Executors use type-narrowed optional parameter for safe pre-fetched data access
 - Phase 11-02: Event-sourced items carry no operationData -- executor falls back to chain reads (zero regression)
+- Phase 12-01: Used ceil(p/100 * length) - 1 nearest-rank percentile method for LatencyTracker
+- Phase 12-01: Default capacity of 200 samples balances memory and statistical accuracy
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 11-02-PLAN.md (Scanner Data Passthrough)
-Next: Execute Phase 12
+Stopped at: Completed 12-01-PLAN.md (LatencyTracker)
+Next: Continue Phase 12
