@@ -84,10 +84,11 @@ Plans:
   1. Health endpoint returns 200 during idle periods when no user operations are occurring (no false alerts from stale execution timestamps)
   2. Health endpoint reports p50 and p95 execution latency percentiles that can be consumed by monitoring tools
   3. BetterStack does not fire false-positive alerts during 5+ minutes of keeper inactivity
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md — LatencyTracker circular buffer with TDD (INFRA-03)
+- [ ] 12-02-PLAN.md — Heartbeat health model refactor + latency wiring (INFRA-02, INFRA-03)
 
 ## Progress
 
@@ -107,4 +108,4 @@ Phases execute in numeric order: 10 → 11 → 12
 | 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete | 2026-02-23 |
 | 10. Event-Driven Detection | 2/2 | Complete    | 2026-02-23 | - |
 | 11. Execution Pipeline Optimization | 2/2 | Complete    | 2026-02-23 | - |
-| 12. Observability & Tuning | v1.3 | 0/? | Not started | - |
+| 12. Observability & Tuning | v1.3 | 0/2 | Not started | - |
