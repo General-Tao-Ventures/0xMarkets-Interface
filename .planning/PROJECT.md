@@ -10,14 +10,15 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.2 Demo-Ready Deployment (2026-02-23)
+**Shipped:** v1.3 Keeper Execution Speed (2026-02-24)
 
-The full trading loop works end-to-end on Base Sepolia from a public Vercel URL. Cloud keepers on DigitalOcean execute deposits, withdrawals, and orders. Health endpoints and BetterStack uptime monitoring provide observability. UI is polished for investor demos.
+Event-driven operation detection, proactive oracle price caching, optimized execution pipeline, heartbeat health model, and latency tracking. Phases 10-12 complete. Phase 13 (Production Lazer Deployment) deferred to v1.4.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
 - v1.1 Full Trading Experience (2026-02-22) — all 6 markets, positions, limit orders
 - v1.2 Demo-Ready Deployment (2026-02-23) — Vercel, monitoring, UI polish
+- v1.3 Keeper Execution Speed (2026-02-24) — event-driven detection, pipeline optimization, observability
 
 ## Requirements
 
@@ -47,15 +48,17 @@ The full trading loop works end-to-end on Base Sepolia from a public Vercel URL.
 
 ### Active
 
-## Current Milestone: v1.3 Keeper Execution Speed
+## Current Milestone: v1.4 Maximum Keeper Speed
 
-**Goal:** All keeper-executed operations (deposits, withdrawals, orders) complete in under 10 seconds, consistently.
+**Goal:** All keeper-executed operations complete as fast as possible with proper oracle configuration for both crypto and FX markets.
 
 **Target features:**
-- Event-driven operation detection (replace polling with on-chain event listeners)
-- Optimized scan intervals and execution pipeline
-- Consistent sub-10s latency across deposits, withdrawals, and orders
-- Both keeper-service and order-execution-keeper-service optimized
+- Deploy new Pyth Pro API key (crypto account) and configure optimal oracle mode
+- Determine Lazer vs Hermes support per market, use fastest available
+- FX markets (EUR, GBP, JPY, GOLD): fall back to Hermes if Lazer doesn't support them
+- Register Hermes oracle provider for FX tokens on-chain if needed
+- Fix remaining execution errors (MaxPriceAgeExceeded, InvalidOracleProvider)
+- Measure and optimize end-to-end latency to be as fast as possible
 
 ### Out of Scope
 
@@ -72,16 +75,19 @@ The full trading loop works end-to-end on Base Sepolia from a public Vercel URL.
 - **Chain:** Base Sepolia (84532)
 - **Deployed:** app.0xmarkets.io (Vercel)
 - **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22), v1.2 (2026-02-23)
-- **Codebase:** 9 phases, 21 plans, 3 milestones across 3 days
+- **Codebase:** 12 phases, 27 plans, 4 milestones across 4 days
 - **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222) with pino JSON logging, real health endpoints, and BetterStack uptime monitoring
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
-- **Oracle mode:** Pyth Lazer — binary WebSocket price feeds
+- **Oracle mode:** Currently "both" (Lazer + Hermes fallback) — needs proper configuration per market
+- **Pyth Pro API key:** QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN (crypto account)
 - **Test suite:** 136 pass, 1 skipped (live RPC), 0 failures
 - **Known issues:**
   - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
   - batch_report 404 from metrics (GMX analytics endpoint not implemented — cosmetic)
   - pendingImpactAmount defaults to 0n (documented workaround — correct behavior)
+  - FX token withdrawals fail with InvalidOracleProvider (0x05d102a2) — Hermes not registered on-chain for FX tokens
+  - MaxPriceAgeExceeded errors when using Lazer-only mode (stored prices go stale between check and execution)
 
 ## Constraints
 
@@ -106,5 +112,7 @@ The full trading loop works end-to-end on Base Sepolia from a public Vercel URL.
 | healthState mutable singleton | Avoids circular imports across scanner/executor/oracle | ✓ Good |
 | /health returns 503 until first scan | Prevents false-healthy reports on startup | ✓ Good |
 
+| Pyth Pro crypto key for oracle feeds | Previous token had zero entitlements | — Pending |
+
 ---
-*Last updated: 2026-02-23 after v1.3 milestone started*
+*Last updated: 2026-02-24 after v1.4 milestone started*
