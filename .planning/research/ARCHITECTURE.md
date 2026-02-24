@@ -1,538 +1,659 @@
-# Architecture Patterns: Keeper Execution Speed Optimization
+# Architecture Patterns: Per-Market Oracle Routing and Maximum Keeper Speed
 
-**Domain:** Blockchain keeper execution pipeline (GMX-style two-phase request/execute)
-**Researched:** 2026-02-23
-**Confidence:** HIGH (based on codebase analysis + viem docs + Base chain specs)
+**Domain:** Keeper oracle integration, per-market provider routing, execution speed optimization
+**Researched:** 2026-02-24
+**Confidence:** HIGH (based on full codebase analysis of order-execution-keeper-service, contracts repo oracle infrastructure, and on-chain provider architecture)
 
-## Current Architecture Analysis
+## Current Architecture (Post-v1.3)
 
-### Execution Timeline Breakdown (Current ~13s)
+### System Overview
 
-The existing flow for a deposit execution in `order-execution-keeper-service`:
+The order-execution-keeper-service has a mature pipeline built across 12 phases:
 
 ```
-[User creates deposit on-chain]
-    |
-    v (0-10s wait: polling interval)
-[Scanner polls DataStore.getAllBytes32Values()]  ~500ms
-    |
-    v
-[Scanner reads deposit details from Reader]     ~300ms
-    |
-    v
-[Store new deposit in Prisma DB]                ~50ms
-    |
-    v
-[Executor reads deposit from DB]                ~50ms
-    |
-    v
-[Executor reads deposit from Reader (again)]    ~300ms
-    |
-    v
-[Executor reads market from Reader]             ~300ms
-    |
-    v
-[Build oracle params + updatePriceOnChain TX]   ~2-4s (send TX + wait for receipt)
-    |
-    v
-[estimateGas for executeDeposit]                ~300ms
-    |
-    v
-[submitTransaction (writeContract)]             ~500ms
-    |
-    v
-[waitForTransactionReceipt]                     ~2-4s (1-2 blocks on Base)
-    |
-    v
-[Update DB status]                              ~50ms
+[On-chain EventEmitter]     [DataStore polling (30s)]
+         |                            |
+    WebSocket events             Scanner reads
+    (<2s detection)              (safety net)
+         |                            |
+         +----> [ExecutionQueue] <----+
+                      |
+                      v
+              [drainQueue loop]
+              (single consumer, sequential)
+                      |
+         +---disable background oracle---+
+         |                               |
+         v                               |
+    [Executor: buildOracleParams]        |
+         |                               |
+         v                               |
+    [submitTransaction]                  |
+         |                               |
+         v                               |
+    [waitForReceipt]                     |
+         |                               |
+         +---re-enable background oracle--+
 ```
 
-**Where time is spent:**
-1. **Polling delay: 0-10s average 5s** -- The single largest latency source. `setInterval(executePendingRequests, scanIntervalSeconds * 1000)` with default 10s.
-2. **Oracle price TX: 2-4s** -- `updatePriceOnChain()` sends a separate transaction and awaits `waitForTransactionReceipt`. This is a full transaction lifecycle (send + 1-2 blocks).
-3. **Execution TX: 2-4s** -- The actual `executeDeposit` transaction + receipt wait.
-4. **Redundant reads: ~1s** -- Scanner reads deposit details, then executor reads them again. Market data is fetched fresh each time.
+### Current Oracle Architecture
 
-### Key Bottlenecks Identified
+Two oracle services coexist, controlled by a **global** `ORACLE_MODE` env var:
 
-| Bottleneck | Current Impact | Root Cause |
-|-----------|---------------|------------|
-| Polling interval | 0-10s latency | `setInterval` at 10s, detection is chance-based |
-| Oracle TX as separate transaction | 2-4s per operation | `updatePriceOnChain()` is a full TX with receipt wait |
-| Sequential operation execution | N * (2-4s) for N operations | Single nonce, `for...of` loop with `await` |
-| Redundant on-chain reads | ~1s waste | Scanner reads details, executor reads them again |
-| Nonce contention | 4s retry backoff | Sequential nonce management with pending-tag fetch |
+| Service | Class | Transport | Tokens | Role |
+|---------|-------|-----------|--------|------|
+| Pyth Lazer | `PythLazerOracleService` | WebSocket (200ms streaming) | BTC, ETH, USDC | On-chain price storage via `updatePrice()` |
+| Pyth Hermes | `PythOracleService` | REST (per-request fetch) | All 7 tokens | Fallback data in `SetPricesParams` |
+
+The problem: `config.oracleMode` is global. It is either `"hermes"`, `"lazer"`, or `"both"` for ALL tokens. There is no way to say "use Lazer for BTC/ETH, Hermes for EUR/GBP/GOLD/JPY."
+
+### Current buildOracleParams Flow
+
+`BaseExecutor.buildOracleParams()` (lines 202-291) processes ALL tokens through the same oracle mode:
+
+```
+if oracleMode === "lazer" or "both":
+    for EVERY token:
+        if pythLazerOracle.hasFeed(token):
+            check isStoredPriceFresh(token)
+            if stale: updatePriceOnChain(token)   <-- SEPARATE TX
+
+if oracleMode === "hermes" or "both":
+    for EVERY token:
+        if pythOracle.hasFeed(token):
+            fetchPrices(token) via Hermes REST
+            return SetPricesParams (tokens, providers, data)
+
+if oracleMode === "lazer" only:
+    return params with pythLazerProvider address + empty data
+```
+
+### Key Insight: On-Chain Provider Validation
+
+The Oracle.sol contract (lines 250-280) enforces that the `provider` address in oracle params matches `oracleProviderForToken[token]` in DataStore. This means:
+
+1. Each token has exactly ONE registered oracle provider on-chain
+2. The keeper MUST pass the correct provider address per-token in `OracleParams.providers[]`
+3. Mixing Lazer and Hermes providers in the same execution IS supported by the contract -- the `params.tokens[i]` / `params.providers[i]` / `params.data[i]` arrays are processed per-index
+
+This is the architectural enabler for per-market oracle routing.
 
 ---
 
-## Recommended Architecture: Hybrid Event + Polling
+## Problem Statement: Three Failures to Fix
 
-**Do NOT replace polling entirely. Add event-driven detection as the fast path, keep polling as the safety net.**
+### Failure 1: FX Tokens Fail with InvalidOracleProvider (0x05d102a2)
 
-### Why Hybrid (Not Pure Event-Driven)
-
-1. **WebSocket connections drop.** The existing Pyth Lazer WebSocket already demonstrates this -- the code has `allConnectionsDownListener` and stale cache handling. If event detection is the only path, a dropped WebSocket means missed operations.
-2. **Polling catches edge cases.** On restart, during reorgs, or if the RPC WebSocket misses events, polling recovers automatically by reading DataStore state.
-3. **The existing polling architecture works.** It is battle-tested through v1.0-v1.2. The issue is latency, not correctness.
-4. **Base Sepolia block time is 2 seconds.** With events, detection happens at block inclusion time. Polling at 2s intervals achieves similar detection speed without WebSocket fragility.
-
-### Target Architecture
+**Root cause:** The `configureOracleTokens.ts` deploy script sets `oracleProviderForToken` to `PythLazerFeedProvider.address` for ALL tokens (including EUR, GBP, GOLD, JPY). When the keeper runs in `"both"` mode, `buildOracleParams()` falls through to the Hermes path and returns `pythContractAddress` (the Pyth/Hermes contract `0x8250f4aF`) as the provider. The on-chain Oracle contract sees:
 
 ```
-                    EVENT PATH (fast, <2s detection)
-                    ================================
-[User TX mined] --> [EventEmitter emits DepositCreated/OrderCreated/WithdrawalCreated]
-                         |
-                         v
-                    [EventListener (viem watchContractEvent)]
-                         |
-                         v
-                    [Immediate execution trigger]
-                         |
-                         v
-                    [ExecutionQueue.enqueue(key, type)]
-                         |
-                    ======|==============================
-                         |
-                    POLL PATH (safety net, 5s interval)
-                    ================================
-                    [Reduced-interval polling (5s)]
-                         |
-                         v
-                    [Scanner finds keys not yet in queue]
-                         |
-                         v
-                    [ExecutionQueue.enqueue(key, type)]
-                         |
-                    ======|==============================
-                         |
-                         v
-                    SHARED EXECUTION PIPELINE
-                    ================================
-                    [ExecutionQueue processes sequentially]
-                         |
-                         v
-                    [Build oracle params (cached prices)]
-                         |
-                         v
-                    [Submit execution TX]
-                         |
-                         v
-                    [Await receipt / update DB]
+params.providers[i] = 0x8250f4aF (Hermes/Pyth contract)
+expectedProvider    = 0x8a3eb351 (PythLazerFeedProvider)
+--> revert InvalidOracleProviderForToken
+```
+
+**What must change:** Either:
+- (A) Register a Hermes-compatible oracle provider on-chain for FX tokens, OR
+- (B) Keep PythLazerFeedProvider as the on-chain provider for ALL tokens, but ensure all tokens have Lazer price data stored
+
+Option (B) is better because it means the keeper only uses one provider contract. The issue is that Lazer may not have FX feed entitlements. If Lazer gets FX entitlements, ALL tokens go through Lazer and there is no need for Hermes at all.
+
+### Failure 2: MaxPriceAgeExceeded in Lazer-Only Mode
+
+**Root cause:** Background oracle updater runs on a 10s interval per token (`BG_UPDATE_INTERVAL_MS = 10_000`). Between updates, the on-chain stored price ages. If execution happens near the end of the interval AND the `isStoredPriceFresh()` check passes (5s safety margin), but the actual execution TX is mined 1-2 blocks later, the on-chain price may have aged past `MAX_ORACLE_PRICE_AGE` (300s).
+
+On testnet with 300s max age, this should rarely happen with 10s updates. The more likely cause: background updates are disabled during execution (nonce coordination), and if execution takes a long time (retries, gas estimation delays), prices go stale.
+
+### Failure 3: Lazer Token Has Zero Entitlements
+
+**Root cause:** The Pyth Pro access token had zero entitlements. A new key has been obtained (`QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN` -- crypto account). It needs verification that it actually provides data for crypto feeds, and determination of whether it covers FX/metals feeds.
+
+---
+
+## Recommended Architecture: Per-Token Oracle Provider Routing
+
+### Core Design: Token-Level Provider Map
+
+Replace the global `oracleMode` string with a per-token provider map:
+
+```typescript
+// NEW: Per-token oracle provider routing
+interface OracleRoute {
+  provider: "lazer" | "hermes";
+  onChainProviderAddress: Address;  // What to pass in OracleParams.providers[]
+}
+
+// Determined at startup based on:
+// 1. Which Lazer feeds actually receive data (entitlement verification)
+// 2. Fallback to Hermes for any tokens without Lazer data
+type OracleRouteMap = Map<Address, OracleRoute>;
+```
+
+### Architecture Diagram
+
+```
+STARTUP PHASE (one-time)
+========================
+
+[1. Initialize Lazer WebSocket]
+         |
+         v
+[2. Register feeds, connect, wait 10s]
+         |
+         v
+[3. Verify entitlements per feed]  <-- NEW
+    For each PYTH_LAZER_FEED_CONFIGS entry:
+      - Check if updateCache has data
+      - If YES: route = "lazer" with PythLazerFeedProvider address
+      - If NO:  route = "hermes" with HermesProvider address (if registered on-chain)
+         |
+         v
+[4. Verify on-chain consistency]  <-- NEW
+    For each token:
+      - Read oracleProviderForToken from DataStore
+      - Compare with route.onChainProviderAddress
+      - If mismatch: LOG ERROR, may need admin script
+         |
+         v
+[5. Build OracleRouteMap]
+    Stored as module-level singleton
+    Used by buildOracleParams() for per-token routing
+
+
+EXECUTION PHASE (per-operation)
+===============================
+
+[buildOracleParams(market, tokens)]
+         |
+         v
+    For each token:
+      route = oracleRouteMap.get(token)
+         |
+         +-- route.provider === "lazer" ----+
+         |                                   |
+         |   Check isStoredPriceFresh()      |
+         |   If stale: updatePriceOnChain()  |
+         |   provider = PythLazerFeedProvider |
+         |   data = "0x"                     |
+         |                                   |
+         +-- route.provider === "hermes" ----+
+         |                                   |
+         |   fetchPrice() via Hermes REST    |
+         |   provider = HermesProvider addr  |
+         |   data = encoded price data       |
+         |                                   |
+         +------- Build OracleParams --------+
+                        |
+                        v
+              { tokens[], providers[], data[] }
+              (mixed providers in same params array)
+```
+
+### Component Boundaries
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| `OracleRouteMap` (NEW) | Maps token address to provider route | Used by `BaseExecutor.buildOracleParams()` |
+| `StartupVerifier` (NEW) | Verifies Lazer entitlements + on-chain consistency at boot | Reads from `PythLazerOracleService.updateCache`, DataStore |
+| `PythLazerOracleService` (EXISTING) | WebSocket streaming, background price updates for Lazer-routed tokens | Background updates only for Lazer-routed tokens |
+| `PythOracleService` (EXISTING) | REST price fetch for Hermes-routed tokens | Called per-execution for Hermes tokens only |
+| `BaseExecutor.buildOracleParams()` (MODIFIED) | Builds per-token provider arrays using route map | Consumes OracleRouteMap |
+| Admin scripts in contracts repo (NEW) | Register Hermes provider on-chain, update `oracleProviderForToken` | Run against DataStore/Config contracts |
+
+### Data Flow for Mixed-Provider Execution
+
+Example: BTC market deposit (tokens: WETH, USDC)
+
+```
+tokens = [WETH, USDC]
+
+oracleRouteMap:
+  WETH -> { provider: "lazer", onChainProvider: 0x8a3eb351 }
+  USDC -> { provider: "lazer", onChainProvider: 0x8a3eb351 }
+
+Result:
+  OracleParams {
+    tokens:    [WETH,         USDC]
+    providers: [0x8a3eb351,   0x8a3eb351]
+    data:      ["0x",         "0x"]
+  }
+```
+
+Example: EUR market withdrawal (tokens: EUR, USDC) -- IF Lazer lacks FX entitlements:
+
+```
+tokens = [EUR, USDC]
+
+oracleRouteMap:
+  EUR  -> { provider: "hermes", onChainProvider: 0xABCD... (HermesProvider) }
+  USDC -> { provider: "lazer",  onChainProvider: 0x8a3eb351 }
+
+Result:
+  OracleParams {
+    tokens:    [EUR,          USDC]
+    providers: [0xABCD...,    0x8a3eb351]
+    data:      [encodedHermes, "0x"]
+  }
+```
+
+**Critical contract requirement:** The on-chain Oracle.sol processes each index independently (line 250-280). Mixed providers in the same `OracleParams` are valid as long as `params.providers[i]` matches `oracleProviderForToken[params.tokens[i]]` for every `i`.
+
+---
+
+## Speed Bottleneck Analysis (Post-v1.3)
+
+### Current Execution Timeline
+
+With event-driven detection (v1.3), the detection latency is near-zero. The bottleneck has shifted to execution:
+
+```
+Timeline for a deposit execution (measured from drainQueue dequeue):
+
+[0ms]    Dequeue item, disable background oracle
+[0-500ms] Wait for in-flight background update to finish
+                                                          <-- BOTTLENECK 1
+[500ms]  Read deposit from DB (Prisma)
+[550ms]  Read deposit from chain (if no operationData)    <-- BOTTLENECK 2
+[850ms]  Read market from chain (reader.getMarket())      <-- BOTTLENECK 3
+
+[1150ms] buildOracleParams() starts
+[1150ms]   isStoredPriceFresh() - read on-chain stored price per token
+[1250ms]   If stale: updatePriceOnChain() TX              <-- BOTTLENECK 4
+             - writeContract (send TX)
+             - waitForTransactionReceipt (2-4s!)
+             - Repeated for EACH stale token
+
+[3250ms-5250ms] estimateGas for executeDeposit
+[3550ms-5550ms] submitTransaction (writeContract)
+[3600ms-5600ms] waitForTransactionReceipt (2-4s)
+[5600ms-9600ms] Update DB status
+
+TOTAL: 5.6s - 9.6s from dequeue to completion
+```
+
+### Bottleneck Breakdown
+
+| # | Bottleneck | Current Impact | Root Cause |
+|---|-----------|---------------|------------|
+| 1 | Background update wait | 0-5s | `drainQueue` waits up to 5s for `isBackgroundUpdateBusy()` |
+| 2 | Redundant chain read | 300ms | Event-sourced items lack `operationData`, fall back to chain read |
+| 3 | Uncached market read | 300ms | `reader.getMarket()` called every execution, data never changes |
+| 4 | Synchronous `updatePriceOnChain` | 2-4s per stale token | Sends TX + waits receipt BEFORE execution TX |
+| 5 | Sequential token price updates | N * (2-4s) | `for...of` loop with `await` on each token |
+
+### Speed Optimization Architecture
+
+#### Optimization 1: Eliminate Synchronous Oracle Price TX (saves 2-4s)
+
+The background oracle updater already keeps prices fresh on-chain every 10s. The `isStoredPriceFresh()` check in `buildOracleParams()` should almost always return `true`. The synchronous fallback (`updatePriceOnChain`) is a safety net that costs 2-4s when triggered.
+
+**Strategy:** Reduce background update interval from 10s to 5s so prices are always fresh. This makes the synchronous path effectively dead code during normal operation.
+
+```typescript
+// Change in PythLazerOracleService:
+private readonly BG_UPDATE_INTERVAL_MS = 5_000; // 5s instead of 10s
+```
+
+**Trade-off:** More on-chain price update TXs (gas cost). On testnet, gas is free. On mainnet, tune this interval to balance cost vs freshness.
+
+#### Optimization 2: Shorter Background Update Wait (saves 0-4.9s)
+
+The `drainQueue` loop waits up to 5s (50 * 100ms) for a busy background update to finish before executing. This is overly conservative.
+
+**Strategy:** Reduce max wait time. If background update takes > 1s, something is wrong and we should proceed anyway (the synchronous fallback exists).
+
+```typescript
+// In drainQueue:
+let waitCount = 0;
+while (oracleService.isBackgroundUpdateBusy() && waitCount < 10) { // 1s max, not 5s
+  await new Promise((r) => setTimeout(r, 100));
+  waitCount++;
+}
+```
+
+#### Optimization 3: Pre-fetch Operation Data for Event-Sourced Items (saves 300ms)
+
+Currently, event-sourced items have no `operationData` because `EventListener` only captures the request key from the event topic. The executor falls back to a chain read.
+
+**Strategy:** Enrich event-sourced items with operation data BEFORE they reach the executor, either:
+- (A) In the EventListener itself (adds latency to event processing -- bad)
+- (B) In a "pre-fetch" step in `drainQueue` after dequeue (best -- amortizes with the background update wait)
+
+```typescript
+// In drainQueue, after dequeue:
+if (!item.operationData) {
+  // Pre-fetch while waiting for background update to finish
+  const reader = new ReaderContract();
+  // ... read deposit/order/withdrawal + market data
+}
+```
+
+#### Optimization 4: Cache Market Data (saves 300ms per execution)
+
+Market data (indexToken, longToken, shortToken) does not change between contract redeployments. Cache it.
+
+```typescript
+// Module-level cache, populated on first read
+const marketCache = new Map<Address, MarketInfo>();
+
+async function getCachedMarket(reader: ReaderContract, market: Address): Promise<MarketInfo> {
+  if (!marketCache.has(market)) {
+    marketCache.set(market, await reader.getMarket(market));
+  }
+  return marketCache.get(market)!;
+}
+```
+
+#### Optimization 5: Nonce Coordination Without Full Disable (architectural change)
+
+Currently, background oracle updates are fully disabled during execution to prevent nonce collisions. This creates a gap where prices can go stale.
+
+**Better approach:** Use a nonce-aware coordination pattern where background updates and execution TXs share a nonce manager rather than blocking each other.
+
+This is a future optimization. For v1.4, the simpler fix (reducing BG_UPDATE_INTERVAL to 5s, reducing wait time) is sufficient.
+
+### Optimized Timeline Target
+
+```
+[0ms]    Dequeue item, disable background oracle
+[0-1s]   Wait for background update (1s max, not 5s)
+[0ms]    Pre-fetch operation data (parallel with wait)
+
+[1000ms] buildOracleParams() starts
+[1000ms]   isStoredPriceFresh() per token -- almost always TRUE
+[1050ms]   (skip synchronous update -- background updater keeps prices fresh)
+
+[1050ms] estimateGas
+[1350ms] submitTransaction
+[1400ms] waitForTransactionReceipt (2-4s)
+[3400ms-5400ms] Update DB status
+
+TOTAL: 3.4s - 5.4s from dequeue to completion
 ```
 
 ---
 
-## Component Architecture
+## On-Chain Provider Registration
 
-### New Components
+### Current State
 
-#### 1. EventListener (NEW)
+Deployed on Base Sepolia:
+- `PythLazerFeedProvider` at `0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05`
+- `ChainlinkPriceFeedProvider` -- deployed but not used
+- `GmOracleProvider` -- deployed for testing
+- NO Hermes-specific provider deployed
 
-Watches the EventEmitter contract for creation events. The existing `confirmator.ts` in keeper-service already uses `publicClient.watchContractEvent()` -- this is the same pattern applied to the order-execution-keeper-service.
+`configureOracleTokens.ts` sets `oracleProviderForToken` to `PythLazerFeedProvider.address` for ALL tokens (EUR, GBP, GOLD, JPY, USDC, WBTC, WETH) on non-hardhat networks.
 
-```typescript
-// core/listeners/eventListener.ts
-class EventListener {
-  private unwatch: (() => void) | null = null;
-  private wsPublicClient: PublicClient; // WebSocket transport client
+### What Needs to Happen for Hermes FX Support
 
-  // Watches EventEmitter for DepositCreated, WithdrawalCreated, OrderCreated
-  // On event: extract key from topic1, enqueue for execution
-  startListening(queue: ExecutionQueue): void;
-  stopListening(): void;
-}
-```
+If Lazer entitlements do NOT cover FX/metals (EUR, GBP, GOLD, JPY):
 
-**Integration point:** Requires a *second* PublicClient with WebSocket transport. The existing HTTP PublicClient in `client.ts` does not support true push subscriptions. viem's `watchContractEvent` falls back to polling over HTTP, but uses `eth_subscribe` over WebSocket -- which gives block-level event notification without polling overhead.
+1. **Deploy a Hermes-compatible oracle provider contract** that implements `IOracleProvider` and reads from the Pyth contract (`0x8250f4aF`)
+   - OR: Use `ChainlinkPriceFeedProvider` if Chainlink feeds exist for these pairs on Base Sepolia
+   - OR: Extend `PythLazerFeedProvider` to accept Hermes data as a fallback
 
-**Critical:** The EventEmitter contract already emits events with the request key as `topic1` (confirmed in `test-deposit.mjs` line 72: `DepositCreated(bytes32,address)`). The event signature `0x5a4516d9c26b37da5f23b1f47fb3c99cfaf22879a78a40bc2a4bd1a23cdf9dab` maps to `DepositCreated(bytes32,address)` where topic1 is the deposit key. Similar events exist for `OrderCreated` and `WithdrawalCreated`.
+2. **Register the new provider** in DataStore:
+   - Call `setOracleProviderEnabled(providerAddress, true)` via Timelock or Config contract
+   - Call `setOracleProviderForToken(token, providerAddress)` for each FX token
 
-**Transport decision:** Use WebSocket transport if available from the RPC provider. If not, use HTTP polling at 2s intervals (matching Base block time). viem handles this via the `poll` parameter:
-- `poll: false` (default with WebSocket transport): Uses `eth_subscribe` for push notifications
-- `poll: true` (default with HTTP transport): Falls back to `eth_getFilterChanges` at `pollingInterval`
+3. **Update keeper to use the correct provider address** per token in `OracleParams.providers[]`
 
-#### 2. ExecutionQueue (NEW)
+### What Happens if Lazer Covers Everything
 
-Deduplicated, type-aware queue that prevents double-execution of the same key. The current `isExecuting` boolean guard in `index.ts` is a coarse lock. The queue replaces it with fine-grained key-level deduplication.
+If the new Pyth Pro token has entitlements for crypto + FX + metals:
 
-```typescript
-// core/queue/executionQueue.ts
-class ExecutionQueue {
-  private pending: Map<Hex, { type: 'deposit' | 'withdrawal' | 'order'; enqueuedAt: number }>;
-  private processing: Set<Hex>; // Currently being executed
+1. **No new provider needed** -- PythLazerFeedProvider handles everything
+2. **Uncomment FX feeds in `tokens.ts`** (EUR feedId 327, GBP 333, GOLD 346, JPY 340)
+3. **Verify on-chain `oracleProviderForToken` is already PythLazerFeedProvider** for all tokens (it should be, from the deploy script)
+4. **Keep `ORACLE_MODE=lazer`** -- no Hermes fallback needed
 
-  enqueue(key: Hex, type: OperationType): boolean; // Returns false if already queued
-  dequeue(): { key: Hex; type: OperationType } | null;
-  markComplete(key: Hex): void;
-  markFailed(key: Hex): void;
-  size(): number;
-}
-```
+This is the preferred path and should be validated FIRST.
 
-**Integration point:** Both EventListener and Scanner feed into this queue. The main loop drains it sequentially (respecting single-nonce constraint for now).
+### Admin Script Architecture
 
-#### 3. WebSocket PublicClient (NEW)
+The contracts repo already has the scripts needed. No new scripts are required:
 
-A second viem PublicClient with WebSocket transport, used exclusively by EventListener. Separate from the existing HTTP PublicClient to avoid disrupting transaction submission paths.
+| Script | Purpose | When to Use |
+|--------|---------|-------------|
+| `scripts/printOracleConfig.ts` | Read and display on-chain oracle config for all tokens | Diagnostic -- run FIRST to understand current state |
+| `scripts/initOracleConfigForTokens.ts` | Set `oracleProviderForToken` via Config contract (direct, no Timelock) | Initial setup or testnet changes |
+| `scripts/updateOracleConfigForTokens.ts` | Set `oracleProviderForToken` via Timelock (signal + finalize) | Production changes with delay |
+| `scripts/updateOracleProviders.ts` | Enable/disable oracle provider addresses via Timelock | Adding a new provider type |
+| `deploy/configureOracleTokens.ts` | Hardhat deploy task -- sets provider for all tokens | Runs automatically during deployment |
+| `deploy/configurePythLazerFeeds.ts` | Sets feedId, multiplier, inverted flag per token | Runs during deployment |
 
-```typescript
-// core/blockchain/wsClient.ts
-// Only created if WS_RPC_URL env var is set
-// Falls back to HTTP polling if WebSocket unavailable
-function getWsPublicClient(): PublicClient | null;
-```
+Key distinction: On testnet (Base Sepolia), `initOracleConfigForTokens.ts` can be used directly via the Config contract without Timelock delays. On mainnet, `updateOracleConfigForTokens.ts` requires signal + wait + finalize.
 
-**Config addition:**
-```
-WS_RPC_URL=wss://base-sepolia.g.alchemy.com/v2/...  # Optional
-```
+---
 
-### Modified Components
+## Patterns to Follow
 
-#### 4. Scanner (MODIFIED -- reduced role)
+### Pattern 1: Startup Entitlement Verification
 
-The scanners (`depositScanner.ts`, `withdrawalScanner.ts`, `orderScanner.ts`) continue to exist but shift from "primary detection" to "safety net." Changes:
+**What:** At keeper startup, after connecting to Pyth Lazer WebSocket and waiting for initial data, verify which feeds actually receive data. Build the oracle route map based on observed data, not assumed entitlements.
 
-- Reduce polling interval from 10s to 5s (still below the event path, but catches anything events miss)
-- Remove redundant detail reads -- scanner only returns keys, executor reads details
-- Simplify scan result: just return keys, skip DB storage during scan (let executor handle it)
+**When:** Every startup, before the first scan or execution.
 
-**Integration point:** Scanner feeds into ExecutionQueue instead of directly driving execution. The `executePendingRequests()` function becomes the queue drain loop.
-
-#### 5. BaseExecutor (MODIFIED -- optimized pipeline)
-
-The biggest execution speed gain comes from optimizing what happens *after* detection. Current pain points in `baseExecutor.ts`:
-
-**A. Eliminate separate oracle price TX** (saves 2-4s per operation)
-
-The current flow sends `updatePriceOnChain()` as a separate transaction, awaits its receipt, then sends `executeDeposit`. This is two full transaction lifecycles.
-
-**Optimization:** The Pyth Lazer price data is already cached in `updateCache` from the WebSocket stream (200ms fixed-rate updates). Instead of sending a separate `updatePrice` TX, pass the cached price data directly in the oracle params. The on-chain oracle contract should accept the raw Pyth Lazer update as `data` in the `SetPricesParams.data` field, letting the execution handler verify and consume the price in the same transaction.
-
-**If same-TX price verification is not possible** (contract architecture may require separate `updatePrice`): At minimum, skip `waitForTransactionReceipt` on the price update. Send the price TX, immediately send the execution TX with the next nonce, then await both receipts in parallel. This requires nonce management changes (see below).
-
-**B. Cache market data** -- The market's index token, long token, and short token don't change. Cache market info after first read per market address. Currently `reader.getMarket()` is called on every single execution.
+**Example:**
 
 ```typescript
-// core/cache/marketCache.ts
-class MarketCache {
-  private markets: Map<Address, MarketInfo> = new Map();
+async function verifyEntitlementsAndBuildRoutes(
+  lazerOracle: PythLazerOracleService,
+  lazerConfigs: TokenPythLazerConfig[],
+  hermesConfigs: TokenPythConfig[],
+  lazerProviderAddress: Address,
+  hermesProviderAddress: Address
+): Promise<OracleRouteMap> {
+  const routes = new Map<Address, OracleRoute>();
 
-  async getMarket(reader: ReaderContract, address: Address): Promise<MarketInfo>;
-  invalidate(address?: Address): void;
-}
-```
-
-#### 6. Nonce Management (MODIFIED -- prepare for concurrency)
-
-Current state in `baseExecutor.ts` line 93-95:
-```typescript
-const nonce = await publicClient.getTransactionCount({
-  address: account.address,
-  blockTag: "pending",
-});
-```
-
-This fetches the pending nonce fresh for each transaction. With sequential execution, it works. For future concurrency, use viem's `createNonceManager`:
-
-```typescript
-import { createNonceManager, jsonRpc } from 'viem/nonce';
-
-const nonceManager = createNonceManager({ source: jsonRpc() });
-const account = privateKeyToAccount(config.privateKey, { nonceManager });
-```
-
-**Phase 1 (current milestone):** Keep sequential execution but prepare the nonce manager. The main win is eliminating the oracle price as a separate TX, not parallelizing execution TXs.
-
-**Phase 2 (future):** With nonce manager, can fire-and-forget the price update TX (nonce N) and immediately submit execution TX (nonce N+1) without waiting for price TX receipt. Both TXs are in the mempool and will be mined in order.
-
-**WARNING:** The LIFE-04 comment in `index.ts` explicitly states "Do NOT use Promise.all() here." This was correct for the old architecture. With proper nonce management, concurrent TX submission *with sequential nonces* is safe. But for v1.3, keep sequential execution and focus on eliminating wasted time within each execution.
-
-#### 7. index.ts Main Loop (MODIFIED)
-
-Replace the `setInterval` + `isExecuting` guard with a proper drain loop:
-
-```typescript
-// Current (polling-driven):
-setInterval(() => {
-  executePendingRequests().catch(...);
-}, config.scanIntervalSeconds * 1000);
-
-// Proposed (queue-driven):
-async function drainQueue() {
-  while (true) {
-    const item = queue.dequeue();
-    if (!item) {
-      await sleep(100); // Brief pause when queue is empty
-      continue;
-    }
-    try {
-      await executeItem(item);
-    } catch (error) {
-      logger.error({ err: error, key: item.key }, "execution failed");
+  for (const config of lazerConfigs) {
+    const update = lazerOracle.getLatestUpdate(config.token);
+    if (update) {
+      routes.set(config.token.toLowerCase() as Address, {
+        provider: "lazer",
+        onChainProviderAddress: lazerProviderAddress,
+      });
+      logger.info({ token: config.token, feedId: config.feedId }, "Lazer feed active");
+    } else {
+      logger.warn({ token: config.token, feedId: config.feedId }, "Lazer feed NOT receiving data");
     }
   }
+
+  // Tokens without Lazer data fall back to Hermes
+  for (const config of hermesConfigs) {
+    const tokenKey = config.token.toLowerCase() as Address;
+    if (!routes.has(tokenKey)) {
+      routes.set(tokenKey, {
+        provider: "hermes",
+        onChainProviderAddress: hermesProviderAddress,
+      });
+      logger.info({ token: config.token }, "routed to Hermes (no Lazer data)");
+    }
+  }
+
+  return routes;
 }
-
-// Event listener feeds queue immediately
-// Polling scanner feeds queue on 5s interval
-// drainQueue processes items as fast as they arrive
 ```
 
----
+### Pattern 2: On-Chain Consistency Check
 
-## Data Flow Changes
+**What:** After building the route map, verify that each token's route matches the on-chain `oracleProviderForToken` in DataStore. Log mismatches as errors. Do NOT attempt to fix mismatches at runtime -- that requires admin intervention.
 
-### Current Data Flow
+**When:** Every startup, after entitlement verification.
 
-```
-                    [DataStore on-chain]
-                           |
-          scan interval    | getAllBytes32Values() (every 10s)
-                           v
-                    [Scanner reads details]
-                           |
-                           v
-                    [Prisma DB: store as PENDING]
-                           |
-                           v
-                    [Executor reads from DB]
-                           |
-                           v
-                    [Executor reads from chain AGAIN]
-                           |
-                           v
-                    [Oracle price TX (separate)]
-                           |
-                           v
-                    [Execution TX]
-```
+**Why:** A mismatch between keeper route and on-chain provider causes every execution for that token to revert with `InvalidOracleProviderForToken`. Early detection at startup saves debugging time.
 
-### Proposed Data Flow
+### Pattern 3: Background Updates Only for Lazer-Routed Tokens
 
-```
-     [EventEmitter on-chain]          [DataStore on-chain]
-              |                               |
-     event    | watchContractEvent    poll     | getAllBytes32Values() (5s)
-     (<2s)    v                      (5s)     v
-         [EventListener]              [Scanner (safety net)]
-              |                               |
-              +-------> [ExecutionQueue] <-----+
-                              |
-                              v
-                    [Executor reads from chain ONCE]
-                              |
-                              v
-                    [Use cached Pyth Lazer price data]
-                              |
-                              v
-                    [Single execution TX]
-                              |
-                              v
-                    [Prisma DB: record result]
-```
+**What:** The background oracle updater (`triggerBackgroundUpdate`) should only update tokens routed to Lazer. Hermes-routed tokens don't need background updates because they fetch fresh data per-execution via REST.
 
-### Key Data Flow Changes
+**When:** After building the route map.
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| Detection | Poll DataStore every 10s | Event push + poll at 5s |
-| Detail reads | Scanner reads, then executor reads again | Executor reads once |
-| Oracle price | Separate TX + wait receipt | Use cached WebSocket data in params |
-| DB write timing | Scanner writes PENDING, executor reads it | Executor writes after completion |
-| Deduplication | Prisma DB `existingKeys` check | In-memory ExecutionQueue set |
-| Queue management | `isExecuting` boolean lock | Proper queue with key-level tracking |
-
----
-
-## Architecture Patterns to Follow
-
-### Pattern 1: Event-First, Poll-Fallback
-
-**What:** Use blockchain events as the primary detection mechanism, with periodic polling as a safety net that catches anything events miss.
-
-**When:** Any system that needs to react to on-chain state changes with low latency while maintaining reliability.
-
-**Why:** Events give sub-block-time notification. Polling gives guaranteed eventual consistency. The combination provides both speed and reliability.
+**Why:** Sending background `updatePrice` TXs for Hermes-routed tokens wastes gas and nonces. Worse, it would fail because the Lazer cache has no data for those tokens.
 
 ```typescript
-// Event path: immediate trigger
-eventListener.on('DepositCreated', (key) => {
-  queue.enqueue(key, 'deposit');
-});
-
-// Poll path: catches missed events
-setInterval(async () => {
-  const keys = await scanner.scan();
-  for (const key of keys) {
-    queue.enqueue(key, 'deposit'); // enqueue deduplicates
+// In triggerBackgroundUpdate():
+for (const [tokenKey] of this.pythLazerConfigs) {
+  // Skip tokens not routed to Lazer
+  if (!oracleRouteMap.has(tokenKey) || oracleRouteMap.get(tokenKey).provider !== "lazer") {
+    continue;
   }
-}, 5000);
+  // ... existing update logic
+}
 ```
-
-### Pattern 2: Elimination of Intermediate State
-
-**What:** Don't persist PENDING state before execution. The on-chain DataStore is already the source of truth for pending operations.
-
-**When:** The keeper's DB is tracking state that already exists on-chain, creating redundant reads.
-
-**Why:** The scanner currently writes to Prisma, then the executor reads from Prisma, then reads from chain anyway to verify. Skip the Prisma intermediate step. Record to DB only after execution (EXECUTED, FAILED, CANCELLED).
-
-### Pattern 3: Cached Immutable Data
-
-**What:** Cache data that does not change between requests (market configuration, token addresses).
-
-**When:** The same on-chain reads are performed repeatedly for data that changes only on contract redeployment.
-
-**Why:** `reader.getMarket()` is called for every single execution. Market tokens do not change. Cache the result.
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Full Replace of Polling
+### Anti-Pattern 1: Deploying a Custom Hermes Oracle Provider Contract
 
-**What:** Removing the polling scanner entirely and relying only on event detection.
+**What:** Writing a new Solidity contract that implements `IOracleProvider` by reading from the Pyth contract for Hermes data.
 
-**Why bad:** WebSocket connections are unreliable. RPC providers drop connections, especially on testnets. If events are the only detection path, a dropped connection means operations are silently missed until someone notices.
+**Why bad:** Adds contract deployment complexity, audit surface, and maintenance burden. The Pyth Hermes data is already available via `PythOracleService`. If Lazer gets FX entitlements, the Hermes provider is wasted work.
 
-**Instead:** Keep polling as a safety net at reduced interval (5s instead of 10s).
+**Instead:** Validate Lazer entitlements first. If Lazer covers all feeds, no Hermes provider is needed. If Lazer does NOT cover FX, the ChainlinkPriceFeedProvider already exists on-chain -- check if Chainlink feeds exist for these pairs on Base Sepolia first. A custom contract should be the last resort.
 
-### Anti-Pattern 2: Parallel TX Submission Without Nonce Manager
+### Anti-Pattern 2: Making oracleMode Dynamic Per-Request
 
-**What:** Using `Promise.all()` to fire multiple execution transactions simultaneously without coordinated nonce assignment.
+**What:** Passing a `providerMode` parameter to `buildOracleParams()` and letting each executor decide the mode.
 
-**Why bad:** Each `writeContract` call currently fetches `getTransactionCount({ blockTag: "pending" })`. Two concurrent calls may get the same nonce, causing one to fail with "nonce too low" or "replacement transaction underpriced."
+**Why bad:** The correct provider is determined by token, not by operation type. A deposit involving WETH+USDC and a deposit involving EUR+USDC need different provider selections for different tokens within the SAME operation.
 
-**Instead:** Keep sequential execution for v1.3. If parallelism is needed later, use viem's `createNonceManager` which tracks in-memory nonce state.
+**Instead:** Use the per-token route map. `buildOracleParams()` looks up each token's route and builds the params array with the correct provider per-index.
 
-### Anti-Pattern 3: Waiting for Oracle Price TX Receipt Before Execution
+### Anti-Pattern 3: Hardcoding Provider Addresses in the Route Map
 
-**What:** The current `updatePriceOnChain()` sends a TX and calls `waitForTransactionReceipt()` before proceeding to the execution TX.
+**What:** Putting PythLazerFeedProvider address `0x8a3eb351` directly in the token config as a constant.
 
-**Why bad:** This serializes two independent transactions, adding 2-4s (one full block time + confirmation). The execution TX does not need the price TX to be *confirmed* -- it needs the price to be *available on-chain in the same block or earlier*.
+**Why bad:** The address comes from deployment and can change on redeployment. It already lives in `config.pythLazerFeedProviderAddress` (from env var).
 
-**Instead:** If the oracle architecture requires a separate TX, send price TX (nonce N) and execution TX (nonce N+1) back-to-back without waiting for the price TX receipt. The sequencer processes them in nonce order. Both land in the same or adjacent blocks.
+**Instead:** Read provider addresses from config (env vars), and validate them against on-chain state at startup.
+
+### Anti-Pattern 4: Killing Background Updates Entirely During Execution
+
+**What:** The current `drainQueue` disables ALL background updates and waits up to 5s for in-flight ones to finish.
+
+**Why bad:** This creates price staleness gaps. During a slow execution (retry, gas estimation), prices for other tokens go stale.
+
+**Instead (v1.4):** Reduce the wait to 1s maximum. If background is still busy after 1s, proceed anyway -- the synchronous fallback in `buildOracleParams` handles stale prices. In a future version, use nonce coordination instead of full disable.
 
 ---
 
-## Integration Points Summary
+## Integration Points: New vs Modified Components
 
 ### New Components
 
-| Component | File | Depends On | Depended On By |
-|-----------|------|------------|----------------|
-| EventListener | `core/listeners/eventListener.ts` | wsClient, ExecutionQueue, config | index.ts (startup) |
-| ExecutionQueue | `core/queue/executionQueue.ts` | None (pure data structure) | EventListener, Scanner, index.ts |
-| MarketCache | `core/cache/marketCache.ts` | ReaderContract | BaseExecutor, all executors |
-| WS PublicClient | `core/blockchain/wsClient.ts` | config (WS_RPC_URL) | EventListener |
+| Component | File | Purpose | Dependencies |
+|-----------|------|---------|-------------|
+| `OracleRouteMap` | `core/oracle/routeMap.ts` | Per-token provider routing decisions | None (data structure) |
+| `StartupVerifier` | `core/oracle/startupVerifier.ts` | Entitlement verification + on-chain consistency check | PythLazerOracleService, DataStoreContract, config |
+| Admin: register Hermes provider | `scripts/` in contracts repo | Register Hermes provider for FX tokens IF needed | Contracts repo Config/Timelock |
 
 ### Modified Components
 
-| Component | File | Change Description |
-|-----------|------|--------------------|
-| config.ts | `config.ts` | Add `wsRpcUrl`, reduce `scanIntervalSeconds` default to 5 |
-| BaseExecutor | `core/executors/baseExecutor.ts` | Use MarketCache, skip separate oracle TX wait |
-| DepositExecutor | `core/executors/depositExecutor.ts` | Remove redundant Reader calls |
-| WithdrawalExecutor | `core/executors/withdrawalExecutor.ts` | Remove redundant Reader calls |
-| OrderExecutor | `core/executors/orderExecutor.ts` | Remove redundant Reader calls |
-| index.ts | `index.ts` | Add EventListener startup, queue drain loop |
-| healthState.ts | `utils/healthState.ts` | Track event listener status |
-| client.ts | `core/blockchain/client.ts` | (Optional) prepare nonceManager |
+| Component | File | Change |
+|-----------|------|--------|
+| `BaseExecutor.buildOracleParams()` | `core/executors/baseExecutor.ts` | Use OracleRouteMap for per-token provider selection instead of global oracleMode |
+| `PythLazerOracleService.triggerBackgroundUpdate()` | `core/oracle/pythLazerOracle.ts` | Skip background updates for non-Lazer-routed tokens |
+| `index.ts` main() | `index.ts` | Add startup verification, build route map, reduce background wait |
+| `config.ts` | `config.ts` | Keep oracleMode but add hermesProviderAddress for fallback routing |
+| `config/tokens.ts` | `config/tokens.ts` | Uncomment FX Lazer feeds (if entitlements confirmed) |
+| `drainQueue()` | `index.ts` | Reduce background update wait from 5s to 1s |
 
 ### Unchanged Components
 
 | Component | Why Unchanged |
 |-----------|---------------|
-| Prisma/store.ts | Still records execution results -- timing shifts but API stays same |
-| pythLazerOracle.ts | WebSocket price feed stays the same, cache already works |
-| transactionMonitor.ts | Continues background receipt checking -- still useful |
-| Scanner classes | Keep existing logic, just feed into queue instead of direct execution |
+| `ExecutionQueue` | Queue logic is provider-agnostic |
+| `EventListener` | Detects operations regardless of oracle provider |
+| `DepositExecutor` / `OrderExecutor` / `WithdrawalExecutor` | Call `buildOracleParams()` which handles routing internally |
+| `PythOracleService` (Hermes) | API stays the same, just called selectively |
+| `healthState.ts` / `latencyTracker.ts` | Continue tracking execution metrics |
+| `transactionMonitor.ts` | Background TX monitoring unaffected |
 
 ---
 
 ## Suggested Build Order
 
-Build order respects dependency chains. Each step is independently testable.
+The dependency chain is: **Entitlement Verification -> Oracle Route Map -> On-Chain Registration (if needed) -> Modified buildOracleParams -> Speed Optimizations**
 
-### Step 1: ExecutionQueue (no dependencies)
-Pure in-memory data structure. No integration needed. Write + test in isolation.
+### Phase 1: Verify Entitlements (blocks everything else)
 
-### Step 2: MarketCache (depends on ReaderContract -- already exists)
-Simple cache layer. Can be integrated into BaseExecutor immediately. Saves ~300ms per execution.
+1. Deploy new Pyth Pro access token to keeper environment
+2. Run keeper with `ORACLE_MODE=lazer` locally
+3. After 10s, check which feeds in `PYTH_LAZER_FEED_CONFIGS` (including commented-out FX feeds) receive data
+4. This determines whether Hermes fallback is needed for FX tokens
 
-### Step 3: Reduce Polling Interval (config change only)
-Change `scanIntervalSeconds` default from 10 to 5. Immediate 50% detection improvement with zero risk.
+**This is the critical path.** If all 7 feeds get data, the rest of the architecture simplifies dramatically.
 
-### Step 4: Eliminate Redundant Reads in Executor Pipeline
-Stop scanner from reading full deposit details (it only needs keys). Stop executor from reading DB before reading chain. Direct chain read in executor.
+### Phase 2A: All Feeds via Lazer (happy path)
 
-### Step 5: Optimize Oracle Price Flow
-The highest-impact change. Either:
-- (A) Skip `waitForTransactionReceipt` on `updatePriceOnChain` and pipeline with execution TX, OR
-- (B) Pass cached Pyth Lazer binary data directly in oracle params if contract supports it
+If entitlement verification shows all feeds active:
 
-### Step 6: EventListener + WS Client (depends on ExecutionQueue from Step 1)
-Add WebSocket event detection. This makes detection near-instant instead of waiting for poll cycle.
+1. Uncomment FX feeds in `tokens.ts`
+2. Verify on-chain `oracleProviderForToken` is PythLazerFeedProvider for all 7 tokens (run `printOracleConfig.ts`)
+3. Remove global oracleMode branching -- all tokens use Lazer
+4. Apply speed optimizations (BG_UPDATE_INTERVAL 5s, shorter wait in drainQueue)
+5. Deploy and verify
 
-### Step 7: Wire Queue into Main Loop
-Replace `setInterval` + `isExecuting` pattern with queue drain loop. Both EventListener and Scanner feed into the queue.
+### Phase 2B: Mixed Lazer + Hermes (if FX lacks entitlements)
 
----
+If FX feeds have no Lazer data:
 
-## Latency Budget for Sub-10s Target
+1. Build `OracleRouteMap` -- Lazer for crypto, Hermes for FX
+2. Determine the Hermes on-chain provider:
+   - Check if `ChainlinkPriceFeedProvider` works with Pyth Hermes data (it may not -- needs investigation)
+   - If not, deploy a `PythHermesFeedProvider` contract or modify `PythLazerFeedProvider` to accept Hermes data
+3. Run `initOracleConfigForTokens.ts` to set `oracleProviderForToken` for FX tokens to the Hermes provider
+4. Modify `buildOracleParams()` to use route map
+5. Apply speed optimizations
+6. Deploy and verify
 
-With Base Sepolia's 2s block time, the theoretical minimum for detect-to-confirmed is:
+### Phase 3: Speed Optimizations (independent of oracle routing)
 
-| Phase | Current | Optimized | How |
-|-------|---------|-----------|-----|
-| Detection | 0-10s (avg 5s) | 0-2s (avg 1s) | Event listener triggers at block time |
-| Read details | ~600ms | ~300ms | Single read, no redundancy |
-| Oracle price | 2-4s | 0-200ms | Use cached WebSocket price data |
-| Gas estimation | ~300ms | ~300ms | No change (already fast) |
-| TX submission | ~500ms | ~500ms | No change |
-| TX confirmation | 2-4s | 2-4s | Block time is immutable |
-| DB update | ~50ms | ~50ms | No change |
-| **Total** | **~5-19s (avg ~13s)** | **~3-7s (avg ~5s)** | |
-
-The sub-10s target is achievable. The sub-5s average case is realistic with event-driven detection + oracle optimization.
+1. Reduce `BG_UPDATE_INTERVAL_MS` from 10s to 5s
+2. Reduce `drainQueue` background wait from 5s to 1s
+3. Add market data caching
+4. Add operation data pre-fetch for event-sourced items
+5. Measure latency improvement via `latencyTracker` percentiles
 
 ---
 
 ## Scalability Considerations
 
-| Concern | Current (testnet) | At 100 users | At 1K+ users |
-|---------|-------------------|--------------|-------------|
-| Operations/minute | <5 | 10-50 | 50-500 |
-| Single nonce bottleneck | Not an issue | Acceptable | Needs multi-wallet |
-| WebSocket connections | 1 (Pyth) + 1 (EventEmitter) | Same | Same |
-| DB writes | Light | Moderate | Index optimization needed |
-| RPC rate limits | Not hit | Monitor | Dedicated node needed |
-
-For v1.3 (testnet), the single-wallet sequential architecture is sufficient. The execution queue + event listener architecture is forward-compatible with multi-wallet execution if needed later.
-
----
-
-## keeper-service Impact
-
-The keeper-service (port 37017) handles liquidation scanning, not operation execution. Its architecture is different:
-
-- Already uses `watchContractEvent` via the `confirmator.ts` for event confirmation
-- Scans positions for liquidatability (different from scanning DataStore for pending requests)
-- 30s scan interval is appropriate for liquidation detection (less time-sensitive)
-
-**Recommendation:** Do NOT apply the same event-driven pattern to keeper-service for v1.3. Liquidation scanning is fundamentally different -- it requires continuous position evaluation, not reaction to specific creation events. The v1.3 focus should be exclusively on order-execution-keeper-service.
+| Concern | At 7 tokens | At 20 tokens | At 50+ tokens |
+|---------|-------------|--------------|---------------|
+| Background price updates | 7 TXs / 5s = 1.4 TPS | 20 TXs / 5s = 4 TPS | Needs batching |
+| Route map lookup | O(1) per token | O(1) per token | O(1) per token |
+| Startup verification | <10s | <15s | <30s |
+| Nonce contention | Low (sequential) | Medium | Needs multi-wallet |
+| Hermes REST calls | 0-4 per execution | Depends on routing | Needs batch API |
 
 ---
 
 ## Sources
 
-- Codebase analysis: `order-execution-keeper-service/src/` (all scanner, executor, oracle, config files)
-- Codebase analysis: `keeper-service/src/core/confirmator.ts` (existing event watcher pattern)
-- [viem watchContractEvent docs](https://viem.sh/docs/contract/watchContractEvent) -- WebSocket vs polling behavior
-- [viem createNonceManager docs](https://viem.sh/docs/accounts/local/createNonceManager) -- concurrent nonce management
-- [viem nonce management discussion](https://github.com/wevm/viem/discussions/1338) -- parallel transaction patterns
-- [Base chain specs](https://chainspect.app/chain/base) -- 2s block time
-- [GMX Synthetics architecture](https://github.com/gmx-io/gmx-synthetics) -- keeper execution patterns
-- [Chainlink GMX automation](https://github.com/Cyfrin/chainlink-gmx-automation) -- high-frequency price automation
+### Primary (HIGH confidence)
+- `order-execution-keeper-service/src/core/oracle/pythLazerOracle.ts` -- Full Lazer service implementation
+- `order-execution-keeper-service/src/core/oracle/pythOracle.ts` -- Full Hermes service implementation
+- `order-execution-keeper-service/src/core/executors/baseExecutor.ts` -- `buildOracleParams()` logic (lines 202-291)
+- `order-execution-keeper-service/src/index.ts` -- Startup, drainQueue, nonce coordination
+- `order-execution-keeper-service/src/config/tokens.ts` -- Feed configs, commented-out FX feeds
+- `0xmarkets_contract/contracts/oracle/Oracle.sol` -- Provider validation (lines 250-280)
+- `0xmarkets_contract/contracts/oracle/PythLazerFeedProvider.sol` -- On-chain price storage contract
+- `0xmarkets_contract/deploy/configureOracleTokens.ts` -- Default provider = PythLazerFeedProvider
+- `0xmarkets_contract/utils/oracle.ts` -- `getOracleProviderAddress()` resolves provider names to addresses
+- `0xmarkets_contract/config/tokens.ts` -- All 7 tokens have `pythLazerFeedId` configured
+- `0xmarkets_contract/config/types.d.ts` -- `OracleProvider` type definition
+
+### Secondary (MEDIUM confidence)
+- Phase 13 research (`13-RESEARCH.md`) -- Entitlement analysis and error selector identification
+- `0xmarkets_contract/scripts/printOracleConfig.ts` -- Diagnostic script for on-chain state
+- `0xmarkets_contract/scripts/initOracleConfigForTokens.ts` -- Direct provider registration via Config contract
+
+### Derived (from codebase analysis)
+- The `0x05d102a2` error is confirmed as `InvalidOracleProvider(address)` -- provider not enabled in DataStore
+- The `InvalidOracleProviderForToken(provider, expectedProvider)` is the more likely error for FX tokens -- provider enabled but doesn't match the token's assigned provider
+- `ChainlinkPriceFeedProvider` exists on-chain but its compatibility with Pyth Hermes data is UNVERIFIED

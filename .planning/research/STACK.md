@@ -1,174 +1,267 @@
-# Technology Stack: Keeper Execution Speed Optimization
+# Technology Stack: Maximum Keeper Speed with Dual Oracle Configuration
 
-**Project:** 0xMarkets Keeper Speed (v1.3)
-**Researched:** 2026-02-23
-**Scope:** Stack additions/changes needed for sub-10s keeper execution
+**Project:** 0xMarkets v1.4 Maximum Keeper Speed
+**Researched:** 2026-02-24
+**Scope:** Pyth Pro API key deployment, dual oracle mode (Lazer for crypto, Hermes for FX), on-chain oracle provider registration, execution speed optimization
 
-## Current Stack (Validated, No Changes Needed)
+## Current Stack (Already Validated in v1.3)
 
-These are already in place and correct for the task. Listed for context only.
+No changes needed to these. Listed for context.
 
-| Technology | Version | Service | Purpose |
-|------------|---------|---------|---------|
-| viem | ^2.40.3 | Both | Blockchain interaction, tx submission |
-| pino | ^10.3.1 | Both | Structured JSON logging |
-| Prisma | ^7.2.0 / ^5.22.0 | order-exec / keeper | ORM for state management |
-| Express | ^5.1.0 | Both | Health endpoint HTTP server |
-| Pyth Lazer SDK | ^5.2.0 | Both | Binary WebSocket price feeds |
-| PostgreSQL 14 | Docker | Both | Persistence layer |
-| TypeScript | ^5.9.3 | Both | Language |
+| Technology | Installed Version | Purpose |
+|------------|-------------------|---------|
+| viem | 2.44.4 | Blockchain interaction, tx submission |
+| @pythnetwork/pyth-lazer-sdk | 5.2.1 | Binary WebSocket price feeds (Lazer/Pro) |
+| @pythnetwork/hermes-client | 2.1.0 | Standard HTTP price feeds (Hermes) |
+| pino | ^10.3.1 | Structured JSON logging |
+| Prisma | ^7.2.0 | ORM for state management |
+| Express | ^5.1.0 | Health endpoint HTTP server |
+| TypeScript | ^5.9.3 | Language |
+| PostgreSQL 14 | Docker | Persistence layer |
 
 ## Recommended Stack Changes
 
-### 1. WebSocket Transport for viem (CRITICAL)
+### 1. Per-Market Oracle Mode Configuration (CRITICAL)
 
-**What:** Add a `webSocket` transport to both services' viem `PublicClient` so `watchContractEvent` uses real `eth_subscribe` push subscriptions instead of HTTP polling.
+**What:** Replace the global `ORACLE_MODE` env var with per-token oracle routing logic that selects Lazer for crypto tokens and Hermes for FX/commodity tokens.
 
-**Why this is the single highest-impact change:**
-- Current state: Both services use `http()` transport. The keeper-service's `EventConfirmator` already calls `publicClient.watchContractEvent()`, but because the client uses HTTP transport, viem silently falls back to `eth_getFilterChanges` polling (default ~4s interval). The order-execution-keeper doesn't use event watching at all -- it polls DataStore every `scanIntervalSeconds` (default 10s).
-- With WebSocket: `watchContractEvent` with a `webSocket()` transport and `poll: false` uses `eth_subscribe` for real-time push. Events arrive within ~200-500ms of block inclusion on Base Sepolia (2s block time). This eliminates the 10s polling delay entirely.
-- The gap between "user submits createDeposit" and "keeper starts executing" drops from 0-10s (polling lottery) to ~2-3s (next block + WebSocket push).
+**Why:** The current `ORACLE_MODE=lazer` applies globally. FX tokens (EUR, GBP, JPY, GOLD) fail because:
+1. The Pyth Pro API key has entitlements for `[crypto, index, nav, crypto-redemption-rate]` only -- no FX/commodity entitlement (confirmed in `config/tokens.ts` comments: "key entitled for [crypto, index, nav, crypto-redemption-rate] only. Need FX entitlement from Pyth.")
+2. FX Lazer feed configs are commented out in the keeper's `PYTH_LAZER_FEED_CONFIGS`
+3. When the keeper tries to execute FX token operations with `ORACLE_MODE=lazer`, there is no cached Lazer update for FX tokens, causing failures
 
-**What to install:** Nothing new. `webSocket` transport is built into `viem` -- it's `import { webSocket } from 'viem'`. Already available at ^2.40.3.
-
-**Configuration:**
+**Solution architecture:** A token-level oracle routing map, not a global mode switch.
 
 ```typescript
-import { createPublicClient, webSocket, http, fallback } from 'viem'
+// New: per-token oracle mode based on feed availability
+type TokenOracleMode = "lazer" | "hermes";
 
-// WebSocket primary, HTTP fallback for resilience
-const publicClient = createPublicClient({
-  chain: customChain,
-  transport: fallback([
-    webSocket(config.wsRpcUrl, {
-      reconnect: {
-        attempts: 10,
-        delay: 1_000,
-      },
-    }),
-    http(config.rpcUrl),
-  ]),
-  batch: { multicall: true },
-})
+interface TokenOracleRouting {
+  token: Address;
+  mode: TokenOracleMode;
+  provider: Address; // on-chain oracle provider contract address
+}
+
+// Crypto tokens: Lazer (fast, ~200ms WebSocket updates)
+// FX tokens: Hermes (standard HTTP, ~1-2s)
+const ORACLE_ROUTING: TokenOracleRouting[] = [
+  { token: TOKEN_ADDRESSES.WETH, mode: "lazer", provider: PYTH_LAZER_FEED_PROVIDER },
+  { token: TOKEN_ADDRESSES.WBTC, mode: "lazer", provider: PYTH_LAZER_FEED_PROVIDER },
+  { token: TOKEN_ADDRESSES.USDC, mode: "lazer", provider: PYTH_LAZER_FEED_PROVIDER },
+  { token: TOKEN_ADDRESSES.EUR,  mode: "hermes", provider: CHAINLINK_PRICE_FEED_PROVIDER },
+  { token: TOKEN_ADDRESSES.GBP,  mode: "hermes", provider: CHAINLINK_PRICE_FEED_PROVIDER },
+  { token: TOKEN_ADDRESSES.GOLD, mode: "hermes", provider: CHAINLINK_PRICE_FEED_PROVIDER },
+  { token: TOKEN_ADDRESSES.JPY,  mode: "hermes", provider: CHAINLINK_PRICE_FEED_PROVIDER },
+];
 ```
 
-**New env var needed:** `WS_RPC_URL` (e.g., `wss://base-sepolia.g.alchemy.com/v2/<key>`)
+**What to install:** Nothing new. This is a configuration/routing change in `baseExecutor.ts` and `config/tokens.ts`.
 
-**RPC Provider for WebSocket on Base Sepolia:**
+**Impact on buildOracleParams():** The method currently branches on `config.oracleMode` globally. It needs to branch per-token: for each token in the operation, check if it has a Lazer feed or a Hermes feed, and route accordingly.
 
-| Provider | WSS Endpoint | Free Tier | Notes |
-|----------|-------------|-----------|-------|
-| Alchemy | `wss://base-sepolia.g.alchemy.com/v2/<key>` | Yes (300M CU/mo) | Best choice -- reliable WebSocket, Base Sepolia supported |
-| QuickNode | `wss://...quiknode.pro/<key>` | Limited free | Good alternative |
-| Ankr | `wss://rpc.ankr.com/base_sepolia/...` | Yes | Less reliable reconnection |
-
-**Recommendation:** Use Alchemy. Free tier is sufficient for testnet keeper traffic. Their WebSocket implementation is stable with proper reconnection support.
-
-**Confidence:** HIGH -- viem's `webSocket` transport, `fallback` transport, and `watchContractEvent` with `poll: false` are well-documented stable features at v2.x. The keeper-service already uses `watchContractEvent` (just over HTTP polling currently).
+**Confidence:** HIGH -- The existing code already has both `PythOracleService` (Hermes) and `PythLazerOracleService` (Lazer) fully functional. The routing logic is the missing piece.
 
 ---
 
-### 2. Event-Driven Operation Detection for order-execution-keeper (CRITICAL)
+### 2. On-Chain Oracle Provider Registration for FX Tokens (CRITICAL -- BLOCKER)
 
-**What:** Replace the `setInterval` polling loop in `order-execution-keeper-service/src/index.ts` with `watchContractEvent` listeners on the EventEmitter contract for `DepositCreated`, `WithdrawalCreated`, and `OrderCreated` events.
+**What:** Register a Hermes-compatible oracle provider (ChainlinkPriceFeedProvider) for FX tokens in the DataStore, and configure Chainlink-compatible price feeds for EUR, GBP, GOLD, JPY.
 
-**Why:** The current architecture:
-1. User submits `createDeposit` tx (creates request on-chain)
-2. Keeper waits for next `setInterval` tick (0-10s delay)
-3. Keeper calls `DataStore.getBytes32Count` + `getBytes32ValuesAt` (1-2 RPC calls)
-4. Keeper calls `Reader.getDeposits` for new keys (1 RPC call)
-5. Keeper stores in Prisma, then executes
+**Why:** The `InvalidOracleProvider (0x05d102a2)` error on FX withdrawals is caused by the Oracle.sol contract's validation logic:
 
-With event-driven detection:
-1. User submits `createDeposit` tx (creates request on-chain)
-2. EventEmitter emits `EventLog1`/`EventLog2` with eventName `DepositCreated` (~200ms after block)
-3. Keeper immediately starts execution
-
-This eliminates steps 2-4 entirely for new requests. The DataStore polling should remain as a **fallback** (reduced to every 30-60s) to catch any events missed during WebSocket reconnection.
-
-**What to install:** Nothing new. Uses existing `viem` `watchContractEvent` + the EventEmitter ABI that already exists in the keeper-service. The order-execution-keeper needs its own copy of the EventEmitter ABI.
-
-**EventEmitter events to watch:**
-
-| Event Name (in eventData) | Purpose | Maps to Scanner |
-|----------------------------|---------|-----------------|
-| `DepositCreated` | New deposit request | DepositScanner |
-| `WithdrawalCreated` | New withdrawal request | WithdrawalScanner |
-| `OrderCreated` | New order (market/limit) | OrderScanner |
-
-All emitted via `EventLog1` or `EventLog2` on the EventEmitter contract (address already in config: `EVENT_EMITTER_ADDRESS`).
-
-**Confidence:** HIGH -- The keeper-service's `EventConfirmator` already does exactly this pattern for `OrderExecuted` events. The order-execution-keeper needs the same pattern for creation events.
-
----
-
-### 3. Reduced Scan Interval as Fallback (LOW EFFORT)
-
-**What:** Keep the `setInterval` polling loop but reduce `SCAN_INTERVAL_SECONDS` from `10` to `3` as an immediate improvement, even before WebSocket migration.
-
-**Why:** Base Sepolia has 2s block times. A 10s polling interval means 0-10s latency for detection. Reducing to 3s means 0-3s latency. Combined with the WebSocket event listener (which handles the fast path), the polling becomes a reliable catch-all fallback.
-
-**After WebSocket migration:** Increase fallback polling interval to 30-60s. The polling path only needs to catch missed events, not be the primary detection mechanism.
-
-**What to install:** Nothing. Config change only.
-
-**Confidence:** HIGH -- Trivial change, no new dependencies.
-
----
-
-### 4. Parallel Oracle Price Updates (MEDIUM IMPACT)
-
-**What:** Use `Promise.all` for oracle price updates when multiple tokens need pricing, instead of the current sequential loop.
-
-**Why:** In `baseExecutor.ts`, the `buildOracleParams` method updates Pyth Lazer prices sequentially:
-
-```typescript
-// Current: sequential
-for (const token of tokensToPrice) {
-  await pythLazerOracle.updatePriceOnChain(token);
+```solidity
+// Oracle.sol lines 276-279
+address expectedProvider = dataStore.getAddress(Keys.oracleProviderForTokenKey(token));
+if (provider != expectedProvider) {
+    revert Errors.InvalidOracleProviderForToken(provider, expectedProvider);
 }
 ```
 
-Each `updatePriceOnChain` is an on-chain transaction that takes ~2-4s. With 2-3 tokens per deposit, this adds 4-12s of serial oracle updates. However, these updates use the same keeper wallet, so parallelization creates nonce conflicts.
+Currently, ALL tokens (including FX) have `PythLazerFeedProvider` set as their `oracleProviderForToken` in DataStore (set by `configureOracleTokens.ts` with `defaultOracleProvider = "pythLazerFeed"`). When the keeper passes Hermes data with a different provider address, the contract reverts.
 
-**Actual fix:** Batch oracle updates into a single multicall transaction, or use viem's `writeContract` with explicit nonce management for parallel submission.
+**The fix requires two things:**
 
-**Realistic approach for single-wallet constraint:** The oracle price updates are the bottleneck, not the detection. Two strategies:
+1. **Change `oracleProviderForToken` in DataStore** for FX tokens to point to `ChainlinkPriceFeedProvider` (which is already deployed and enabled as an oracle provider).
+2. **Configure Chainlink price feeds** for FX tokens in DataStore (price feed address, multiplier, heartbeat duration).
 
-1. **Pre-cache oracle prices:** Update all token prices on-chain on every new Pyth Lazer WebSocket message (proactively), not just when a deposit is detected. This makes `buildOracleParams` a no-op read instead of a write.
-2. **Skip redundant updates:** Track the last on-chain update timestamp per token. If the price was updated within the last N seconds, skip the update.
+**How to execute this on Base Sepolia:**
 
-**What to install:** Nothing new. Architecture change using existing viem + Pyth Lazer SDK.
+Since this is testnet (no Timelock), the deployer wallet can call DataStore.setAddress directly:
 
-**Confidence:** MEDIUM -- The single-wallet nonce constraint is real and limits true parallelism. Pre-caching is the correct pattern but needs careful implementation to avoid wasting gas on unnecessary updates.
+```typescript
+// Script: register-hermes-provider-for-fx.ts (viem-based, runs against Base Sepolia)
+import { keccak256, encodeAbiParameters } from "viem";
+
+// Key computation (matches contracts/data/Keys.sol)
+const ORACLE_PROVIDER_FOR_TOKEN = keccak256(
+  encodeAbiParameters([{ type: "string" }], ["ORACLE_PROVIDER_FOR_TOKEN"])
+);
+
+function oracleProviderForTokenKey(token: Address): Hex {
+  return keccak256(
+    encodeAbiParameters(
+      [{ type: "bytes32" }, { type: "address" }],
+      [ORACLE_PROVIDER_FOR_TOKEN, token]
+    )
+  );
+}
+
+// For each FX token: dataStore.setAddress(oracleProviderForTokenKey(token), chainlinkPriceFeedProviderAddress)
+```
+
+**Required contract addresses (already deployed on Base Sepolia):**
+
+| Contract | Purpose | How to Find Address |
+|----------|---------|---------------------|
+| ChainlinkPriceFeedProvider | Oracle provider for Hermes/price-feed tokens | `deployments/baseSepolia/ChainlinkPriceFeedProvider.json` |
+| DataStore | Storage contract for oracle config | Already in keeper .env: `0xBaD049d5FedE7Bd9022F7E750B982349fE17e83E` |
+| PythLazerFeedProvider | Oracle provider for Lazer tokens (keep for crypto) | Already in keeper .env: `0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05` |
+
+**Additional DataStore keys to set for each FX token:**
+
+| Key | Value | Purpose |
+|-----|-------|---------|
+| `priceFeedKey(token)` | Chainlink/Pyth Hermes price feed address | Where to read the price |
+| `priceFeedMultiplierKey(token)` | `expandDecimals(1, 60 - tokenDecimals - feedDecimals)` | Normalize price precision |
+| `priceFeedHeartbeatDurationKey(token)` | `86400` (24h for testnet) | Max acceptable price age |
+
+**What to install:** Nothing new. This is a one-time admin script using viem (already installed). The script runs from the contracts repo using Hardhat OR from a standalone viem script.
+
+**Confidence:** HIGH -- The exact same pattern is used in `configureOracleTokens.ts` (deploy script) and `updateOracleConfigForTokens.ts` (admin script). The Oracle.sol validation logic is unambiguous.
+
+---
+
+### 3. Pyth Pro API Key Verification (MEDIUM -- PRE-REQUISITE)
+
+**What:** Verify the new Pyth Pro API key (`QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN`) has correct entitlements for the crypto feeds being used (feed IDs 1, 2, 7).
+
+**Why:** The previous token had zero entitlements. The new key is labeled "crypto account" which should cover BTC (feed 1), ETH (feed 2), and USDC (feed 7). But entitlement verification should happen before deployment.
+
+**How to verify:**
+
+```typescript
+// Quick verification script: connect with the token and subscribe to feeds
+const client = await PythLazerClient.create({
+  token: "QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN",
+});
+
+client.subscribe({
+  type: "subscribe",
+  subscriptionId: 1,
+  priceFeedIds: [1, 2, 7], // BTC, ETH, USDC
+  properties: ["price"],
+  formats: ["evm"],
+  deliveryFormat: "binary",
+  channel: "fixed_rate@200ms",
+  parsed: false,
+});
+
+// If subscription succeeds and data flows: entitlements confirmed
+// If subscriptionError with "not entitled": need different key or entitlement upgrade
+```
+
+**FX feed verification (separate):**
+
+The FX feeds (327=EUR, 333=GBP, 346=GOLD, 340=JPY) require FX entitlement which the current key does NOT have. This is why Hermes fallback is needed for FX -- not a bug to fix, but a known limitation driving the dual-oracle architecture.
+
+**What to install:** Nothing. Uses existing `@pythnetwork/pyth-lazer-sdk`.
+
+**Confidence:** HIGH for crypto feeds. The key type "crypto account" should entitle feeds 1, 2, 7. LOW for FX -- FX entitlement is a separate Pyth tier that requires contacting Pyth team.
+
+---
+
+### 4. Hermes Price Update Integration in buildOracleParams (CRITICAL)
+
+**What:** Modify `buildOracleParams` in `baseExecutor.ts` to use Hermes `getPriceUpdateData()` for FX tokens and pass the update data as the `data` field in oracle params (instead of empty `0x`).
+
+**Why:** The current Hermes path in `buildOracleParams` uses `pythOracle.buildSetPricesParams()` which encodes price data in a custom format. But with ChainlinkPriceFeedProvider as the on-chain provider, the `data` field is ignored (the provider reads from on-chain Chainlink feeds). So for FX tokens using ChainlinkPriceFeedProvider, the keeper passes:
+
+```typescript
+// For Hermes/ChainlinkPriceFeed tokens: provider reads price on-chain, data is empty
+{
+  tokens: [fxToken],
+  providers: [chainlinkPriceFeedProviderAddress],
+  data: ["0x"],
+}
+```
+
+The ChainlinkPriceFeedProvider.getOraclePrice() reads directly from the Chainlink price feed configured in DataStore -- it does not use the `data` parameter at all.
+
+**Key insight:** On Base Sepolia, Chainlink price feeds may not exist for all FX pairs. If they do not, we need a different approach: use the Hermes price data to store prices via a custom provider, OR set up mock price feeds. This needs validation during implementation.
+
+**Fallback approach if no Chainlink feeds exist on Base Sepolia:** Deploy simple price feed contracts that the keeper updates via Hermes data. This is more complex but would work.
+
+**What to install:** Nothing new.
+
+**Confidence:** MEDIUM -- The ChainlinkPriceFeedProvider pattern is well-understood from the codebase. The uncertainty is whether Chainlink has the FX feeds deployed on Base Sepolia specifically.
+
+---
+
+### 5. SDK Version Consideration (LOW PRIORITY)
+
+**What:** Optionally update `@pythnetwork/pyth-lazer-sdk` from 5.2.1 to 6.0.0 and `@pythnetwork/hermes-client` from 2.1.0 to 3.1.0.
+
+**Why NOT to update now:**
+- `pyth-lazer-sdk` 6.0.0 was published 2 days ago. Major version = breaking changes. The current 5.2.1 works.
+- `hermes-client` 3.1.0 is also a major version bump from 2.1.0.
+- Updating both SDKs while also changing the oracle routing architecture adds unnecessary risk.
+
+**When to update:** After v1.4 is stable, as a separate maintenance task. Pin to current working versions for now.
+
+**Confidence:** HIGH -- "don't fix what isn't broken" during a feature milestone.
+
+---
+
+### 6. Execution Speed Profiling (LOW EFFORT, HIGH VALUE)
+
+**What:** Add granular timing instrumentation to the execution pipeline to measure where time is actually spent.
+
+**Why:** The existing `latencyTracker` records end-to-end latency but doesn't break down the pipeline stages. To optimize further, we need to know:
+- Time from event detection to queue dequeue
+- Time spent on `isStoredPriceFresh()` check
+- Time spent on synchronous `updatePriceOnChain()` fallback
+- Time spent on gas estimation
+- Time spent on TX submission
+- Time spent waiting for TX confirmation
+
+**Implementation:** Use `performance.now()` (Node.js built-in) at each stage boundary in `baseExecutor.ts` and `depositExecutor.ts`, log as structured pino fields.
+
+```typescript
+const t0 = performance.now();
+const oracleParams = await this.buildOracleParams(market, tokens);
+const t1 = performance.now();
+log.info({ stage: "buildOracleParams", durationMs: Math.round(t1 - t0) }, "timing");
+```
+
+**What to install:** Nothing. `performance.now()` is built into Node.js.
+
+**Confidence:** HIGH -- Standard profiling pattern.
 
 ---
 
 ## What NOT to Add
 
-### Message Queues (Redis, RabbitMQ, BullMQ)
+### Do NOT Upgrade Pyth SDKs (pyth-lazer-sdk 6.0.0, hermes-client 3.1.0)
 
-**Why not:** Overengineering. Both keepers are single-process Node.js services with one wallet. There is no fan-out, no multi-consumer pattern, no horizontal scaling need. The "queue" is already the on-chain DataStore list + Prisma status tracking. Adding a message queue adds operational complexity (another Docker service, failure modes, monitoring) for zero latency benefit.
+**Why not:** Both are major version bumps released very recently. The existing versions (5.2.1, 2.1.0) work correctly. Upgrading during a feature milestone that changes oracle routing introduces two variables instead of one. Upgrade in a separate maintenance pass.
 
-**When it would matter:** If you had multiple keeper wallets executing in parallel, a queue would coordinate work distribution. That's not the v1.3 scope.
+### Do NOT Create a Custom Hermes Oracle Provider Contract
 
-### Worker Threads (node:worker_threads)
+**Why not:** The codebase already has `ChainlinkPriceFeedProvider` deployed and enabled. It reads Chainlink price feeds from DataStore. If Chainlink feeds exist on Base Sepolia for FX pairs, use them. A custom "HermesOracleProvider" would need to be written in Solidity, deployed, and enabled -- unnecessary complexity when an existing provider may work.
 
-**Why not:** The keeper workload is I/O-bound (RPC calls, WebSocket messages, database queries), not CPU-bound. Node.js's event loop handles I/O concurrency natively. Worker threads help with CPU-intensive work (heavy crypto computation, data transformation). The keeper does none of that -- it waits for network responses.
+**Exception:** If Chainlink FX feeds are not available on Base Sepolia, a `PythHermesFeedProvider` contract would be needed. But validate first before building.
 
-**When it would matter:** If oracle price validation involved heavy cryptographic verification (e.g., verifying ZK proofs), worker threads would prevent blocking the event loop. Pyth Lazer SDK handles this internally already.
+### Do NOT Add a Separate Admin Service
 
-### ethers.js WebSocketProvider
+**Why not:** The on-chain oracle provider registration is a one-time admin operation (a script that calls `DataStore.setAddress` for 4 FX tokens). It does not need a persistent service. A standalone viem script or Hardhat task is sufficient.
 
-**Why not:** The project already uses viem exclusively. viem's `webSocket` transport provides identical WebSocket subscription functionality (`eth_subscribe`). Adding ethers.js would mean maintaining two blockchain libraries for the same feature. viem's TypeScript-first design is also better for this codebase.
+### Do NOT Add Multi-Wallet Keeper Support
 
-### Separate Event Indexer Service (Squid, Ponder, custom)
+**Why not:** Out of scope for v1.4. The single-wallet sequential execution model works. The nonce coordination between background oracle updates and execution transactions (disable/enable pattern in `drainQueue`) is already well-implemented.
 
-**Why not:** There's already a Squid indexer (`0xMarkets-squid`) for historical data. The keeper needs real-time event detection, not indexed historical data. An indexer adds latency (sync delay) rather than reducing it. Direct `watchContractEvent` on the EventEmitter is the fastest path.
+### Do NOT Replace Hermes with PythNet Direct
 
-### Custom WebSocket Reconnection Library (ws, reconnecting-websocket)
-
-**Why not:** viem's `webSocket` transport has built-in reconnection with configurable `attempts` and `delay`. The `fallback` transport adds HTTP as an automatic backup. No need for a custom reconnection layer.
+**Why not:** `@pythnetwork/hermes-client` is the standard, supported way to get Pyth prices via HTTP. PythNet direct access requires running a validator node. Hermes is the correct choice for non-Lazer tokens.
 
 ---
 
@@ -178,89 +271,151 @@ Each `updatePriceOnChain` is an on-chain transaction that takes ~2-4s. With 2-3 
 
 | Setting | Value | Service | Purpose |
 |---------|-------|---------|---------|
-| `WS_RPC_URL` | `wss://base-sepolia.g.alchemy.com/v2/<key>` | Both | WebSocket RPC for event subscriptions |
-| `SCAN_INTERVAL_SECONDS` | `3` (immediate) / `30` (after WS) | order-exec | Reduced polling interval |
+| `CHAINLINK_PRICE_FEED_PROVIDER_ADDRESS` | TBD (read from deployments) | order-exec | On-chain provider address for FX tokens |
+| `ORACLE_MODE` | Change from `"lazer"` to `"dual"` | order-exec | Signal per-token routing logic |
+
+### New Keys in `src/core/utils/keys.ts`
+
+```typescript
+export const ORACLE_PROVIDER_FOR_TOKEN = keccak256(
+  encodeAbiParameters([{ type: "string" }], ["ORACLE_PROVIDER_FOR_TOKEN"])
+);
+
+export function oracleProviderForTokenKey(token: Address): Hex {
+  return keccak256(
+    encodeAbiParameters(
+      [{ type: "bytes32" }, { type: "address" }],
+      [ORACLE_PROVIDER_FOR_TOKEN, token]
+    )
+  );
+}
+```
 
 ### Code Changes (No New Packages)
 
 | Change | Service | File(s) | Impact |
 |--------|---------|---------|--------|
-| Add `webSocket` + `fallback` transport | order-exec | `src/core/blockchain/client.ts` | WebSocket event subscription support |
-| Add `webSocket` + `fallback` transport | keeper | `src/core/contract.ts` | WebSocket event subscription support |
-| Add EventEmitter ABI | order-exec | `src/core/blockchain/contracts/abis/event-emitter.ts` | Event decoding for creation events |
-| Add event listener for DepositCreated/WithdrawalCreated/OrderCreated | order-exec | `src/index.ts` (new event watcher module) | Event-driven detection |
-| Proactive oracle price caching | order-exec | `src/core/oracle/` | Eliminate per-execution oracle update latency |
-| Reduce SCAN_INTERVAL_SECONDS default | order-exec | `src/config.ts` | Faster fallback polling |
+| Per-token oracle routing map | order-exec | `src/config/tokens.ts` | Maps each token to its oracle mode + provider |
+| Dual-mode `buildOracleParams` | order-exec | `src/core/executors/baseExecutor.ts` | Routes Lazer vs Hermes per token |
+| Add `CHAINLINK_PRICE_FEED_PROVIDER_ADDRESS` config | order-exec | `src/config.ts` | New env var |
+| Add `oracleProviderForTokenKey` to keys | order-exec | `src/core/utils/keys.ts` | For verification reads |
+| On-chain provider registration script | contracts | `scripts/register-fx-oracle-provider.ts` | One-time admin setup |
+| Pipeline timing instrumentation | order-exec | `src/core/executors/*.ts` | Latency breakdown logging |
+| API key verification script | order-exec | `scripts/verify-pyth-entitlements.ts` | One-time validation |
 
 ### Installation
 
 ```bash
-# No new packages needed. All capabilities exist in viem ^2.40.3.
+# No new packages needed. All capabilities exist in the current stack.
 # Only configuration changes:
 
-# 1. Get Alchemy API key for Base Sepolia (free tier)
-# 2. Add to .env files:
-WS_RPC_URL=wss://base-sepolia.g.alchemy.com/v2/YOUR_KEY
+# 1. Find ChainlinkPriceFeedProvider address from deployments:
+#    cat 0xmarkets_contract/deployments/baseSepolia/ChainlinkPriceFeedProvider.json | jq .address
 
-# 3. Reduce scan interval (immediate win):
-SCAN_INTERVAL_SECONDS=3
+# 2. Add to order-execution-keeper .env:
+CHAINLINK_PRICE_FEED_PROVIDER_ADDRESS=<address from step 1>
+ORACLE_MODE=dual
+
+# 3. Run on-chain registration script (one-time, from contracts repo):
+#    npx hardhat run scripts/register-fx-oracle-provider.ts --network baseSepolia
+
+# 4. Run entitlement verification script (one-time):
+#    npx tsx scripts/verify-pyth-entitlements.ts
 ```
 
-## Latency Budget Analysis
+---
 
-**Current (polling at 10s interval):**
+## Execution Flow: Dual Oracle Mode
 
-| Step | Time | Cumulative |
-|------|------|------------|
-| User tx mined | 0s | 0s |
-| Wait for next poll tick | 0-10s (avg 5s) | 5s |
-| DataStore RPC calls (count + values) | ~1s | 6s |
-| Reader.getDeposits | ~0.5s | 6.5s |
-| Prisma store | ~0.1s | 6.6s |
-| Oracle price update(s) | 2-8s | 10-14s |
-| Gas estimation | ~0.5s | ~12s |
-| TX submission + confirmation | 2-4s | ~15s |
-| **Total** | | **10-18s** |
+**Before (single Lazer mode -- breaks on FX):**
 
-**Target (event-driven with WebSocket):**
+```
+Every token -> Lazer WebSocket cache -> updatePriceOnChain() -> PythLazerFeedProvider
+                                         ^ FX tokens have no Lazer cache = FAIL
+```
 
-| Step | Time | Cumulative |
-|------|------|------------|
-| User tx mined | 0s | 0s |
-| WebSocket event push | ~0.3s | 0.3s |
-| Extract key from event (no RPC) | ~0s | 0.3s |
-| Reader.getDeposit (single key) | ~0.3s | 0.6s |
-| Prisma store | ~0.1s | 0.7s |
-| Oracle price (pre-cached) | ~0s | 0.7s |
-| Gas estimation | ~0.5s | 1.2s |
-| TX submission | ~0.3s | 1.5s |
-| TX confirmation (next block) | 2s | 3.5s |
-| **Total** | | **3-5s** |
+**After (dual mode):**
 
-The two biggest latency wins:
-1. **Polling delay eliminated:** 5s average -> 0.3s (WebSocket push)
-2. **Oracle update eliminated:** 2-8s -> 0s (pre-cached prices)
+```
+Token detected in operation
+  |
+  +-- Has Lazer feed? (WETH, WBTC, USDC)
+  |     YES -> Check isStoredPriceFresh()
+  |              Fresh? -> Skip update, use PythLazerFeedProvider as provider
+  |              Stale? -> Sync updatePriceOnChain(), then use PythLazerFeedProvider
+  |
+  +-- Has Hermes feed only? (EUR, GBP, GOLD, JPY)
+        YES -> Use ChainlinkPriceFeedProvider as provider, pass empty data
+               (Provider reads from on-chain Chainlink feed configured in DataStore)
+```
+
+**Oracle params for a deposit on ETH/USDC market:**
+
+```typescript
+{
+  tokens: [WETH, USDC],          // Both have Lazer
+  providers: [PythLazerFeedProvider, PythLazerFeedProvider],
+  data: ["0x", "0x"],            // Prices pre-stored on-chain by background updater
+}
+```
+
+**Oracle params for a withdrawal from EUR/USDC pool:**
+
+```typescript
+{
+  tokens: [EUR, USDC],           // EUR = Hermes, USDC = Lazer
+  providers: [ChainlinkPriceFeedProvider, PythLazerFeedProvider],
+  data: ["0x", "0x"],            // EUR price from Chainlink feed, USDC from stored Lazer
+}
+```
+
+---
+
+## Latency Impact Analysis
+
+**Current state (ORACLE_MODE=lazer, FX broken):**
+
+| Token Type | Detection | Oracle | Execution | Total | Status |
+|------------|-----------|--------|-----------|-------|--------|
+| Crypto (ETH, BTC) | ~0.3s (event) | ~0s (pre-cached) | ~2.5s | ~3s | Working |
+| FX (EUR, GBP, etc.) | ~0.3s (event) | FAIL | -- | -- | InvalidOracleProvider |
+
+**After dual mode:**
+
+| Token Type | Detection | Oracle | Execution | Total | Status |
+|------------|-----------|--------|-----------|-------|--------|
+| Crypto (ETH, BTC) | ~0.3s (event) | ~0s (pre-cached Lazer) | ~2.5s | ~3s | Working |
+| FX (EUR, GBP, etc.) | ~0.3s (event) | ~0s (Chainlink on-chain) | ~2.5s | ~3s | Fixed |
+
+FX operations will be as fast as crypto operations because ChainlinkPriceFeedProvider reads prices on-chain (no keeper-side price push needed for FX).
+
+---
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Event detection | viem `watchContractEvent` + WebSocket | ethers.js `WebSocketProvider` | Already using viem; identical capability |
-| Event detection | viem `watchContractEvent` + WebSocket | Squid/Ponder indexer | Adds latency, not reduces it |
-| Transport | viem `fallback([webSocket, http])` | WebSocket only | HTTP fallback prevents total failure on WS disconnect |
-| Concurrency | Single event loop, sequential TX | Worker threads | I/O-bound workload, not CPU-bound |
-| Work distribution | Direct execution on event | Message queue (Redis/BullMQ) | Single wallet, single process -- no fan-out needed |
-| Oracle optimization | Proactive price caching | Parallel price updates | Single wallet nonce constraint prevents true parallelism |
+| FX oracle | ChainlinkPriceFeedProvider | Custom PythHermesFeedProvider contract | Existing provider already deployed; avoid new contract deployment |
+| Oracle routing | Per-token config map | Global mode switch with fallback | Explicit routing prevents silent fallback bugs |
+| FX Lazer feeds | Skip (use Hermes) | Request FX entitlement from Pyth | Depends on Pyth team timeline; Hermes is immediately available |
+| SDK upgrade | Stay on 5.2.1 / 2.1.0 | Upgrade to 6.0.0 / 3.1.0 | Major version bumps during feature work = unnecessary risk |
+| Admin scripts | Standalone viem script | Hardhat deploy task | Simpler, no Hardhat dependency in keeper repo |
+| Price feed for FX | Chainlink on-chain feeds | Keeper pushes Hermes prices | On-chain reads are atomic; no extra TX needed |
 
 ## Sources
 
-- [viem watchContractEvent documentation](https://viem.sh/docs/contract/watchContractEvent) -- WebSocket subscription behavior, poll configuration
-- [viem WebSocket Transport documentation](https://viem.sh/docs/clients/transports/websocket) -- reconnect configuration, transport setup
-- [viem Fallback Transport documentation](https://v1.viem.sh/docs/clients/transports/fallback.html) -- multi-transport resilience, ranking
-- [viem Discussion #503: eth_subscribe vs eth_getFilterChanges](https://github.com/wevm/viem/discussions/503) -- polling vs subscription internals
-- [Alchemy Base Sepolia RPC](https://www.alchemy.com/chain-connect/chain/base-sepolia-testnet) -- WSS endpoint availability
-- [GMX Synthetics EventEmitter.sol](https://github.com/gmx-io/gmx-synthetics/blob/main/contracts/event/EventEmitter.sol) -- Event architecture reference
-- [GMX Synthetics documentation](https://github.com/gmx-io/gmx-synthetics) -- Keeper architecture (keepers listen for events, bundle oracle prices, execute)
-- Codebase analysis: `keeper-service/src/core/confirmator.ts` already uses `watchContractEvent` pattern (lines 50-58)
-- Codebase analysis: `order-execution-keeper-service/src/core/blockchain/client.ts` uses `http()` transport only (line 31)
-- Codebase analysis: `order-execution-keeper-service/src/index.ts` uses `setInterval` at `scanIntervalSeconds` (line 180-184)
+- Codebase: `0xmarkets_contract/contracts/oracle/Oracle.sol` lines 251-280 -- Oracle provider validation logic
+- Codebase: `0xmarkets_contract/contracts/oracle/PythLazerFeedProvider.sol` -- Lazer stored price model
+- Codebase: `0xmarkets_contract/contracts/oracle/ChainlinkPriceFeedProvider.sol` -- On-chain price feed reader
+- Codebase: `0xmarkets_contract/deploy/configureOracleTokens.ts` -- Default provider = pythLazerFeed
+- Codebase: `0xmarkets_contract/deploy/configurePythLazerFeeds.ts` -- Lazer feed configuration pattern
+- Codebase: `order-execution-keeper-service/src/config/tokens.ts` lines 47-48 -- FX Lazer feeds commented out with entitlement note
+- Codebase: `order-execution-keeper-service/src/core/executors/baseExecutor.ts` -- Current buildOracleParams logic
+- [Pyth Pro Getting Started](https://docs.pyth.network/price-feeds/pro/getting-started) -- API key and entitlement setup
+- [Pyth Pro Price Feed IDs](https://docs.pyth.network/price-feeds/pro/price-feed-ids) -- Feed ID reference for crypto/FX/commodity
+- [Pyth Pro Subscribe to Prices](https://docs.pyth.network/price-feeds/pro/subscribe-to-prices) -- WebSocket subscription API
+- [GMX Synthetics Oracle.sol](https://github.com/gmx-io/gmx-synthetics/blob/main/contracts/oracle/Oracle.sol) -- Oracle provider validation reference
+- [GMX Synthetics Errors.sol](https://github.com/gmx-io/gmx-synthetics/blob/main/contracts/error/Errors.sol) -- Error selector reference
+- npm registry: `@pythnetwork/pyth-lazer-sdk` latest=6.0.0, installed=5.2.1
+- npm registry: `@pythnetwork/hermes-client` latest=3.1.0, installed=2.1.0
+- npm registry: `viem` latest=2.46.3, installed=2.44.4
