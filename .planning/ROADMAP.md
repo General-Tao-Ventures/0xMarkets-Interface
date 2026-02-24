@@ -42,7 +42,7 @@
 
 - [x] **Phase 10: Event-Driven Detection** - WebSocket event listeners with execution queue and polling fallback (completed 2026-02-23)
 - [x] **Phase 11: Execution Pipeline Optimization** - Oracle pre-caching and redundant read elimination (completed 2026-02-23)
-- [ ] **Phase 12: Observability & Tuning** - Heartbeat health model and latency metrics
+- [x] **Phase 12: Observability & Tuning** - Heartbeat health model and latency metrics (completed 2026-02-24)
 
 ## Phase Details
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 10 → 11 → 12
 | 9. UI Polish & Tech Debt | v1.2 | 2/2 | Complete | 2026-02-23 |
 | 10. Event-Driven Detection | 2/2 | Complete    | 2026-02-23 | - |
 | 11. Execution Pipeline Optimization | 2/2 | Complete    | 2026-02-23 | - |
-| 12. Observability & Tuning | 1/2 | In Progress|  | - |
+| 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
