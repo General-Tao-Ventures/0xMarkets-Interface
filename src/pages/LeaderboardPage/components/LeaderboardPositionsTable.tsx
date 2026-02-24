@@ -120,7 +120,7 @@ export function LeaderboardPositionsTable({
   );
 
   return (
-    <div className="rounded-b-8 bg-slate-900">
+    <div>
       <TableScrollFadeContainer>
         <table className="w-full min-w-[1024px] table-fixed">
           <thead>

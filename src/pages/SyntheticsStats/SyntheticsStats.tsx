@@ -75,12 +75,19 @@ export function SyntheticsStats() {
 
   return (
     <AppPageLayout>
-      <div className="SyntheticsStats mt-20">
-        <div className="SyntheticsStats-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th className="sticky-left">Market</th>
+      <div className="SyntheticsStats">
+        <div className="overflow-hidden rounded-8 border border-slate-800 bg-slate-750">
+          <div className="flex items-center justify-between border-b-1/2 border-slate-800 p-16">
+            <div className="flex flex-col gap-4">
+              <span className="text-h3 font-medium">Market Stats</span>
+              <span className="text-body-medium text-typography-secondary">Protocol market data and configuration</span>
+            </div>
+          </div>
+          <div className="SyntheticsStats-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th className="sticky-left">Market</th>
                 <th>Pool Value</th>
                 <th>Pool Balance</th>
                 <th>Pool Cap Long</th>
@@ -1231,14 +1238,15 @@ export function SyntheticsStats() {
               })}
             </tbody>
           </table>
-        </div>
-        <div>
-          <DownloadAsCsv
-            excludedFields={CSV_EXCLUDED_FIELDS}
-            data={markets}
-            fileName={`gmx_v2_markets_${format(new Date(), "yyyy-MM-dd")}`}
-            className="download-csv mt-15"
-          />
+          </div>
+          <div className="border-t-1/2 border-slate-600 p-16">
+            <DownloadAsCsv
+              excludedFields={CSV_EXCLUDED_FIELDS}
+              data={markets}
+              fileName={`gmx_v2_markets_${format(new Date(), "yyyy-MM-dd")}`}
+              className="download-csv"
+            />
+          </div>
         </div>
       </div>
     </AppPageLayout>

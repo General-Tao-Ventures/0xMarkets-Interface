@@ -174,7 +174,7 @@ export function LeaderboardAccountsTable({
   );
 
   return (
-    <div className="rounded-b-8 bg-slate-900">
+    <div>
       <TableScrollFadeContainer>
         <table className="w-full min-w-[1000px]">
           <thead>

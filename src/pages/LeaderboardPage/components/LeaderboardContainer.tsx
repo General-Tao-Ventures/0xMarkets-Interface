@@ -139,8 +139,8 @@ export function LeaderboardContainer() {
   const { isMobile } = useBreakpoints();
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-12 p-12">
+    <div className="flex flex-col gap-16">
+      <div className="flex flex-col gap-12">
         <BodyScrollFadeContainer>
           <div>
             <LeaderboardNavigation />
@@ -149,8 +149,8 @@ export function LeaderboardContainer() {
         <div className="text-body-medium font-medium text-typography-secondary">{description}</div>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between gap-16 rounded-t-8 border-b-1/2 border-slate-600 bg-slate-900 p-20 max-md:flex-col">
+      <div className="overflow-hidden rounded-8 border border-slate-800 bg-slate-750">
+        <div className="flex items-center justify-between gap-16 border-b-1/2 border-slate-800 bg-slate-900 p-20 max-md:flex-col">
           {!isCompetition ? (
             <Tabs
               type="inline"
@@ -192,7 +192,7 @@ export function LeaderboardContainer() {
         </div>
 
         {isCompetition && activeCompetition && (
-          <BodyScrollFadeContainer>
+          <BodyScrollFadeContainer className="border-b-1/2 border-slate-600">
             <div className="min-w-[1000px]">
               <CompetitionPrizes leaderboardPageKey={leaderboardPageKey} competitionType={activeCompetition} />
             </div>
@@ -218,7 +218,7 @@ function Table({ activeCompetition }: { activeCompetition: CompetitionType | und
       <AccountsTable activeCompetition={activeCompetition} />
     );
 
-  return <div className="default-container">{table}</div>;
+  return <div>{table}</div>;
 }
 
 function AccountsTable({ activeCompetition }: { activeCompetition: CompetitionType | undefined }) {
