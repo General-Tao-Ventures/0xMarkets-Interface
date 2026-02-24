@@ -50,7 +50,12 @@
 
 **Milestone Goal:** All keeper-executed operations complete as fast as possible with proper oracle configuration for both crypto and FX markets.
 
-- [x] **Phase 13: Oracle Correctness** - Per-token oracle routing so all 6 markets execute without reverts (2/2 plans complete)
+- [ ] **Phase 13: Oracle Correctness** - Per-token oracle routing so all 6 markets execute without reverts (2/4 plans complete)
+  Plans:
+  - [x] 13-01-PLAN.md -- Lazer safety checks (feed verification, provider consistency)
+  - [x] 13-02-PLAN.md -- Metrics endpoint and Docker hardening
+  - [ ] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
+  - [ ] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
 - [ ] **Phase 14: Execution Speed** - Flashblocks RPC, tighter update intervals, and pipeline timing instrumentation
 
 ## Phase Details
@@ -64,7 +69,12 @@
   2. A deposit on an FX market (EUR, GBP, GOLD, or JPY) executes end-to-end without InvalidOracleProvider revert — the correct on-chain provider is registered and the keeper routes oracle params accordingly
   3. A deposit on a crypto market (ETH or BTC) continues to execute via Lazer with no regression from the oracle routing changes
   4. Keeper logs a FATAL error at startup if any token's on-chain `oracleProviderForToken` does not match the keeper's configured provider address, preventing hours of cryptic debugging
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 13-01-PLAN.md -- Lazer safety checks (feed verification, provider consistency)
+- [x] 13-02-PLAN.md -- Metrics endpoint and Docker hardening
+- [ ] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
+- [ ] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
 
 ### Phase 14: Execution Speed
 **Goal**: Keeper execution latency reduced to the minimum achievable on Base Sepolia, with per-stage timing to prove it
@@ -96,5 +106,5 @@ Phases execute in numeric order: 13 → 14
 | 10. Event-Driven Detection | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 11. Execution Pipeline Optimization | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
-| 13. Oracle Correctness | v1.4 | 2/2 | Complete | 2026-02-24 |
+| 13. Oracle Correctness | v1.4 | 2/4 | In progress | - |
 | 14. Execution Speed | v1.4 | TBD | Not started | - |
