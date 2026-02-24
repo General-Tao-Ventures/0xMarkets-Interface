@@ -109,3 +109,19 @@ Phases execute in numeric order: 10 → 11 → 12
 | 10. Event-Driven Detection | 2/2 | Complete    | 2026-02-23 | - |
 | 11. Execution Pipeline Optimization | 2/2 | Complete    | 2026-02-23 | - |
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
+
+### Phase 13: Production Lazer Deployment and Keeper Optimization
+**Goal**: Keeper starts with verified Pyth Lazer feed entitlements, oracle provider consistency checks, all 7 markets configured, a dedicated metrics endpoint, and Docker HEALTHCHECK for production deployment
+**Depends on**: Phase 12
+**Requirements**: PROD-01, PROD-02, PROD-03, PROD-04, PROD-05
+**Success Criteria** (what must be TRUE):
+  1. Keeper exits with clear error within 30s of startup if Lazer mode is enabled but no feed data arrives (zero-entitlement token detection)
+  2. All 7 Pyth Lazer feed configs (BTC, ETH, USDC, EUR, GBP, GOLD, JPY) are registered when oracle mode includes Lazer
+  3. Keeper logs a clear warning at startup if on-chain oracleProviderForToken does not match configured provider address
+  4. GET /metrics returns JSON with queue stats, per-token feed freshness, and execution rates
+  5. Dockerfile uses HEALTHCHECK directive for Docker-native health monitoring
+**Plans**: 2 plans
+
+Plans:
+- [ ] 13-01-PLAN.md -- Startup verification: feed entitlement check, FX feed re-enablement, oracle provider consistency
+- [ ] 13-02-PLAN.md -- Metrics endpoint, Docker HEALTHCHECK, production env template

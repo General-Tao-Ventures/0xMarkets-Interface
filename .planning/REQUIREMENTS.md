@@ -22,8 +22,16 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 ### Infrastructure
 
 - [x] **INFRA-01**: Both keeper services use WebSocket RPC transport for Base Sepolia event subscriptions
-- [ ] **INFRA-02**: Health endpoints use heartbeat-based liveness model compatible with event-driven architecture
+- [x] **INFRA-02**: Health endpoints use heartbeat-based liveness model compatible with event-driven architecture
 - [x] **INFRA-03**: Health endpoint reports execution latency percentiles (p50, p95) for monitoring
+
+### Production Deployment
+
+- [ ] **PROD-01**: Keeper verifies Pyth Lazer feed data arrives within startup timeout, exits with clear error if token has zero entitlements
+- [ ] **PROD-02**: All 7 Pyth Lazer feed configs (BTC, ETH, USDC, EUR, GBP, GOLD, JPY) are active in production
+- [ ] **PROD-03**: Keeper verifies on-chain oracleProviderForToken matches configured provider address at startup
+- [ ] **PROD-04**: Docker configuration uses HEALTHCHECK directive and env_file pattern for production deployments
+- [ ] **PROD-05**: Dedicated /metrics endpoint exposes queue stats, feed freshness, and execution rates
 
 ## Future Requirements
 
@@ -54,14 +62,19 @@ Requirements for Keeper Execution Speed milestone. Each maps to roadmap phases.
 | EXEC-02 | Phase 11 | Complete |
 | EXEC-03 | Phase 11 | Complete |
 | INFRA-01 | Phase 10 | Complete |
-| INFRA-02 | Phase 12 | Pending |
+| INFRA-02 | Phase 12 | Complete |
 | INFRA-03 | Phase 12 | Complete |
+| PROD-01 | Phase 13 | Pending |
+| PROD-02 | Phase 13 | Pending |
+| PROD-03 | Phase 13 | Pending |
+| PROD-04 | Phase 13 | Pending |
+| PROD-05 | Phase 13 | Pending |
 
 **Coverage:**
-- v1.3 requirements: 9 total
-- Mapped to phases: 9
+- v1.3 requirements: 14 total
+- Mapped to phases: 14
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-23*
-*Last updated: 2026-02-23 after roadmap creation*
+*Last updated: 2026-02-24 after Phase 13 planning*
