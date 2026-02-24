@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 13 of 14 (Oracle Correctness)
-Plan: 01 of 02 complete
-Status: Executing
-Last activity: 2026-02-24 — Completed 13-01 (Lazer Safety Checks)
+Plan: 02 of 02 complete
+Status: Phase 13 complete
+Last activity: 2026-02-24 — Completed 13-02 (Metrics Endpoint & Docker Hardening)
 
-Progress: [##########..........] 25% (v1.4) — 1/4 plans
+Progress: [##########..........] 50% (v1.4) — 2/4 plans
 
 ## Performance Metrics
 
@@ -30,13 +30,14 @@ Progress: [##########..........] 25% (v1.4) — 1/4 plans
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
-| 13-14 | v1.4 | 1/4 | In progress |
+| 13-14 | v1.4 | 2/4 | In progress |
 
 **v1.4 Execution:**
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 13 P01 | 2min | 2 | 3 |
+| Phase 13 P02 | 3min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -69,9 +70,12 @@ Archived with v1.3 milestone. See .planning/PROJECT.md for key decisions table.
 - 13-01: verifyLazerFeeds is synchronous cache-check (no network calls) since data arrives via WebSocket during 10s warm-up
 - 13-01: Oracle provider mismatch is non-fatal warning (not process.exit) since Hermes mode may still work
 - 13-01: Uses encodeAbiParameters (not encodePacked) to match Solidity abi.encode for DataStore key computation
+- 13-02: Separated /metrics from /health to keep BetterStack probes clean while providing rich operational data
+- 13-02: 120s HEALTHCHECK start-period covers DB migration + Lazer init + 10s data wait + initial scan
+- 13-02: Force-tracked .env.production.example despite .env.* gitignore (template only, no secrets)
 
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 13-01-PLAN.md
-Next: Execute 13-02-PLAN.md
+Stopped at: Completed 13-02-PLAN.md (Phase 13 complete)
+Next: Plan and execute Phase 14
