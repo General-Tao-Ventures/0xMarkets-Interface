@@ -56,7 +56,7 @@
   - [x] 13-02-PLAN.md -- Metrics endpoint and Docker hardening
   - [x] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
   - [x] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
-- [ ] **Phase 14: Execution Speed** - Flashblocks RPC, tighter update intervals, and pipeline timing instrumentation
+- [x] **Phase 14: Execution Speed** - Flashblocks RPC, tighter update intervals, and pipeline timing instrumentation (completed 2026-02-25)
   Plans:
   - [ ] 14-01-PLAN.md -- Flashblocks RPC + background oracle optimization (SPEED-01, SPEED-02, SPEED-03)
   - [ ] 14-02-PLAN.md -- Per-stage execution timing instrumentation (SPEED-04)
@@ -113,4 +113,4 @@ Phases execute in numeric order: 13 → 14
 | 11. Execution Pipeline Optimization | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
 | 13. Oracle Correctness | v1.4 | Complete    | 2026-02-25 | 2026-02-24 |
-| 14. Execution Speed | 1/2 | In Progress|  | - |
+| 14. Execution Speed | 2/2 | Complete   | 2026-02-25 | - |

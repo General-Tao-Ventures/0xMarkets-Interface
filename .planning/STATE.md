@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 14 of 14 (Execution Speed)
-Plan: 01 of 02 complete
-Status: In progress
-Last activity: 2026-02-24 — Completed 14-01 (Flashblocks RPC + Oracle Interval Tightening)
+Plan: 02 of 02 complete
+Status: Phase complete
+Last activity: 2026-02-24 — Completed 14-02 (Execution Timing Instrumentation)
 
-Progress: [##########..........] 50% (Phase 14) — 1/2 plans
+Progress: [####################] 100% (Phase 14) — 2/2 plans
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: [##########..........] 50% (Phase 14) — 1/2 plans
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
-| 13-14 | v1.4 | 5/6 | Phase 14 in progress |
+| 13-14 | v1.4 | 6/6 | Complete |
 
 **v1.4 Execution:**
 
@@ -41,6 +41,7 @@ Progress: [##########..........] 50% (Phase 14) — 1/2 plans
 | Phase 13 P03 | 2min | 1 | 3 |
 | Phase 13 P04 | 4min | 2 | 4 |
 | Phase 14 P01 | 3min | 2 | 5 |
+| Phase 14 P02 | 2min | 1 | 3 |
 
 ## Accumulated Context
 
@@ -85,9 +86,12 @@ Archived with v1.3 milestone. See .planning/PROJECT.md for key decisions table.
 - 14-01: baseSepoliaPreconf chain provides automatic pending block tag for estimateGas/waitForTransactionReceipt
 - 14-01: Stale Lazer prices fall back to Hermes rather than blocking — graceful degradation over correctness-at-cost
 - 14-01: 30s safety margin (up from 5s) accounts for 5s update interval with wide buffer
+- 14-02: performance.now() for all timing (monotonic, sub-ms precision) instead of Date.now()
+- 14-02: Consistent timing field names across all three executors for unified log parsing
+- 14-02: orderExecutor now waits for TX confirmation matching deposit/withdrawal behavior
 
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 14-01-PLAN.md (Flashblocks RPC + Oracle Interval Tightening)
-Next: 14-02-PLAN.md
+Stopped at: Completed 14-02-PLAN.md (Execution Timing Instrumentation)
+Next: Phase 14 complete — all plans delivered
