@@ -16,9 +16,9 @@ Requirements for v1.4 release. Each maps to roadmap phases.
 
 ### Execution Speed
 
-- [ ] **SPEED-01**: Keeper uses Flashblocks-enabled RPC endpoint for TX submission, reducing confirmation time from ~2-4s to ~200ms
-- [ ] **SPEED-02**: MaxPriceAgeExceeded prevented by increasing safety margin to 30s and reducing background oracle update interval from 10s to 5s
-- [ ] **SPEED-03**: Synchronous `updatePriceOnChain()` TX eliminated from normal execution path — background updater keeps prices fresh
+- [x] **SPEED-01**: Keeper uses Flashblocks-enabled RPC endpoint for TX submission, reducing confirmation time from ~2-4s to ~200ms
+- [x] **SPEED-02**: MaxPriceAgeExceeded prevented by increasing safety margin to 30s and reducing background oracle update interval from 10s to 5s
+- [x] **SPEED-03**: Synchronous `updatePriceOnChain()` TX eliminated from normal execution path — background updater keeps prices fresh
 - [ ] **SPEED-04**: Per-stage execution timing (detection → oracle params → TX submission → confirmation) logged via `performance.now()` instrumentation
 
 ## Future Requirements
@@ -56,9 +56,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ORCL-02 | Phase 13 | Complete |
 | ORCL-03 | Phase 13 | Complete |
 | ORCL-04 | Phase 13 | Complete |
-| SPEED-01 | Phase 14 | Pending |
-| SPEED-02 | Phase 14 | Pending |
-| SPEED-03 | Phase 14 | Pending |
+| SPEED-01 | Phase 14 | Complete |
+| SPEED-02 | Phase 14 | Complete |
+| SPEED-03 | Phase 14 | Complete |
 | SPEED-04 | Phase 14 | Pending |
 
 **Coverage:**

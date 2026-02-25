@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** All keeper-executed operations complete as fast as possible with proper oracle configuration
-**Current focus:** Phase 13 — Oracle Correctness
+**Current focus:** Phase 14 — Execution Speed
 
 ## Current Position
 
-Phase: 13 of 14 (Oracle Correctness)
-Plan: 04 of 04 complete
-Status: Phase 13 complete
-Last activity: 2026-02-24 — Completed 13-04 (On-Chain Oracle Provider Verification)
+Phase: 14 of 14 (Execution Speed)
+Plan: 01 of 02 complete
+Status: In progress
+Last activity: 2026-02-24 — Completed 14-01 (Flashblocks RPC + Oracle Interval Tightening)
 
-Progress: [####################] 100% (Phase 13) — 4/4 plans
+Progress: [##########..........] 50% (Phase 14) — 1/2 plans
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: [####################] 100% (Phase 13) — 4/4 plans
 | 4-6 | v1.1 | 8/8 | Complete |
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
-| 13-14 | v1.4 | 4/4 | Phase 13 complete |
+| 13-14 | v1.4 | 5/6 | Phase 14 in progress |
 
 **v1.4 Execution:**
 
@@ -40,6 +40,7 @@ Progress: [####################] 100% (Phase 13) — 4/4 plans
 | Phase 13 P02 | 3min | 2 | 4 |
 | Phase 13 P03 | 2min | 1 | 3 |
 | Phase 13 P04 | 4min | 2 | 4 |
+| Phase 14 P01 | 3min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -53,7 +54,7 @@ Progress: [####################] 100% (Phase 13) — 4/4 plans
 ### Known Issues
 
 - FX token withdrawals fail with InvalidOracleProvider — RESOLVED: on-chain oracleProviderForToken updated for all 7 tokens (13-04)
-- MaxPriceAgeExceeded when using Lazer-only mode — stored prices go stale (Phase 14 target)
+- MaxPriceAgeExceeded when using Lazer-only mode — MITIGATED: 5s background updates + 30s safety margin + Hermes fallback (14-01)
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
 
 ### Pending Todos
@@ -81,9 +82,12 @@ Archived with v1.3 milestone. See .planning/PROJECT.md for key decisions table.
 - 13-04: Script uses same viem client infrastructure as keeper for consistency
 - 13-04: Fix mode guarded behind --fix flag to prevent accidental chain writes during diagnostics
 - 13-04: Script suggests contracts repo deploy command if keeper wallet lacks CONTROLLER role
+- 14-01: baseSepoliaPreconf chain provides automatic pending block tag for estimateGas/waitForTransactionReceipt
+- 14-01: Stale Lazer prices fall back to Hermes rather than blocking — graceful degradation over correctness-at-cost
+- 14-01: 30s safety margin (up from 5s) accounts for 5s update interval with wide buffer
 
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 13-04-PLAN.md (On-Chain Oracle Provider Verification)
-Next: Phase 14 (Execution Speed)
+Stopped at: Completed 14-01-PLAN.md (Flashblocks RPC + Oracle Interval Tightening)
+Next: 14-02-PLAN.md
