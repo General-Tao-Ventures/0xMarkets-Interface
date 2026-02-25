@@ -3,29 +3,25 @@ status: testing
 phase: 14-execution-speed
 source: [14-01-SUMMARY.md, 14-02-SUMMARY.md]
 started: 2026-02-25T03:00:00Z
-updated: 2026-02-25T04:00:00Z
+updated: 2026-02-25T04:20:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: Flashblocks TX Confirmation Speed
+number: 2
+name: Background Oracle Update Cadence
 expected: |
-  With FLASHBLOCKS_RPC_URL=https://sepolia-preconf.base.org in keeper .env, restart the keeper.
-  Logs should show "public client created" with chain "Base Sepolia (Preconf)".
-  Execute a deposit on any market. Check keeper logs for txConfirmMs — should be under 500ms (ideally ~200ms).
-awaiting: blocked — background updatePrice reverts, no successful TX to measure
+  With keeper running in Lazer mode, logs show background oracle update messages
+  approximately every 5 seconds per token. No MaxPriceAgeExceeded errors appear.
+awaiting: user response
 
 ## Tests
 
 ### 1. Flashblocks TX Confirmation Speed
 expected: With FLASHBLOCKS_RPC_URL set, keeper logs show Base Sepolia (Preconf) chain. A deposit execution shows txConfirmMs under 500ms in timing breakdown.
-result: [pending]
-notes: |
-  Partially verified: FLASHBLOCKS_RPC_URL configured, keeper uses preconf RPC URL.
-  Chain logged as "Base Sepolia" (baseSepoliaPreconf chain). Subscription confirmed for 3 crypto feeds.
-  BLOCKED: background updatePrice() reverts with "out of gas: gas required exceeds: 52305" during
-  viem eth_estimateGas. Static cast call/estimate succeed. Suspected viem gas parameter issue.
+result: issue
+reported: "i tried to deposit on the EUR/USD pool but its taking 1m+"
+severity: major
 
 ### 2. Background Oracle Update Cadence
 expected: With keeper running in Lazer mode, logs show background oracle update messages approximately every 5 seconds per token. No MaxPriceAgeExceeded errors appear.
@@ -52,8 +48,8 @@ notes: |
 
 total: 5
 passed: 0
-issues: 0
-pending: 5
+issues: 1
+pending: 4
 skipped: 0
 
 ## Gaps
@@ -75,6 +71,17 @@ skipped: 0
     - "Investigate if baseSepoliaPreconf chain requires explicit gas price or gas limit overrides in writeContract"
     - "Try adding explicit gas limit (e.g., 200000) to writeContract call to bypass estimation"
     - "Check if viem's gas estimation behavior differs between standard and preconf chain configs"
+
+### Issue: EUR/USD deposit takes 1m+
+
+- truth: "Deposit execution shows txConfirmMs under 500ms with Flashblocks preconf RPC"
+  status: failed
+  reason: "User reported: i tried to deposit on the EUR/USD pool but its taking 1m+"
+  severity: major
+  test: 1
+  artifacts: []
+  missing: []
+  debug_session: ""
 
 ### Fix applied: FX feeds removed from Lazer config
 
