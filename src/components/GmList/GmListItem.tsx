@@ -65,6 +65,29 @@ function computeUtilization(marketOrGlv: GlvOrMarketInfo | undefined): number | 
   return Math.min(util, 100); // cap at 100% in edge cases
 }
 
+/**
+ * Compute pool fill as a percentage (0–100) for a market.
+ * Fill = (longPoolAmount + shortPoolAmount) / (maxLongPoolAmount + maxShortPoolAmount) * 100
+ * Returns null for GLV markets or when max is zero.
+ */
+function computePoolFill(marketOrGlv: GlvOrMarketInfo | undefined): {
+  fillPercent: number;
+  currentAmount: bigint;
+  maxAmount: bigint;
+} | null {
+  if (!marketOrGlv || isGlvInfo(marketOrGlv)) return null;
+  const market = marketOrGlv as MarketInfo;
+  const maxTotal = market.maxLongPoolAmount + market.maxShortPoolAmount;
+  if (!maxTotal || maxTotal === 0n) return null;
+  const currentTotal = market.longPoolAmount + market.shortPoolAmount;
+  const fillBps = bigMath.mulDiv(currentTotal, 10000n, maxTotal);
+  return {
+    fillPercent: Math.min(Number(fillBps) / 100, 100),
+    currentAmount: currentTotal,
+    maxAmount: maxTotal,
+  };
+}
+
 export function GmListItem({
   token,
   marketsTokensApyData,
@@ -154,6 +177,9 @@ export function GmListItem({
   const utilization = computeUtilization(marketOrGlv);
   const utilizationDisplay = utilization !== null ? `${utilization.toFixed(1)}%` : "—";
 
+  // Pool cap calculation
+  const poolFill = computePoolFill(marketOrGlv);
+
   // PnL display
   const pnlValue = marketEarnings?.total;
   const pnlDisplay = pnlValue !== undefined ? formatUsd(pnlValue, { displayDecimals: 2 }) : null;
@@ -211,13 +237,23 @@ export function GmListItem({
           <SyntheticsInfoRow
             label={<Trans>TVL (Supply)</Trans>}
             value={
-              <AmountWithUsdHuman
-                amount={totalSupply}
-                decimals={token.decimals}
-                usd={totalSupplyUsd}
-                symbol={token.symbol}
-                usdOnTop
-              />
+              <div>
+                <AmountWithUsdHuman
+                  amount={totalSupply}
+                  decimals={token.decimals}
+                  usd={totalSupplyUsd}
+                  symbol={token.symbol}
+                  usdOnTop
+                />
+                {poolFill && (
+                  <PoolCapBar
+                    fillPercent={poolFill.fillPercent}
+                    currentAmount={poolFill.currentAmount}
+                    maxAmount={poolFill.maxAmount}
+                    tokenDecimals={longToken.decimals}
+                  />
+                )}
+              </div>
             }
           />
           <SyntheticsInfoRow
@@ -332,6 +368,14 @@ export function GmListItem({
           symbol={token.symbol}
           usdOnTop
         />
+        {poolFill && (
+          <PoolCapBar
+            fillPercent={poolFill.fillPercent}
+            currentAmount={poolFill.currentAmount}
+            maxAmount={poolFill.maxAmount}
+            tokenDecimals={longToken.decimals}
+          />
+        )}
       </TableTdActionable>
       <TableTdActionable className="w-[11%]">
         <div className="flex flex-col gap-4">
@@ -351,11 +395,23 @@ export function GmListItem({
       </TableTdActionable>
 
       <TableTdActionable className="w-[11%]">
-        <AprInfo apy={apy} incentiveApr={incentiveApr} lidoApr={lidoApr} marketAddress={token.address} />
+        <div className={`apy-value ${apy && apy > 0n ? "apy-positive" : ""}`}>
+          <AprInfo apy={apy} incentiveApr={incentiveApr} lidoApr={lidoApr} marketAddress={token.address} />
+        </div>
       </TableTdActionable>
 
       <TableTdActionable className="w-[8%]">
-        <span className="numbers">{utilizationDisplay}</span>
+        <div>
+          <span className="numbers text-body-small">{utilizationDisplay}</span>
+          {utilization !== null && (
+            <div className="util-bar">
+              <div
+                className={`util-bar-fill ${utilization < 50 ? "util-low" : utilization < 80 ? "util-medium" : "util-high"}`}
+                style={{ width: `${Math.min(utilization, 100)}%` }}
+              />
+            </div>
+          )}
+        </div>
       </TableTdActionable>
 
       <TableTdActionable className="w-[18%]">
@@ -396,6 +452,37 @@ export function GmListItem({
         </div>
       </TableTdActionable>
     </TableTrActionable>
+  );
+}
+
+/**
+ * Format a raw token amount (6 decimals for USDC) as a compact string like "1.2M" or "500K".
+ */
+function formatCompactAmount(amount: bigint, decimals: number): string {
+  const num = Number(amount) / 10 ** decimals;
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(0)}K`;
+  return num.toFixed(0);
+}
+
+function PoolCapBar({ fillPercent, currentAmount, maxAmount, tokenDecimals }: {
+  fillPercent: number;
+  currentAmount: bigint;
+  maxAmount: bigint;
+  tokenDecimals: number;
+}) {
+  return (
+    <div className="mt-4">
+      <div className="text-12 text-typography-secondary">
+        {formatCompactAmount(currentAmount, tokenDecimals)} / {formatCompactAmount(maxAmount, tokenDecimals)} USDC
+      </div>
+      <div className="pool-cap-bar">
+        <div
+          className={`pool-cap-bar-fill ${fillPercent < 50 ? "util-low" : fillPercent < 80 ? "util-medium" : "util-high"}`}
+          style={{ width: `${Math.min(fillPercent, 100)}%` }}
+        />
+      </div>
+    </div>
   );
 }
 

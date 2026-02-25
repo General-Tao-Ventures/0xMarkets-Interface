@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════
+   Pools Page — Data Clarity Utilities
+   Matches trade page aesthetic (flat, minimal, slate borders)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── APY emphasis ──────────────────────────────────────── */
+.apy-value {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.apy-positive {
+  color: var(--color-green-500);
+}
+
+.apy-negative {
+  color: var(--color-red-400);
+}
+
+/* ── Utilization bar ───────────────────────────────────── */
+.util-bar {
+  position: relative;
+  width: 100%;
+  max-width: 72px;
+  height: 3px;
+  background: var(--color-slate-600);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.util-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.util-low {
+  background: var(--color-green-500);
+}
+
+.util-medium {
+  background: var(--color-yellow-500);
+}
+
+.util-high {
+  background: var(--color-red-400);
+}
+
+/* ── Pool cap bar ────────────────────────────────────────── */
+.pool-cap-bar {
+  position: relative;
+  width: 100%;
+  max-width: 100px;
+  height: 3px;
+  background: var(--color-slate-600);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.pool-cap-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
