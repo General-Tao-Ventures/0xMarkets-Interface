@@ -2,25 +2,23 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-24)
+See: .planning/PROJECT.md (updated 2026-02-25)
 
-**Core value:** All keeper-executed operations complete as fast as possible with proper oracle configuration
-**Current focus:** Phase 14 — Execution Speed
+**Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
+**Current focus:** v1.5 — Minimal Keeper Rewrite
 
 ## Current Position
 
-Phase: 14 of 14 (Execution Speed)
-Plan: 02 of 02 complete
-Status: Phase complete
-Last activity: 2026-02-24 — Completed 14-02 (Execution Timing Instrumentation)
-
-Progress: [####################] 100% (Phase 14) — 2/2 plans
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-25 — Milestone v1.5 started
 
 ## Performance Metrics
 
-**Velocity (v1.0-v1.3):**
-- Total plans completed: 27
-- Phases: 12, all complete
+**Velocity (v1.0-v1.4):**
+- Total plans completed: 33
+- Phases: 14, all complete
 
 **By Phase:**
 
@@ -32,30 +30,15 @@ Progress: [####################] 100% (Phase 14) — 2/2 plans
 | 10-12 | v1.3 | 6/6 | Complete |
 | 13-14 | v1.4 | 6/6 | Complete |
 
-**v1.4 Execution:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 13 P01 | 2min | 2 | 3 |
-| Phase 13 P02 | 3min | 2 | 4 |
-| Phase 13 P03 | 2min | 1 | 3 |
-| Phase 13 P04 | 4min | 2 | 4 |
-| Phase 14 P01 | 3min | 2 | 5 |
-| Phase 14 P02 | 2min | 1 | 3 |
-
 ## Accumulated Context
 
 ### Research Flags
 
-- Phase 13: Pyth entitlement verification must happen FIRST — if all 7 feeds have Lazer data, dual-oracle architecture is unnecessary
-- Phase 13: ChainlinkPriceFeedProvider FX compatibility on Base Sepolia unknown — check before writing routing code
-- Phase 11 (RESOLVED): PythLazerFeedProvider.getOraclePrice() reads from storedPrices; separate updatePriceOnChain() TX required but moved to proactive background loop
-- Phase 10 (RESOLVED): viem fallback([webSocket(), http()]) does NOT produce WebSocket-type client; must use dedicated WebSocket-only PublicClient
+- All 7 tokens point to Pyth Lazer provider on-chain — no Hermes migration needed
+- Minimal Lazer WebSocket cache (~50 lines) chosen over Hermes HTTP for compatibility
 
 ### Known Issues
 
-- FX token withdrawals fail with InvalidOracleProvider — RESOLVED: on-chain oracleProviderForToken updated for all 7 tokens (13-04)
-- MaxPriceAgeExceeded when using Lazer-only mode — MITIGATED: 5s background updates + 30s safety margin + Hermes fallback (14-01)
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
 
 ### Pending Todos
@@ -68,30 +51,10 @@ None.
 
 ### Decisions
 
-Archived with v1.3 milestone. See .planning/PROJECT.md for key decisions table.
-
-**v1.4 decisions:**
-- 13-01: verifyLazerFeeds is synchronous cache-check (no network calls) since data arrives via WebSocket during 10s warm-up
-- 13-01: Oracle provider mismatch is non-fatal warning (not process.exit) since Hermes mode may still work
-- 13-01: Uses encodeAbiParameters (not encodePacked) to match Solidity abi.encode for DataStore key computation
-- 13-02: Separated /metrics from /health to keep BetterStack probes clean while providing rich operational data
-- 13-02: 120s HEALTHCHECK start-period covers DB migration + Lazer init + 10s data wait + initial scan
-- 13-02: Force-tracked .env.production.example despite .env.* gitignore (template only, no secrets)
-- 13-03: Entitlement state stored as module-level Set<string> with lowercase normalization for case-insensitive matching
-- 13-03: Hermes feeds registered unconditionally (not gated by oracleMode) to enable per-token fallback in lazer mode
-- 13-03: Per-token Lazer failure gracefully moves individual tokens to Hermes rather than failing the entire buildOracleParams call
-- 13-04: Script uses same viem client infrastructure as keeper for consistency
-- 13-04: Fix mode guarded behind --fix flag to prevent accidental chain writes during diagnostics
-- 13-04: Script suggests contracts repo deploy command if keeper wallet lacks CONTROLLER role
-- 14-01: baseSepoliaPreconf chain provides automatic pending block tag for estimateGas/waitForTransactionReceipt
-- 14-01: Stale Lazer prices fall back to Hermes rather than blocking — graceful degradation over correctness-at-cost
-- 14-01: 30s safety margin (up from 5s) accounts for 5s update interval with wide buffer
-- 14-02: performance.now() for all timing (monotonic, sub-ms precision) instead of Date.now()
-- 14-02: Consistent timing field names across all three executors for unified log parsing
-- 14-02: orderExecutor now waits for TX confirmation matching deposit/withdrawal behavior
+**v1.4 decisions (archived):** See .planning/PROJECT.md key decisions table.
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Completed 14-02-PLAN.md (Execution Timing Instrumentation)
-Next: Phase 14 complete — all plans delivered
+Last session: 2026-02-25
+Stopped at: Milestone v1.5 definition started
+Next: Define requirements and roadmap

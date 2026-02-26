@@ -10,15 +10,16 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.3 Keeper Execution Speed (2026-02-24)
+**Shipped:** v1.4 Maximum Keeper Speed (2026-02-25)
 
-Event-driven operation detection, proactive oracle price caching, optimized execution pipeline, heartbeat health model, and latency tracking. Phases 10-12 complete. Phase 13 (Production Lazer Deployment) deferred to v1.4.
+Per-token oracle routing for all 6 markets, on-chain provider verification, Flashblocks RPC preconfirmations, 5s background oracle updates, per-stage execution timing instrumentation. All keeper oracle errors resolved.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
 - v1.1 Full Trading Experience (2026-02-22) — all 6 markets, positions, limit orders
 - v1.2 Demo-Ready Deployment (2026-02-23) — Vercel, monitoring, UI polish
 - v1.3 Keeper Execution Speed (2026-02-24) — event-driven detection, pipeline optimization, observability
+- v1.4 Maximum Keeper Speed (2026-02-25) — oracle correctness, execution speed, timing instrumentation
 
 ## Requirements
 
@@ -45,20 +46,23 @@ Event-driven operation detection, proactive oracle price caching, optimized exec
 - ✓ Keeper health monitoring — health checks, logging, alerting — v1.2
 - ✓ UI/UX polish — professional enough to demo to investors — v1.2
 - ✓ Tech debt cleanup — failing tests, workarounds, code quality — v1.2
+- ✓ Per-token oracle routing — all 6 markets execute without reverts — v1.4
+- ✓ On-chain oracle provider verification at keeper startup — v1.4
+- ✓ Flashblocks RPC for ~200ms TX preconfirmations — v1.4
+- ✓ Background oracle updates at 5s intervals with 30s safety margin — v1.4
+- ✓ Per-stage execution timing instrumentation — v1.4
 
 ### Active
 
-## Current Milestone: v1.4 Maximum Keeper Speed
+## Current Milestone: v1.5 Minimal Keeper Rewrite
 
-**Goal:** All keeper-executed operations complete as fast as possible with proper oracle configuration for both crypto and FX markets.
+**Goal:** Replace the 3,000+ line order-execution-keeper with a ~300 line single-loop keeper that reliably executes deposits, withdrawals, and orders.
 
 **Target features:**
-- Deploy new Pyth Pro API key (crypto account) and configure optimal oracle mode
-- Determine Lazer vs Hermes support per market, use fastest available
-- FX markets (EUR, GBP, JPY, GOLD): fall back to Hermes if Lazer doesn't support them
-- Register Hermes oracle provider for FX tokens on-chain if needed
-- Fix remaining execution errors (MaxPriceAgeExceeded, InvalidOracleProvider)
-- Measure and optimize end-to-end latency to be as fast as possible
+- Clean rewrite: single TypeScript process with event watcher + safety-net polling + sequential executor
+- No database — on-chain DataStore is source of truth
+- Pyth Lazer WebSocket cache for oracle prices (matching current on-chain config)
+- Deploy to same DigitalOcean droplet, verify all operation types end-to-end
 
 ### Out of Scope
 
@@ -112,7 +116,9 @@ Event-driven operation detection, proactive oracle price caching, optimized exec
 | healthState mutable singleton | Avoids circular imports across scanner/executor/oracle | ✓ Good |
 | /health returns 503 until first scan | Prevents false-healthy reports on startup | ✓ Good |
 
-| Pyth Pro crypto key for oracle feeds | Previous token had zero entitlements | — Pending |
+| Pyth Pro crypto key for oracle feeds | Previous token had zero entitlements | ✓ Good |
+| Per-token Lazer/Hermes fallback | Graceful degradation per token vs global switch | ✓ Good |
+| Transaction mutex for nonce conflicts | Serializes execution + cleanup paths | ✓ Good |
 
 ---
-*Last updated: 2026-02-24 after v1.4 milestone started*
+*Last updated: 2026-02-25 after v1.5 milestone started*
