@@ -76,7 +76,7 @@ export const useDepositWithdrawalTransactions = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const chainId = useSelector(selectChainId);
   const { signer, account } = useWallet();
-  const { setPendingDeposit, setPendingWithdrawal } = useSyntheticsEvents();
+  const { setPendingDeposit, setPendingWithdrawal, watchOrderTxn } = useSyntheticsEvents();
   const { setPendingTxns } = usePendingTxns();
   const blockTimestampData = useSelector(selectBlockTimestampData);
 
@@ -185,6 +185,7 @@ export const useDepositWithdrawalTransactions = ({
         blockTimestampData,
         setPendingTxns,
         setPendingDeposit,
+        watchOrderTxn,
       })
         .then(makeTxnSentMetricsHandler(metricData.metricId))
         .catch(makeTxnErrorMetricsHandler(metricData.metricId))
@@ -214,6 +215,7 @@ export const useDepositWithdrawalTransactions = ({
       blockTimestampData,
       setPendingTxns,
       setPendingDeposit,
+      watchOrderTxn,
       isMarketTokenDeposit,
     ]
   );
@@ -310,6 +312,7 @@ export const useDepositWithdrawalTransactions = ({
         skipSimulation: shouldDisableValidation,
         setPendingTxns,
         setPendingWithdrawal,
+        watchOrderTxn,
         blockTimestampData,
       })
         .then(makeTxnSentMetricsHandler(metricData.metricId))
@@ -338,6 +341,7 @@ export const useDepositWithdrawalTransactions = ({
       shouldDisableValidation,
       setPendingTxns,
       setPendingWithdrawal,
+      watchOrderTxn,
       blockTimestampData,
     ]
   );

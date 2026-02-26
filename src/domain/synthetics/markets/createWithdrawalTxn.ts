@@ -37,6 +37,7 @@ export type CreateWithdrawalParams = {
   blockTimestampData: BlockTimestampData | undefined;
   setPendingTxns: (txns: any) => void;
   setPendingWithdrawal: SetPendingWithdrawal;
+  watchOrderTxn?: (txnHash: string) => void;
 };
 
 export async function createWithdrawalTxn(chainId: ContractsChainId, signer: Signer, p: CreateWithdrawalParams) {
@@ -116,7 +117,10 @@ export async function createWithdrawalTxn(chainId: ContractsChainId, signer: Sig
       estimatedExecutionFee: p.executionFee,
       estimatedExecutionGasLimit: p.executionGasLimit,
     },
-  }).then(() => {
+  }).then((res) => {
+    if (p.watchOrderTxn && res?.hash) {
+      p.watchOrderTxn(res.hash);
+    }
     p.setPendingWithdrawal({
       account: p.account,
       marketAddress: p.marketTokenAddress,

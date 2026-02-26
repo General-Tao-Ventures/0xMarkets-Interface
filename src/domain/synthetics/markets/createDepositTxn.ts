@@ -36,6 +36,7 @@ export type CreateDepositParams = {
   blockTimestampData: BlockTimestampData | undefined;
   setPendingTxns: (txns: any) => void;
   setPendingDeposit: SetPendingDeposit;
+  watchOrderTxn?: (txnHash: string) => void;
 };
 
 export async function createDepositTxn(chainId: ContractsChainId, signer: Signer, p: CreateDepositParams) {
@@ -131,7 +132,10 @@ export async function createDepositTxn(chainId: ContractsChainId, signer: Signer
       estimatedExecutionFee: p.executionFee,
       estimatedExecutionGasLimit: p.executionGasLimit,
     },
-  }).then(() => {
+  }).then((res) => {
+    if (p.watchOrderTxn && res?.hash) {
+      p.watchOrderTxn(res.hash);
+    }
     p.setPendingDeposit({
       account: p.account,
       marketAddress: p.marketTokenAddress,
