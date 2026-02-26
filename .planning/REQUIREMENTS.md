@@ -70,31 +70,31 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | TBD | Pending |
-| DET-02 | TBD | Pending |
-| DET-03 | TBD | Pending |
-| EXEC-01 | TBD | Pending |
-| EXEC-02 | TBD | Pending |
-| EXEC-03 | TBD | Pending |
-| EXEC-04 | TBD | Pending |
-| EXEC-05 | TBD | Pending |
-| ORCL-01 | TBD | Pending |
-| ORCL-02 | TBD | Pending |
-| ORCL-03 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| DEPLOY-01 | TBD | Pending |
-| DEPLOY-02 | TBD | Pending |
-| DEPLOY-03 | TBD | Pending |
-| DEPLOY-04 | TBD | Pending |
+| DET-01 | Phase 16 | Pending |
+| DET-02 | Phase 16 | Pending |
+| DET-03 | Phase 16 | Pending |
+| EXEC-01 | Phase 16 | Pending |
+| EXEC-02 | Phase 16 | Pending |
+| EXEC-03 | Phase 16 | Pending |
+| EXEC-04 | Phase 16 | Pending |
+| EXEC-05 | Phase 16 | Pending |
+| ORCL-01 | Phase 15 | Pending |
+| ORCL-02 | Phase 15 | Pending |
+| ORCL-03 | Phase 15 | Pending |
+| INFRA-01 | Phase 16 | Pending |
+| INFRA-02 | Phase 16 | Pending |
+| INFRA-03 | Phase 16 | Pending |
+| INFRA-04 | Phase 16 | Pending |
+| DEPLOY-01 | Phase 17 | Pending |
+| DEPLOY-02 | Phase 17 | Pending |
+| DEPLOY-03 | Phase 17 | Pending |
+| DEPLOY-04 | Phase 17 | Pending |
 
 **Coverage:**
 - v1.5 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-25*
-*Last updated: 2026-02-25 after initial definition*
+*Last updated: 2026-02-25 after roadmap creation*

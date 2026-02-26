@@ -6,7 +6,8 @@
 - ✅ **v1.1 Full Trading Experience** — Phases 4-6 ([shipped 2026-02-22](milestones/v1.1-ROADMAP.md))
 - ✅ **v1.2 Demo-Ready Deployment** — Phases 7-9 ([shipped 2026-02-23](milestones/v1.2-ROADMAP.md))
 - ✅ **v1.3 Keeper Execution Speed** — Phases 10-12 (shipped 2026-02-24)
-- 🚧 **v1.4 Maximum Keeper Speed** — Phases 13-14 (in progress)
+- ✅ **v1.4 Maximum Keeper Speed** — Phases 13-14 (shipped 2026-02-25)
+- 🚧 **v1.5 Minimal Keeper Rewrite** — Phases 15-17 (in progress)
 
 ## Phases
 
@@ -46,57 +47,62 @@
 
 </details>
 
-### 🚧 v1.4 Maximum Keeper Speed (In Progress)
+<details>
+<summary>✅ v1.4 Maximum Keeper Speed (Phases 13-14) — SHIPPED 2026-02-25</summary>
 
-**Milestone Goal:** All keeper-executed operations complete as fast as possible with proper oracle configuration for both crypto and FX markets.
+- [x] Phase 13: Oracle Correctness (4/4 plans) — completed 2026-02-25
+- [x] Phase 14: Execution Speed (2/2 plans) — completed 2026-02-25
 
-- [x] **Phase 13: Oracle Correctness** - Per-token oracle routing so all 6 markets execute without reverts (4/4 plans complete)
-  Plans:
-  - [x] 13-01-PLAN.md -- Lazer safety checks (feed verification, provider consistency)
-  - [x] 13-02-PLAN.md -- Metrics endpoint and Docker hardening
-  - [x] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
-  - [x] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
-- [x] **Phase 14: Execution Speed** - Flashblocks RPC, tighter update intervals, and pipeline timing instrumentation (completed 2026-02-25)
-  Plans:
-  - [ ] 14-01-PLAN.md -- Flashblocks RPC + background oracle optimization (SPEED-01, SPEED-02, SPEED-03)
-  - [ ] 14-02-PLAN.md -- Per-stage execution timing instrumentation (SPEED-04)
+</details>
+
+### 🚧 v1.5 Minimal Keeper Rewrite (In Progress)
+
+**Milestone Goal:** Replace the 3,000+ line order-execution-keeper with a ~300 line single-loop keeper that reliably executes deposits, withdrawals, and orders.
+
+- [ ] **Phase 15: Project Skeleton and Oracle** - Clean project reset with config/keys/ABIs and Pyth Lazer WebSocket cache
+- [ ] **Phase 16: Keeper Logic and Infrastructure** - Event watcher, poller, sequential executor, health endpoint, Dockerfile
+- [ ] **Phase 17: Deploy and Verify** - Deploy to DigitalOcean and verify all operation types end-to-end
 
 ## Phase Details
 
-### Phase 13: Oracle Correctness
-**Goal**: All 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY) execute deposits, withdrawals, and orders without oracle-related reverts
-**Depends on**: Phase 12
-**Requirements**: ORCL-01, ORCL-02, ORCL-03, ORCL-04
+### Phase 15: Project Skeleton and Oracle
+**Goal**: A clean TypeScript project that compiles, with correct config/keys/ABIs and a working Pyth Lazer oracle cache
+**Depends on**: Phase 14 (v1.4 complete)
+**Requirements**: ORCL-01, ORCL-02, ORCL-03
 **Success Criteria** (what must be TRUE):
-  1. Keeper starts up, verifies Pyth Lazer feed entitlements for all 7 tokens, and exits with a clear FATAL log within 30 seconds if any expected feed receives no data
-  2. A deposit on an FX market (EUR, GBP, GOLD, or JPY) executes end-to-end without InvalidOracleProvider revert — the correct on-chain provider is registered and the keeper routes oracle params accordingly
-  3. A deposit on a crypto market (ETH or BTC) continues to execute via Lazer with no regression from the oracle routing changes
-  4. Keeper logs a FATAL error at startup if any token's on-chain `oracleProviderForToken` does not match the keeper's configured provider address, preventing hours of cryptic debugging
-**Plans**: 4 plans
-Plans:
-- [x] 13-01-PLAN.md -- Lazer safety checks (feed verification, provider consistency)
-- [x] 13-02-PLAN.md -- Metrics endpoint and Docker hardening
-- [x] 13-03-PLAN.md -- Per-token oracle routing in buildOracleParams (ORCL-02 gap closure)
-- [x] 13-04-PLAN.md -- On-chain provider verification and fix script (ORCL-03 gap closure)
+  1. Old code is removed (no Prisma, no scanner/executor class hierarchies, no TransactionMonitor) and the project compiles cleanly with `pnpm build`
+  2. Pyth Lazer WebSocket connects and populates price cache for all 7 tokens (EUR, GBP, GOLD, JPY, USDC, WBTC, WETH) — verified by running `pnpm dev` and seeing cache populated in logs
+  3. `buildOracleParams(tokens)` returns the correct Lazer provider address (`0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05`) for every token — not a mix of providers
+  4. Cache rejects prices older than 270 seconds, preventing MaxPriceAgeExceeded errors that plagued v1.3-v1.4
+**Plans**: TBD
 
-### Phase 14: Execution Speed
-**Goal**: Keeper execution latency reduced to the minimum achievable on Base Sepolia, with per-stage timing to prove it
-**Depends on**: Phase 13
-**Requirements**: SPEED-01, SPEED-02, SPEED-03, SPEED-04
+### Phase 16: Keeper Logic and Infrastructure
+**Goal**: A fully functional keeper that detects, deduplicates, and sequentially executes deposits, withdrawals, and orders with health monitoring
+**Depends on**: Phase 15
+**Requirements**: DET-01, DET-02, DET-03, EXEC-01, EXEC-02, EXEC-03, EXEC-04, EXEC-05, INFRA-01, INFRA-02, INFRA-03, INFRA-04
 **Success Criteria** (what must be TRUE):
-  1. Transaction confirmation time drops from ~2-4 seconds to under 500ms after switching to Flashblocks-enabled RPC (measurable in keeper logs)
-  2. MaxPriceAgeExceeded errors no longer occur during normal operation — background oracle updates at 5s intervals with 30s safety margin keep prices fresh
-  3. Normal execution path does not include a synchronous `updatePriceOnChain()` transaction — background updater handles freshness, eliminating 2-4s of blocking overhead per execution
-  4. Every execution logs per-stage timing (detection, oracle param build, TX submission, TX confirmation) via `performance.now()` instrumentation, enabling latency regression detection
-**Plans**: 2 plans
-Plans:
-- [ ] 14-01-PLAN.md -- Flashblocks RPC + background oracle optimization (SPEED-01, SPEED-02, SPEED-03)
-- [ ] 14-02-PLAN.md -- Per-stage execution timing instrumentation (SPEED-04)
+  1. Keeper detects DepositCreated, WithdrawalCreated, and OrderCreated events via WebSocket within 1 second of on-chain emission — verified by watching logs after submitting a deposit on the frontend
+  2. Safety-net poller reads all three DataStore lists (DEPOSIT_LIST, WITHDRAWAL_LIST, ORDER_LIST) every 15 seconds and enqueues any operations missed by the event watcher
+  3. Same operation key is never executed twice — dedup Set prevents double-execution from event+poll overlap
+  4. GET /health returns JSON with status, uptime, queue length, and keeper address; Docker health check passes with 30s start-period
+  5. Keeper completes in-flight transaction on SIGTERM before shutting down — no orphaned nonces
+**Plans**: TBD
+
+### Phase 17: Deploy and Verify
+**Goal**: Keeper deployed to production and all three operation types verified end-to-end on live chain
+**Depends on**: Phase 16
+**Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04
+**Success Criteria** (what must be TRUE):
+  1. Keeper running on DigitalOcean droplet (142.93.203.222) via Docker Compose with BetterStack health monitoring active
+  2. A deposit submitted via the frontend executes successfully — user sees GM tokens appear
+  3. A withdrawal submitted via the frontend executes successfully — user receives collateral back
+  4. A market order submitted via the frontend executes successfully — user sees position opened/closed
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 13 → 14
+Phases execute in numeric order: 15 → 16 → 17
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -112,5 +118,8 @@ Phases execute in numeric order: 13 → 14
 | 10. Event-Driven Detection | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 11. Execution Pipeline Optimization | v1.3 | 2/2 | Complete | 2026-02-23 |
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
-| 13. Oracle Correctness | v1.4 | Complete    | 2026-02-25 | 2026-02-24 |
-| 14. Execution Speed | 2/2 | Complete    | 2026-02-25 | - |
+| 13. Oracle Correctness | v1.4 | 4/4 | Complete | 2026-02-25 |
+| 14. Execution Speed | v1.4 | 2/2 | Complete | 2026-02-25 |
+| 15. Project Skeleton and Oracle | v1.5 | 0/TBD | Not started | - |
+| 16. Keeper Logic and Infrastructure | v1.5 | 0/TBD | Not started | - |
+| 17. Deploy and Verify | v1.5 | 0/TBD | Not started | - |
