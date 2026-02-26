@@ -18,6 +18,8 @@ import Tabs from "components/Tabs/Tabs";
 import PoolsTimeRangeFilter from "./PoolsTimeRangeFilter";
 import { usePoolsIsMobilePage } from "./usePoolsIsMobilePage";
 
+import "styles/pools-glass.css";
+
 const POOLS_TAB_OPTIONS = [
   { value: "all" as const, label: "All Pools" },
   { value: "my" as const, label: "My Pools" },
@@ -52,21 +54,13 @@ export default function Pools() {
   return (
     <AppPageLayout header={<ChainContentHeader />}>
       <div
-        className={cx("mb-24 grid w-full flex-col", {
-          "grid-cols-1": isMobile,
-          "grid-cols-2": !isMobile,
+        className={cx("mb-24 flex w-full gap-16", {
+          "flex-col": isMobile,
+          "items-end justify-between": !isMobile,
         })}
       >
         <PoolsTvl />
-
-        <div
-          className={cx("flex-end flex", {
-            "ml-0 mt-28": isMobile,
-            "ml-auto mt-auto": !isMobile,
-          })}
-        >
-          <PoolsTimeRangeFilter timeRange={timeRange} setTimeRange={setTimeRange} />
-        </div>
+        <PoolsTimeRangeFilter timeRange={timeRange} setTimeRange={setTimeRange} />
       </div>
 
       <div className="mb-16">
@@ -102,9 +96,12 @@ function PoolsTvl() {
   const tvl = v2Stats?.totalGMLiquidity ?? 0n;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4">
+      <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
+        Total Value Locked
+      </span>
       <span className="text-h1 normal-nums">{formatUsd(tvl, { displayDecimals: 0 })}</span>
-      <span className="text-body-medium font-medium text-typography-secondary">TVL in vaults and pools.</span>
+      <span className="text-body-medium text-typography-secondary">In vaults and pools</span>
     </div>
   );
 }
