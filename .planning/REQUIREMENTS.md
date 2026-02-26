@@ -1,26 +1,40 @@
-# Requirements: 0xMarkets v1.6 Execution Feedback
+# Requirements: 0xMarkets v1.6 E2E Reliability
 
 **Defined:** 2026-02-26
 **Core Value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
 
 ## v1.6 Requirements
 
-### Detection
+### Contract Audit
 
-- [x] **DET-01**: Frontend watches for DepositExecuted events after user submits a deposit
-- [x] **DET-02**: Frontend watches for WithdrawalExecuted events after user submits a withdrawal
-- [x] **DET-03**: Frontend watches for OrderExecuted events after user submits an order
+- [ ] **AUDIT-01**: All market addresses in interface SDK match actual on-chain DataStore deployments
+- [ ] **AUDIT-02**: All token addresses in keeper services match deployed token contracts
+- [ ] **AUDIT-03**: Oracle provider addresses are correct and match on-chain DataStore configuration
+- [ ] **AUDIT-04**: All 6 markets are enabled and properly configured on-chain (reserve factors, OI limits, pool caps)
 
-### Feedback
+### Keeper Execution
 
-- [x] **FB-01**: Toast notification shows "Pending..." immediately after operation submission
-- [x] **FB-02**: Toast notification updates to "Executed!" when execution event is detected
-- [x] **FB-03**: Toast notification shows error state if operation fails or expires
+- [ ] **EXEC-01**: Keeper executes deposits for all 6 markets without reverts
+- [ ] **EXEC-02**: Keeper executes withdrawals for all 6 markets without reverts
+- [ ] **EXEC-03**: Keeper executes market orders (long and short) for all 6 markets without reverts
+- [ ] **EXEC-04**: Keeper detects new operations within 10 seconds of on-chain submission
 
-### Refresh
+### Frontend Feedback
 
-- [ ] **REF-01**: Balances auto-refresh when a deposit or withdrawal executes (no manual page refresh)
-- [ ] **REF-02**: Positions auto-refresh when an order executes (no manual page refresh)
+- [ ] **FB-01**: Toast shows "Pending..." immediately after deposit submission
+- [ ] **FB-02**: Toast updates to "Executed!" when DepositExecuted event is detected
+- [ ] **FB-03**: Toast shows "Pending..." immediately after withdrawal submission
+- [ ] **FB-04**: Toast updates to "Executed!" when WithdrawalExecuted event is detected
+- [ ] **FB-05**: Toast shows "Pending..." immediately after order submission
+- [ ] **FB-06**: Toast updates to "Executed!" when OrderExecuted event is detected
+- [ ] **FB-07**: Balances auto-refresh when a deposit or withdrawal executes (no manual page refresh)
+- [ ] **FB-08**: Positions auto-refresh when an order executes (no manual page refresh)
+
+### Automated Testing
+
+- [ ] **TEST-01**: E2E test script that tests deposits for all 6 markets and reports pass/fail
+- [ ] **TEST-02**: E2E test script that tests withdrawals for all 6 markets and reports pass/fail
+- [ ] **TEST-03**: E2E test script that tests market orders for all 6 markets and reports pass/fail
 
 ## Future Requirements
 
@@ -29,13 +43,11 @@ Deferred to v2+. Tracked but not in current roadmap.
 ### Reliability
 
 - **REL-01**: Expired request cancellation — returns stuck user funds past REQUEST_EXPIRATION_TIME
-- **REL-02**: Startup oracle provider + feed entitlement verification
-- **REL-03**: Hermes HTTP fallback for individual tokens when Lazer cache goes stale
+- **REL-02**: Multi-wallet parallel execution for higher throughput
 
 ### Performance
 
-- **PERF-01**: Per-stage execution timing instrumentation via performance.now()
-- **PERF-02**: Multi-wallet parallel execution for higher throughput
+- **PERF-01**: Sub-5s end-to-end execution latency
 
 ## Out of Scope
 
@@ -46,25 +58,37 @@ Deferred to v2+. Tracked but not in current roadmap.
 | Operation history page | Beyond current scope — just toast + refresh |
 | Mobile-specific UI | Web-first approach |
 | Mainnet deployment | Testnet-first strategy unchanged |
+| New market creation | Admin operation, not user-facing |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | Phase 18 | Complete |
-| DET-02 | Phase 18 | Complete |
-| DET-03 | Phase 18 | Complete |
-| FB-01 | Phase 18 | Complete |
-| FB-02 | Phase 18 | Complete |
-| FB-03 | Phase 18 | Complete |
-| REF-01 | Phase 19 | Pending |
-| REF-02 | Phase 19 | Pending |
+| AUDIT-01 | — | Pending |
+| AUDIT-02 | — | Pending |
+| AUDIT-03 | — | Pending |
+| AUDIT-04 | — | Pending |
+| EXEC-01 | — | Pending |
+| EXEC-02 | — | Pending |
+| EXEC-03 | — | Pending |
+| EXEC-04 | — | Pending |
+| FB-01 | — | Pending |
+| FB-02 | — | Pending |
+| FB-03 | — | Pending |
+| FB-04 | — | Pending |
+| FB-05 | — | Pending |
+| FB-06 | — | Pending |
+| FB-07 | — | Pending |
+| FB-08 | — | Pending |
+| TEST-01 | — | Pending |
+| TEST-02 | — | Pending |
+| TEST-03 | — | Pending |
 
 **Coverage:**
-- v1.6 requirements: 8 total
-- Mapped to phases: 8
-- Unmapped: 0
+- v1.6 requirements: 19 total
+- Mapped to phases: 0
+- Unmapped: 19 ⚠️
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after roadmap creation*
+*Last updated: 2026-02-26 after scope replacement*
