@@ -60,7 +60,7 @@
 **Milestone Goal:** Replace the 3,000+ line order-execution-keeper with a ~300 line single-loop keeper that reliably executes deposits, withdrawals, and orders.
 
 - [x] **Phase 15: Project Skeleton and Oracle** - Clean project reset with config/keys/ABIs and Pyth Lazer WebSocket cache (completed 2026-02-26)
-- [ ] **Phase 16: Keeper Logic and Infrastructure** - Event watcher, poller, sequential executor, health endpoint, Dockerfile
+- [x] **Phase 16: Keeper Logic and Infrastructure** - Event watcher, poller, sequential executor, health endpoint, Dockerfile (completed 2026-02-26)
 - [ ] **Phase 17: Deploy and Verify** - Deploy to DigitalOcean and verify all operation types end-to-end
 
 ## Phase Details
@@ -89,10 +89,10 @@ Plans:
   3. Same operation key is never executed twice — dedup Set prevents double-execution from event+poll overlap
   4. GET /health returns JSON with status, uptime, queue length, and keeper address; Docker health check passes with 30s start-period
   5. Keeper completes in-flight transaction on SIGTERM before shutting down — no orphaned nonces
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 16-01-PLAN.md -- Detection layer (watcher, poller) and sequential executor with dedup, retry, token extraction
-- [ ] 16-02-PLAN.md -- Health endpoint, index.ts wiring, graceful shutdown, Dockerfile verification
+- [x] 16-01-PLAN.md -- Detection layer (watcher, poller) and sequential executor with dedup, retry, token extraction
+- [x] 16-02-PLAN.md -- Health endpoint, index.ts wiring, graceful shutdown, Dockerfile verification
 
 ### Phase 17: Deploy and Verify
 **Goal**: Keeper deployed to production and all three operation types verified end-to-end on live chain
@@ -127,5 +127,5 @@ Phases execute in numeric order: 15 → 16 → 17
 | 13. Oracle Correctness | v1.4 | 4/4 | Complete | 2026-02-25 |
 | 14. Execution Speed | v1.4 | 2/2 | Complete | 2026-02-25 |
 | 15. Project Skeleton and Oracle | v1.5 | Complete    | 2026-02-26 | 2026-02-26 |
-| 16. Keeper Logic and Infrastructure | 1/2 | In Progress|  | - |
+| 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 17. Deploy and Verify | v1.5 | 0/TBD | Not started | - |

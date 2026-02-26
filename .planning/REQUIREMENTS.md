@@ -27,10 +27,10 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Health endpoint at GET /health returns JSON with status, uptime, queue length, and keeper address
-- [ ] **INFRA-02**: All operations logged as structured JSON via pino
-- [ ] **INFRA-03**: Graceful shutdown on SIGTERM — completes in-flight TX, closes WebSocket, stops intervals
-- [ ] **INFRA-04**: Simplified Dockerfile with no database, no Prisma, 30s health check start-period
+- [x] **INFRA-01**: Health endpoint at GET /health returns JSON with status, uptime, queue length, and keeper address
+- [x] **INFRA-02**: All operations logged as structured JSON via pino
+- [x] **INFRA-03**: Graceful shutdown on SIGTERM — completes in-flight TX, closes WebSocket, stops intervals
+- [x] **INFRA-04**: Simplified Dockerfile with no database, no Prisma, 30s health check start-period
 
 ### Deployment
 
@@ -81,10 +81,10 @@ Deferred to v2+. Tracked but not in current roadmap.
 | ORCL-01 | Phase 15 | Complete |
 | ORCL-02 | Phase 15 | Complete |
 | ORCL-03 | Phase 15 | Complete |
-| INFRA-01 | Phase 16 | Pending |
-| INFRA-02 | Phase 16 | Pending |
-| INFRA-03 | Phase 16 | Pending |
-| INFRA-04 | Phase 16 | Pending |
+| INFRA-01 | Phase 16 | Complete |
+| INFRA-02 | Phase 16 | Complete |
+| INFRA-03 | Phase 16 | Complete |
+| INFRA-04 | Phase 16 | Complete |
 | DEPLOY-01 | Phase 17 | Pending |
 | DEPLOY-02 | Phase 17 | Pending |
 | DEPLOY-03 | Phase 17 | Pending |
