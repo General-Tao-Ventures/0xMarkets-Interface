@@ -82,7 +82,7 @@ was replaced with E2E Reliability. The polling infrastructure from 18-01 carries
 
 **Milestone Goal:** Every market x every operation (deposit, trade, withdrawal) works reliably end-to-end: user action -> keeper execution -> frontend toast + auto-refresh. No manual page refresh needed.
 
-- [ ] **Phase 20: Contract Address Audit** - Verify all addresses across interface SDK, keeper, and contracts repo match on-chain reality
+- [x] **Phase 20: Contract Address Audit** - Verify all addresses across interface SDK, keeper, and contracts repo match on-chain reality (completed 2026-02-26)
 - [ ] **Phase 21: Keeper Execution Fixes** - All 6 markets execute deposits, withdrawals, and orders without reverts
 - [ ] **Phase 22: Frontend Feedback** - Toast lifecycle and auto-refresh for all operation types
 - [ ] **Phase 23: Automated E2E Testing** - Scripts that verify all 18 market x operation combinations
@@ -100,8 +100,8 @@ was replaced with E2E Reliability. The polling infrastructure from 18-01 carries
   4. All 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY) are enabled on-chain with non-zero reserve factors, OI limits, and pool caps
   5. A single audit report documents every discrepancy found and every fix applied, so future redeployments have a checklist
 **Plans**: 2 plans
-- [ ] 20-01-PLAN.md -- Write audit verification script, run against on-chain DataStore, produce audit report
-- [ ] 20-02-PLAN.md -- Apply all fixes from audit report, SDK prebuild, re-verify, smoke test, keeper restart
+- [x] 20-01-PLAN.md -- Write audit verification script, run against on-chain DataStore, produce audit report
+- [x] 20-02-PLAN.md -- Apply all fixes from audit report, SDK prebuild, re-verify, smoke test, keeper restart
 
 ### Phase 21: Keeper Execution Fixes
 **Goal**: The order-execution-keeper executes all three operation types across all 6 markets without reverts, so every user action reaches completion
@@ -162,7 +162,7 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 18. Event Detection and Toast Feedback | v1.6 (old) | 1/3 | Superseded | - |
-| 20. Contract Address Audit | 1/2 | In Progress|  | - |
+| 20. Contract Address Audit | v1.6 | 2/2 | Complete | 2026-02-26 |
 | 21. Keeper Execution Fixes | v1.6 | 0/TBD | Not started | - |
 | 22. Frontend Feedback | v1.6 | 0/TBD | Not started | - |
 | 23. Automated E2E Testing | v1.6 | 0/TBD | Not started | - |
