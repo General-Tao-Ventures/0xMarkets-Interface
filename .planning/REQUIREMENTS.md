@@ -7,17 +7,17 @@
 
 ### Detection
 
-- [ ] **DET-01**: Keeper detects DepositCreated, WithdrawalCreated, and OrderCreated events via WebSocket in under 1 second
-- [ ] **DET-02**: Keeper polls DataStore for pending deposits, withdrawals, and orders every 15 seconds as safety net
-- [ ] **DET-03**: Duplicate keys are deduplicated — same operation is never executed twice
+- [x] **DET-01**: Keeper detects DepositCreated, WithdrawalCreated, and OrderCreated events via WebSocket in under 1 second
+- [x] **DET-02**: Keeper polls DataStore for pending deposits, withdrawals, and orders every 15 seconds as safety net
+- [x] **DET-03**: Duplicate keys are deduplicated — same operation is never executed twice
 
 ### Execution
 
-- [ ] **EXEC-01**: Keeper executes deposits by reading on-chain struct, building oracle params, and calling executeDeposit
-- [ ] **EXEC-02**: Keeper executes withdrawals by reading on-chain struct, building oracle params, and calling executeWithdrawal
-- [ ] **EXEC-03**: Keeper executes orders by reading on-chain struct, building oracle params, and calling executeOrder
-- [ ] **EXEC-04**: Execution is sequential — one transaction at a time, no nonce conflicts
-- [ ] **EXEC-05**: Transient errors retry up to 3 times; permanent errors (EmptyDeposit, expired, InvalidOracleProvider) are logged and skipped
+- [x] **EXEC-01**: Keeper executes deposits by reading on-chain struct, building oracle params, and calling executeDeposit
+- [x] **EXEC-02**: Keeper executes withdrawals by reading on-chain struct, building oracle params, and calling executeWithdrawal
+- [x] **EXEC-03**: Keeper executes orders by reading on-chain struct, building oracle params, and calling executeOrder
+- [x] **EXEC-04**: Execution is sequential — one transaction at a time, no nonce conflicts
+- [x] **EXEC-05**: Transient errors retry up to 3 times; permanent errors (EmptyDeposit, expired, InvalidOracleProvider) are logged and skipped
 
 ### Oracle
 
@@ -70,14 +70,14 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | Phase 16 | Pending |
-| DET-02 | Phase 16 | Pending |
-| DET-03 | Phase 16 | Pending |
-| EXEC-01 | Phase 16 | Pending |
-| EXEC-02 | Phase 16 | Pending |
-| EXEC-03 | Phase 16 | Pending |
-| EXEC-04 | Phase 16 | Pending |
-| EXEC-05 | Phase 16 | Pending |
+| DET-01 | Phase 16 | Complete |
+| DET-02 | Phase 16 | Complete |
+| DET-03 | Phase 16 | Complete |
+| EXEC-01 | Phase 16 | Complete |
+| EXEC-02 | Phase 16 | Complete |
+| EXEC-03 | Phase 16 | Complete |
+| EXEC-04 | Phase 16 | Complete |
+| EXEC-05 | Phase 16 | Complete |
 | ORCL-01 | Phase 15 | Complete |
 | ORCL-02 | Phase 15 | Complete |
 | ORCL-03 | Phase 15 | Complete |
