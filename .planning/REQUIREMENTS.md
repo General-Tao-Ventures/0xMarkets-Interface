@@ -13,8 +13,8 @@
 
 ### Feedback
 
-- [ ] **FB-01**: Toast notification shows "Pending..." immediately after operation submission
-- [ ] **FB-02**: Toast notification updates to "Executed!" when execution event is detected
+- [x] **FB-01**: Toast notification shows "Pending..." immediately after operation submission
+- [x] **FB-02**: Toast notification updates to "Executed!" when execution event is detected
 - [x] **FB-03**: Toast notification shows error state if operation fails or expires
 
 ### Refresh
@@ -54,8 +54,8 @@ Deferred to v2+. Tracked but not in current roadmap.
 | DET-01 | Phase 18 | Complete |
 | DET-02 | Phase 18 | Complete |
 | DET-03 | Phase 18 | Complete |
-| FB-01 | Phase 18 | Pending |
-| FB-02 | Phase 18 | Pending |
+| FB-01 | Phase 18 | Complete |
+| FB-02 | Phase 18 | Complete |
 | FB-03 | Phase 18 | Complete |
 | REF-01 | Phase 19 | Pending |
 | REF-02 | Phase 19 | Pending |
