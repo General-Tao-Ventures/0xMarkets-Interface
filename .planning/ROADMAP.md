@@ -61,7 +61,7 @@
 
 - [x] **Phase 15: Project Skeleton and Oracle** - Clean project reset with config/keys/ABIs and Pyth Lazer WebSocket cache (completed 2026-02-26)
 - [x] **Phase 16: Keeper Logic and Infrastructure** - Event watcher, poller, sequential executor, health endpoint, Dockerfile (completed 2026-02-26)
-- [ ] **Phase 17: Deploy and Verify** - Deploy to DigitalOcean and verify all operation types end-to-end
+- [x] **Phase 17: Deploy and Verify** - Deploy to DigitalOcean and verify all operation types end-to-end (completed 2026-02-26)
 
 ## Phase Details
 
@@ -103,7 +103,7 @@ Plans:
   2. A deposit submitted via the frontend executes successfully — user sees GM tokens appear
   3. A withdrawal submitted via the frontend executes successfully — user receives collateral back
   4. A market order submitted via the frontend executes successfully — user sees position opened/closed
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 17-01-PLAN.md -- Update docker-compose.yml and deploy keeper to DigitalOcean droplet
 - [ ] 17-02-PLAN.md -- Verify deposit, withdrawal, and order execution end-to-end
@@ -131,4 +131,4 @@ Phases execute in numeric order: 15 → 16 → 17
 | 14. Execution Speed | v1.4 | 2/2 | Complete | 2026-02-25 |
 | 15. Project Skeleton and Oracle | v1.5 | Complete    | 2026-02-26 | 2026-02-26 |
 | 16. Keeper Logic and Infrastructure | 2/2 | Complete   | 2026-02-26 | 2026-02-26 |
-| 17. Deploy and Verify | v1.5 | 0/2 | Not started | - |
+| 17. Deploy and Verify | 2/2 | Complete   | 2026-02-26 | - |
