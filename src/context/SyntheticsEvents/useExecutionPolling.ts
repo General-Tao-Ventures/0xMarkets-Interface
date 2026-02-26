@@ -7,13 +7,14 @@ import { getProvider } from "lib/rpc";
 import { abis } from "sdk/abis";
 import type { ContractsChainId } from "sdk/configs/chains";
 
-import type { DepositStatuses, OrderStatuses, WithdrawalStatuses, MultiTransactionStatus } from "./types";
+import { parseEventLogData } from "context/WebsocketContext/subscribeToEvents";
+
+import type { DepositStatuses, EventLogData, EventTxnParams, OrderStatuses, WithdrawalStatuses, MultiTransactionStatus } from "./types";
 import { EXECUTION_TIMEOUT_HASH } from "./types";
 
 // --- Constants ---
 
-const POLL_INTERVAL_MS = 5_000; // Poll every 5 seconds
-const POLL_DELAY_MS = 10_000; // Wait 10s before first poll (give WS a chance)
+const POLL_INTERVAL_MS = 3_000; // Poll every 3 seconds
 const MAX_WAIT_MS = 5 * 60 * 1000; // 5 minutes max before timeout
 
 // Event name hashes for execution/cancellation events
@@ -28,6 +29,8 @@ const ORDER_CANCELLED_HASH = ethers.id("OrderCancelled");
 
 type StatusSetter<T> = React.Dispatch<React.SetStateAction<T>>;
 
+type EventLogHandler = (eventData: EventLogData, txnParams: EventTxnParams) => void;
+
 interface ExecutionPollingParams {
   chainId: number;
   depositStatuses: DepositStatuses;
@@ -36,9 +39,12 @@ interface ExecutionPollingParams {
   setDepositStatuses: StatusSetter<DepositStatuses>;
   setWithdrawalStatuses: StatusSetter<WithdrawalStatuses>;
   setOrderStatuses: StatusSetter<OrderStatuses>;
+  watchedTxnHashes: Set<string>;
+  setWatchedTxnHashes: React.Dispatch<React.SetStateAction<Set<string>>>;
+  eventLogHandlers: React.MutableRefObject<Record<string, EventLogHandler>>;
 }
 
-interface StuckOperation {
+interface PendingOperation {
   key: string;
   createdAt: number;
   createdTxnHash: string;
@@ -56,15 +62,9 @@ function isPendingOperation(status: MultiTransactionStatus<unknown>): status is 
   );
 }
 
-function isStuckOperation(status: MultiTransactionStatus<unknown>): status is MultiTransactionStatus<unknown> & {
-  createdTxnHash: string;
-} {
-  return isPendingOperation(status) && Date.now() - status.createdAt > POLL_DELAY_MS;
-}
-
-function getStuckOperations(statuses: Record<string, MultiTransactionStatus<unknown>>): StuckOperation[] {
+function getPendingOperations(statuses: Record<string, MultiTransactionStatus<unknown>>): PendingOperation[] {
   return Object.values(statuses)
-    .filter(isStuckOperation)
+    .filter(isPendingOperation)
     .map((s) => ({
       key: s.key,
       createdAt: s.createdAt,
@@ -82,6 +82,9 @@ export function useExecutionPolling({
   setDepositStatuses,
   setWithdrawalStatuses,
   setOrderStatuses,
+  watchedTxnHashes,
+  setWatchedTxnHashes,
+  eventLogHandlers,
 }: ExecutionPollingParams) {
   // Use refs to avoid re-creating intervals on every status change
   const depositStatusesRef = useRef(depositStatuses);
@@ -96,24 +99,28 @@ export function useExecutionPolling({
   const chainIdRef = useRef(chainId);
   chainIdRef.current = chainId;
 
+  const watchedTxnHashesRef = useRef(watchedTxnHashes);
+  watchedTxnHashesRef.current = watchedTxnHashes;
+
+  const eventLogHandlersRef = useRef(eventLogHandlers);
+  eventLogHandlersRef.current = eventLogHandlers;
+
   useEffect(() => {
-    // Check if there are any pending operations (submitted but not yet executed/cancelled)
     const hasPendingOps =
       Object.values(depositStatusesRef.current).some(isPendingOperation) ||
       Object.values(withdrawalStatusesRef.current).some(isPendingOperation) ||
       Object.values(orderStatusesRef.current).some(isPendingOperation);
 
-    // Don't start interval if nothing is pending
-    if (!hasPendingOps) return;
+    const hasWatchedTxns = watchedTxnHashes.size > 0;
 
-    // Log stuck operations for debugging
-    const stuckDepositsInit = getStuckOperations(depositStatusesRef.current);
-    const stuckWithdrawalsInit = getStuckOperations(withdrawalStatusesRef.current);
-    const stuckOrdersInit = getStuckOperations(orderStatusesRef.current);
-    for (const s of [...stuckDepositsInit, ...stuckWithdrawalsInit, ...stuckOrdersInit]) {
-      const type = stuckDepositsInit.includes(s) ? "deposit" : stuckWithdrawalsInit.includes(s) ? "withdrawal" : "order";
-      console.warn("[execution-polling] Polling for stuck operation:", s.key, "type:", type, "elapsed:", Date.now() - s.createdAt, "ms");
-    }
+    // Don't start interval if nothing needs polling
+    if (!hasPendingOps && !hasWatchedTxns) return;
+
+    console.warn(
+      "[execution-polling] Starting unified poll loop.",
+      "watchedTxns:", watchedTxnHashes.size,
+      "pendingOps:", hasPendingOps
+    );
 
     const poll = async () => {
       const currentChainId = chainIdRef.current;
@@ -121,14 +128,14 @@ export function useExecutionPolling({
       let provider: ethers.JsonRpcProvider;
       try {
         provider = getProvider(undefined, currentChainId);
-      } catch (_e) {
+      } catch {
         return;
       }
 
       let eventEmitterAddress: string;
       try {
         eventEmitterAddress = getContract(currentChainId as ContractsChainId, "EventEmitter");
-      } catch (_e) {
+      } catch {
         return;
       }
 
@@ -137,14 +144,76 @@ export function useExecutionPolling({
       const EVENT_LOG1_TOPIC = eventEmitter.interface.getEvent("EventLog1")?.topicHash ?? null;
       const EVENT_LOG2_TOPIC = eventEmitter.interface.getEvent("EventLog2")?.topicHash ?? null;
 
+      // --- Phase A: Receipt detection for watched TX hashes ---
+      const currentWatched = watchedTxnHashesRef.current;
+      for (const txnHash of currentWatched) {
+        try {
+          const receipt = await provider.getTransactionReceipt(txnHash);
+          if (!receipt) continue;
+
+          console.warn("[execution-polling] Receipt found for TX:", txnHash, "logs:", receipt.logs.length);
+
+          // Remove from watch list
+          setWatchedTxnHashes((prev) => {
+            const next = new Set(prev);
+            next.delete(txnHash);
+            return next;
+          });
+
+          // Parse logs and feed through event handlers (triggers OrderCreated → sets createdTxnHash)
+          for (const log of receipt.logs) {
+            if (log.address.toLowerCase() !== eventEmitterAddress.toLowerCase()) continue;
+
+            try {
+              const parsed = eventEmitter.interface.parseLog({
+                topics: log.topics as string[],
+                data: log.data,
+              });
+
+              if (!parsed) continue;
+
+              const txnOpts: EventTxnParams = {
+                transactionHash: receipt.hash,
+                blockNumber: receipt.blockNumber,
+              };
+
+              let eventName: string;
+              let rawEventData: unknown;
+
+              if (parsed.name === "EventLog") {
+                eventName = parsed.args[1];
+                rawEventData = parsed.args[3];
+              } else if (parsed.name === "EventLog1") {
+                eventName = parsed.args[1];
+                rawEventData = parsed.args[4];
+              } else if (parsed.name === "EventLog2") {
+                eventName = parsed.args[1];
+                rawEventData = parsed.args[5];
+              } else {
+                continue;
+              }
+
+              console.warn("[execution-polling] Parsed event:", eventName, "from TX:", txnHash);
+              const parsedData = parseEventLogData(rawEventData);
+              eventLogHandlersRef.current.current[eventName]?.(parsedData, txnOpts);
+            } catch {
+              // Skip unparseable logs
+            }
+          }
+        } catch {
+          // Receipt not available yet, will retry on next poll
+        }
+      }
+
+      // --- Phase B: Execution detection for pending operations ---
       const now = Date.now();
 
-      // Poll for stuck deposits
-      const stuckDeposits = getStuckOperations(depositStatusesRef.current);
-      for (const stuck of stuckDeposits) {
-        if (now - stuck.createdAt > MAX_WAIT_MS) {
-          console.warn("[execution-polling] Operation timed out:", stuck.key, "after", now - stuck.createdAt, "ms");
-          setDepositStatuses((old) => updateByKey(old, stuck.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
+      // Poll for pending deposits
+      const pendingDeposits = getPendingOperations(depositStatusesRef.current);
+      for (const pending of pendingDeposits) {
+        if (now - pending.createdAt > MAX_WAIT_MS) {
+          console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
+          setDepositStatuses((old) => updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
           continue;
         }
 
@@ -155,7 +224,7 @@ export function useExecutionPolling({
             [EVENT_LOG_TOPIC, EVENT_LOG1_TOPIC, EVENT_LOG2_TOPIC],
             [DEPOSIT_EXECUTED_HASH, DEPOSIT_CANCELLED_HASH],
             eventEmitter,
-            stuck.key,
+            pending.key,
             (key, txnHash, isExecuted) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
@@ -165,17 +234,17 @@ export function useExecutionPolling({
               }
             }
           );
-        } catch (_e) {
-          // Silently ignore polling errors -- will retry on next interval
+        } catch {
+          // Will retry on next interval
         }
       }
 
-      // Poll for stuck withdrawals
-      const stuckWithdrawals = getStuckOperations(withdrawalStatusesRef.current);
-      for (const stuck of stuckWithdrawals) {
-        if (now - stuck.createdAt > MAX_WAIT_MS) {
-          console.warn("[execution-polling] Operation timed out:", stuck.key, "after", now - stuck.createdAt, "ms");
-          setWithdrawalStatuses((old) => updateByKey(old, stuck.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
+      // Poll for pending withdrawals
+      const pendingWithdrawals = getPendingOperations(withdrawalStatusesRef.current);
+      for (const pending of pendingWithdrawals) {
+        if (now - pending.createdAt > MAX_WAIT_MS) {
+          console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
+          setWithdrawalStatuses((old) => updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
           continue;
         }
 
@@ -186,7 +255,7 @@ export function useExecutionPolling({
             [EVENT_LOG_TOPIC, EVENT_LOG1_TOPIC, EVENT_LOG2_TOPIC],
             [WITHDRAWAL_EXECUTED_HASH, WITHDRAWAL_CANCELLED_HASH],
             eventEmitter,
-            stuck.key,
+            pending.key,
             (key, txnHash, isExecuted) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
@@ -196,17 +265,17 @@ export function useExecutionPolling({
               }
             }
           );
-        } catch (_e) {
-          // Silently ignore polling errors
+        } catch {
+          // Will retry on next interval
         }
       }
 
-      // Poll for stuck orders
-      const stuckOrders = getStuckOperations(orderStatusesRef.current);
-      for (const stuck of stuckOrders) {
-        if (now - stuck.createdAt > MAX_WAIT_MS) {
-          console.warn("[execution-polling] Operation timed out:", stuck.key, "after", now - stuck.createdAt, "ms");
-          setOrderStatuses((old) => updateByKey(old, stuck.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
+      // Poll for pending orders
+      const pendingOrders = getPendingOperations(orderStatusesRef.current);
+      for (const pending of pendingOrders) {
+        if (now - pending.createdAt > MAX_WAIT_MS) {
+          console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
+          setOrderStatuses((old) => updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
           continue;
         }
 
@@ -217,7 +286,7 @@ export function useExecutionPolling({
             [EVENT_LOG_TOPIC, EVENT_LOG1_TOPIC, EVENT_LOG2_TOPIC],
             [ORDER_EXECUTED_HASH, ORDER_CANCELLED_HASH],
             eventEmitter,
-            stuck.key,
+            pending.key,
             (key, txnHash, isExecuted) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
@@ -227,8 +296,8 @@ export function useExecutionPolling({
               }
             }
           );
-        } catch (_e) {
-          // Silently ignore polling errors
+        } catch {
+          // Will retry on next interval
         }
       }
     };
@@ -238,16 +307,14 @@ export function useExecutionPolling({
     const interval = setInterval(poll, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
-    // Re-evaluate when any status object identity changes (new entries added)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    depositStatuses,
-    withdrawalStatuses,
-    orderStatuses,
+    watchedTxnHashes,
     chainId,
     setDepositStatuses,
     setWithdrawalStatuses,
     setOrderStatuses,
+    setWatchedTxnHashes,
   ]);
 }
 
@@ -315,7 +382,7 @@ async function pollForEvents(
 
       onFound(operationKey, log.transactionHash, isExecuted);
       return; // Found a match, stop searching
-    } catch (_e) {
+    } catch {
       // Skip unparseable logs
       continue;
     }
