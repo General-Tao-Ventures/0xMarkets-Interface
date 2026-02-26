@@ -65,7 +65,7 @@
 
 </details>
 
-### 🚧 v1.6 Execution Feedback (In Progress)
+### v1.6 Execution Feedback (In Progress)
 
 **Milestone Goal:** Real-time toast notifications and auto-balance refresh when deposits, withdrawals, and orders execute — no manual page refresh needed.
 
@@ -83,7 +83,11 @@
   2. After user submits a withdrawal, a "Pending..." toast appears immediately and updates to "Executed!" when the WithdrawalExecuted event is detected on-chain
   3. After user submits an order (market, limit, stop-loss, take-profit), a "Pending..." toast appears immediately and updates to "Executed!" when the OrderExecuted event is detected on-chain
   4. If an operation fails or expires without execution, the toast updates to an error state with an actionable message (not stuck on "Pending..." forever)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 18-01-PLAN.md — RPC polling fallback for reliable event detection and timeout handling
+- [ ] 18-02-PLAN.md — Verify toast lifecycle for all operation types (e2e testing)
 
 ### Phase 19: Auto-Refresh on Execution
 **Goal**: User's balances and positions update automatically when operations execute, eliminating the need to manually refresh the page
@@ -119,5 +123,5 @@ Phases execute in numeric order: 18 → 19
 | 15. Project Skeleton and Oracle | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
-| 18. Event Detection and Toast Feedback | v1.6 | 0/TBD | Not started | - |
+| 18. Event Detection and Toast Feedback | v1.6 | 0/2 | Not started | - |
 | 19. Auto-Refresh on Execution | v1.6 | 0/TBD | Not started | - |
