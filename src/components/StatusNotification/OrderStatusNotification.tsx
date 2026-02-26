@@ -7,6 +7,7 @@ import { getExplorerUrl } from "config/chains";
 import { usePendingTxns } from "context/PendingTxnsContext/PendingTxnsContext";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
 import {
+  EXECUTION_TIMEOUT_HASH,
   OrderStatus,
   PendingOrderData,
   getGelatoTaskUrl,
@@ -311,7 +312,11 @@ export function OrderStatusNotification({
       txnHash = orderStatus?.executedTxnHash;
     }
 
-    if (orderStatus?.cancelledTxnHash) {
+    if (orderStatus?.cancelledTxnHash === EXECUTION_TIMEOUT_HASH) {
+      text = t`Order timed out. The keeper may be down. Try again.`;
+      status = "error";
+      // Don't show a BaseScan link for timeout (not a real tx hash)
+    } else if (orderStatus?.cancelledTxnHash) {
       text = t`Order cancelled`;
       txnHash = orderStatus?.cancelledTxnHash;
 

@@ -3,6 +3,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
+  EXECUTION_TIMEOUT_HASH,
   PendingDepositData,
   PendingShiftData,
   PendingWithdrawalData,
@@ -331,7 +332,10 @@ export function GmStatusNotification({
     let txnHash: string | undefined;
 
     if (operation === "deposit") {
-      if (depositStatus?.cancelledTxnHash) {
+      if (depositStatus?.cancelledTxnHash === EXECUTION_TIMEOUT_HASH) {
+        text = t`Deposit timed out. The keeper may be down. Try again or check your wallet balance.`;
+        status = "error";
+      } else if (depositStatus?.cancelledTxnHash) {
         text = getActionableMessage(keeperErrorReason);
         status = "error";
         txnHash = depositStatus.cancelledTxnHash;
@@ -354,7 +358,10 @@ export function GmStatusNotification({
         text = t`Fulfilling buy request.`;
       }
     } else if (operation === "withdrawal") {
-      if (withdrawalStatus?.cancelledTxnHash) {
+      if (withdrawalStatus?.cancelledTxnHash === EXECUTION_TIMEOUT_HASH) {
+        text = t`Withdrawal timed out. The keeper may be down. Try again or check your GM token balance.`;
+        status = "error";
+      } else if (withdrawalStatus?.cancelledTxnHash) {
         text = getWithdrawalActionableMessage(withdrawalErrorReason);
         status = "error";
         txnHash = withdrawalStatus.cancelledTxnHash;
@@ -484,7 +491,7 @@ export function GmStatusNotification({
   }, [hasError, toastTimestamp]);
 
   useEffect(() => {
-    if (depositStatus?.cancelledTxnHash && depositStatusKey) {
+    if (depositStatus?.cancelledTxnHash && depositStatus.cancelledTxnHash !== EXECUTION_TIMEOUT_HASH && depositStatusKey) {
       fetch(`${KEEPER_API_URL}/api/deposits/${depositStatusKey}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
@@ -495,7 +502,7 @@ export function GmStatusNotification({
   }, [depositStatus?.cancelledTxnHash, depositStatusKey]);
 
   useEffect(() => {
-    if (withdrawalStatus?.cancelledTxnHash && withdrawalStatusKey) {
+    if (withdrawalStatus?.cancelledTxnHash && withdrawalStatus.cancelledTxnHash !== EXECUTION_TIMEOUT_HASH && withdrawalStatusKey) {
       fetch(`${KEEPER_API_URL}/api/withdrawals/${withdrawalStatusKey}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {

@@ -2,8 +2,8 @@ import { ethers } from "ethers";
 import { useEffect, useRef } from "react";
 
 import { getContract } from "config/contracts";
-import { getProvider } from "lib/rpc";
 import { updateByKey } from "lib/objects";
+import { getProvider } from "lib/rpc";
 import { abis } from "sdk/abis";
 import type { ContractsChainId } from "sdk/configs/chains";
 
@@ -110,14 +110,14 @@ export function useExecutionPolling({
       let provider: ethers.JsonRpcProvider;
       try {
         provider = getProvider(undefined, currentChainId);
-      } catch {
+      } catch (_e) {
         return;
       }
 
       let eventEmitterAddress: string;
       try {
         eventEmitterAddress = getContract(currentChainId as ContractsChainId, "EventEmitter");
-      } catch {
+      } catch (_e) {
         return;
       }
 
@@ -152,7 +152,7 @@ export function useExecutionPolling({
               }
             }
           );
-        } catch {
+        } catch (_e) {
           // Silently ignore polling errors -- will retry on next interval
         }
       }
@@ -181,7 +181,7 @@ export function useExecutionPolling({
               }
             }
           );
-        } catch {
+        } catch (_e) {
           // Silently ignore polling errors
         }
       }
@@ -210,7 +210,7 @@ export function useExecutionPolling({
               }
             }
           );
-        } catch {
+        } catch (_e) {
           // Silently ignore polling errors
         }
       }
@@ -298,7 +298,7 @@ async function pollForEvents(
 
       onFound(operationKey, log.transactionHash, isExecuted);
       return; // Found a match, stop searching
-    } catch {
+    } catch (_e) {
       // Skip unparseable logs
       continue;
     }

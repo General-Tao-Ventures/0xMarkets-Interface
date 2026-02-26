@@ -88,6 +88,7 @@ import {
   WithdrawalCreatedEventData,
   WithdrawalStatuses,
 } from "./types";
+import { useExecutionPolling } from "./useExecutionPolling";
 import { useMultichainEvents } from "./useMultichainEvents";
 import { extractGelatoError, getGelatoTaskUrl, getPendingOrderKey } from "./utils";
 
@@ -881,6 +882,17 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
     },
     [chainId, currentAccount, hasV2LostFocus, wsProvider]
   );
+
+  // RPC-based polling fallback for missed WebSocket execution events
+  useExecutionPolling({
+    chainId,
+    depositStatuses,
+    withdrawalStatuses,
+    orderStatuses,
+    setDepositStatuses,
+    setWithdrawalStatuses,
+    setOrderStatuses,
+  });
 
   useEffect(
     function subscribeTokenTransferEvents() {
