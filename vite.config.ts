@@ -82,7 +82,7 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/keeper/, ""),
         },
         "/api/order-keeper": {
-          target: "http://142.93.203.222:37018",
+          target: "http://localhost:37018",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/order-keeper/, ""),
         },

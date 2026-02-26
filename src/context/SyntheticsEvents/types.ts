@@ -192,6 +192,7 @@ export type SyntheticsEventsContextType = MultichainEventsState & {
   setDepositStatusViewed: (key: string) => void;
   setWithdrawalStatusViewed: (key: string) => void;
   setShiftStatusViewed: (key: string) => void;
+  watchOrderTxn: (txnHash: string) => void;
 };
 
 export type SetPendingOrder = (data: PendingOrderData | PendingOrderData[]) => void;

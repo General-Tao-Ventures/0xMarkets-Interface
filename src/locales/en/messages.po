@@ -34,6 +34,10 @@ msgstr "Not likely"
 msgid "STIP.b Trading Incentives"
 msgstr "STIP.b Trading Incentives"
 
+#: src/components/StatusNotification/OrderStatusNotification.tsx
+msgid "Order timed out. The keeper may be down. Try again."
+msgstr "Order timed out. The keeper may be down. Try again."
+
 #: landing/src/pages/Home/HeroSection/AnimatedTitle.tsx
 msgid "from 5 blockchains"
 msgstr "from 5 blockchains"
@@ -1345,6 +1349,10 @@ msgstr "Withdrawal may be stuck."
 #: src/components/TradeBox/ExpressTradingWarningCard.tsx
 msgid "Express and One-Click Trading are unavailable due to insufficient gas balance."
 msgstr "Express and One-Click Trading are unavailable due to insufficient gas balance."
+
+#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
+msgid "View on BaseScan"
+msgstr "View on BaseScan"
 
 #: src/components/UserIncentiveDistributionList/ClaimableAmounts.tsx
 msgid "No funds to claim"
@@ -2897,6 +2905,10 @@ msgstr "Updating settings..."
 msgid "Active Referral Code"
 msgstr "Active Referral Code"
 
+#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
+msgid "Txn failed. <0>View on BaseScan</0>."
+msgstr "Txn failed. <0>View on BaseScan</0>."
+
 #: src/components/GmxAccountModal/DepositView.tsx
 msgid "The amount you are trying to deposit is below the limit. Please try an amount larger than <0>{lowerLimitFormatted}</0>."
 msgstr "The amount you are trying to deposit is below the limit. Please try an amount larger than <0>{lowerLimitFormatted}</0>."
@@ -3172,10 +3184,6 @@ msgstr "Claiming failed."
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
 msgid "Stop Market price is above mark price"
 msgstr "Stop Market price is above mark price"
-
-#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
-msgid "Txn failed. <0>View</0>."
-msgstr "Txn failed. <0>View</0>."
 
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
 #: src/domain/synthetics/trade/utils/validation.ts
@@ -3470,6 +3478,10 @@ msgstr "No open orders"
 #: src/components/TradeBox/TradeBoxRows/LimitAndTPSLRows.tsx
 msgid "Take Profit / Stop Loss"
 msgstr "Take Profit / Stop Loss"
+
+#: src/components/StatusNotification/GmStatusNotification.tsx
+msgid "Deposit timed out. The keeper may be down. Try again or check your wallet balance."
+msgstr "Deposit timed out. The keeper may be down. Try again or check your wallet balance."
 
 #: src/components/TradeboxPoolWarnings/TradeboxPoolWarnings.tsx
 msgid "Save {0} in price impact and fees by <0>switching to the {1} pool</0>"
@@ -3848,6 +3860,7 @@ msgstr "Cancelling {ordersText}."
 
 #: src/App/MainRoutes.tsx
 #: src/components/Claims/Claims.tsx
+#: src/components/EmptyTableContent/EmptyTableContent.tsx
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 #: src/components/GmSwap/GmSwapBox/GmShiftBox/useShiftSubmitState.tsx
 #: src/components/PositionEditor/usePositionEditorButtonState.tsx
@@ -4991,7 +5004,6 @@ msgstr "{0} and {1} can be used to buy GM for this market up to the specified bu
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
 #: src/components/StatusNotification/StakeNotification.tsx
-#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
 #: src/lib/contracts/notifications.tsx
 #: src/lib/contracts/notifications.tsx
 msgid "View"
@@ -5539,6 +5551,10 @@ msgstr "This code has been taken by someone else on {takenNetworkNames}, you wil
 #: src/components/Referrals/ClaimAffiliatesModal/ClaimAffiliatesModal.tsx
 msgid "Confirm Claim"
 msgstr "Confirm Claim"
+
+#: src/components/StatusNotification/GmStatusNotification.tsx
+msgid "Withdrawal timed out. The keeper may be down. Try again or check your GM token balance."
+msgstr "Withdrawal timed out. The keeper may be down. Try again or check your GM token balance."
 
 #: src/components/GmList/GmListItem.tsx
 #: src/components/GmList/GmListItem.tsx
@@ -6506,7 +6522,6 @@ msgid "You're withdrawing {0}, your gas token. Gas is required for this withdraw
 msgstr "You're withdrawing {0}, your gas token. Gas is required for this withdrawal, so please keep at least <0>{1}</0> in {2} or switch your gas token in settings."
 
 #: src/components/ClaimModal/ClaimModal.tsx
-#: src/components/EmptyTableContent/EmptyTableContent.tsx
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 #: src/components/PositionSeller/PositionSeller.tsx
 #: src/components/Referrals/JoinReferralCode.tsx

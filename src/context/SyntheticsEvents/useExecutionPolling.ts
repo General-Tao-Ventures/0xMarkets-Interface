@@ -354,6 +354,8 @@ async function pollForEvents(
     topics: [validTopics, eventNameHashes],
   });
 
+  console.warn("[execution-polling] pollForEvents: got", logs.length, "logs from blocks", fromBlock, "to latest, looking for key:", operationKey);
+
   for (const log of logs) {
     try {
       const parsed = eventEmitter.interface.parseLog({
@@ -365,12 +367,16 @@ async function pollForEvents(
 
       // Extract eventData from parsed args based on event type
       let eventData: unknown;
+      let eventName: string | undefined;
       if (parsed.name === "EventLog") {
         eventData = parsed.args[3]; // (sender, eventName, eventNameHash, eventData)
+        eventName = parsed.args[1];
       } else if (parsed.name === "EventLog1") {
         eventData = parsed.args[4]; // (sender, eventName, eventNameHash, topic1, eventData)
+        eventName = parsed.args[1];
       } else if (parsed.name === "EventLog2") {
         eventData = parsed.args[5]; // (sender, eventName, eventNameHash, topic1, topic2, eventData)
+        eventName = parsed.args[1];
       } else {
         continue;
       }
@@ -380,7 +386,11 @@ async function pollForEvents(
         bytes32Items?: { items?: Array<{ key: string; value: string }> };
       };
 
-      const keyItem = eventLogData?.bytes32Items?.items?.find((item) => item.key === "key");
+      const items = eventLogData?.bytes32Items?.items;
+      const keyItem = items?.find((item: { key: string; value: string }) => item.key === "key");
+
+      console.warn("[execution-polling] pollForEvents: log event:", eventName, "parsed.name:", parsed.name, "bytes32Items.items type:", typeof items, "isArray:", Array.isArray(items), "length:", items?.length, "keyItem:", keyItem ? { key: keyItem.key, value: keyItem.value } : "NOT_FOUND");
+
       if (!keyItem || keyItem.value !== operationKey) continue;
 
       // Determine the event name hash (topic[1] in the log)
@@ -391,8 +401,8 @@ async function pollForEvents(
 
       onFound(operationKey, log.transactionHash, isExecuted);
       return; // Found a match, stop searching
-    } catch {
-      // Skip unparseable logs
+    } catch (e) {
+      console.warn("[execution-polling] pollForEvents: error parsing log:", e);
       continue;
     }
   }

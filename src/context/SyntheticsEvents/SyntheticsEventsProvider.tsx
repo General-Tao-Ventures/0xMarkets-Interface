@@ -151,6 +151,18 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
   const latestPendingExpressTxnParams = useLatest(pendingExpressTxnParams);
   const eventLogHandlers = useRef({});
 
+  // Receipt-based watcher: polls for TX receipts to detect events independently of WebSocket
+  const [watchedTxnHashes, setWatchedTxnHashes] = useState<Set<string>>(new Set());
+
+  const watchOrderTxn = useCallback((txnHash: string) => {
+    console.warn("[receipt-watcher] Watching TX receipt:", txnHash);
+    setWatchedTxnHashes((prev) => {
+      const next = new Set(prev);
+      next.add(txnHash);
+      return next;
+    });
+  }, []);
+
   const handleExpressTxnSuccess = useCallback(
     (pendingExpressTxn: Partial<PendingExpressTxnParams>) => {
       const key = pendingExpressTxn.key;
@@ -186,6 +198,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
   // use ref to avoid re-subscribing on state changes
   eventLogHandlers.current = {
     OrderCreated: (eventData: EventLogData, txnParams: EventTxnParams) => {
+      console.warn("[events] OrderCreated received via handler, txnHash:", txnParams.transactionHash, "key:", eventData.bytes32Items.items.key);
       updateNativeTokenBalance();
 
       const uiFeeReceiver = eventData.addressItems.items.uiFeeReceiver;
@@ -281,6 +294,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
     },
 
     OrderExecuted: (eventData: EventLogData, txnParams: EventTxnParams) => {
+      console.warn("[events] OrderExecuted received via handler, txnHash:", txnParams.transactionHash, "key:", eventData.bytes32Items.items.key);
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
@@ -883,7 +897,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
     [chainId, currentAccount, hasV2LostFocus, wsProvider]
   );
 
-  // RPC-based polling fallback for missed WebSocket execution events
+  // Unified polling: receipt detection + execution event detection (WS-independent)
   useExecutionPolling({
     chainId,
     depositStatuses,
@@ -892,6 +906,9 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
     setDepositStatuses,
     setWithdrawalStatuses,
     setOrderStatuses,
+    watchedTxnHashes,
+    setWatchedTxnHashes,
+    eventLogHandlers,
   });
 
   useEffect(
@@ -1236,9 +1253,12 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         setShiftStatuses((old) => updateByKey(old, key, { isViewed: true }));
       },
 
+      watchOrderTxn,
+
       ...multichainEventsState,
     };
   }, [
+    watchOrderTxn,
     orderStatuses,
     depositStatuses,
     withdrawalStatuses,

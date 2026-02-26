@@ -421,7 +421,7 @@ export function subscribeToMultichainApprovalEvents(
   };
 }
 
-function parseEventLogData(eventData): EventLogData {
+export function parseEventLogData(eventData): EventLogData {
   const ret: any = {};
   for (const typeKey of [
     "addressItems",

@@ -34,6 +34,10 @@ msgstr "가능성 낮음"
 msgid "STIP.b Trading Incentives"
 msgstr ""
 
+#: src/components/StatusNotification/OrderStatusNotification.tsx
+msgid "Order timed out. The keeper may be down. Try again."
+msgstr ""
+
 #: landing/src/pages/Home/HeroSection/AnimatedTitle.tsx
 msgid "from 5 blockchains"
 msgstr ""
@@ -1345,6 +1349,10 @@ msgstr ""
 #: src/components/TradeBox/ExpressTradingWarningCard.tsx
 msgid "Express and One-Click Trading are unavailable due to insufficient gas balance."
 msgstr "가스 잔고 부족으로 익스프레스 및 원클릭 트레이딩 사용 불가."
+
+#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
+msgid "View on BaseScan"
+msgstr ""
 
 #: src/components/UserIncentiveDistributionList/ClaimableAmounts.tsx
 msgid "No funds to claim"
@@ -2897,6 +2905,10 @@ msgstr "설정 업데이트 중..."
 msgid "Active Referral Code"
 msgstr "활성화된 추천 코드"
 
+#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
+msgid "Txn failed. <0>View on BaseScan</0>."
+msgstr ""
+
 #: src/components/GmxAccountModal/DepositView.tsx
 msgid "The amount you are trying to deposit is below the limit. Please try an amount larger than <0>{lowerLimitFormatted}</0>."
 msgstr ""
@@ -3172,10 +3184,6 @@ msgstr ""
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
 msgid "Stop Market price is above mark price"
 msgstr "스탑 마켓 가격이 시장 평균가 초과"
-
-#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
-msgid "Txn failed. <0>View</0>."
-msgstr "트랜잭션 실패. <0>보기</0>."
 
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
 #: src/domain/synthetics/trade/utils/validation.ts
@@ -3470,6 +3478,10 @@ msgstr "열려있는 주문이 없습니다"
 #: src/components/TradeBox/TradeBoxRows/LimitAndTPSLRows.tsx
 msgid "Take Profit / Stop Loss"
 msgstr "이익 실현 / 손절"
+
+#: src/components/StatusNotification/GmStatusNotification.tsx
+msgid "Deposit timed out. The keeper may be down. Try again or check your wallet balance."
+msgstr ""
 
 #: src/components/TradeboxPoolWarnings/TradeboxPoolWarnings.tsx
 msgid "Save {0} in price impact and fees by <0>switching to the {1} pool</0>"
@@ -3848,6 +3860,7 @@ msgstr ""
 
 #: src/App/MainRoutes.tsx
 #: src/components/Claims/Claims.tsx
+#: src/components/EmptyTableContent/EmptyTableContent.tsx
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 #: src/components/GmSwap/GmSwapBox/GmShiftBox/useShiftSubmitState.tsx
 #: src/components/PositionEditor/usePositionEditorButtonState.tsx
@@ -4991,7 +5004,6 @@ msgstr "{0} 및 {1}은 지정된 구매 상한까지 이 시장의 GM 구매에 
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
 #: src/components/StatusNotification/StakeNotification.tsx
-#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
 #: src/lib/contracts/notifications.tsx
 #: src/lib/contracts/notifications.tsx
 msgid "View"
@@ -5539,6 +5551,10 @@ msgstr "이 코드는 {takenNetworkNames}에서 다른 사람이 사용 중입�
 #: src/components/Referrals/ClaimAffiliatesModal/ClaimAffiliatesModal.tsx
 msgid "Confirm Claim"
 msgstr "수령 확인"
+
+#: src/components/StatusNotification/GmStatusNotification.tsx
+msgid "Withdrawal timed out. The keeper may be down. Try again or check your GM token balance."
+msgstr ""
 
 #: src/components/GmList/GmListItem.tsx
 #: src/components/GmList/GmListItem.tsx
@@ -6506,7 +6522,6 @@ msgid "You're withdrawing {0}, your gas token. Gas is required for this withdraw
 msgstr ""
 
 #: src/components/ClaimModal/ClaimModal.tsx
-#: src/components/EmptyTableContent/EmptyTableContent.tsx
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 #: src/components/PositionSeller/PositionSeller.tsx
 #: src/components/Referrals/JoinReferralCode.tsx

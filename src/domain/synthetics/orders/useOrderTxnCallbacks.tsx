@@ -73,6 +73,7 @@ export function useOrderTxnCallbacks() {
     updatePendingExpressTxn,
     setPendingExpressTxn,
     setPendingFundingFeeSettlement,
+    watchOrderTxn,
   } = useSyntheticsEvents();
   const { chainId } = useChainId();
   const { showDebugValues, setIsSettingsVisible } = useSettings();
@@ -248,6 +249,11 @@ export function useOrderTxnCallbacks() {
             handleTxnSubmitted();
           }
 
+          // Start receipt-based event detection as WS fallback
+          if (e.data.type === "wallet") {
+            watchOrderTxn(e.data.transactionHash);
+          }
+
           if (e.data.type === "relay") {
             updatePendingExpressTxn({
               key: expressParams ? getExpressParamsKey(expressParams) : undefined,
@@ -365,6 +371,7 @@ export function useOrderTxnCallbacks() {
       showDebugValues,
       tokensData,
       updatePendingExpressTxn,
+      watchOrderTxn,
     ]
   );
 

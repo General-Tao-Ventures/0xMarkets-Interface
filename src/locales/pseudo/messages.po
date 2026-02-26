@@ -34,6 +34,10 @@ msgstr ""
 msgid "STIP.b Trading Incentives"
 msgstr ""
 
+#: src/components/StatusNotification/OrderStatusNotification.tsx
+msgid "Order timed out. The keeper may be down. Try again."
+msgstr ""
+
 #: landing/src/pages/Home/HeroSection/AnimatedTitle.tsx
 msgid "from 5 blockchains"
 msgstr ""
@@ -1344,6 +1348,10 @@ msgstr ""
 #: src/components/ExpressTradingOutOfGasBanner.ts/ExpressTradingOutOfGasBanner.tsx
 #: src/components/TradeBox/ExpressTradingWarningCard.tsx
 msgid "Express and One-Click Trading are unavailable due to insufficient gas balance."
+msgstr ""
+
+#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
+msgid "View on BaseScan"
 msgstr ""
 
 #: src/components/UserIncentiveDistributionList/ClaimableAmounts.tsx
@@ -2897,6 +2905,10 @@ msgstr ""
 msgid "Active Referral Code"
 msgstr ""
 
+#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
+msgid "Txn failed. <0>View on BaseScan</0>."
+msgstr ""
+
 #: src/components/GmxAccountModal/DepositView.tsx
 msgid "The amount you are trying to deposit is below the limit. Please try an amount larger than <0>{lowerLimitFormatted}</0>."
 msgstr ""
@@ -3171,10 +3183,6 @@ msgstr ""
 
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
 msgid "Stop Market price is above mark price"
-msgstr ""
-
-#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
-msgid "Txn failed. <0>View</0>."
 msgstr ""
 
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
@@ -3469,6 +3477,10 @@ msgstr ""
 
 #: src/components/TradeBox/TradeBoxRows/LimitAndTPSLRows.tsx
 msgid "Take Profit / Stop Loss"
+msgstr ""
+
+#: src/components/StatusNotification/GmStatusNotification.tsx
+msgid "Deposit timed out. The keeper may be down. Try again or check your wallet balance."
 msgstr ""
 
 #: src/components/TradeboxPoolWarnings/TradeboxPoolWarnings.tsx
@@ -3848,6 +3860,7 @@ msgstr ""
 
 #: src/App/MainRoutes.tsx
 #: src/components/Claims/Claims.tsx
+#: src/components/EmptyTableContent/EmptyTableContent.tsx
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 #: src/components/GmSwap/GmSwapBox/GmShiftBox/useShiftSubmitState.tsx
 #: src/components/PositionEditor/usePositionEditorButtonState.tsx
@@ -4991,7 +5004,6 @@ msgstr ""
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
 #: src/components/StatusNotification/StakeNotification.tsx
-#: src/context/PendingTxnsContext/PendingTxnsContext.tsx
 #: src/lib/contracts/notifications.tsx
 #: src/lib/contracts/notifications.tsx
 msgid "View"
@@ -5538,6 +5550,10 @@ msgstr ""
 #: src/components/ClaimModal/ClaimModal.tsx
 #: src/components/Referrals/ClaimAffiliatesModal/ClaimAffiliatesModal.tsx
 msgid "Confirm Claim"
+msgstr ""
+
+#: src/components/StatusNotification/GmStatusNotification.tsx
+msgid "Withdrawal timed out. The keeper may be down. Try again or check your GM token balance."
 msgstr ""
 
 #: src/components/GmList/GmListItem.tsx
@@ -6506,7 +6522,6 @@ msgid "You're withdrawing {0}, your gas token. Gas is required for this withdraw
 msgstr ""
 
 #: src/components/ClaimModal/ClaimModal.tsx
-#: src/components/EmptyTableContent/EmptyTableContent.tsx
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 #: src/components/PositionSeller/PositionSeller.tsx
 #: src/components/Referrals/JoinReferralCode.tsx
