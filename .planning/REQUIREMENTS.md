@@ -22,7 +22,7 @@
 ### Oracle
 
 - [ ] **ORCL-01**: Pyth Lazer WebSocket connects and caches price updates for all 7 tokens
-- [ ] **ORCL-02**: buildOracleParams reads from cache (synchronous) and includes correct provider address per token
+- [x] **ORCL-02**: buildOracleParams reads from cache (synchronous) and includes correct provider address per token
 - [ ] **ORCL-03**: Cache rejects prices older than 270 seconds (safety margin below 300s MAX_ORACLE_PRICE_AGE)
 
 ### Infrastructure
@@ -79,7 +79,7 @@ Deferred to v2+. Tracked but not in current roadmap.
 | EXEC-04 | Phase 16 | Pending |
 | EXEC-05 | Phase 16 | Pending |
 | ORCL-01 | Phase 15 | Pending |
-| ORCL-02 | Phase 15 | Pending |
+| ORCL-02 | Phase 15 | Complete |
 | ORCL-03 | Phase 15 | Pending |
 | INFRA-01 | Phase 16 | Pending |
 | INFRA-02 | Phase 16 | Pending |

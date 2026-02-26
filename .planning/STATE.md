@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: Minimal Keeper Rewrite
+status: unknown
+last_updated: "2026-02-26T05:39:32.190Z"
+progress:
+  total_phases: 9
+  completed_phases: 8
+  total_plans: 22
+  completed_plans: 21
+---
+
 # Project State
 
 ## Project Reference
@@ -10,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 15 of 17 (Project Skeleton and Oracle)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-25 — Roadmap created for v1.5 Minimal Keeper Rewrite
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-02-26 — Completed 15-01 (Project Skeleton)
 
 Progress: [##############░░░░░░] 82% (14/17 phases complete)
 
@@ -31,7 +44,8 @@ Progress: [##############░░░░░░] 82% (14/17 phases complete)
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
 | 13-14 | v1.4 | 6/6 | Complete |
-| 15-17 | v1.5 | 0/TBD | Not started |
+| 15-17 | v1.5 | 1/TBD | In progress |
+| Phase 15 P01 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -55,11 +69,13 @@ None.
 
 ### Decisions
 
-**v1.5 decisions:** Keep Lazer WebSocket (not Hermes HTTP) — all 7 tokens use Lazer provider on-chain.
+**v1.5 decisions:** Keep Lazer WebSocket (not Hermes HTTP) -- all 7 tokens use Lazer provider on-chain.
+**15-01:** Pinned pyth-lazer-sdk to exactly 5.2.0 (no caret) to avoid Node ^24 engine in 5.2.1+. Used console.error for config failures to avoid circular dep with pino logger. Kept PYTH_PRO_ACCESS_TOKEN env var name to match existing server .env.
 **Prior decisions:** See .planning/PROJECT.md key decisions table.
+- [Phase 15]: Pinned pyth-lazer-sdk to exactly 5.2.0 to avoid Node ^24 engine requirement
 
 ## Session Continuity
 
-Last session: 2026-02-25
-Stopped at: Roadmap created for v1.5
-Next: `/gsd:plan-phase 15`
+Last session: 2026-02-26
+Stopped at: Completed 15-01-PLAN.md (Project Skeleton)
+Next: Execute 15-02-PLAN.md (Oracle Module)
