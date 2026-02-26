@@ -1,128 +1,191 @@
-# Feature Landscape: Maximum Keeper Speed and Oracle Configuration (v1.4)
+# Feature Landscape: Minimal Keeper Rewrite (v1.5)
 
-**Domain:** DeFi keeper oracle routing, per-market oracle configuration, and end-to-end latency optimization
-**Researched:** 2026-02-24
-**Overall confidence:** MEDIUM (Pyth entitlement model externally verified via pricing page; on-chain provider registration pattern verified from Phase 13 research and GMX Oracle.sol; latency optimization patterns HIGH confidence from codebase analysis)
+**Domain:** DeFi order execution keeper -- replacing 3,000+ line over-engineered keeper with ~300 line minimal equivalent
+**Researched:** 2026-02-25
+**Overall confidence:** HIGH (based on direct codebase analysis of existing keeper, GMX synthetics keeper spec, Chainlink Automation patterns, and MEV bot architectural principles)
+
+## Context: What the Keeper Actually Does
+
+The GMX-style two-step execution model is simple: users create requests on-chain (deposits, withdrawals, orders), and a keeper detects them, bundles oracle prices, and calls the corresponding handler contract to execute them. The on-chain DataStore is the source of truth for all pending operations. The keeper's only job is to:
+
+1. Detect pending operations (event or poll)
+2. Read operation details from chain
+3. Get fresh oracle prices
+4. Call `executeDeposit` / `executeWithdrawal` / `executeOrder` with oracle params
+5. Confirm the TX landed
+
+Everything else is optional infrastructure.
 
 ## Table Stakes
 
-Features required for the keeper to execute ALL markets reliably. Missing = FX markets are broken, crypto markets intermittently fail with stale prices, or the new API key silently does nothing.
+Features the minimal keeper MUST have. Without any of these, operations will not execute or the keeper will silently fail.
 
-| Feature | Why Expected | Complexity | Current State | Notes |
-|---------|--------------|------------|---------------|-------|
-| Pyth Pro API key deployment with startup entitlement verification | Current key has zero entitlements -- WebSocket connects but sends no data. Without verification, keeper runs indefinitely with stale prices and every execution fails silently. | Low | Key `QpxMy21OMvC7rap9...` obtained but not deployed. Phase 13 planned `verifyLazerFeeds()` startup check. FX feeds commented out in `tokens.ts`. | Tier matters: "Pyth Crypto" (free) = crypto only, 1s updates. "Pyth Crypto+" ($5k/mo) = crypto, 1ms updates. "Pyth Pro" ($10k/mo) = cross-asset including FX. If key is Crypto tier, FX feeds will never receive data regardless of feed IDs. |
-| Per-market oracle mode selection (Lazer for crypto, Hermes for FX) | Crypto tokens (WETH, WBTC, USDC) have Lazer feed IDs and entitlements. FX tokens (EUR, GBP, JPY, GOLD) may not have Lazer entitlements unless on Pyth Pro tier. Forcing Lazer-only mode breaks FX; forcing Hermes-only mode wastes Lazer's speed for crypto. | Medium | `config.oracleMode` is global ("hermes", "lazer", or "both"). `buildOracleParams()` in `baseExecutor.ts` applies the same mode to ALL tokens. No per-token oracle routing exists. | Central feature of v1.4. Must route crypto tokens through Lazer (fast path) and FX tokens through Hermes (reliable path). The `pythLazerOracle.hasFeed()` check already exists per-token -- extend this into a routing decision. |
-| On-chain oracle provider registration for FX tokens to accept Hermes prices | FX withdrawals fail with `InvalidOracleProvider (0x05d102a2)`. The DataStore's `oracleProviderForToken` maps each token to a single expected provider address. If it points to PythLazerFeedProvider but keeper sends Hermes provider address (or vice versa), the contract reverts. | Medium | `oracleProviderForToken` likely set to PythLazerFeedProvider for ALL tokens via `configureOracleTokens.ts`. FX tokens need the Hermes/Pyth contract address registered instead (or both providers enabled). | Requires contract-level admin transaction via deploy scripts in `0xmarkets_contract`. Keeper-side code cannot fix this alone -- it is an on-chain DataStore configuration issue. |
-| MaxPriceAgeExceeded prevention for all execution paths | Stored prices go stale between background update and execution. With MAX_ORACLE_PRICE_AGE = 300s and background updates every 10s per token, there is normally a large margin. But during execution, background updates are disabled (nonce coordination), and if the queue is backed up, prices can age out. | Low | `isStoredPriceFresh()` in `baseExecutor.ts` checks freshness with 5s safety margin. Falls back to synchronous `updatePriceOnChain()` when stale. Current 10s background interval is conservative. | The real risk is when `updatePriceOnChain()` also fails (e.g., Lazer WS disconnected AND cache stale). Need clear error path: try Lazer cache -> try Lazer fresh fetch -> fall back to Hermes for that token. |
+| Feature | Why Expected | Complexity | Existing State | Notes |
+|---------|--------------|------------|----------------|-------|
+| EventEmitter WebSocket watcher | Primary detection path. Without it, keeper relies entirely on polling and adds 15s latency to every operation. Users expect sub-second detection. | Low | `EventListener` class exists (327 lines), but coupled to Prisma for block persistence. Rewrite needs only the `watchEvent` + `decodeEventName` + enqueue logic (~50 lines). | GMX keepers "listen for user transactions" via events. This is the standard pattern. |
+| DataStore polling safety net | WebSocket connections drop. RPC providers flap. Events can be missed during reconnect windows. A periodic poll of DataStore's DEPOSIT_LIST / WITHDRAWAL_LIST / ORDER_LIST catches anything the event watcher missed. | Low | Scanner classes exist (deposit: 328 lines, withdrawal: 232 lines, order: 210 lines) but 60%+ is DB operations. Minimal version: `dataStore.getAllBytes32Values(key)` -> dedup against in-memory set -> enqueue. ~30 lines per type. | Chainlink Automation calls this "checkUpkeep" -- the off-chain check that determines if work needs doing. Polling interval of 10-15s is standard. |
+| Sequential single-consumer execution loop | Single keeper wallet means a single nonce. Parallel execution causes "replacement transaction underpriced" and "nonce too low" errors. The architecture must enforce one-TX-at-a-time. | Very Low | `drainQueue()` + `TxMutex` in index.ts (~70 lines). The queue+mutex pattern is solid. Minimal version: simple `while(true)` loop pulling from a Set, no mutex needed if there is only one consumer and no competing cleanup path. | This is the consensus pattern. MEV bots, GMX keepers, and all single-wallet execution bots use sequential execution. There is no alternative. |
+| In-memory dedup set | Without dedup, the same operation key gets executed twice -- once from the event, once from the poll. The on-chain contract may revert (good case) or double-charge gas (bad case). | Very Low | `ExecutionQueue` class (151 lines) with pending/processing/allKnown Maps, fail counts, TTL cleanup. Minimal version: a `Set<Hex>` cleared after key completion + a TTL eviction. ~15 lines. | Standard pattern. Every keeper implementation deduplicates. |
+| Pyth Lazer WebSocket price cache | Oracle prices must be included with every execution call. Lazer streams prices via WebSocket into an in-memory cache. Executors read cached prices at execution time -- zero HTTP round-trips. | Medium | `PythLazerOracleService` (full file not shown but estimated ~200 lines) with `updateCache` Map, `getLatestUpdate()`, feed registration. This is already well-designed and cache-only. Minimal version can reuse this largely as-is. | GMX spec: "Keepers listen for transactions, include the prices for the request then send a transaction." Pyth Lazer's streaming model is ideal -- prices are always ready. |
+| Per-token oracle routing (Lazer/Hermes) | Crypto tokens (WETH, WBTC, USDC) use Lazer. FX tokens (EUR, GBP, JPY, GOLD) use Hermes. A global mode breaks one group or the other. This was shipped in v1.4 and must be preserved. | Low | `buildOracleParams()` in `baseExecutor.ts` already partitions tokens into `lazerTokens` and `hermesTokens` per-token. ~80 lines of oracle routing logic. | Proven pattern from v1.4. No changes needed to the routing logic itself. |
+| Fixed gas limit (skip estimateGas) | `estimateGas` adds an RPC round-trip per execution. GMX handler contracts have predictable gas usage. A generous fixed limit (2M) avoids the round-trip while only charging gas actually used. | Very Low | `DEFAULT_GAS_LIMIT = 2_000_000n` in `baseExecutor.ts`. Already proven. | GMX docs: "order keepers are expected to validate whether a transaction will revert before sending the transaction to minimize gas wastage." But for a single-operator testnet keeper, a fixed generous gas limit is simpler and equally effective. |
+| Nonce-aware TX submission with retry | Nonce conflicts happen from RPC lag, stale pending TX state, or WS reconnects. The keeper must get explicit nonce (`getTransactionCount({ blockTag: "pending" })`) and retry on nonce errors. | Low | `submitTransaction()` in `baseExecutor.ts` (40 lines) with 3 retries, gas bumping, nonce-error detection. Well-designed and minimal already. | Every blockchain bot needs this. The existing implementation is already close to minimal. |
+| Health endpoint | BetterStack pings the keeper every 5 minutes. Without a health endpoint, there is no monitoring. A keeper that crashes silently means operations queue up forever. | Very Low | `healthState.ts` (81 lines) + HTTP server. Minimal version: single `GET /health` returning JSON with uptime, last heartbeat, oracle status, WS status. ~20 lines of Bun.serve or similar. | Table stakes for any production service. The existing health state tracking is simple enough to keep. |
+| Graceful shutdown (SIGINT/SIGTERM) | Docker sends SIGTERM on restart/redeploy. Without graceful shutdown, in-flight transactions may be abandoned, WebSocket connections leak, and the process hangs. | Very Low | `shutdown()` handler in index.ts (~15 lines): stop intervals, unwatch events, destroy WS client, close server. | Standard for any long-running process. |
+| Structured logging | JSON logs are essential for debugging production issues via SSH. Without structured logging, diagnosing "why did this order fail?" requires grep through unstructured output. | Very Low | Pino logger already configured. Minimal version: keep pino, keep child loggers per module. ~5 lines of setup. | The existing keeper replaced 278 console calls with pino. That was the right call. Keep it. |
 
 ## Differentiators
 
-Features that push execution speed well beyond "working" into "fast" territory. These leverage the existing event-driven architecture from v1.3 and optimize the remaining latency sources.
+Features that go beyond "it works" into "it works well." These are worth including in the rewrite if they remain simple, but should not inflate the line count.
 
 | Feature | Value Proposition | Complexity | Dependencies | Notes |
 |---------|-------------------|------------|--------------|-------|
-| Eliminate synchronous `updatePriceOnChain()` TX during execution | Current flow: check `isStoredPriceFresh()` -> if stale, call `updatePriceOnChain()` (sends TX, waits for receipt: ~2-4s) -> then submit execution TX. If background updater keeps prices fresh, the synchronous path is never needed for Lazer tokens. Reduce background interval from 10s to 5s or lower for Lazer tokens. | Low | Background updater already exists in `pythLazerOracle.ts`. Just needs interval tuning + confidence that prices stay fresh. | With 300s MAX_ORACLE_PRICE_AGE and 5s update interval, prices should never go stale during execution. Saves 2-4s per execution when the synchronous fallback would have fired. |
-| Flashblocks-aware RPC endpoint (200ms confirmations) | Every `waitForTransactionReceipt` call in the keeper waits up to 2s for block inclusion. With Flashblocks, this drops to ~200ms. Affects: `updatePriceOnChain()` receipt wait, `executeDeposit/Withdrawal/Order` receipt wait, and `submitTransaction` nonce retry waits. | Very Low | Alchemy and Chainstack support Flashblocks on Base Sepolia. Just swap RPC URL. Flashblocks went live on Base Mainnet July 2025. | Single highest-ROI configuration change. No code changes needed -- just update `RPC_URL` env var to a Flashblocks-enabled endpoint. Every execution saves ~1.8s per TX confirmation. |
-| Tighter background oracle update interval for Lazer tokens | Current: 10s minimum between on-chain updates per token (`BG_UPDATE_INTERVAL_MS = 10_000`). With 200ms Flashblocks confirmations, this can safely drop to 3-5s without nonce pressure. Keeps stored prices fresher, reducing synchronous fallback probability. | Very Low | Flashblocks RPC (for faster confirmations). Without Flashblocks, more frequent updates risk nonce pileup. | Trade-off: more gas spent on background updates vs. fewer synchronous update delays during execution. On testnet, gas is free -- prefer freshness. |
-| Oracle cascade fallback (Lazer -> Hermes per-token) | When Lazer WS disconnects or cache goes stale for a specific token, automatically fall back to Hermes for that token only (not globally). Prevents a Lazer outage from blocking all executions. | Medium | Per-market oracle routing (table stakes feature). Hermes feeds already registered for all 7 tokens. | Different from "both" mode which always does Lazer then Hermes. This is: try Lazer, and if Lazer fails for THIS token, use Hermes for THIS token only. Keeps crypto tokens fast when Lazer works while providing resilience. |
-| Startup oracle provider consistency verification | Read `oracleProviderForToken` from DataStore for each configured token at startup. Compare against keeper's expected provider address. Log clear MISMATCH warnings before any execution attempt. Prevents running for hours with 100% execution failures. | Low | Phase 13 already planned this in `13-01-PLAN.md`. | Diagnostic only -- does not fix mismatches, but surfaces them immediately at startup instead of discovering them from cryptic `0x05d102a2` reverts during execution. |
-| Per-market latency tracking | Track execution latency separately per market/token-pair, not just globally. Enables identifying if FX markets are slower (Hermes HTTP fetch) vs. crypto markets (Lazer cached). | Low | `latencyTracker.ts` circular buffer exists. Extend to per-market buckets. | Observability feature. Reveals whether per-market oracle routing is actually delivering speed benefits. |
+| Expired request cancellation | Operations that sit unclaimed past `REQUEST_EXPIRATION_TIME` (currently 3600s on testnet) should be cancelled on-chain. Returns stuck user funds. | Low | DataStore read for expiration time, cancel TX per expired request. ~30 lines. | Currently runs every 5 minutes in existing keeper. Important for UX -- a user whose deposit expired should get their tokens back without manual admin intervention. |
+| Stale request cleanup | If a request key appears in the in-memory dedup set but no longer exists on-chain (already executed by another keeper or manually), clear it so the set does not grow unbounded. | Very Low | Poll-based comparison: on-chain keys vs. in-memory set. ~10 lines. | Without this, the in-memory set grows monotonically. Not a real problem at testnet volume but good hygiene. |
+| Execution timing instrumentation | Per-stage timing (oracle build, TX submit, TX confirm, total) logged with each execution. Enables identifying bottlenecks without a profiler. | Very Low | Already exists in current executors. ~5 lines per execution path using `performance.now()`. | Proven valuable in v1.3/v1.4 for diagnosing latency. Zero runtime cost. Keep it. |
+| Startup oracle provider verification | Read `oracleProviderForToken` from DataStore for each configured token at boot. Log mismatches loudly. Prevents running with 100% execution failures for hours. | Low | `verifyOracleProviderConsistency()` already exists and is ~40 lines. Copy into minimal keeper. | Saved debugging time in v1.4. Worth the 40 lines. |
+| Startup Lazer feed entitlement verification | After 10s warmup, verify that all expected Lazer feeds actually received data. Detects zero-entitlement API keys immediately instead of failing silently. | Low | `verifyLazerFeeds()` already exists and is ~30 lines. | This caught a real issue in v1.4 -- a crypto-only key that silently received zero FX data. |
+| Hermes fallback for stale Lazer cache | If Lazer WS disconnects and cached price for a token goes stale, fall back to Hermes REST API for that specific token. Prevents Lazer outage from blocking all executions. | Low | Already built into `buildOracleParams()` -- stale tokens get moved from `lazerTokens` to `hermesTokens`. ~10 lines. | Resilience feature. Already proven. Keep it. |
 
 ## Anti-Features
 
-Features to explicitly NOT build for v1.4. These are traps that appear relevant but add complexity without solving the actual problems.
+Features to explicitly NOT build in the minimal rewrite. These are the primary sources of complexity in the existing 3,000+ line keeper.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Upgrading to Pyth Pro tier ($10k/mo) just for FX Lazer feeds | FX markets (EUR, GBP, JPY, GOLD) are low-volume on testnet. Paying $10k/mo for millisecond FX data on a testnet with sparse orders is not justified. Hermes provides perfectly adequate FX prices at ~400ms latency. | Use Hermes for FX, Lazer for crypto. The per-market routing approach gives crypto markets maximum speed without requiring cross-asset entitlements. |
-| Custom multicall contract for atomic price-update + execution | Building a Solidity contract that batches `updatePrice()` + `executeDeposit()` in one TX. High audit risk, requires contract deployment, and the existing two-TX pattern (background update + execution) already eliminates most of this latency when prices stay fresh. | Keep background price updater. Tune update interval. The only time a synchronous update TX is needed is when background updater falls behind -- optimize that path, don't rebuild the contract layer. |
-| Switching ALL markets to Hermes-only for simplicity | Hermes works for all tokens and avoids the `InvalidOracleProvider` issue entirely. But Hermes adds ~200-500ms HTTP fetch latency per execution, and loses the streaming WebSocket advantage of Lazer. | Per-market routing: best of both worlds. Crypto gets Lazer speed, FX gets Hermes reliability. |
-| Building a separate "oracle admin service" for provider registration | The `oracleProviderForToken` on-chain configuration is a one-time admin operation per token, done via contract deploy scripts. Building a service to manage this is over-engineering. | Run `configureOracleTokens.ts` from `0xmarkets_contract` repo with the correct provider addresses. This is a deploy-time concern, not a runtime concern. |
-| Parallel execution of multiple operations | With a single keeper wallet, parallel execution causes nonce collisions. The v1.3 `ExecutionQueue` was specifically designed to prevent this. | Keep sequential execution via queue. Speed comes from making each individual execution faster (fresh prices, Flashblocks, no synchronous oracle TX), not from parallelism. |
-| Aggressive background update interval (< 3s) | Updating on-chain prices every 1-2s with single wallet creates nonce pressure, especially if one TX is slow. Background updates compete with execution TXs for nonce slots. | 3-5s interval with Flashblocks is sufficient. 300s MAX_ORACLE_PRICE_AGE means even 10s intervals have massive headroom. The goal is to prevent synchronous fallback, not achieve real-time on-chain prices. |
+| **PostgreSQL database (Prisma/PG)** | The database is the single largest source of complexity. 6 Prisma models, 148 lines of schema, ~1,000 lines of DB operations across scanners/executors/monitors. It tracks request status (PENDING/EXECUTED/FAILED/CANCELLED), execution history, block numbers, gas costs. But the on-chain DataStore already IS the source of truth -- a request is pending if and only if its key exists in the DataStore list. The DB duplicates on-chain state, adds a failure mode (DB connection issues), requires migrations, and needs a PostgreSQL container. | Use the DataStore as the sole source of truth. If a key is in DEPOSIT_LIST, it needs executing. If it is not, it has been executed or cancelled. Log execution results to structured JSON logs for post-mortem analysis. No DB needed. |
+| **TransactionMonitor** (240 lines) | Monitors submitted TXs by polling the DB for SUBMITTED status and checking receipts. Detects MINED/REVERTED/DROPPED. But the minimal keeper already calls `waitForTransactionReceipt()` inline after submission -- it knows the TX outcome immediately. The monitor exists only because the old architecture recorded TXs to DB and checked them later. | Call `waitForTransactionReceipt()` after each `writeContract()`. Handle success/revert inline. No separate monitoring loop. |
+| **Block number persistence to DB** | `EventListener` persists `lastProcessedBlock` to Prisma for backfill on restart. But on a 2-second Base Sepolia block time, the safety-net polling (every 15s) catches anything missed during a restart gap. The window of vulnerability is at most 15 seconds -- during which DataStore polling will find the operation anyway. | Drop block persistence entirely. On restart, start watching events from current block. The very first safety-net poll (at startup) catches any operations created during downtime. |
+| **Per-type Scanner/Executor class hierarchies** | Three scanner classes (deposit, withdrawal, order) with nearly identical logic. Three executor classes with a BaseExecutor abstract class. Total: ~1,200 lines across 6 files. The actual difference per type is: which handler address to call, which ABI function to invoke, and which DataStore list key to read. | Single `execute(key, type)` function that dispatches to the correct handler address and function name based on type. Single `scan(type)` function parameterized by DataStore key. ~50 lines total replaces ~1,200. |
+| **Pre-fetched operation data passthrough** | Scanners pre-fetch deposit/order details and pass them to executors as `operationData` to avoid a second RPC call. Adds type complexity (`OperationData` union types, `ScannedDeposit`, market data caching) across scanner and executor code. | Read operation details at execution time. One extra RPC call per execution is negligible at testnet volume. The simpler code path is worth the ~50ms extra latency. |
+| **Separate HTTP server with controllers** | The existing keeper has an Express/Fastify-style HTTP server with route controllers for deposits, health checks, and metrics. Most of these endpoints are unused -- only `/health` matters. | Use `Bun.serve()` or `http.createServer()` with a single route handler. ~15 lines for the entire HTTP server. |
+| **Queue with fail counts, retry backoff, TTL cleanup** | `ExecutionQueue` tracks failure counts per key, implements exponential backoff on retries (2s * 2^attempt), has a 5-minute TTL for known entries, and runs periodic cleanup. This is sophisticated retry logic -- but the retry behavior is already handled by the execution loop: if an execution fails, the key remains in the DataStore and will be re-discovered on the next poll cycle (15s). | Drop the queue retry machinery. Use a simple `Set<Hex>` for dedup. Failed executions: log the error, remove from dedup set. The next poll cycle re-discovers and re-attempts. Max retries are effectively infinite but bounded by the on-chain expiration time. |
+| **Configurable feature flags (enableDeposits/enableWithdrawals/enableOrders)** | The existing config has toggles for each operation type. This was useful during iterative development (v1.0: deposits only, v1.1: add orders). The minimal rewrite handles all three from day one. | No per-type flags. The keeper executes everything in the DataStore. If an operation type is not wanted, do not create those requests on the frontend. |
+| **Hermes feed registration and REST fetch for ALL tokens** | The existing keeper registers Hermes feeds for all 7 tokens as universal fallback. But for crypto tokens, Lazer always has data (the keeper verifies this at startup). Hermes REST is only actually needed for FX tokens. | Register Hermes feeds only for FX tokens. Lazer covers crypto. If Lazer cache is stale for crypto (rare), skip execution and wait for the next poll cycle rather than falling back to slow Hermes. Keep Hermes fallback for FX only. |
+| **Multiple WebSocket pool connections** | `PythLazerClient` is configured with `numConnections: 4` for redundancy. For a testnet keeper processing <100 operations/day, a single connection with auto-reconnect is sufficient. | `numConnections: 1`. The SDK handles reconnection. |
 
 ## Feature Dependencies
 
 ```
-Pyth Pro API key deployment ---------> Entitlement verification at startup
-                                  \
-                                   \-> Per-market oracle mode selection
-                                         |
-                                         v
-                              On-chain provider registration for FX tokens
-                              (FX tokens need Hermes provider in DataStore)
-                                         |
-                                         v
-                              Oracle cascade fallback (Lazer -> Hermes per-token)
+EventEmitter WebSocket watcher ---\
+                                   +--> In-memory dedup Set --> Sequential execution loop
+DataStore polling safety net -----/                                     |
+                                                                        v
+                                                           Pyth Lazer price cache
+                                                                        |
+                                                                        v
+                                                              Per-token oracle routing
+                                                                        |
+                                                                        v
+                                                              TX submission + receipt wait
+                                                                        |
+                                                                        v
+                                                              Log result (structured JSON)
 
-Background update interval tuning ---> Flashblocks RPC (faster confirmations = safer frequent updates)
-                                  \
-                                   \-> Eliminate synchronous updatePriceOnChain
-                                        (fresh prices = synchronous path never fires)
+Health endpoint (independent) --------> BetterStack monitoring
 
-Startup provider verification -------> Independent (diagnostic, no deps)
+Startup verification (independent):
+  - Oracle provider consistency check
+  - Lazer feed entitlement verification
 
-Per-market latency tracking ---------> Per-market oracle routing (needs routing to measure)
+Periodic maintenance:
+  - Expired request cancellation (every 5 min)
+  - Dedup set TTL cleanup (every 30 min)
 ```
 
-**Critical path:** API key deployment -> entitlement verification -> per-market routing -> on-chain provider fix -> FX markets work.
+**Critical path:** Lazer WS connect -> feed verification -> event watcher start -> initial DataStore scan -> execution loop ready.
 
-**Speed path (parallel):** Flashblocks RPC -> background interval tuning -> synchronous fallback elimination.
+**No dependency on:** Database, block persistence, transaction monitoring, class hierarchies.
 
 ## MVP Recommendation
 
-Prioritize in this order:
+The minimal keeper should ship with ALL table stakes features from the start. This is not a phased rollout -- it is a single ~300 line file that replaces 3,000+ lines.
 
-**Phase 1 -- Oracle Configuration (fix broken markets):**
-1. **Deploy Pyth Pro API key** and add startup entitlement verification (`verifyLazerFeeds()` from Phase 13 plan)
-2. **Per-market oracle mode selection** -- route crypto tokens through Lazer, FX tokens through Hermes. Modify `buildOracleParams()` to check `pythLazerOracle.hasFeed(token)` per-token instead of using global `config.oracleMode`
-3. **On-chain oracle provider registration** -- run `configureOracleTokens.ts` to set correct provider per token (PythLazerFeedProvider for crypto, Pyth/Hermes contract for FX)
-4. **Startup oracle provider consistency check** -- verify DataStore matches keeper config
+**Include (table stakes -- all in the initial rewrite):**
+1. EventEmitter WebSocket watcher for real-time detection
+2. DataStore polling every 10-15s as safety net
+3. Sequential execution loop with in-memory dedup Set
+4. Pyth Lazer WebSocket price cache (reuse existing PythLazerOracleService)
+5. Per-token oracle routing (Lazer for crypto, Hermes for FX)
+6. Fixed gas limit TX submission with nonce retry
+7. Health endpoint for BetterStack
+8. Graceful shutdown handlers
+9. Pino structured logging
 
-**Phase 2 -- Latency Optimization (make fast markets faster):**
-5. **Flashblocks-aware RPC** -- swap `RPC_URL` to Flashblocks-enabled endpoint (Alchemy or Chainstack)
-6. **Reduce background update interval** from 10s to 5s for Lazer tokens
-7. **Oracle cascade fallback** -- per-token Lazer->Hermes fallback when Lazer cache is stale
+**Include (differentiators -- worth the ~50 extra lines):**
+10. Startup oracle provider + feed entitlement verification
+11. Expired request cancellation (periodic)
+12. Execution timing instrumentation
 
 **Defer:**
-- Pyth Pro tier upgrade: unnecessary cost for testnet FX feeds
-- Custom multicall contracts: background updater already handles this
-- Multi-wallet keeper: testnet volume doesn't justify
+- DB-backed state tracking: not needed, on-chain DataStore is source of truth
+- Block persistence: safety-net polling covers restart gaps
+- Pre-fetched operation data: extra RPC call is negligible at testnet volume
+- Per-type class hierarchies: parameterized functions are simpler
+- Transaction monitoring: inline `waitForTransactionReceipt` handles this
 
 ## Complexity Budget
 
-| Feature | Effort | Risk | Impact |
-|---------|--------|------|--------|
-| API key deployment + verification | 1 hour | Low (config + startup check) | Critical -- unblocks all Lazer functionality |
-| Per-market oracle routing | 2-3 hours | Medium (modify buildOracleParams branching logic) | Critical -- unblocks FX markets while keeping crypto fast |
-| On-chain provider registration | 30 min | Low (one-time admin script run) | Critical -- fixes InvalidOracleProvider for FX tokens |
-| Startup provider consistency check | 1 hour | Low (read-only diagnostic) | High -- prevents hours of cryptic execution failures |
-| Flashblocks RPC | 15 min | Very Low (env var change) | High -- ~1.8s saved per TX confirmation, no code changes |
-| Background interval tuning | 15 min | Very Low (change constant) | Medium -- reduces synchronous oracle fallback probability |
-| Oracle cascade fallback | 2-3 hours | Medium (per-token fallback logic in buildOracleParams) | Medium -- resilience against Lazer outages |
-| Per-market latency tracking | 1 hour | Low (extend existing tracker) | Low -- observability only |
+| Feature | Lines (est.) | Risk | Impact |
+|---------|-------------|------|--------|
+| Main loop + signal handlers | 30 | Very Low | Critical -- the skeleton |
+| Event watcher (WS) | 40 | Low | Critical -- real-time detection |
+| DataStore poller | 30 | Very Low | Critical -- safety net |
+| Execution function (all 3 types) | 60 | Low | Critical -- the core job |
+| Oracle params builder (Lazer + Hermes routing) | 40 | Low | Critical -- prices for execution |
+| Pyth Lazer WS cache (reuse existing) | ~150 (existing) | Very Low | Critical -- price source |
+| Health endpoint | 20 | Very Low | Critical -- monitoring |
+| Startup verification | 40 | Very Low | High -- diagnostic |
+| Expired request cleanup | 30 | Low | Medium -- user funds |
+| Execution timing | 10 | Very Low | Medium -- observability |
+| **Total new code** | **~300** | | |
+| **Reused from existing** | **~150** (PythLazerOracleService) | | |
+
+## What Gets Deleted
+
+| Component | Lines | Reason for Removal |
+|-----------|-------|-------------------|
+| Prisma schema + models | 148 | On-chain DataStore is source of truth |
+| store.ts (DB connection) | 42 | No database |
+| DepositScanner | 328 | Replaced by parameterized scan function |
+| WithdrawalScanner | 232 | Replaced by parameterized scan function |
+| OrderScanner | 210 | Replaced by parameterized scan function |
+| DepositExecutor | 293 | Replaced by single execute function |
+| WithdrawalExecutor | ~230 | Replaced by single execute function |
+| OrderExecutor | 221 | Replaced by single execute function |
+| BaseExecutor (abstract) | 228 | No class hierarchy needed |
+| ExecutionQueue | 151 | Replaced by Set + TTL |
+| TransactionMonitor | 240 | Inline receipt checking |
+| EventListener (Prisma-coupled) | 326 | Replaced by minimal event watcher |
+| HTTP server + controllers | ~200 | Replaced by 20-line health server |
+| Config with feature flags | ~150 | Simplified config |
+| Scanner/executor type definitions | ~80 | Inline types |
+| Test files for above | ~500 | New tests for new code |
+| **Total removed** | **~3,500+** | |
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Codebase analysis: `order-execution-keeper-service/src/` -- full oracle, executor, and config code examined directly
-- Phase 13 research: `.planning/phases/13-production-lazer-deployment-and-keeper-optimization/13-RESEARCH.md` -- oracle provider error analysis, entitlement pitfalls
-- [GMX Synthetics Oracle.sol](https://github.com/gmx-io/gmx-synthetics/blob/main/contracts/oracle/Oracle.sol) -- `oracleProviderForToken` validation, `InvalidOracleProviderForToken` error pattern
-- [Pyth Best Practices](https://docs.pyth.network/price-feeds/core/best-practices) -- `updatePriceFeeds()` + execution in same TX pattern
-- [Pyth Pull Oracle Architecture](https://docs.pyth.network/price-feeds/core/pull-updates) -- "package price update together with each transaction"
-- [Base Flashblocks documentation](https://docs.base.org/base-chain/flashblocks/apps) -- 200ms preconfirmations, RPC provider support
+- Direct codebase analysis: `order-execution-keeper-service/src/` -- all scanner, executor, queue, listener, monitor, oracle, and config code read in full
+- [GMX Synthetics README](https://github.com/gmx-io/gmx-synthetics/blob/main/README.md) -- two-step execution model, keeper responsibilities, oracle price bundling pattern
+- [GMX Synthetics OrderHandler.sol](https://github.com/gmx-io/gmx-synthetics/blob/main/contracts/exchange/OrderHandler.sol/) -- keeper calls `executeOrder(key, oracleParams)`
+- [Cyfrin/chainlink-gmx-automation](https://github.com/Cyfrin/chainlink-gmx-automation) -- reference implementation of event-driven deposit/withdrawal/order automation for GMX
+- [Chainlink Automation Best Practices](https://docs.chain.link/chainlink-automation/concepts/best-practice) -- idempotency, condition checking, testing patterns
+- [Chainlink Automation Architecture](https://docs.chain.link/chainlink-automation/concepts/automation-architecture) -- checkUpkeep/performUpkeep pattern (analogous to scan/execute)
 
 ### Secondary (MEDIUM confidence)
-- [Pyth Pro pricing tiers](https://www.pyth.network/price-feeds) -- Pyth Crypto (free, crypto only, 1s), Pyth Crypto+ ($5k/mo, crypto, 1ms), Pyth Pro ($10k/mo, cross-asset, 1ms)
-- [Pyth Pro documentation](https://docs.pyth.network/price-feeds/pro) -- subscription model, access token usage, feed categories
-- [Pyth Pro Getting Started](https://docs.pyth.network/price-feeds/pro/getting-started) -- PythLazerClient setup, token acquisition via Data Distributors
-- [Chainstack Flashblocks on Base](https://chainstack.com/flashblocks-base-rpc/) -- Flashblocks available on Chainstack Base Mainnet and Sepolia
-- [Alchemy Flashblocks support](https://x.com/Alchemy/status/1945626061146132650) -- Alchemy supported Flashblocks from day one on Base Mainnet
+- [Cyfrin GMX Perpetuals Trading Course](https://updraft.cyfrin.io/courses/gmx-perpetuals-trading/foundation/gmx-contract-architecture) -- keeper architecture explanation, two-step execution model
+- [GMX V2 Trading Docs](https://docs.gmx.io/docs/trading/v2/) -- keeper compensation, execution fee model
+- [MEV bot templates](https://github.com/solidquant/mev-templates) -- minimal bot architecture patterns in TypeScript/Python/Rust
+- [Cadence Protocol Decentralized Keepers](https://cadenceprotocol.gitbook.io/cadence-protocol/trading-on-cadence-protocol/decentralized-keepers) -- centralized keeper EOA pattern is standard for early-stage protocols
 
-### Tertiary (LOW confidence -- needs validation)
-- Pyth entitlement per-asset-class behavior: No official documentation found on exactly which feeds are included in "Pyth Crypto" free tier vs. "Pyth Pro". Understanding based on tier descriptions ("crypto data" vs. "global, cross-asset coverage") and observed behavior (crypto feeds work, FX feeds don't receive data). Must verify empirically with the actual API key.
-- [Pyth Pro Price Feed IDs](https://docs.pyth.network/price-feeds/pro/price-feed-ids) -- feed ID list exists but specific FX availability per tier not documented
+### Design Principles (HIGH confidence -- derived from analysis)
+- **On-chain state is the source of truth:** If a key exists in DataStore's list, it needs executing. If it does not, it has been handled. No DB mirror needed.
+- **Sequential execution for single-wallet keepers:** Nonce management is trivial when there is exactly one consumer. No mutex, no queue -- just a loop.
+- **Event-first, poll-second:** WebSocket events provide sub-second detection. Polling provides crash recovery. Both feed into the same dedup set.
+- **Inline oracle prices:** Pyth Lazer streams prices into cache. Execution reads from cache. No background on-chain price updates needed (v1.4 already disabled these due to nonce conflicts).
+- **Generous gas limit over estimateGas:** Fixed gas limit saves an RPC round-trip. Only gas used is charged. testnet gas is free.
 
 ---
-*Research completed: 2026-02-24*
-*Replaces: v1.3 FEATURES.md (2026-02-23) -- v1.3 features are now SHIPPED; this covers v1.4 scope*
+*Research completed: 2026-02-25*
+*Replaces: v1.4 FEATURES.md (2026-02-24) -- v1.4 features are now SHIPPED; this covers v1.5 scope*

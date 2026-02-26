@@ -1,364 +1,389 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Per-market oracle routing, dual oracle mode configuration, and maximum keeper execution speed for DeFi perpetual futures
-**Researched:** 2026-02-24
-**Confidence:** HIGH for pitfalls derived from our own debugging history and codebase analysis; MEDIUM for Pyth Pro entitlement model (external dependency with limited documentation)
+**Domain:** Minimal keeper rewrite -- replacing 3,000+ line order-execution-keeper with ~300 line single-loop keeper
+**Researched:** 2026-02-25
+**Confidence:** HIGH (based on actual codebase analysis, known production incidents, and verified library documentation)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause complete execution failures, reverts on every transaction, or require coordinated multi-service fixes.
+### Pitfall 1: Nonce Gap on Failed estimateGas / Pre-Send Revert
 
-### Pitfall 1: Oracle Provider Mismatch Between Keeper Config and On-Chain DataStore
+**What goes wrong:**
+Viem's `nonceManager` (introduced in v2.15.0) increments the nonce atomically BEFORE the transaction is submitted. If `writeContract` fails during gas estimation (before the TX hits the mempool), the nonce is consumed but no transaction exists on-chain for that nonce. All subsequent transactions queue behind the gap forever. The current keeper already encountered this -- it uses a manual `getTransactionCount({ blockTag: "pending" })` call per attempt instead of the built-in nonceManager specifically to avoid this.
 
-**What goes wrong:** Every execution reverts with `InvalidOracleProvider (0x05d102a2)` or `InvalidOracleProviderForToken (0x68b49e6c)`. The keeper appears connected, healthy, and detecting operations correctly, but 100% of executions fail at gas estimation.
+**Why it happens:**
+The natural reflex when rewriting is to use viem's built-in `createNonceManager` since it was designed for exactly this use case. But viem issue #3142 documented that the nonce increments even when `estimateGas` fails, creating an unrecoverable gap. The fix (PR #3153) was merged, but only for the case where `prepareTransactionRequest` throws. If the transaction reverts at the RPC level (not estimateGas), the gap can still occur depending on the error path.
 
-**Why it happens:** The on-chain Oracle contract reads `oracleProviderForToken` from the DataStore for each token and validates that the provider address in the keeper's oracle params matches. There are TWO provider addresses in play:
-- `PythLazerFeedProvider` (e.g., `0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05`) -- used in Lazer and "both" modes
-- `PythContractAddress` / Hermes provider (e.g., `0x8250f4aF4B972684F7b336503E2D6dFeDeB1487a`) -- used in Hermes mode
+**How to avoid:**
+Do NOT use viem's built-in `createNonceManager` for the minimal keeper. Instead, use the proven pattern from the current `baseExecutor.ts`: fetch nonce via `getTransactionCount({ blockTag: "pending" })` before each transaction, pass it explicitly, and retry with a fresh nonce fetch on `nonce too low` / `replacement transaction underpriced` errors. The sequential execution guarantee (single consumer loop + txMutex) means we never need parallel nonce management.
 
-The `configureOracleTokens.ts` deploy script sets ALL non-hardhat tokens to `pythLazerFeed` provider by default (line 10). But the keeper's `buildOracleParams()` in `baseExecutor.ts` sends the Hermes `pythContractAddress` when running in "hermes" or "both" mode (line 259-273). If the on-chain config says "PythLazerFeedProvider" but the keeper sends "PythContractAddress" as the provider, the contract rejects it.
+**Warning signs:**
+- Transactions hang indefinitely after a single revert
+- Logs show "nonce too low" errors that don't self-heal
+- Health check shows items stuck in processing state
 
-**This already happened:** FX token withdrawals failed with `0x05d102a2` because the keeper was running in "both" mode (which falls through to Hermes for oracle params) while on-chain provider was set to PythLazerFeedProvider. The fix requires BOTH: (1) updating on-chain `oracleProviderForToken` via `updateOracleConfigForTokens.ts` AND (2) matching the keeper's oracle mode.
-
-**Consequences:**
-- All executions for affected tokens fail immediately
-- Deposits, withdrawals, and orders pile up as PENDING, then expire
-- Users see operations stuck indefinitely with no useful error message
-- Retries are futile -- the error is deterministic until config is fixed
-
-**Prevention:**
-1. Add a startup consistency check that reads `oracleProviderForToken` from DataStore for every configured token and compares against the keeper's expected provider address. Log a FATAL error if any mismatch is found. (This is planned in Phase 13-01.)
-2. When switching `ORACLE_MODE`, always update on-chain provider mapping FIRST (via deploy script), THEN update the keeper. Never change one without the other.
-3. Document the three-way coordination requirement: on-chain DataStore mapping + keeper `ORACLE_MODE` + keeper provider address env vars.
-4. For "both" mode specifically: understand that `buildOracleParams()` returns Hermes-style params (line 259-273), so the on-chain provider must be set to the Hermes/Pyth contract for "both" mode to work. The Lazer part only does background `updatePriceOnChain()` calls.
-
-**Detection:** Gas estimation reverts on first execution attempt after startup. Error message contains `0x05d102a2` or `0x68b49e6c`. Health endpoint shows `oracleConnected: true` but zero successful executions.
-
-**Phase to address:** Phase 1 -- startup verification must run before first execution.
+**Phase to address:**
+Phase 1 (Core Architecture) -- the transaction submission function must be implemented correctly from day one. No recovery path exists once nonce gaps occur in production.
 
 ---
 
-### Pitfall 2: Per-Market Oracle Routing Creates Inconsistent Provider Requirements
+### Pitfall 2: Stale Pyth Lazer Cache After Silent WebSocket Disconnect
 
-**What goes wrong:** Crypto markets (ETH, BTC) execute successfully via Lazer, but FX markets (EUR, GBP, JPY, GOLD) fail because on-chain they need a different oracle provider. Or vice versa: you register Hermes for FX tokens on-chain, but the keeper sends Lazer provider for those tokens.
+**What goes wrong:**
+The Pyth Lazer WebSocket pool maintains 4 redundant connections. When ALL connections drop simultaneously (network blip, Pyth server maintenance, token expiry), the `updateCache` Map still holds the last received price data. The keeper reads "valid" cached data, includes it in oracle params, and submits the transaction. The on-chain contract checks `MAX_ORACLE_PRICE_AGE` (300 seconds) and reverts with `MaxPriceAgeExceeded` (or `0x5c0e53f0`). This is not hypothetical -- it was a production issue documented in `PROJECT.md` as a known issue.
 
-**Why it happens:** Per-market oracle routing means different tokens need different `oracleProviderForToken` values in the DataStore. Currently, `configureOracleTokens.ts` sets ALL tokens to `pythLazerFeed` provider (line 10-11). But if Lazer does not support FX feeds (due to entitlements), those tokens need Hermes provider on-chain instead. This creates a split configuration:
-- Crypto tokens: `oracleProviderForToken` = PythLazerFeedProvider
-- FX tokens: `oracleProviderForToken` = PythContractAddress (Hermes)
+**Why it happens:**
+The cache has no TTL. `getLatestUpdate()` returns whatever is stored, regardless of age. The `allConnectionsDownListener` fires a log message but does not invalidate the cache or set a flag that prevents execution. The existing keeper's `handlePriceUpdate` sets `timestamp: BigInt(Math.floor(Date.now() / 1000))` using local time, NOT the Pyth-provided timestamp, so even the timestamp is unreliable for staleness detection.
 
-The keeper's `buildOracleParams()` currently uses a single oracle mode for ALL tokens. There is no per-token routing logic. When building oracle params for a deposit that involves both WETH (crypto, Lazer) and USDC (crypto, Lazer), it works. But a withdrawal from the EUR/USDC pool involves EUR (FX, needs Hermes provider) and USDC -- the keeper cannot send different providers for different tokens in the same execution call.
+**How to avoid:**
+1. Add a TTL check in `getLatestUpdate()` -- if the cached entry is older than `MAX_ORACLE_PRICE_AGE - SAFETY_MARGIN` (e.g., 300s - 30s = 270s), return `undefined` and force fallback or skip execution.
+2. Use Pyth's recommended `feedUpdateTimestamp` property (add it to the subscription `properties` array) instead of `Date.now()` for the timestamp. This tells you whether the price was freshly generated or carried forward.
+3. Track a `lastUpdateReceived` timestamp that resets on every WebSocket message. If no message for >10s, set an `oracleStale` flag that blocks execution.
+4. When `allConnectionsDownListener` fires, immediately set `oracleStale = true` and clear or mark the cache.
 
-**Consequences:**
-- Crypto markets work, FX markets do not (or vice versa)
-- The keeper cannot handle mixed-provider executions without refactoring `buildOracleParams()`
-- Operations involving FX tokens accumulate as PENDING/FAILED
+**Warning signs:**
+- Oracle build times drop to 0ms (reading from stale cache, no WS messages)
+- Executions revert with `MaxPriceAgeExceeded` in bursts
+- Health endpoint shows `oracleConnected: true` but no new prices for minutes
 
-**Prevention:**
-1. Modify `buildOracleParams()` to route per-token: for each token, check whether it has a Lazer feed registered. If yes, use PythLazerFeedProvider as provider. If no (FX tokens without Lazer entitlements), use PythContractAddress (Hermes).
-2. On-chain: run a MODIFIED `configureOracleTokens.ts` that sets `oracleProviderForToken` to PythLazerFeedProvider for crypto tokens and PythContractAddress for FX tokens. The current script uses a single default -- it needs per-token `oracleProvider` overrides in the token config.
-3. The contract-side token config already supports `oracleProvider` per token (see `BaseTokenConfig.oracleProvider` in `config/tokens.ts` line 33), but the type definition only includes `"gmOracle" | "chainlinkDataStream" | "chainlinkPriceFeed"` -- NOT `"pythLazerFeed"`. The deploy script uses `"pythLazerFeed"` as an untyped string, bypassing TypeScript validation. Add `"pythLazerFeed" | "pythHermes"` to the `OracleProvider` type.
-4. For FX tokens specifically, set `oracleProvider: "pythHermes"` in `config/tokens.ts` baseSepolia section, and update the deploy script to handle this new provider type.
-
-**Detection:** Crypto market operations succeed, FX market operations revert with `InvalidOracleProvider`. Check keeper logs for which token triggered the error.
-
-**Phase to address:** Phase 1 -- per-token routing in `buildOracleParams()` is the core feature of this milestone.
+**Phase to address:**
+Phase 1 (Core Architecture) -- the oracle cache design must include TTL from the start. Retrofitting TTL after deployment means a period of silent price staleness.
 
 ---
 
-### Pitfall 3: Pyth Pro API Key With Wrong Asset Class Entitlements
+### Pitfall 3: Losing In-Flight Queue Items on Docker Restart
 
-**What goes wrong:** The Pyth Lazer WebSocket connects successfully, subscription is accepted, but only crypto feeds (BTC feedId 1, ETH feedId 2, USDC feedId 7) receive price data. FX feeds (EUR feedId 327, GBP feedId 333, JPY feedId 340, GOLD feedId 346) receive nothing. The keeper runs with partial oracle coverage: crypto markets work, FX markets have stale/missing prices.
+**What goes wrong:**
+The current keeper persists `lastProcessedBlock` to PostgreSQL and uses it to backfill missed events on restart (DETECT-03 pattern). The minimal rewrite removes the database. If the keeper restarts (Docker restart, OOM kill, crash), the in-memory queue and the `lastProcessedBlock` are both lost. Without a backfill mechanism, any events that arrived between the crash and restart are permanently missed. Those deposits/withdrawals/orders sit on-chain forever, unexecuted.
 
-**Why it happens:** Pyth Pro (formerly Pyth Lazer) uses asset-class-based entitlements. A "crypto" account subscription may only grant access to crypto, index, nav, and crypto-redemption-rate feed types. FX (forex) and commodity (metals) feeds require separate entitlements or a higher subscription tier. The previous Pyth token had ZERO entitlements for all asset types. The new token (noted in PROJECT.md as "crypto account") may only have crypto entitlements.
+**Why it happens:**
+The appeal of "no database" is simplicity -- the on-chain DataStore IS the source of truth for pending operations. The mistake is assuming that polling the DataStore on startup catches everything. It does, IF the polling scan reads the full pending list. But if the scan only reads new events (like the current event-based detection), items created during downtime are invisible.
 
-**This already happened:** The commented-out FX feeds in `PYTH_LAZER_FEED_CONFIGS` (tokens.ts lines 47-51) include the note: "key entitled for [crypto, index, nav, crypto-redemption-rate] only. Need FX entitlement from Pyth." This was discovered empirically -- the WebSocket connected but sent no data for FX feed IDs.
+**How to avoid:**
+The "no database" design works ONLY if every scan cycle reads the full pending operation list from on-chain DataStore (deposit keys, withdrawal keys, order keys), not just new events. The scan-based safety net at 15s intervals already does this in the current keeper via `depositScanner.scan()` which reads `DEPOSIT_LIST` from DataStore. The minimal rewrite MUST preserve this full-list scan pattern.
 
-**Consequences:**
-- FX markets (4 out of 6 non-USDC markets) cannot use Lazer, must fall back to Hermes
-- The "maximum keeper speed" goal is only achievable for crypto markets
-- If the keeper is configured for Lazer-only mode, FX markets break completely
-- Background oracle updates for FX tokens silently skip (no cache data), creating a slow failure mode where prices go stale over time
+Specifically:
+1. On startup, immediately scan ALL pending keys from DataStore (deposit list, withdrawal list, order list)
+2. Every safety-net poll cycle, re-scan the full lists (not just listen for new events)
+3. Event-based detection is an optimization for speed, not the source of truth
+4. No need to persist block numbers -- the DataStore pending lists ARE the recovery mechanism
 
-**Prevention:**
-1. Before deploying the new API key, test it locally with a standalone script that subscribes to ALL 7 feed IDs and verifies data arrives for each. Do not assume "crypto account" includes FX.
-2. After enabling Lazer in production, add startup feed verification (planned in Phase 13-01): wait 10s after connect, check `updateCache` for each registered feed. If any FX feeds are missing, log a clear warning identifying the missing asset class.
-3. Design the system to gracefully handle partial Lazer coverage: Lazer for crypto tokens, Hermes fallback for FX tokens. Do not require all-or-nothing Lazer support.
-4. Contact the Pyth Data Distributor to explicitly request FX and commodity entitlements if they are not included in the current subscription.
+**Warning signs:**
+- After restart, known pending deposits are not picked up
+- Users report deposits stuck after keeper downtime
+- Health endpoint shows 0 pending items when frontend shows pending operations
 
-**Detection:** After startup, check `pythLazerOracle.getLatestUpdate(token)` for each FX token. Returns `undefined` = no entitlement. The health endpoint should expose per-feed status, not just aggregate `oracleConnected: true/false`.
-
-**Phase to address:** Phase 1 -- verify entitlements before any other work. This is an external blocker.
-
----
-
-### Pitfall 4: MaxPriceAgeExceeded From Race Between Freshness Check and TX Execution
-
-**What goes wrong:** The keeper checks that the stored on-chain price is fresh (within `MAX_ORACLE_PRICE_AGE - 5s safety margin`), decides to skip `updatePriceOnChain()`, then submits `executeDeposit()`. Between the freshness check and the actual execution transaction being mined, time passes (gas estimation, transaction submission, block confirmation). The price that was "fresh" when checked becomes stale by the time the Oracle contract validates it during execution. The transaction reverts with `MaxPriceAgeExceeded`.
-
-**Why it happens:** `MAX_ORACLE_PRICE_AGE` is 300 seconds (5 minutes) for both Base and Base Sepolia (oracle.ts lines 30, 39). The safety margin in `isStoredPriceFresh()` is only 5 seconds (baseExecutor.ts line 185). In practice, the time between freshness check and transaction mining can be 10-30+ seconds:
-- Gas estimation: 1-3s
-- Transaction submission: 1-2s
-- Block inclusion: 2-12s (Base Sepolia block times vary)
-- Total: 4-17s typical, 30s+ under congestion
-
-With only 5s safety margin, any execution delay can push the price past the age threshold.
-
-**This already happened:** PROJECT.md lists "MaxPriceAgeExceeded errors when using Lazer-only mode (stored prices went stale between freshness check and TX execution)" as a known issue.
-
-**Consequences:**
-- Intermittent execution failures that are hard to reproduce (timing-dependent)
-- More likely under network congestion or when Base Sepolia is slow
-- Background updater keeps prices fresh, but the 10s minimum interval (`BG_UPDATE_INTERVAL_MS`) can miss the window
-- Retries may succeed (price gets updated between attempts) but waste gas and time
-
-**Prevention:**
-1. Increase the safety margin from 5s to at least 30s. Better: make it `MAX_ORACLE_PRICE_AGE / 2` (150s) so the keeper always updates if the price is more than halfway to expiry.
-2. When the freshness check passes but is close to the margin (e.g., price age > 200s out of 300s), proactively update anyway. "Fresh enough to skip" should mean "very fresh" not "barely fresh."
-3. Consider always doing `updatePriceOnChain()` before execution regardless of freshness. The cost is one extra transaction per execution, but the reliability improvement is significant. Only skip if the price was updated within the last 30 seconds.
-4. Reduce `BG_UPDATE_INTERVAL_MS` from 10s to 5s to keep prices fresher on-chain between executions.
-
-**Detection:** Execution failures with error messages containing "MaxPriceAgeExceeded" or the corresponding error selector. Check the time delta between the last `updatePriceOnChain` TX and the failed `executeX` TX.
-
-**Phase to address:** Phase 2 -- tune the freshness margin and background update interval after per-market routing is working.
+**Phase to address:**
+Phase 1 (Core Architecture) -- the scan loop must be designed as full-list-scan from the start. Switching from event-only to full-scan later requires rethinking the entire detection model.
 
 ---
 
-### Pitfall 5: Nonce Collision Between Background Oracle Updates and Execution Transactions
+### Pitfall 4: Ghost Deposits Create Infinite Retry Loops Without DB State
 
-**What goes wrong:** The background oracle updater (`triggerBackgroundUpdate()`) sends an `updatePriceOnChain()` transaction at the exact moment the drain loop starts an execution. Both use the same keeper wallet. The background TX grabs nonce N, the execution TX also grabs nonce N (or N+1 before the background TX is mined). One of the two fails with "nonce too low" or "replacement transaction underpriced."
+**What goes wrong:**
+A "ghost deposit" is a key that exists in the DataStore's `DEPOSIT_LIST` but has zeroed data on-chain (account = 0x0, amounts = 0). These occur when a deposit is cancelled or already executed but the key cleanup is delayed. The current keeper detects ghosts by reading the full deposit struct and checking `account === ZERO_ADDRESS`, then marks them CANCELLED in the database so they are never retried. Without the database, the keeper has no memory that a key was already classified as a ghost. Every 15-second scan cycle rediscovers the ghost, tries to execute it, reads the zeroed data, skips it... then rediscovers it again next cycle. This is not a crash risk but it is wasted RPC calls and log noise.
 
-**Why it happens:** The current system has a coordination mechanism: `drainQueue()` calls `disableBackgroundUpdates()` before execution and `enableBackgroundUpdates()` after (index.ts lines 89-117). However, there is a race window: the background update might be in-flight when `disableBackgroundUpdates()` is called. The code handles this by waiting up to 5 seconds for `isBackgroundUpdateBusy()` to clear (lines 93-96). But:
-- The busy flag is only set while `triggerBackgroundUpdate()` is running, not while its transactions are pending in the mempool
-- If a background `updatePriceOnChain()` TX is submitted but not yet mined, and execution starts, the execution's `getTransactionCount({ blockTag: "pending" })` should return the correct next nonce. But "pending" nonce depends on the RPC node's mempool view, which can be inconsistent
-- The 3-second sleep in `updatePriceOnChain()` nonce retry (line 349) can overlap with execution's 4-second nonce retry (baseExecutor.ts line 134)
+**Why it happens:**
+The on-chain DataStore key list is eventually consistent -- keys may linger after the operation data is cleared. The database served as "I already looked at this and it's dead" memory. Without it, there is no dedup across restarts.
 
-**This already happened:** The retry logic in both `updatePriceOnChain()` and `submitTransaction()` was added specifically to handle nonce conflicts. The existence of this retry code is evidence that the race condition occurs in practice.
+**How to avoid:**
+Use the existing `allKnown` Set from the `ExecutionQueue` pattern. When a ghost is detected (zeroed account), add it to an in-memory `ignoredKeys` set with a TTL. This prevents re-reading the same ghost every cycle. On restart, the ghost will be re-evaluated once (cheap -- one RPC read), classified as ghost again, and re-added to the ignore set. This is acceptable overhead.
 
-**Consequences:**
-- Execution latency increases by 3-7 seconds per nonce conflict (retry + backoff)
-- Under load (multiple operations queued), nonce conflicts cascade: each retry delays the next operation
-- In worst case, a nonce gap forms and blocks all transactions until it resolves
+Additionally, add a `MIN_DEPOSIT_AMOUNT` check -- if both `initialLongTokenAmount` and `initialShortTokenAmount` are 0, skip without even fetching the full deposit struct.
 
-**Prevention:**
-1. Keep the current disable/enable pattern but extend it: track whether the background updater's last TX is confirmed (mined), not just whether the function returned. Add a `lastBackgroundTxHash` field and wait for its receipt before starting execution.
-2. Alternative: eliminate background updates entirely and always update prices synchronously before each execution. This adds 3-5s per execution but eliminates all nonce coordination complexity. For a single-wallet testnet keeper, reliability beats speed.
-3. If keeping background updates: use an explicit nonce manager that tracks the next available nonce atomically across both the background updater and the executor. The simplest version is a mutex-protected counter:
+**Warning signs:**
+- Logs show repeated "deposit is stale (zeroed on-chain) -- skipping" for the same key
+- RPC call count is disproportionately high relative to actual pending operations
+- Scan cycle duration increases linearly with ghost count
 
-```typescript
-let nextNonce: number | null = null;
-const nonceMutex = new Mutex();
-
-async function getNextNonce(): Promise<number> {
-  return nonceMutex.runExclusive(async () => {
-    if (nextNonce === null) {
-      nextNonce = await publicClient.getTransactionCount({
-        address: account, blockTag: "pending"
-      });
-    }
-    return nextNonce++;
-  });
-}
-```
-
-4. Log every nonce conflict with the source (background vs execution) to measure how often this occurs. If it is rare (< 1% of executions), the retry logic is sufficient. If frequent, invest in proper nonce management.
-
-**Detection:** "nonce too low" or "replacement transaction underpriced" in logs. Check if the preceding log entry is from `pythLazerOracle` (background update) vs `baseExecutor` (execution).
-
-**Phase to address:** Phase 2 -- measure frequency first. If nonce conflicts are rare with the current disable/enable pattern, defer. If frequent, implement proper nonce management.
+**Phase to address:**
+Phase 2 (Executor Implementation) -- ghost detection is part of the execution path, not the core architecture.
 
 ---
 
-## Moderate Pitfalls
+### Pitfall 5: Docker Deployment Creates Duplicate Keeper During Restart Window
 
-Mistakes that cause partial failures, degraded performance, or require non-trivial debugging.
+**What goes wrong:**
+`docker compose up -d --build order-execution-keeper` rebuilds the image and recreates the container. Docker's default behavior with `restart: unless-stopped` means the OLD container runs until the NEW one is ready. During this overlap window (10-30 seconds for image build, startup, Pyth connection), both keepers are running with the SAME private key. Both detect the same pending operations. Both try to submit transactions. Result: nonce conflicts, "replacement transaction underpriced" errors, doubled gas costs, and potential double-execution if timing aligns.
 
-### Pitfall 6: "Both" Mode Sends Hermes Prices for Tokens That Require Lazer Provider On-Chain
+**Why it happens:**
+Docker Compose does not implement blue-green deployment by default. `docker compose up -d` stops the old container THEN starts the new one (brief downtime). But with complex health checks and startup delays, the exact ordering depends on Docker version and configuration. The real danger is when using `docker compose up -d --scale order-execution-keeper=2` accidentally, or when the old container's shutdown takes longer than expected due to `waitForTransactionReceipt` blocking.
 
-**What goes wrong:** In "both" mode, `buildOracleParams()` first updates Lazer prices on-chain (lines 222-256), then falls through to the Hermes code path (lines 259-273) which fetches ALL token prices via Hermes and returns them as oracle params with `pythContractAddress` as the provider. But if the on-chain `oracleProviderForToken` is set to `PythLazerFeedProvider`, the Hermes-style params are rejected because the provider does not match.
+**How to avoid:**
+1. Explicitly stop the old container before starting the new one: `docker compose stop order-execution-keeper && docker compose up -d --build order-execution-keeper`
+2. Add a SIGTERM handler that sets `shuttingDown = true` immediately, drains the current execution (waits for `waitForTransactionReceipt` to finish), then exits. The current keeper already has this pattern.
+3. Set `stop_grace_period: 120s` in docker-compose.yml to give the keeper time to finish in-flight transactions before Docker sends SIGKILL.
+4. Never use `--scale` for the keeper -- it MUST be a singleton.
+5. Consider a startup lock: on boot, read the pending nonce. If it doesn't match `getTransactionCount({ blockTag: "latest" })`, there may be a pending TX from the old instance. Wait for it to confirm before starting execution.
 
-**Prevention:** "Both" mode must be redesigned for per-token routing. For tokens with Lazer feeds: do `updatePriceOnChain()` and pass `PythLazerFeedProvider` as provider with empty data. For tokens without Lazer feeds (FX fallback): fetch from Hermes and pass `PythContractAddress` as provider with Hermes data. The current "update Lazer, return Hermes params" pattern only works if ALL tokens have their on-chain provider set to Hermes/Pyth contract.
+**Warning signs:**
+- Nonce errors spike immediately after deployment
+- Two containers with the same image appear in `docker ps` briefly
+- Transactions appear to execute twice (double gas charges)
 
-**Phase to address:** Phase 1 -- this is the core refactoring of `buildOracleParams()`.
-
----
-
-### Pitfall 7: FX Feed IDs Use Different Decimal Precision Than Crypto Feeds
-
-**What goes wrong:** Price multiplier calculations are wrong for FX/commodity tokens, causing the Oracle contract to derive incorrect USD prices. Deposits and withdrawals succeed but with wrong pool share calculations, or revert with price validation errors.
-
-**Why it happens:** The contract-side token config (`config/tokens.ts`) sets different `pythLazerFeedDecimals` per token:
-- Crypto: `pythLazerFeedDecimals: 8` (BTC, ETH, USDC)
-- FX: `pythLazerFeedDecimals: 5` (EUR, GBP)
-- Commodity: `pythLazerFeedDecimals: 3` (GOLD, JPY)
-
-The `configurePythLazerFeeds.ts` deploy script computes a multiplier: `expandDecimals(1, 60 - token.decimals - token.pythLazerFeedDecimals)`. If the keeper-side feed config does not match these decimals, prices will be scaled incorrectly.
-
-The keeper-side `PYTH_LAZER_FEED_CONFIGS` in `tokens.ts` does NOT track `feedDecimals` -- it only has `token`, `feedId`, and `inverted`. The decimal handling happens on-chain in the PythLazerFeedProvider contract. However, if you ever need to validate or log prices in the keeper, using the wrong decimals will produce misleading values.
-
-**Prevention:**
-1. Verify that `configurePythLazerFeeds.ts` has been run after any token config changes. The on-chain multiplier must match the actual feed decimals.
-2. When re-enabling FX feeds in the keeper, verify the on-chain multiplier by reading `pythLazerFeedMultiplierKey(token)` from DataStore and checking it matches the expected value.
-3. Add a comment in the keeper's `PYTH_LAZER_FEED_CONFIGS` documenting the decimal precision per feed for developer reference.
-
-**Phase to address:** Phase 1 -- verify on-chain config when enabling FX feeds.
+**Phase to address:**
+Phase 3 (Docker Deployment) -- must be addressed as part of the deployment procedure, not afterthought.
 
 ---
 
-### Pitfall 8: Inverted Feed Flag Mismatch Between Keeper and On-Chain Config
+### Pitfall 6: WebSocket Event Subscription Silently Falls Back to HTTP Polling
 
-**What goes wrong:** JPY feed is inverted (feedId 340, `inverted: true` -- the feed provides JPYUSD but the system needs USDJPY). If the `pythLazerFeedInverted` flag is set correctly on-chain but not in the keeper config (or vice versa), the price is interpreted as the reciprocal of the correct value. JPY markets show absurdly wrong prices.
+**What goes wrong:**
+Viem's `createPublicClient` with a `fallback([webSocket(), http()])` transport produces a transport with `type: "fallback"`, NOT `type: "webSocket"`. When `watchContractEvent` (or `watchEvent`) is called on this client, it silently degrades to HTTP polling instead of using WebSocket subscriptions. The keeper appears to work but detects events at poll intervals (seconds) instead of real-time (milliseconds).
 
-**Why it happens:** The inversion is handled on-chain by the PythLazerFeedProvider contract (via `pythLazerFeedInvertedKey`). The keeper-side `inverted` flag in `PYTH_LAZER_FEED_CONFIGS` is metadata for the keeper's own use. If these two get out of sync -- for example, the deploy script runs with `pythLazerFeedInverted: false` but the keeper config has `inverted: true` -- the keeper might skip price validation thinking the price is inverted when it is not.
+**Why it happens:**
+This is a known viem footgun (documented in the current codebase's `client.ts` comments referencing "viem issue #776"). The natural instinct when building a resilient client is to wrap WebSocket in a fallback -- but this defeats the purpose of WebSocket entirely.
 
-**Prevention:**
-1. The authoritative source of truth for the inverted flag is the contract config (`config/tokens.ts` in the contracts repo). The keeper config must mirror it exactly.
-2. Add the inverted flag to the startup consistency check: read `pythLazerFeedInvertedKey(token)` from DataStore and compare with the keeper's config.
-3. After running any deploy script, verify JPY prices manually by comparing the keeper's logged price against a known FX rate source.
+**How to avoid:**
+The current keeper's `getWsPublicClient()` already implements the correct pattern: create a SEPARATE WebSocket-only client (no fallback transport), and verify `transport.type === "webSocket"` after creation. If it's not "webSocket", return null and fall back to poll-only mode explicitly. The minimal rewrite must preserve this pattern:
+1. Create HTTP client for reads and transaction submission
+2. Create separate WebSocket client for event watching ONLY
+3. Verify transport type after creation
+4. If WebSocket unavailable, degrade to poll-only with a clear log warning
 
-**Phase to address:** Phase 1 -- include in the oracle config verification at startup.
+**Warning signs:**
+- Event detection latency is 2-4 seconds instead of <500ms
+- Logs show no WebSocket subscription confirmation message
+- `transport.type` is "fallback" or "http" instead of "webSocket"
 
----
-
-### Pitfall 9: Pyth Lazer WebSocket Silently Disconnects Under Load
-
-**What goes wrong:** The Pyth Lazer WebSocket pool drops all 4 connections simultaneously. The `allConnectionsDownListener` fires (pythLazerOracle.ts line 108) and logs an error, but the keeper continues running. The `updateCache` contains stale data. Background updates fail silently (stale cache, skipped). Execution uses the stale cached price for `updatePriceOnChain()`, which either fails on-chain (price too old for the Lazer verifier) or succeeds but is rejected later by the Oracle contract's `MAX_ORACLE_PRICE_AGE` check.
-
-**Why it happens:** The SDK uses `heartbeatTimeoutDurationMs: 5000` (pythLazerOracle.ts line 61) which disconnects if no heartbeat within 5 seconds. Under Pyth service maintenance or network issues, all 4 connections can drop. The SDK has exponential backoff reconnection (`maxRetryDelayMs: 1000`) but during the reconnection window, the cache goes stale.
-
-**Prevention:**
-1. Track the timestamp of the last received price update per token. In `updatePriceOnChain()`, check this timestamp against a strict threshold (e.g., 10s). If the cached update is older than the threshold, refuse to send the stale data and fall back to Hermes instead.
-2. The current cache freshness check (`isCacheFresh` at line 263, 30s threshold) is too generous. Reduce to 10s or less.
-3. Set `healthState.oracleConnected = false` when `allConnectionsDownListener` fires, and only set it back to `true` when a new price update is received (not just when the connection re-establishes).
-4. Consider adding Hermes as an automatic fallback when Lazer cache is stale, even in "lazer" mode. The goal is execution reliability, not oracle purity.
-
-**Phase to address:** Phase 2 -- resilience hardening after basic routing works.
+**Phase to address:**
+Phase 1 (Core Architecture) -- client setup is the first thing built.
 
 ---
 
-### Pitfall 10: updateOracleProviders vs updateOracleConfigForTokens Confusion
+### Pitfall 7: Oracle Provider Address Mismatch With On-Chain Config
 
-**What goes wrong:** Developer runs `updateOracleProviders.ts` (which enables/disables provider contracts globally) instead of `updateOracleConfigForTokens.ts` (which sets per-token provider mappings). Global provider is enabled, but per-token mapping still points to the wrong provider. Or: developer updates the per-token mapping but forgets to enable the provider globally first.
+**What goes wrong:**
+The on-chain `DataStore` has a mapping `ORACLE_PROVIDER_FOR_TOKEN` that maps each token address to its authorized oracle provider contract. If the keeper passes oracle data signed for the wrong provider (e.g., Pyth Hermes data to a token configured for Pyth Lazer, or vice versa), the execution reverts with `InvalidOracleProvider (0x05d102a2)`. This was a production-blocking bug that required v1.4 to fully resolve with per-token oracle routing.
 
-**Why it happens:** The contract system has TWO layers of oracle provider configuration:
-1. **Global provider enablement:** `isOracleProviderEnabled[providerAddress]` -- whether the provider contract is allowed to supply prices at all
-2. **Per-token provider mapping:** `oracleProviderForToken[token]` -- which specific provider is expected for each token
+**Why it happens:**
+During the rewrite, it is tempting to simplify oracle handling by assuming all tokens use the same provider (e.g., all Lazer). But the on-chain config may have some tokens set to Hermes and others to Lazer, especially for FX tokens that lack Lazer entitlements. The current system has a complex per-token routing system (`isTokenLazerEntitled` + Hermes fallback) that must be preserved or simplified correctly.
 
-Both must be correctly set. Running only one deploy script leaves the other misconfigured. The scripts have similar names and purposes, making it easy to confuse them.
+**How to avoid:**
+1. At startup, verify oracle provider consistency using `verifyOracleProviderConsistency()` -- read the on-chain `ORACLE_PROVIDER_FOR_TOKEN` for every configured token and compare against the keeper's configured provider addresses.
+2. If any token's on-chain provider doesn't match the keeper's Lazer provider, either: (a) skip that token, or (b) route it through the correct provider.
+3. Log mismatches as ERRORS, not warnings. A mismatch means that token's operations WILL fail.
+4. The simplest approach for the minimal rewrite: assume all tokens use PythLazerFeedProvider (since that's what's configured on-chain for all 6 markets). If a token fails verification, log an error and exclude it from executable operations.
 
-**Prevention:**
-1. Create a single "oracle setup" script or checklist that runs both operations in sequence: first enable the provider globally, then set per-token mappings.
-2. Add the startup verification check to detect BOTH failure modes: (a) expected provider is not globally enabled, and (b) per-token mapping does not match expected provider.
-3. Document the two-layer model clearly in the deployment runbook.
+**Warning signs:**
+- Executions revert with `0x05d102a2` or `0x68b49e6c` error codes
+- Some markets work while others consistently fail
+- Oracle verification at startup shows mismatches
 
-**Phase to address:** Phase 1 -- must be understood before any on-chain config changes.
-
----
-
-## Minor Pitfalls
-
-Issues that cause confusion, waste developer time, or produce misleading diagnostics.
-
-### Pitfall 11: OracleProvider TypeScript Type Excludes pythLazerFeed
-
-**What goes wrong:** The `OracleProvider` type in `config/types.d.ts` is defined as `"gmOracle" | "chainlinkDataStream" | "chainlinkPriceFeed"`. It does NOT include `"pythLazerFeed"`. Yet `configureOracleTokens.ts` uses `"pythLazerFeed"` as the default provider key (line 10). This works because the deploy script accesses it as a string key, but TypeScript does not catch typos or misconfigurations in the token config's `oracleProvider` field when set to `"pythLazerFeed"` or `"pythHermes"`.
-
-**Prevention:** Update the `OracleProvider` type to include all provider types actually in use: `"gmOracle" | "chainlinkDataStream" | "chainlinkPriceFeed" | "pythLazerFeed" | "pythHermes"`. This makes misconfigurations a compile-time error.
-
-**Phase to address:** Phase 1 -- quick type fix when modifying the contract config.
+**Phase to address:**
+Phase 1 (Core Architecture) -- oracle provider verification must run at startup before any execution begins.
 
 ---
 
-### Pitfall 12: REQUEST_EXPIRATION_TIME Set to 3600s Masks Slow Execution
+### Pitfall 8: Pyth Lazer Reconnection Storm After Token Expiry
 
-**What goes wrong:** Operations have a full hour to execute on testnet. This hides execution delays that would be unacceptable on mainnet. A keeper that takes 60 seconds to execute a deposit "works" on testnet but would fail on mainnet where REQUEST_EXPIRATION_TIME is typically 60-300 seconds.
+**What goes wrong:**
+When the Pyth Pro access token expires or is revoked, all 4 WebSocket connections drop simultaneously. The SDK's reconnection logic (exponential backoff, `maxRetryDelayMs: 1000`) tries to reconnect every connection aggressively. Each reconnection attempt fails with an auth error, generating 4 error logs per second. Meanwhile, the oracle cache goes stale (Pitfall 2), executions start failing, and the error log volume fills disk space on the DigitalOcean droplet.
 
-**Prevention:** After achieving maximum speed on testnet, reduce REQUEST_EXPIRATION_TIME to a realistic mainnet value (e.g., 300s) and verify all operations still complete within that window. Log execution latency percentiles (already implemented via `latencyTracker`) and set alerting thresholds.
+**Why it happens:**
+The Pyth Lazer SDK reconnects with `attempts: Infinity` by default. Auth failures are not distinguished from transient network errors, so the client never gives up. The `maxRetryDelayMs: 1000` (currently configured) caps backoff at 1 second, meaning even with 4 connections, that is at minimum 4 failed connection attempts per second, indefinitely.
 
-**Phase to address:** Phase 3 -- tuning and validation after speed optimization is complete.
+**How to avoid:**
+1. Set `maxRetryDelayMs` to something reasonable like `30000` (30s) to reduce reconnection storm intensity.
+2. Monitor the `allConnectionsDownListener` callback. If it fires and stays down for >60 seconds, the token is likely expired, not a transient issue. Log a FATAL-level message with the action to take ("check PYTH_PRO_ACCESS_TOKEN validity").
+3. Add a circuit breaker: after N consecutive failed connections across all pools (e.g., 20), stop reconnecting and set the keeper to "degraded mode" (poll-only with Hermes fallback, or pause execution entirely).
+4. Monitor Pyth Pro token expiry proactively. Set a calendar reminder before the token expires.
+
+**Warning signs:**
+- Log output volume spikes dramatically
+- All oracle cache entries go stale simultaneously
+- `allConnectionsDownListener` fires but connections never recover
+- Disk usage on droplet increases rapidly
+
+**Phase to address:**
+Phase 2 (Executor Implementation) -- when building the Pyth Lazer integration.
+
+---
+
+### Pitfall 9: viem `waitForTransactionReceipt` Blocks Drain Loop During Congestion
+
+**What goes wrong:**
+The current keeper calls `waitForTransactionReceipt({ timeout: 60_000 })` after every transaction submission. During chain congestion, a transaction may sit in the mempool for the full 60 seconds before confirming. The drain loop is blocked for this entire time, unable to process any other pending operations. If 5 deposits arrive during this window, they queue up and execute 60s apart instead of in rapid succession.
+
+**Why it happens:**
+The sequential execution design correctly prevents nonce conflicts, but `waitForTransactionReceipt` is a blocking call that holds the txMutex. The intent is to confirm success before moving on, but the confirmation is not necessary for correctness -- the nonce was already consumed, and the next transaction can use the next nonce immediately.
+
+**How to avoid:**
+For the minimal rewrite, consider a fire-and-confirm pattern:
+1. Submit transaction, capture the txHash
+2. Immediately release the execution slot and move to the next pending item
+3. Track submitted txHashes in a separate "confirmations pending" list
+4. A parallel confirmation checker polls for receipts and logs results
+5. If a receipt shows `status: "reverted"`, the operation needs re-evaluation (but the on-chain state already reflects the revert, so the next scan will re-discover it if needed)
+
+HOWEVER, this adds complexity. For the ~300 line minimal rewrite, the simpler approach is to accept the blocking wait but reduce the timeout to 15-20 seconds (on Base Sepolia with Flashblocks, transactions confirm in <2 seconds normally) and treat timeout as a transient error that triggers retry.
+
+**Warning signs:**
+- Queue depth grows while a single item is being processed
+- Execution latency shows 60000ms for individual items
+- Users report long waits between submitting and seeing execution
+
+**Phase to address:**
+Phase 2 (Executor Implementation) -- this is an execution design choice that affects throughput.
 
 ---
 
-### Pitfall 13: Background Update 10s Interval Means Prices Can Be 10s Stale at Execution
+### Pitfall 10: Losing the keccak256/encodeAbiParameters Pattern for DataStore Keys
 
-**What goes wrong:** The background updater runs at `BG_UPDATE_INTERVAL_MS = 10_000` (10s minimum between on-chain updates per token). If an execution starts 9.9s after the last background update, the on-chain price is 9.9s old. Add 5-10s for execution, and the price is 15-20s old when the Oracle validates it. This is within MAX_ORACLE_PRICE_AGE (300s) but suboptimal for "maximum speed" goals.
+**What goes wrong:**
+Reading DataStore keys requires constructing the correct `bytes32` key using `keccak256(encodeAbiParameters(...))`. Solidity's `abi.encode` is NOT the same as viem's `encodePacked`. Using `encodePacked` produces a different hash, silently returning wrong data (empty arrays, zero values) from the DataStore. This was already a production bug documented in the project MEMORY.md.
 
-**Prevention:** Reduce `BG_UPDATE_INTERVAL_MS` to 3-5 seconds for tokens that have active Lazer feeds. For FX tokens using Hermes (no background update path), this is N/A -- those prices are fetched synchronously per execution.
+**Why it happens:**
+During a rewrite, the developer sees Solidity code like `keccak256(abi.encode("DEPOSIT_LIST"))` and translates it to viem using `encodePacked` because "packed" feels like it matches "encode". But `abi.encode` pads each argument to 32 bytes, while `abi.encodePacked` concatenates without padding. The hashes are completely different.
 
-**Phase to address:** Phase 2 -- tuning after per-market routing works.
+**How to avoid:**
+Copy the existing `keys.ts` pattern exactly. Use `encodeAbiParameters([{ type: 'string' }], ['DEPOSIT_LIST'])` (NOT `encodePacked`). The existing keeper already has this correct -- the rewrite must not "simplify" it.
+
+Test the key construction at startup: read a known DataStore key (like `DEPOSIT_LIST` count) and verify it returns a non-zero value. If it returns 0 and there are known pending deposits, the key construction is wrong.
+
+**Warning signs:**
+- Scanner returns 0 pending deposits when the frontend shows pending operations
+- DataStore reads return empty arrays or zero values
+- No errors thrown -- just silently wrong data
+
+**Phase to address:**
+Phase 1 (Core Architecture) -- DataStore key construction is the foundation of the scanner.
 
 ---
 
-## Phase-Specific Warnings
+## Technical Debt Patterns
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Deploy new Pyth Pro API key | Key has crypto-only entitlements, FX feeds receive no data (Pitfall 3) | Test all 7 feed IDs locally before deploying to production |
-| Enable Lazer for crypto, Hermes for FX | buildOracleParams sends wrong provider per token (Pitfall 2, 6) | Refactor buildOracleParams for per-token routing; test with mixed operations |
-| Register Hermes provider for FX tokens on-chain | Run wrong deploy script (Pitfall 10) | Run both updateOracleProviders AND updateOracleConfigForTokens in sequence |
-| Tune background update interval | Background TX collides with execution nonce (Pitfall 5) | Measure nonce conflict frequency before and after interval change |
-| Optimize end-to-end latency | Freshness check passes but price goes stale before TX mines (Pitfall 4) | Increase safety margin to 30s minimum; consider always updating |
-| Verify with mixed market operations | FX decimal precision causes wrong prices (Pitfall 7) | Read on-chain multiplier and compare against expected value |
+Shortcuts that seem reasonable but create long-term problems.
 
----
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Skip DB entirely | -500 lines of Prisma/migration code, no postgres dependency | No execution history, no block tracking for backfill, no audit trail | Acceptable for v1.5 -- on-chain DataStore is the audit trail. Add structured logging to file for post-mortem analysis. |
+| Fixed 2M gas limit for all TXs | Saves an estimateGas RPC call per execution | Overpays gas on simple operations, underpays on complex ones | Acceptable on Base Sepolia (low gas costs). Revisit for mainnet. |
+| Single-process design | Simplicity, no IPC, no coordination | Cannot scale to multiple keeper instances | Acceptable until transaction volume exceeds ~1 TX/second throughput |
+| `Date.now()` for oracle timestamps | Avoids parsing Pyth's timestamp format | Clock skew between keeper machine and chain validators causes MaxPriceAgeExceeded | Never acceptable. Use `feedUpdateTimestamp` from Pyth response. |
+| Hardcoded contract addresses | No config file parsing | Address changes require code changes and rebuild | Acceptable for testnet. Use env vars for all addresses from day one. |
+| No Hermes fallback in minimal rewrite | Simpler oracle code (Lazer only) | FX tokens without Lazer entitlements become unexecutable | Acceptable ONLY if all 6 markets are verified to have Lazer entitlements. Otherwise, must include Hermes fallback path. |
+
+## Integration Gotchas
+
+Common mistakes when connecting to external services.
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Pyth Lazer WebSocket | Subscribing before SDK client is fully initialized (race condition in `PythLazerClient.create`) | Await `clientReady` promise before calling `subscribe()`. Current code does this correctly via the `connect()` method. |
+| Pyth Lazer WebSocket | Not including all 3 endpoints for redundancy | Pyth docs: "you must connect to all endpoints" -- `pyth-lazer-0`, `pyth-lazer-1`, `pyth-lazer-2`. The SDK handles this with `numConnections: 4` across the endpoint pool. |
+| Pyth Lazer binary format | Assuming each binary message contains data for a single feed | Binary responses contain data for ALL subscribed feeds. Cache the raw update for every registered token, not just the one that "matches" the feed ID. Current `handlePriceUpdate` does this correctly. |
+| Base Sepolia RPC (Flashblocks) | Using the Flashblocks RPC URL for WebSocket subscriptions | Flashblocks RPC is HTTP-only for preconfirmations. Use standard WS_RPC_URL for event subscriptions. |
+| Docker + Pyth WebSocket | Container restart causes 4 WebSocket reconnection attempts before data flows | Add a startup wait (current: 10 seconds) after Pyth connection before first scan. Verify feed data actually arrived with `verifyLazerFeeds()` pattern. |
+| viem WebSocket transport | Using `fallback([webSocket(), http()])` for event watching | Creates "fallback" transport type that silently polls via HTTP. Use separate WebSocket-only client. |
+| DataStore key encoding | Using viem `encodePacked` to match Solidity `abi.encode` | Must use `encodeAbiParameters` -- different encoding, different hash, silently wrong results. |
+| viem nonceManager | Using `createNonceManager` for sequential keeper transactions | Nonce gap on estimateGas failure. Use manual `getTransactionCount({ blockTag: "pending" })` instead. |
+
+## Performance Traps
+
+Patterns that work at small scale but fail as usage grows.
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Fetching full deposit struct for every key in DEPOSIT_LIST each scan cycle | Scan cycle takes 2-5 seconds with 50+ pending keys | Batch reads using multicall. Pre-filter by checking if key is already in `allKnown` set before fetching details. | >20 simultaneous pending operations |
+| Synchronous `waitForTransactionReceipt` in the drain loop | Queue backs up during chain congestion; 5 pending items take 5 minutes | Reduce timeout to 15s; accept that confirmation is best-effort. On-chain state is the source of truth. | Any period of >5s block times |
+| Restarting full WebSocket subscription on every reconnection | Pyth Lazer SDK creates new subscription, old one still active on server side | Let SDK handle reconnection internally. Don't call `subscribe()` again in `allConnectionsDownListener`. | Frequent network blips (>1/minute) |
+| Reading `getTransactionCount({ blockTag: "pending" })` before every TX | Adds 100-200ms RPC latency per execution | For sequential execution, track nonce locally: fetch once at startup, increment after each successful submission, reset to on-chain value on any nonce error. | >5 TXs in rapid succession |
+
+## Security Mistakes
+
+Domain-specific security issues beyond general web security.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Private key in docker-compose.yml or committed to git | Key theft, fund drainage | Use `.env` file (already in `.gitignore`). Never hardcode in compose file. Current setup correctly uses `${PRIVATE_KEY}` env var reference. |
+| No gas balance monitoring | Keeper wallet runs out of ETH, all executions fail silently, users' deposits stuck | Add a startup check: if keeper wallet balance < 0.01 ETH, log FATAL and refuse to start. Check balance periodically and alert when low. |
+| Executing operations without validating oracle data freshness | Stale oracle prices lead to incorrect execution prices, potential economic loss | Always check timestamp of cached oracle data against `MAX_ORACLE_PRICE_AGE` before including in execution params. |
+| Not verifying transaction receipt status after execution | TX reverts on-chain but keeper marks it as "executed" | Always check `txReceipt.status === "success"`. If "reverted", mark for retry or investigation. |
+
+## UX Pitfalls
+
+Common user experience mistakes in this domain.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Keeper goes down with no user-facing indication | Users submit deposits that sit pending forever, assume the platform is broken | Health endpoint exposed at `/health`. Frontend should poll keeper health and show "Execution service unavailable" banner when unhealthy. |
+| Ghost deposits stuck in UI pending state | Users see "Pending" for deposits that were already cancelled on-chain | Frontend should check on-chain deposit state directly, not rely on keeper DB status. With no DB, this becomes the only option -- which is actually better. |
+| Execution latency visible as "pending" to user | User submits deposit, sees "Pending" for 10-30 seconds, panics | Frontend should show "Processing..." with a progress indicator. Display "Submitted to chain" as soon as the createDeposit TX confirms, "Executing..." when keeper picks it up. |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **All 7 feeds receive data:** After deploying new API key, verify each of BTC, ETH, USDC, EUR, GBP, GOLD, JPY feed IDs individually
-- [ ] **On-chain providers match keeper for ALL tokens:** Not just crypto tokens -- check FX tokens too. Different tokens may need different providers.
-- [ ] **buildOracleParams handles mixed providers:** A EUR/USDC withdrawal needs EUR via Hermes provider and USDC via Lazer provider -- both in the same oracle params
-- [ ] **Inverted feeds produce correct prices:** Check JPY price against known FX rate; wrong inversion produces reciprocal (e.g., 0.0067 instead of 149)
-- [ ] **Background updater disabled during execution:** Nonce coordination pattern still works after refactoring buildOracleParams
-- [ ] **Health endpoint reflects per-feed status:** Not just "oracle connected" but which specific feeds are receiving data
-- [ ] **FX operations work end-to-end:** Not just deposits -- test withdrawals and limit orders on FX markets specifically
-- [ ] **No nonce conflicts under load:** Submit crypto deposit + FX withdrawal simultaneously; both execute without nonce errors
+Things that appear complete but are missing critical pieces.
 
----
+- [ ] **Scanner reads all pending keys:** Verify the scan reads the FULL DataStore list (deposit + withdrawal + order keys), not just new events. Test by creating a deposit while the keeper is stopped, then starting the keeper -- it should pick it up.
+- [ ] **Oracle cache has TTL:** Verify that stale cache entries (>270s old) are NOT used for execution. Test by disconnecting the Pyth WebSocket and waiting 5 minutes -- executions should fail with "no oracle data" not with "MaxPriceAgeExceeded".
+- [ ] **Graceful shutdown completes in-flight TX:** Verify that `SIGTERM` waits for the current `waitForTransactionReceipt` to finish before exiting. Test by sending SIGTERM during an active execution -- the TX should confirm, not be abandoned.
+- [ ] **All 6 markets execute:** Verify deposits/withdrawals work for ETH, BTC, EUR, GBP, GOLD, and JPY markets. FX markets historically fail with oracle errors -- do not assume "it works for ETH so it works for all".
+- [ ] **Nonce recovery after crash:** Verify that after a process crash (kill -9), the keeper recovers the correct nonce on restart. Test by killing the process during execution and restarting -- the next TX should use the correct nonce.
+- [ ] **Docker health check passes:** Verify the `/health` endpoint returns 200 after startup wait + oracle initialization. The Dockerfile HEALTHCHECK has `start-period: 120s` -- ensure the keeper is fully initialized within this window.
+- [ ] **Event listener reconnects after WS drop:** Verify that if the WebSocket connection drops, the event listener reconnects AND the poll safety net catches events during the gap. Test by restarting the WS RPC endpoint.
+- [ ] **Ghost key dedup works across scan cycles:** Verify that after a ghost is detected once, subsequent scan cycles do NOT re-fetch and re-log it.
 
 ## Recovery Strategies
 
+When pitfalls occur despite prevention, how to recover.
+
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Oracle provider mismatch (Pitfall 1) | HIGH | Run updateOracleConfigForTokens.ts to fix on-chain mapping; restart keeper. All pending operations must be re-tried. |
-| Per-market routing wrong provider (Pitfall 2) | MEDIUM | Fix buildOracleParams routing logic; redeploy keeper. Pending operations retry automatically. |
-| Wrong API key entitlements (Pitfall 3) | HIGH | Contact Pyth Data Distributor for correct entitlements; cannot be self-served. Meanwhile, use Hermes for unentitled feeds. |
-| MaxPriceAgeExceeded (Pitfall 4) | LOW | Increase safety margin or always update prices; redeploy keeper. Operations retry automatically. |
-| Nonce collision (Pitfall 5) | LOW | Existing retry logic handles it. If nonce gap forms, send a zero-value TX to fill the gap. |
-| "Both" mode provider confusion (Pitfall 6) | MEDIUM | Refactor buildOracleParams for per-token routing. Until then, switch to per-token mode or Hermes-only. |
-| Wrong decimal multiplier (Pitfall 7) | HIGH | Rerun configurePythLazerFeeds.ts with correct decimals. Any executions with wrong prices may have caused incorrect pool share calculations. |
-| Inverted feed mismatch (Pitfall 8) | HIGH | Fix on-chain or keeper config. Any JPY operations executed with wrong inversion have incorrect prices -- manual review needed. |
+| Nonce gap (stuck transactions) | LOW | SSH into droplet, restart the keeper container. On restart, `getTransactionCount({ blockTag: "pending" })` fetches the correct nonce. If a TX is stuck in mempool, submit a zero-value TX with the stuck nonce and higher gas to unstick it. |
+| Stale oracle cache | LOW | Restart the keeper. Pyth WebSocket reconnects, cache repopulates in 10 seconds. Pending operations will be re-discovered by the scanner. |
+| Ghost deposit infinite loop | LOW | Add the ghost key to an ignore list, or cancel it on-chain via the DepositHandler. Restart keeper to clear in-memory state. |
+| Docker duplicate keeper | MEDIUM | `docker compose stop order-execution-keeper` to stop both instances. Wait 30 seconds for any in-flight TXs to confirm. Then `docker compose up -d order-execution-keeper`. Check `getTransactionCount` matches expected nonce. |
+| Oracle provider mismatch | MEDIUM | Run the `configureOracleTokens.ts` deploy script to update on-chain DataStore mappings. Or update the keeper's configured provider address to match what's on-chain. Restart keeper after fix. |
+| DataStore key hash mismatch (wrong encoding) | HIGH | This is a code bug, not a runtime issue. Fix the encoding function, rebuild Docker image, redeploy. All pending operations are safe on-chain -- they just weren't being discovered. |
+| Private key compromise | CRITICAL | Immediately transfer all funds from the keeper wallet. Deploy new keeper wallet. Update on-chain RoleStore to revoke old keeper and authorize new one. Update .env and redeploy. |
+| Pyth token expired / reconnection storm | LOW | Replace `PYTH_PRO_ACCESS_TOKEN` in .env, restart keeper. If disk is full from log spam, `docker logs --tail 0` to truncate, then restart. |
 
----
+## Pitfall-to-Phase Mapping
+
+How roadmap phases should address these pitfalls.
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Nonce gap on failed estimateGas | Phase 1: Core Architecture | Unit test: mock a reverted estimateGas, verify next TX uses correct nonce |
+| Stale oracle cache | Phase 1: Core Architecture | Integration test: disconnect WS, wait 5 min, verify execution is blocked |
+| In-flight queue loss on restart | Phase 1: Core Architecture | E2E test: create deposit, kill keeper, restart, verify deposit executes |
+| Ghost deposit infinite retry | Phase 2: Executor Implementation | Log analysis: after 3 scan cycles, ghost key should appear in logs only once |
+| Docker duplicate keeper | Phase 3: Docker Deployment | Deployment runbook with explicit stop-then-start procedure |
+| WebSocket HTTP fallback | Phase 1: Core Architecture | Startup assertion: verify `transport.type === "webSocket"` |
+| Oracle provider mismatch | Phase 1: Core Architecture | Startup verification: `verifyOracleProviderConsistency()` with hard failure on mismatch |
+| Pyth reconnection storm | Phase 2: Executor Implementation | Config review: verify `maxRetryDelayMs >= 10000`, circuit breaker implemented |
+| waitForTransactionReceipt blocking | Phase 2: Executor Implementation | Load test: submit 5 deposits rapidly, verify all execute within 60s total |
+| keccak256/encodeAbiParameters mismatch | Phase 1: Core Architecture | Startup smoke test: read DEPOSIT_LIST count, verify it matches expected value |
 
 ## Sources
 
-### Primary (HIGH confidence -- codebase analysis)
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/executors/baseExecutor.ts` -- buildOracleParams(), isStoredPriceFresh(), nonce handling
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/oracle/pythLazerOracle.ts` -- WebSocket pool config, background updates, cache freshness
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/oracle/pythOracle.ts` -- Hermes provider integration
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/config/tokens.ts` -- Feed configs, commented-out FX feeds with entitlement notes
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/config.ts` -- Oracle mode configuration
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/index.ts` -- Startup sequence, nonce coordination in drainQueue()
-- `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/configureOracleTokens.ts` -- On-chain provider mapping logic, default provider
-- `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/configurePythLazerFeeds.ts` -- Feed decimal multiplier computation
-- `/Users/ken/Projects/0xM/0xmarkets_contract/config/tokens.ts` -- Per-token pythLazerFeedId, decimals, inverted flags
-- `/Users/ken/Projects/0xM/0xmarkets_contract/config/oracle.ts` -- maxOraclePriceAge (300s), pythLazerFeedVerifier address
-- `/Users/ken/Projects/0xM/0xmarkets_contract/config/types.d.ts` -- OracleProvider type definition (missing pythLazerFeed)
-- `.planning/phases/13-production-lazer-deployment-and-keeper-optimization/13-RESEARCH.md` -- Prior debugging findings
-- `.planning/PROJECT.md` -- Known issues, constraints, key decisions
+### Primary (HIGH confidence -- codebase analysis and production incidents)
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/index.ts` -- TxMutex, drainQueue, scanAndEnqueue, shutdown handler
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/executors/baseExecutor.ts` -- nonce management, submitTransaction retry logic, buildOracleParams per-token routing
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/oracle/pythLazerOracle.ts` -- WebSocket pool config, cache architecture, allConnectionsDownListener
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/queue/executionQueue.ts` -- dedup via allKnown, retry with backoff, ghost handling
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/listeners/eventListener.ts` -- backfill from lastProcessedBlock, DB dependency for recovery
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/blockchain/client.ts` -- WebSocket transport type verification, fallback transport pitfall
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/Dockerfile` -- health check config, startup period
+- `/Users/ken/Projects/0xM/docker-compose.yml` -- service definitions, restart policy, postgres dependency
+- `.planning/PROJECT.md` -- Known issues (MaxPriceAgeExceeded, InvalidOracleProvider, nonce conflicts, ghost deposits)
 
-### Secondary (MEDIUM confidence -- verified documentation)
-- [Pyth Developer Hub - Best Practices](https://docs.pyth.network/price-feeds/core/best-practices) -- Staleness checks, MaxPriceAge guidance
-- [Pyth Developer Hub - Price Feed IDs](https://docs.pyth.network/price-feeds/pro/price-feed-ids) -- Pro feed ID catalog
-- [Pyth Network Launches Pyth Pro](https://www.businesswire.com/news/home/20250923720158/en/) -- Pro subscription model, asset class coverage
-- [@pythnetwork/pyth-lazer-sdk (npm)](https://www.npmjs.com/package/@pythnetwork/pyth-lazer-sdk) -- WebSocket pool config, heartbeat, reconnection
-- [GMX Synthetics Oracle.sol](https://github.com/gmx-io/gmx-synthetics/blob/main/contracts/oracle/Oracle.sol) -- oracleProviderForToken validation pattern
-- [QuickNode - Nonce Management](https://www.quicknode.com/guides/ethereum-development/transactions/how-to-manage-nonces-with-ethereum-transactions) -- EVM nonce collision strategies
+### Secondary (MEDIUM confidence -- verified library documentation)
+- [viem createNonceManager documentation](https://viem.sh/docs/accounts/local/createNonceManager)
+- [viem issue #3142: nonceManager still incrementing if tx was not sent](https://github.com/wevm/viem/issues/3142)
+- [viem discussion #1338: Better nonce handling with parallel transactions](https://github.com/wevm/viem/discussions/1338)
+- [Pyth Lazer Getting Started documentation](https://docs.pyth.network/lazer/getting-started)
+- [Pyth Pro Subscribe to Prices documentation](https://docs.pyth.network/price-feeds/pro/subscribe-to-prices)
+- [@pythnetwork/pyth-lazer-sdk npm package](https://www.npmjs.com/package/@pythnetwork/pyth-lazer-sdk)
+- [Docker Rollout: Zero Downtime Deployment for Docker Compose](https://github.com/wowu/docker-rollout)
+- [GMX Synthetics keeper documentation](https://github.com/gmx-io/gmx-synthetics)
 
-### Tertiary (LOW confidence -- needs validation)
-- Pyth Pro entitlement tiers per asset class -- no official documentation found. Understanding based on observed behavior (crypto feeds work, FX feeds silent) and keeper token config comments. Must be verified empirically with Pyth Data Distributor.
+### Tertiary (LOW confidence -- training data only)
+- Docker Compose stop/start behavior during `up -d --build` -- verified against Docker documentation but exact behavior may vary by Docker version
 
 ---
-*Pitfalls research for: Per-market oracle routing, dual oracle mode, and maximum keeper speed (v1.4)*
-*Researched: 2026-02-24*
+*Pitfalls research for: Minimal keeper rewrite (v1.5)*
+*Researched: 2026-02-25*
