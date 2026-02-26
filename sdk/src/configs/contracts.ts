@@ -4,18 +4,18 @@ import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
 
 export const CONTRACTS = {
   [BASE_SEPOLIA]: {
-    // Synthetics - Updated to match deployed contracts (Jan 2025)
-    DataStore: "0xBaD049d5FedE7Bd9022F7E750B982349fE17e83E",
-    EventEmitter: "0x1E4cBc2ea12B190D6222D568151b5e708e1477F8",
+    // Synthetics - Updated to match on-chain DataStore (Feb 2026 audit)
+    DataStore: "0x3B9d71B497aD2d3c32a7c24e96565f84a58089a7",
+    EventEmitter: "0xd5aAfa71f745645Db84cB4877873701ddAf2514c",
     SubaccountRouter: "0x733FC820632de04Ff901E2664d208401c4E71A6e",
-    ExchangeRouter: "0xAf0BD41cf8376bB1084774bf81804faf7Ba9dE46",
-    DepositVault: "0xAeDAad1F7acB0D1b1e1775cEde4606d617d75DCd",
-    WithdrawalVault: "0x88f6B6e498720594D21B9a3E2dc3A4CbF35C1ed6",
-    OrderVault: "0xF4c5C6C21baeB725AA87bb708e1e3Cc9c2495da7",
-    ShiftVault: "0xbDE46443061949B7ce0e534A3BC53A1E98BaD745",
+    ExchangeRouter: "0x5AcE07B0E746662A2BB172a7A3C652C198bAf631",
+    DepositVault: "0x4AFE24c4e2477F54aFa4bF30d6D7385e588dfeC4",
+    WithdrawalVault: "0x64D496E867000875Dd19C808592fAB6Fc99cBE7F",
+    OrderVault: "0x18916C70dFEb3fA3366089d35464aC40f5a1D903",
+    ShiftVault: "0xEB15262f24c0AdB52FaB1E496fDf8730B0195cD7",
 
-    SyntheticsReader: "0xb53122a72ceA22F71Cf75dc70A2Ed2526246253c",
-    SyntheticsRouter: "0x189D42feB4F7238d3B908eD3B45aBc69A43c9bED",
+    SyntheticsReader: "0x1e6Ca8042e7BC258BBbA35C5C86F013b4eceC03C",
+    SyntheticsRouter: "0x33153255bed0219b571483e6a0801Fa0B916f7D7",
 
     GlvReader: "0x838a9822868ddAF0951e2474c575b8632835776A",
     GlvRouter: "0xEf4cB87df8050cD98237aF174F4b7972972a114F",
@@ -46,9 +46,9 @@ export const CONTRACTS = {
 
     // V1 legacy (not deployed on Base Sepolia)
     Vault: zeroAddress,
-    Reader: "0xb53122a72ceA22F71Cf75dc70A2Ed2526246253c",
+    Reader: "0x1e6Ca8042e7BC258BBbA35C5C86F013b4eceC03C",
     PositionRouter: zeroAddress,
-    ReferralStorage: "0x38D58E8AFd79F4EcEF1414252fc0bB0151a4FD30",
+    ReferralStorage: "0xF5F9CdBe6225aBFF7cE2F290d12bc1BaCCC926E2",
     VaultReader: zeroAddress,
     GlpManager: zeroAddress,
     RewardRouter: zeroAddress,
@@ -70,7 +70,7 @@ export const CONTRACTS = {
     GmxVester: zeroAddress,
     GlpVester: zeroAddress,
     AffiliateVester: zeroAddress,
-    Router: "0x189D42feB4F7238d3B908eD3B45aBc69A43c9bED",
+    Router: "0x33153255bed0219b571483e6a0801Fa0B916f7D7",
     GovToken: "0x9e3C8a704e31df4D79672b30706BD2587461b256",
     ES_GMX_IOU: zeroAddress,
     OrderBook: zeroAddress,
