@@ -162,7 +162,7 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 18. Event Detection and Toast Feedback | v1.6 (old) | 1/3 | Superseded | - |
-| 20. Contract Address Audit | v1.6 | 0/2 | Planned | - |
+| 20. Contract Address Audit | 1/2 | In Progress|  | - |
 | 21. Keeper Execution Fixes | v1.6 | 0/TBD | Not started | - |
 | 22. Frontend Feedback | v1.6 | 0/TBD | Not started | - |
 | 23. Automated E2E Testing | v1.6 | 0/TBD | Not started | - |
