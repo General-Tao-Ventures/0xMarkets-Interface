@@ -123,6 +123,6 @@ Phases execute in numeric order: 15 → 16 → 17
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
 | 13. Oracle Correctness | v1.4 | 4/4 | Complete | 2026-02-25 |
 | 14. Execution Speed | v1.4 | 2/2 | Complete | 2026-02-25 |
-| 15. Project Skeleton and Oracle | v1.5 | 2/2 | Complete | 2026-02-26 |
+| 15. Project Skeleton and Oracle | v1.5 | Complete    | 2026-02-26 | 2026-02-26 |
 | 16. Keeper Logic and Infrastructure | v1.5 | 0/TBD | Not started | - |
 | 17. Deploy and Verify | v1.5 | 0/TBD | Not started | - |
