@@ -112,7 +112,8 @@ was replaced with E2E Reliability. The polling infrastructure from 18-01 carries
   2. A withdrawal submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
   3. A market order (long or short) submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
   4. Keeper logs show zero revert errors across a full 6-market test pass (deposit + withdrawal + order per market = 18 operations)
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 21-01-PLAN.md -- Diagnose and fix all keeper execution failures across 6 markets x 3 operation types, verify 18/18 pass
 
 ### Phase 22: Frontend Feedback
 **Goal**: Users see real-time toast notifications for every operation and never need to manually refresh to see updated balances or positions
@@ -163,6 +164,6 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 18. Event Detection and Toast Feedback | v1.6 (old) | 1/3 | Superseded | - |
 | 20. Contract Address Audit | v1.6 | 2/2 | Complete | 2026-02-26 |
-| 21. Keeper Execution Fixes | v1.6 | 0/TBD | Not started | - |
+| 21. Keeper Execution Fixes | v1.6 | 0/1 | Planned | - |
 | 22. Frontend Feedback | v1.6 | 0/TBD | Not started | - |
 | 23. Automated E2E Testing | v1.6 | 0/TBD | Not started | - |
