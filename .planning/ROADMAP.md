@@ -74,7 +74,10 @@
   2. Pyth Lazer WebSocket connects and populates price cache for all 7 tokens (EUR, GBP, GOLD, JPY, USDC, WBTC, WETH) — verified by running `pnpm dev` and seeing cache populated in logs
   3. `buildOracleParams(tokens)` returns the correct Lazer provider address (`0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05`) for every token — not a mix of providers
   4. Cache rejects prices older than 270 seconds, preventing MaxPriceAgeExceeded errors that plagued v1.3-v1.4
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 15-01-PLAN.md — Gut old code, create project skeleton (config/keys/ABIs, package.json, tsconfig, Dockerfile)
+- [ ] 15-02-PLAN.md — Pyth Lazer oracle cache module and minimal index.ts proving oracle works
 
 ### Phase 16: Keeper Logic and Infrastructure
 **Goal**: A fully functional keeper that detects, deduplicates, and sequentially executes deposits, withdrawals, and orders with health monitoring
@@ -120,6 +123,6 @@ Phases execute in numeric order: 15 → 16 → 17
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
 | 13. Oracle Correctness | v1.4 | 4/4 | Complete | 2026-02-25 |
 | 14. Execution Speed | v1.4 | 2/2 | Complete | 2026-02-25 |
-| 15. Project Skeleton and Oracle | v1.5 | 0/TBD | Not started | - |
+| 15. Project Skeleton and Oracle | v1.5 | 0/2 | Not started | - |
 | 16. Keeper Logic and Infrastructure | v1.5 | 0/TBD | Not started | - |
 | 17. Deploy and Verify | v1.5 | 0/TBD | Not started | - |
