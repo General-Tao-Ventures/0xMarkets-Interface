@@ -10,6 +10,8 @@ import type { ExternalSwapQuote } from "sdk/types/trade";
 
 import type { MultichainEventsState } from "./useMultichainEvents";
 
+export const EXECUTION_TIMEOUT_HASH = "timeout";
+
 export type MultiTransactionStatus<TEventData> = {
   key: string;
   data?: TEventData;
