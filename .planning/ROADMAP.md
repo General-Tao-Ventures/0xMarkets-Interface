@@ -8,7 +8,7 @@
 - ✅ **v1.3 Keeper Execution Speed** — Phases 10-12 (shipped 2026-02-24)
 - ✅ **v1.4 Maximum Keeper Speed** — Phases 13-14 (shipped 2026-02-25)
 - ✅ **v1.5 Minimal Keeper Rewrite** — Phases 15-17 (shipped 2026-02-26)
-- 🚧 **v1.6 Execution Feedback** — Phases 18-19 (in progress)
+- 🚧 **v1.6 E2E Reliability** — Phases 20-23 (in progress)
 
 ## Phases
 
@@ -65,45 +65,80 @@
 
 </details>
 
-### v1.6 Execution Feedback (In Progress)
+<details>
+<summary>Superseded: v1.6 Execution Feedback — Phase 18 (partial)</summary>
 
-**Milestone Goal:** Real-time toast notifications and auto-balance refresh when deposits, withdrawals, and orders execute — no manual page refresh needed.
+Phase 18 was partially completed under the original v1.6 "Execution Feedback" scope.
+Plan 18-01 shipped (RPC polling fallback). Plans 18-02 and 18-03 were superseded when v1.6 scope
+was replaced with E2E Reliability. The polling infrastructure from 18-01 carries forward into Phase 22.
 
-- [ ] **Phase 18: Event Detection and Toast Feedback** - Watch EventEmitter for execution events and show toast notification lifecycle (pending/executed/error)
-- [ ] **Phase 19: Auto-Refresh on Execution** - Automatically refresh balances and positions when execution events are detected
+- [x] 18-01-PLAN.md — RPC polling fallback for reliable event detection and timeout handling
+- [ ] ~~18-02-PLAN.md — Verify toast lifecycle (superseded)~~
+- [ ] ~~18-03-PLAN.md — Gap closure (superseded)~~
+
+</details>
+
+### v1.6 E2E Reliability (In Progress)
+
+**Milestone Goal:** Every market x every operation (deposit, trade, withdrawal) works reliably end-to-end: user action -> keeper execution -> frontend toast + auto-refresh. No manual page refresh needed.
+
+- [ ] **Phase 20: Contract Address Audit** - Verify all addresses across interface SDK, keeper, and contracts repo match on-chain reality
+- [ ] **Phase 21: Keeper Execution Fixes** - All 6 markets execute deposits, withdrawals, and orders without reverts
+- [ ] **Phase 22: Frontend Feedback** - Toast lifecycle and auto-refresh for all operation types
+- [ ] **Phase 23: Automated E2E Testing** - Scripts that verify all 18 market x operation combinations
 
 ## Phase Details
 
-### Phase 18: Event Detection and Toast Feedback
-**Goal**: User sees real-time toast notifications tracking their operation from submission through execution or failure
-**Depends on**: Phase 17 (v1.5 complete — keeper executes all operation types)
-**Requirements**: DET-01, DET-02, DET-03, FB-01, FB-02, FB-03
+### Phase 20: Contract Address Audit
+**Goal**: All contract addresses across every service are verified correct against on-chain state, so no execution failures come from stale config
+**Depends on**: Phase 17 (v1.5 complete -- keeper deployed and running)
+**Requirements**: AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04
 **Success Criteria** (what must be TRUE):
-  1. After user submits a deposit, a "Pending..." toast appears immediately and updates to "Executed!" when the DepositExecuted event is detected on-chain
-  2. After user submits a withdrawal, a "Pending..." toast appears immediately and updates to "Executed!" when the WithdrawalExecuted event is detected on-chain
-  3. After user submits an order (market, limit, stop-loss, take-profit), a "Pending..." toast appears immediately and updates to "Executed!" when the OrderExecuted event is detected on-chain
-  4. If an operation fails or expires without execution, the toast updates to an error state with an actionable message (not stuck on "Pending..." forever)
-**Plans**: 3 plans
+  1. Every market address in the interface SDK (`sdk/src/configs/markets.ts`) resolves to a valid on-chain DataStore entry -- no phantom markets
+  2. Every token address in the order-execution-keeper-service matches the token contracts actually deployed on Base Sepolia
+  3. Oracle provider addresses in both keeper and interface match the on-chain DataStore oracle configuration for all 6 markets
+  4. All 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY) are enabled on-chain with non-zero reserve factors, OI limits, and pool caps
+  5. A single audit report documents every discrepancy found and every fix applied, so future redeployments have a checklist
+**Plans**: TBD
 
-Plans:
-- [x] 18-01-PLAN.md — RPC polling fallback for reliable event detection and timeout handling
-- [ ] 18-02-PLAN.md — Verify toast lifecycle for all operation types (e2e testing)
-- [ ] 18-03-PLAN.md — Gap closure: wire watchOrderTxn into deposit/withdrawal flows and fix polling interval stability
-
-### Phase 19: Auto-Refresh on Execution
-**Goal**: User's balances and positions update automatically when operations execute, eliminating the need to manually refresh the page
-**Depends on**: Phase 18 (event detection infrastructure exists)
-**Requirements**: REF-01, REF-02
+### Phase 21: Keeper Execution Fixes
+**Goal**: The order-execution-keeper executes all three operation types across all 6 markets without reverts, so every user action reaches completion
+**Depends on**: Phase 20 (addresses verified correct -- execution failures are real bugs, not config)
+**Requirements**: EXEC-01, EXEC-02, EXEC-03, EXEC-04
 **Success Criteria** (what must be TRUE):
-  1. After a deposit executes, the user's GM token balance updates on the pools page without a page refresh
-  2. After a withdrawal executes, the user's USDC balance updates without a page refresh
-  3. After an order executes, the user's positions list on the trade page updates without a page refresh (new position appears or existing position closes)
+  1. A deposit submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
+  2. A withdrawal submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
+  3. A market order (long or short) submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
+  4. Keeper logs show zero revert errors across a full 6-market test pass (deposit + withdrawal + order per market = 18 operations)
+**Plans**: TBD
+
+### Phase 22: Frontend Feedback
+**Goal**: Users see real-time toast notifications for every operation and never need to manually refresh to see updated balances or positions
+**Depends on**: Phase 21 (keeper executes reliably -- frontend can trust execution happens)
+**Requirements**: FB-01, FB-02, FB-03, FB-04, FB-05, FB-06, FB-07, FB-08
+**Success Criteria** (what must be TRUE):
+  1. After submitting a deposit, a "Pending..." toast appears immediately and updates to "Executed!" when the DepositExecuted event is detected on-chain
+  2. After submitting a withdrawal, a "Pending..." toast appears immediately and updates to "Executed!" when the WithdrawalExecuted event is detected on-chain
+  3. After submitting a market order, a "Pending..." toast appears immediately and updates to "Executed!" when the OrderExecuted event is detected on-chain
+  4. GM token balances on the pools page auto-refresh after a deposit or withdrawal executes -- no manual page refresh
+  5. Positions list on the trade page auto-refresh after an order executes -- new position appears or existing position closes without page refresh
+**Plans**: TBD
+
+### Phase 23: Automated E2E Testing
+**Goal**: A repeatable test suite validates all 18 market x operation combinations, so regressions are caught before they reach users
+**Depends on**: Phase 22 (full pipeline working -- tests validate the complete flow)
+**Requirements**: TEST-01, TEST-02, TEST-03
+**Success Criteria** (what must be TRUE):
+  1. Running the deposit test script produces a pass/fail result for each of the 6 markets (6 results total)
+  2. Running the withdrawal test script produces a pass/fail result for each of the 6 markets (6 results total)
+  3. Running the order test script produces a pass/fail result for each of the 6 markets (6 results total)
+  4. All 18 tests pass on a clean run against the deployed keeper and live Base Sepolia contracts
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 18 → 19
+Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -124,5 +159,8 @@ Phases execute in numeric order: 18 → 19
 | 15. Project Skeleton and Oracle | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
-| 18. Event Detection and Toast Feedback | 2/3 | In Progress|  | - |
-| 19. Auto-Refresh on Execution | v1.6 | 0/TBD | Not started | - |
+| 18. Event Detection and Toast Feedback | v1.6 (old) | 1/3 | Superseded | - |
+| 20. Contract Address Audit | v1.6 | 0/TBD | Not started | - |
+| 21. Keeper Execution Fixes | v1.6 | 0/TBD | Not started | - |
+| 22. Frontend Feedback | v1.6 | 0/TBD | Not started | - |
+| 23. Automated E2E Testing | v1.6 | 0/TBD | Not started | - |

@@ -42,7 +42,7 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 ### Reliability
 
-- **REL-01**: Expired request cancellation — returns stuck user funds past REQUEST_EXPIRATION_TIME
+- **REL-01**: Expired request cancellation -- returns stuck user funds past REQUEST_EXPIRATION_TIME
 - **REL-02**: Multi-wallet parallel execution for higher throughput
 
 ### Performance
@@ -55,7 +55,7 @@ Deferred to v2+. Tracked but not in current roadmap.
 |---------|--------|
 | Token swaps (SWAP-01) | Deferred from v1.1, user prioritized trading |
 | WebSocket push from keeper | Adds complexity; on-chain events are authoritative |
-| Operation history page | Beyond current scope — just toast + refresh |
+| Operation history page | Beyond current scope -- just toast + refresh |
 | Mobile-specific UI | Web-first approach |
 | Mainnet deployment | Testnet-first strategy unchanged |
 | New market creation | Admin operation, not user-facing |
@@ -64,31 +64,31 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | — | Pending |
-| AUDIT-02 | — | Pending |
-| AUDIT-03 | — | Pending |
-| AUDIT-04 | — | Pending |
-| EXEC-01 | — | Pending |
-| EXEC-02 | — | Pending |
-| EXEC-03 | — | Pending |
-| EXEC-04 | — | Pending |
-| FB-01 | — | Pending |
-| FB-02 | — | Pending |
-| FB-03 | — | Pending |
-| FB-04 | — | Pending |
-| FB-05 | — | Pending |
-| FB-06 | — | Pending |
-| FB-07 | — | Pending |
-| FB-08 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
+| AUDIT-01 | Phase 20 | Pending |
+| AUDIT-02 | Phase 20 | Pending |
+| AUDIT-03 | Phase 20 | Pending |
+| AUDIT-04 | Phase 20 | Pending |
+| EXEC-01 | Phase 21 | Pending |
+| EXEC-02 | Phase 21 | Pending |
+| EXEC-03 | Phase 21 | Pending |
+| EXEC-04 | Phase 21 | Pending |
+| FB-01 | Phase 22 | Pending |
+| FB-02 | Phase 22 | Pending |
+| FB-03 | Phase 22 | Pending |
+| FB-04 | Phase 22 | Pending |
+| FB-05 | Phase 22 | Pending |
+| FB-06 | Phase 22 | Pending |
+| FB-07 | Phase 22 | Pending |
+| FB-08 | Phase 22 | Pending |
+| TEST-01 | Phase 23 | Pending |
+| TEST-02 | Phase 23 | Pending |
+| TEST-03 | Phase 23 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19 ⚠️
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after scope replacement*
+*Last updated: 2026-02-26 after roadmap creation*
