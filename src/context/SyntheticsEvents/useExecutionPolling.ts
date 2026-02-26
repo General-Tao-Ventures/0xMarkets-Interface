@@ -104,6 +104,15 @@ export function useExecutionPolling({
     // The effect will re-run when statuses change (via the dependency on hasAnyPending)
     if (!hasStuckOps()) return;
 
+    // Log stuck operations for debugging
+    const stuckDepositsInit = getStuckOperations(depositStatusesRef.current);
+    const stuckWithdrawalsInit = getStuckOperations(withdrawalStatusesRef.current);
+    const stuckOrdersInit = getStuckOperations(orderStatusesRef.current);
+    for (const s of [...stuckDepositsInit, ...stuckWithdrawalsInit, ...stuckOrdersInit]) {
+      const type = stuckDepositsInit.includes(s) ? "deposit" : stuckWithdrawalsInit.includes(s) ? "withdrawal" : "order";
+      console.warn("[execution-polling] Polling for stuck operation:", s.key, "type:", type, "elapsed:", Date.now() - s.createdAt, "ms");
+    }
+
     const poll = async () => {
       const currentChainId = chainIdRef.current;
 
@@ -132,6 +141,7 @@ export function useExecutionPolling({
       const stuckDeposits = getStuckOperations(depositStatusesRef.current);
       for (const stuck of stuckDeposits) {
         if (now - stuck.createdAt > MAX_WAIT_MS) {
+          console.warn("[execution-polling] Operation timed out:", stuck.key, "after", now - stuck.createdAt, "ms");
           setDepositStatuses((old) => updateByKey(old, stuck.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
           continue;
         }
@@ -145,6 +155,7 @@ export function useExecutionPolling({
             eventEmitter,
             stuck.key,
             (key, txnHash, isExecuted) => {
+              console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
                 setDepositStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
               } else {
@@ -161,6 +172,7 @@ export function useExecutionPolling({
       const stuckWithdrawals = getStuckOperations(withdrawalStatusesRef.current);
       for (const stuck of stuckWithdrawals) {
         if (now - stuck.createdAt > MAX_WAIT_MS) {
+          console.warn("[execution-polling] Operation timed out:", stuck.key, "after", now - stuck.createdAt, "ms");
           setWithdrawalStatuses((old) => updateByKey(old, stuck.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
           continue;
         }
@@ -174,6 +186,7 @@ export function useExecutionPolling({
             eventEmitter,
             stuck.key,
             (key, txnHash, isExecuted) => {
+              console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
                 setWithdrawalStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
               } else {
@@ -190,6 +203,7 @@ export function useExecutionPolling({
       const stuckOrders = getStuckOperations(orderStatusesRef.current);
       for (const stuck of stuckOrders) {
         if (now - stuck.createdAt > MAX_WAIT_MS) {
+          console.warn("[execution-polling] Operation timed out:", stuck.key, "after", now - stuck.createdAt, "ms");
           setOrderStatuses((old) => updateByKey(old, stuck.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
           continue;
         }
@@ -203,6 +217,7 @@ export function useExecutionPolling({
             eventEmitter,
             stuck.key,
             (key, txnHash, isExecuted) => {
+              console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
                 setOrderStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
               } else {
