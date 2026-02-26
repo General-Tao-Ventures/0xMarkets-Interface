@@ -123,5 +123,5 @@ Phases execute in numeric order: 18 → 19
 | 15. Project Skeleton and Oracle | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
-| 18. Event Detection and Toast Feedback | v1.6 | 0/2 | Not started | - |
+| 18. Event Detection and Toast Feedback | 1/2 | In Progress|  | - |
 | 19. Auto-Refresh on Execution | v1.6 | 0/TBD | Not started | - |

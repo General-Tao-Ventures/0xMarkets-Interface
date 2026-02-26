@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Execution Feedback
-status: ready_to_plan
+status: executing
 last_updated: "2026-02-26"
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.6 Execution Feedback — Phase 18 ready to plan
+**Current focus:** v1.6 Execution Feedback — Phase 18 executing
 
 ## Current Position
 
 Phase: 18 of 19 (Event Detection and Toast Feedback)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-26 — Roadmap created for v1.6
+Plan: 1 of 2 in current phase (18-01 complete)
+Status: Executing
+Last activity: 2026-02-26 — Completed 18-01 (Event Detection Polling Fallback)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [=====-----] 50%
 
 ## Performance Metrics
 
@@ -45,14 +45,14 @@ Progress: [░░░░░░░░░░] 0%
 | v1.3 | 10-12 | 6/6 | Complete |
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
-| v1.6 | 18-19 | 0/TBD | In progress |
+| v1.6 | 18-19 | 1/2 | In progress |
 
 ## Accumulated Context
 
 ### Known Issues
 
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
-- Frontend lacks execution status notifications — user must refresh to see results (v1.6 target)
+- Frontend lacks execution status notifications — user must refresh to see results (partially addressed by 18-01 polling fallback)
 
 ### Pending Todos
 
@@ -66,8 +66,10 @@ None.
 
 **Prior milestone decisions:** See .planning/PROJECT.md key decisions table.
 
+- **18-01:** Used RPC polling fallback with refs pattern to avoid interval recreation; 500-block lookback; 5-min timeout sentinel
+
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Roadmap created for v1.6 Execution Feedback
-Next: Plan Phase 18 (Event Detection and Toast Feedback)
+Stopped at: Completed 18-01-PLAN.md
+Next: Execute 18-02 (remaining event detection and toast feedback)
