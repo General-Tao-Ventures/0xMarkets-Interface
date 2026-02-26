@@ -58,14 +58,17 @@ Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSoc
 
 ### Active
 
-## Current Milestone: v1.6 Execution Feedback
+## Current Milestone: v1.6 E2E Reliability
 
-**Goal:** Real-time toast notifications and auto-balance refresh when deposits, withdrawals, and orders execute — no manual page refresh needed.
+**Goal:** Every market × every operation (deposit, trade, withdrawal) works reliably end-to-end: user action → keeper execution → frontend toast + auto-refresh. No manual page refresh needed.
 
 **Target features:**
-- Toast notifications: "Pending..." → "Executed!" for all three operation types
-- Auto-refresh balances and positions when operations complete
-- On-chain event detection for execution status (EventEmitter events)
+- Contract address audit: verify all addresses across interface SDK, keeper, and contracts repo match on-chain reality
+- Systematic diagnosis: test all 6 markets × 3 operations, catalog every failure mode
+- Keeper fixes: resolve reverts, detection issues, oracle/gas/config problems per market
+- Frontend fixes: toast lifecycle (Pending → Executed!) and auto-refresh balances/positions
+- Automated E2E test scripts: verify all 18 market×operation combinations
+- Manual verification: full frontend UX works without page refresh
 
 ### Out of Scope
 
@@ -82,7 +85,8 @@ Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSoc
 - **Chain:** Base Sepolia (84532)
 - **Deployed:** app.0xmarkets.io (Vercel)
 - **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22), v1.2 (2026-02-23)
-- **Codebase:** 17 phases, 39 plans, 6 milestones across 6 days
+- **Codebase:** 18 phases, 41 plans, 6 milestones across 6 days
+- **Critical risk:** Multiple contract deployments mean stale addresses across services — audit before testing
 - **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222) with pino JSON logging, real health endpoints, and BetterStack uptime monitoring
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
@@ -122,5 +126,7 @@ Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSoc
 | Per-token Lazer/Hermes fallback | Graceful degradation per token vs global switch | ✓ Good |
 | Transaction mutex for nonce conflicts | Serializes execution + cleanup paths | ✓ Good |
 
+| Contract audit before testing | Multiple deployments mean stale addresses are likely | — Pending |
+
 ---
-*Last updated: 2026-02-26 after v1.6 milestone started*
+*Last updated: 2026-02-26 after v1.6 scope replaced with E2E Reliability*
