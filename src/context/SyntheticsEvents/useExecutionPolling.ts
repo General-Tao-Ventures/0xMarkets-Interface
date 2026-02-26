@@ -211,6 +211,9 @@ export function useExecutionPolling({
       // Poll for pending deposits
       const pendingDeposits = getPendingOperations(depositStatusesRef.current);
       for (const pending of pendingDeposits) {
+        console.warn("[execution-polling] Polling for pending operation:", pending.key, "type:", "deposit", "elapsed:", now - pending.createdAt, "ms");
+      }
+      for (const pending of pendingDeposits) {
         if (now - pending.createdAt > MAX_WAIT_MS) {
           console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
           setDepositStatuses((old) => updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
@@ -242,6 +245,9 @@ export function useExecutionPolling({
       // Poll for pending withdrawals
       const pendingWithdrawals = getPendingOperations(withdrawalStatusesRef.current);
       for (const pending of pendingWithdrawals) {
+        console.warn("[execution-polling] Polling for pending operation:", pending.key, "type:", "withdrawal", "elapsed:", now - pending.createdAt, "ms");
+      }
+      for (const pending of pendingWithdrawals) {
         if (now - pending.createdAt > MAX_WAIT_MS) {
           console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
           setWithdrawalStatuses((old) => updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
@@ -272,6 +278,9 @@ export function useExecutionPolling({
 
       // Poll for pending orders
       const pendingOrders = getPendingOperations(orderStatusesRef.current);
+      for (const pending of pendingOrders) {
+        console.warn("[execution-polling] Polling for pending operation:", pending.key, "type:", "order", "elapsed:", now - pending.createdAt, "ms");
+      }
       for (const pending of pendingOrders) {
         if (now - pending.createdAt > MAX_WAIT_MS) {
           console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
