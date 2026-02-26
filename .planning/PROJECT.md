@@ -10,9 +10,9 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.4 Maximum Keeper Speed (2026-02-25)
+**Shipped:** v1.5 Minimal Keeper Rewrite (2026-02-26)
 
-Per-token oracle routing for all 6 markets, on-chain provider verification, Flashblocks RPC preconfirmations, 5s background oracle updates, per-stage execution timing instrumentation. All keeper oracle errors resolved.
+Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSocket oracle cache, event watcher + safety-net polling + sequential executor. Deployed to DigitalOcean, all operation types verified e2e.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
@@ -20,6 +20,7 @@ Per-token oracle routing for all 6 markets, on-chain provider verification, Flas
 - v1.2 Demo-Ready Deployment (2026-02-23) — Vercel, monitoring, UI polish
 - v1.3 Keeper Execution Speed (2026-02-24) — event-driven detection, pipeline optimization, observability
 - v1.4 Maximum Keeper Speed (2026-02-25) — oracle correctness, execution speed, timing instrumentation
+- v1.5 Minimal Keeper Rewrite (2026-02-26) — clean 300-line keeper, Lazer oracle cache, deployed and verified
 
 ## Requirements
 
@@ -51,18 +52,20 @@ Per-token oracle routing for all 6 markets, on-chain provider verification, Flas
 - ✓ Flashblocks RPC for ~200ms TX preconfirmations — v1.4
 - ✓ Background oracle updates at 5s intervals with 30s safety margin — v1.4
 - ✓ Per-stage execution timing instrumentation — v1.4
+- ✓ Clean keeper rewrite: single-loop with event watcher + safety-net polling + sequential executor — v1.5
+- ✓ Pyth Lazer WebSocket oracle cache for all 7 tokens with 270s TTL — v1.5
+- ✓ Keeper deployed to DigitalOcean, all operation types verified e2e — v1.5
 
 ### Active
 
-## Current Milestone: v1.5 Minimal Keeper Rewrite
+## Current Milestone: v1.6 Execution Feedback
 
-**Goal:** Replace the 3,000+ line order-execution-keeper with a ~300 line single-loop keeper that reliably executes deposits, withdrawals, and orders.
+**Goal:** Real-time toast notifications and auto-balance refresh when deposits, withdrawals, and orders execute — no manual page refresh needed.
 
 **Target features:**
-- Clean rewrite: single TypeScript process with event watcher + safety-net polling + sequential executor
-- No database — on-chain DataStore is source of truth
-- Pyth Lazer WebSocket cache for oracle prices (matching current on-chain config)
-- Deploy to same DigitalOcean droplet, verify all operation types end-to-end
+- Toast notifications: "Pending..." → "Executed!" for all three operation types
+- Auto-refresh balances and positions when operations complete
+- On-chain event detection for execution status (EventEmitter events)
 
 ### Out of Scope
 
@@ -79,19 +82,18 @@ Per-token oracle routing for all 6 markets, on-chain provider verification, Flas
 - **Chain:** Base Sepolia (84532)
 - **Deployed:** app.0xmarkets.io (Vercel)
 - **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22), v1.2 (2026-02-23)
-- **Codebase:** 12 phases, 27 plans, 4 milestones across 4 days
+- **Codebase:** 17 phases, 39 plans, 6 milestones across 6 days
 - **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222) with pino JSON logging, real health endpoints, and BetterStack uptime monitoring
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
-- **Oracle mode:** Currently "both" (Lazer + Hermes fallback) — needs proper configuration per market
+- **Oracle mode:** Pyth Lazer only (v1.5 keeper uses Lazer WebSocket exclusively)
 - **Pyth Pro API key:** QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN (crypto account)
 - **Test suite:** 136 pass, 1 skipped (live RPC), 0 failures
 - **Known issues:**
   - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
   - batch_report 404 from metrics (GMX analytics endpoint not implemented — cosmetic)
   - pendingImpactAmount defaults to 0n (documented workaround — correct behavior)
-  - FX token withdrawals fail with InvalidOracleProvider (0x05d102a2) — Hermes not registered on-chain for FX tokens
-  - MaxPriceAgeExceeded errors when using Lazer-only mode (stored prices go stale between check and execution)
+  - Frontend lacks execution status notifications — user must refresh to see results
 
 ## Constraints
 
@@ -121,4 +123,4 @@ Per-token oracle routing for all 6 markets, on-chain provider verification, Flas
 | Transaction mutex for nonce conflicts | Serializes execution + cleanup paths | ✓ Good |
 
 ---
-*Last updated: 2026-02-25 after v1.5 milestone started*
+*Last updated: 2026-02-26 after v1.6 milestone started*
