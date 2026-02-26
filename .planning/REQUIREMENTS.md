@@ -1,71 +1,100 @@
-# Requirements: 0xMarkets v1.4 Maximum Keeper Speed
+# Requirements: 0xMarkets v1.5 Minimal Keeper Rewrite
 
-**Defined:** 2026-02-24
-**Core Value:** All keeper-executed operations complete as fast as possible with proper oracle configuration
+**Defined:** 2026-02-25
+**Core Value:** Deposits, withdrawals, and orders execute reliably with minimal code
 
-## v1.4 Requirements
+## v1.5 Requirements
 
-Requirements for v1.4 release. Each maps to roadmap phases.
+### Detection
 
-### Oracle Correctness
+- [ ] **DET-01**: Keeper detects DepositCreated, WithdrawalCreated, and OrderCreated events via WebSocket in under 1 second
+- [ ] **DET-02**: Keeper polls DataStore for pending deposits, withdrawals, and orders every 15 seconds as safety net
+- [ ] **DET-03**: Duplicate keys are deduplicated — same operation is never executed twice
 
-- [x] **ORCL-01**: Keeper deploys new Pyth Pro API key and verifies per-feed entitlements at startup (exits with clear error if expected feeds receive no data within 10s)
-- [x] **ORCL-02**: Keeper routes oracle params per-token — Lazer for crypto tokens (WETH, WBTC, USDC), Hermes/Chainlink for FX tokens (EUR, GBP, GOLD, JPY) — based on startup entitlement results
-- [x] **ORCL-03**: On-chain `oracleProviderForToken` in DataStore is updated for FX tokens to point to the correct provider (ChainlinkPriceFeedProvider or equivalent)
-- [x] **ORCL-04**: Keeper reads on-chain `oracleProviderForToken` at startup and logs FATAL if any token's configured provider doesn't match keeper's expected provider address
+### Execution
 
-### Execution Speed
+- [ ] **EXEC-01**: Keeper executes deposits by reading on-chain struct, building oracle params, and calling executeDeposit
+- [ ] **EXEC-02**: Keeper executes withdrawals by reading on-chain struct, building oracle params, and calling executeWithdrawal
+- [ ] **EXEC-03**: Keeper executes orders by reading on-chain struct, building oracle params, and calling executeOrder
+- [ ] **EXEC-04**: Execution is sequential — one transaction at a time, no nonce conflicts
+- [ ] **EXEC-05**: Transient errors retry up to 3 times; permanent errors (EmptyDeposit, expired, InvalidOracleProvider) are logged and skipped
 
-- [x] **SPEED-01**: Keeper uses Flashblocks-enabled RPC endpoint for TX submission, reducing confirmation time from ~2-4s to ~200ms
-- [x] **SPEED-02**: MaxPriceAgeExceeded prevented by increasing safety margin to 30s and reducing background oracle update interval from 10s to 5s
-- [x] **SPEED-03**: Synchronous `updatePriceOnChain()` TX eliminated from normal execution path — background updater keeps prices fresh
-- [x] **SPEED-04**: Per-stage execution timing (detection → oracle params → TX submission → confirmation) logged via `performance.now()` instrumentation
+### Oracle
+
+- [ ] **ORCL-01**: Pyth Lazer WebSocket connects and caches price updates for all 7 tokens
+- [ ] **ORCL-02**: buildOracleParams reads from cache (synchronous) and includes correct provider address per token
+- [ ] **ORCL-03**: Cache rejects prices older than 270 seconds (safety margin below 300s MAX_ORACLE_PRICE_AGE)
+
+### Infrastructure
+
+- [ ] **INFRA-01**: Health endpoint at GET /health returns JSON with status, uptime, queue length, and keeper address
+- [ ] **INFRA-02**: All operations logged as structured JSON via pino
+- [ ] **INFRA-03**: Graceful shutdown on SIGTERM — completes in-flight TX, closes WebSocket, stops intervals
+- [ ] **INFRA-04**: Simplified Dockerfile with no database, no Prisma, 30s health check start-period
+
+### Deployment
+
+- [ ] **DEPLOY-01**: Deployed to DigitalOcean droplet (142.93.203.222) via Docker Compose
+- [ ] **DEPLOY-02**: End-to-end deposit executes successfully on a live market
+- [ ] **DEPLOY-03**: End-to-end withdrawal executes successfully
+- [ ] **DEPLOY-04**: End-to-end order executes successfully
 
 ## Future Requirements
 
 Deferred to v2+. Tracked but not in current roadmap.
 
-### Advanced Oracle
+### Reliability
 
-- **ADV-01**: Pyth Pro tier upgrade for native FX Lazer feeds (eliminates Hermes fallback)
-- **ADV-02**: Oracle cascade fallback — when Lazer cache goes stale per-token, automatically fall back to Hermes for that token only
-- **ADV-03**: Custom multicall contract for atomic price-update + execution in single TX
+- **REL-01**: Expired request cancellation — returns stuck user funds past REQUEST_EXPIRATION_TIME
+- **REL-02**: Startup oracle provider + feed entitlement verification
+- **REL-03**: Hermes HTTP fallback for individual tokens when Lazer cache goes stale
 
-### Infrastructure
+### Performance
 
-- **INFRA-01**: Multi-wallet parallel execution for higher throughput
-- **INFRA-02**: Background update interval below 3s (requires nonce pressure testing)
+- **PERF-01**: Per-stage execution timing instrumentation via performance.now()
+- **PERF-02**: Multi-wallet parallel execution for higher throughput
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Pyth Pro $10k tier upgrade | Hermes adequate for testnet FX volume |
-| Multi-wallet parallel execution | Single wallet sufficient at current volume |
-| Custom PythHermesFeedProvider contract | Only needed if Chainlink FX feeds absent on Base Sepolia — check first |
+| PostgreSQL / any database | On-chain DataStore is source of truth |
+| Per-type scanner/executor classes | Single parameterized function replaces 1,200 lines |
+| TransactionMonitor | Inline waitForTransactionReceipt handles this |
+| Block number persistence | Full DataStore scan on startup covers restart recovery |
+| Feature flags per operation type | All three types always enabled |
+| Multiple WebSocket connections | Testnet volume doesn't need redundancy |
 | Mainnet deployment | Testnet-first strategy unchanged |
-| New market additions | Focus on making existing 6 markets fast and reliable |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ORCL-01 | Phase 13 | Complete |
-| ORCL-02 | Phase 13 | Complete |
-| ORCL-03 | Phase 13 | Complete |
-| ORCL-04 | Phase 13 | Complete |
-| SPEED-01 | Phase 14 | Complete |
-| SPEED-02 | Phase 14 | Complete |
-| SPEED-03 | Phase 14 | Complete |
-| SPEED-04 | Phase 14 | Complete |
+| DET-01 | TBD | Pending |
+| DET-02 | TBD | Pending |
+| DET-03 | TBD | Pending |
+| EXEC-01 | TBD | Pending |
+| EXEC-02 | TBD | Pending |
+| EXEC-03 | TBD | Pending |
+| EXEC-04 | TBD | Pending |
+| EXEC-05 | TBD | Pending |
+| ORCL-01 | TBD | Pending |
+| ORCL-02 | TBD | Pending |
+| ORCL-03 | TBD | Pending |
+| INFRA-01 | TBD | Pending |
+| INFRA-02 | TBD | Pending |
+| INFRA-03 | TBD | Pending |
+| INFRA-04 | TBD | Pending |
+| DEPLOY-01 | TBD | Pending |
+| DEPLOY-02 | TBD | Pending |
+| DEPLOY-03 | TBD | Pending |
+| DEPLOY-04 | TBD | Pending |
 
 **Coverage:**
-- v1.4 requirements: 8 total
-- Mapped to phases: 8
-- Unmapped: 0
+- v1.5 requirements: 19 total
+- Mapped to phases: 0
+- Unmapped: 19
 
 ---
-*Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after roadmap creation*
+*Requirements defined: 2026-02-25*
+*Last updated: 2026-02-25 after initial definition*
