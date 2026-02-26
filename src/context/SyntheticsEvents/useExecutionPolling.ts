@@ -46,15 +46,20 @@ interface StuckOperation {
 
 // --- Helpers ---
 
-function isStuckOperation(status: MultiTransactionStatus<unknown>): status is MultiTransactionStatus<unknown> & {
+function isPendingOperation(status: MultiTransactionStatus<unknown>): status is MultiTransactionStatus<unknown> & {
   createdTxnHash: string;
 } {
   return Boolean(
     status.createdTxnHash &&
       !status.executedTxnHash &&
-      !status.cancelledTxnHash &&
-      Date.now() - status.createdAt > POLL_DELAY_MS
+      !status.cancelledTxnHash
   );
+}
+
+function isStuckOperation(status: MultiTransactionStatus<unknown>): status is MultiTransactionStatus<unknown> & {
+  createdTxnHash: string;
+} {
+  return isPendingOperation(status) && Date.now() - status.createdAt > POLL_DELAY_MS;
 }
 
 function getStuckOperations(statuses: Record<string, MultiTransactionStatus<unknown>>): StuckOperation[] {
@@ -92,17 +97,14 @@ export function useExecutionPolling({
   chainIdRef.current = chainId;
 
   useEffect(() => {
-    // Check if there are any stuck operations across all status types
-    const hasStuckOps = () => {
-      const stuckDeposits = getStuckOperations(depositStatusesRef.current);
-      const stuckWithdrawals = getStuckOperations(withdrawalStatusesRef.current);
-      const stuckOrders = getStuckOperations(orderStatusesRef.current);
-      return stuckDeposits.length > 0 || stuckWithdrawals.length > 0 || stuckOrders.length > 0;
-    };
+    // Check if there are any pending operations (submitted but not yet executed/cancelled)
+    const hasPendingOps =
+      Object.values(depositStatusesRef.current).some(isPendingOperation) ||
+      Object.values(withdrawalStatusesRef.current).some(isPendingOperation) ||
+      Object.values(orderStatusesRef.current).some(isPendingOperation);
 
-    // Don't start interval if nothing is stuck right now
-    // The effect will re-run when statuses change (via the dependency on hasAnyPending)
-    if (!hasStuckOps()) return;
+    // Don't start interval if nothing is pending
+    if (!hasPendingOps) return;
 
     // Log stuck operations for debugging
     const stuckDepositsInit = getStuckOperations(depositStatusesRef.current);
