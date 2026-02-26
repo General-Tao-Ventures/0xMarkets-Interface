@@ -103,7 +103,10 @@ Plans:
   2. A deposit submitted via the frontend executes successfully — user sees GM tokens appear
   3. A withdrawal submitted via the frontend executes successfully — user receives collateral back
   4. A market order submitted via the frontend executes successfully — user sees position opened/closed
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 17-01-PLAN.md -- Update docker-compose.yml and deploy keeper to DigitalOcean droplet
+- [ ] 17-02-PLAN.md -- Verify deposit, withdrawal, and order execution end-to-end
 
 ## Progress
 
@@ -127,5 +130,5 @@ Phases execute in numeric order: 15 → 16 → 17
 | 13. Oracle Correctness | v1.4 | 4/4 | Complete | 2026-02-25 |
 | 14. Execution Speed | v1.4 | 2/2 | Complete | 2026-02-25 |
 | 15. Project Skeleton and Oracle | v1.5 | Complete    | 2026-02-26 | 2026-02-26 |
-| 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
-| 17. Deploy and Verify | v1.5 | 0/TBD | Not started | - |
+| 16. Keeper Logic and Infrastructure | 2/2 | Complete   | 2026-02-26 | 2026-02-26 |
+| 17. Deploy and Verify | v1.5 | 0/2 | Not started | - |
