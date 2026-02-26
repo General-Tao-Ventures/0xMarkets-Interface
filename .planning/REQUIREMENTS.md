@@ -51,20 +51,20 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | TBD | Pending |
-| DET-02 | TBD | Pending |
-| DET-03 | TBD | Pending |
-| FB-01 | TBD | Pending |
-| FB-02 | TBD | Pending |
-| FB-03 | TBD | Pending |
-| REF-01 | TBD | Pending |
-| REF-02 | TBD | Pending |
+| DET-01 | Phase 18 | Pending |
+| DET-02 | Phase 18 | Pending |
+| DET-03 | Phase 18 | Pending |
+| FB-01 | Phase 18 | Pending |
+| FB-02 | Phase 18 | Pending |
+| FB-03 | Phase 18 | Pending |
+| REF-01 | Phase 19 | Pending |
+| REF-02 | Phase 19 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 8 total
-- Mapped to phases: 0
-- Unmapped: 8 (awaiting roadmap)
+- Mapped to phases: 8
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after roadmap creation*

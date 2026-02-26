@@ -7,7 +7,8 @@
 - ✅ **v1.2 Demo-Ready Deployment** — Phases 7-9 ([shipped 2026-02-23](milestones/v1.2-ROADMAP.md))
 - ✅ **v1.3 Keeper Execution Speed** — Phases 10-12 (shipped 2026-02-24)
 - ✅ **v1.4 Maximum Keeper Speed** — Phases 13-14 (shipped 2026-02-25)
-- 🚧 **v1.5 Minimal Keeper Rewrite** — Phases 15-17 (in progress)
+- ✅ **v1.5 Minimal Keeper Rewrite** — Phases 15-17 (shipped 2026-02-26)
+- 🚧 **v1.6 Execution Feedback** — Phases 18-19 (in progress)
 
 ## Phases
 
@@ -55,63 +56,49 @@
 
 </details>
 
-### 🚧 v1.5 Minimal Keeper Rewrite (In Progress)
+<details>
+<summary>✅ v1.5 Minimal Keeper Rewrite (Phases 15-17) — SHIPPED 2026-02-26</summary>
 
-**Milestone Goal:** Replace the 3,000+ line order-execution-keeper with a ~300 line single-loop keeper that reliably executes deposits, withdrawals, and orders.
+- [x] Phase 15: Project Skeleton and Oracle (2/2 plans) — completed 2026-02-26
+- [x] Phase 16: Keeper Logic and Infrastructure (2/2 plans) — completed 2026-02-26
+- [x] Phase 17: Deploy and Verify (2/2 plans) — completed 2026-02-26
 
-- [x] **Phase 15: Project Skeleton and Oracle** - Clean project reset with config/keys/ABIs and Pyth Lazer WebSocket cache (completed 2026-02-26)
-- [x] **Phase 16: Keeper Logic and Infrastructure** - Event watcher, poller, sequential executor, health endpoint, Dockerfile (completed 2026-02-26)
-- [x] **Phase 17: Deploy and Verify** - Deploy to DigitalOcean and verify all operation types end-to-end (completed 2026-02-26)
+</details>
+
+### 🚧 v1.6 Execution Feedback (In Progress)
+
+**Milestone Goal:** Real-time toast notifications and auto-balance refresh when deposits, withdrawals, and orders execute — no manual page refresh needed.
+
+- [ ] **Phase 18: Event Detection and Toast Feedback** - Watch EventEmitter for execution events and show toast notification lifecycle (pending/executed/error)
+- [ ] **Phase 19: Auto-Refresh on Execution** - Automatically refresh balances and positions when execution events are detected
 
 ## Phase Details
 
-### Phase 15: Project Skeleton and Oracle
-**Goal**: A clean TypeScript project that compiles, with correct config/keys/ABIs and a working Pyth Lazer oracle cache
-**Depends on**: Phase 14 (v1.4 complete)
-**Requirements**: ORCL-01, ORCL-02, ORCL-03
+### Phase 18: Event Detection and Toast Feedback
+**Goal**: User sees real-time toast notifications tracking their operation from submission through execution or failure
+**Depends on**: Phase 17 (v1.5 complete — keeper executes all operation types)
+**Requirements**: DET-01, DET-02, DET-03, FB-01, FB-02, FB-03
 **Success Criteria** (what must be TRUE):
-  1. Old code is removed (no Prisma, no scanner/executor class hierarchies, no TransactionMonitor) and the project compiles cleanly with `pnpm build`
-  2. Pyth Lazer WebSocket connects and populates price cache for all 7 tokens (EUR, GBP, GOLD, JPY, USDC, WBTC, WETH) — verified by running `pnpm dev` and seeing cache populated in logs
-  3. `buildOracleParams(tokens)` returns the correct Lazer provider address (`0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05`) for every token — not a mix of providers
-  4. Cache rejects prices older than 270 seconds, preventing MaxPriceAgeExceeded errors that plagued v1.3-v1.4
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 15-01-PLAN.md — Gut old code, create project skeleton (config/keys/ABIs, package.json, tsconfig, Dockerfile)
-- [x] 15-02-PLAN.md — Pyth Lazer oracle cache module and minimal index.ts proving oracle works
+  1. After user submits a deposit, a "Pending..." toast appears immediately and updates to "Executed!" when the DepositExecuted event is detected on-chain
+  2. After user submits a withdrawal, a "Pending..." toast appears immediately and updates to "Executed!" when the WithdrawalExecuted event is detected on-chain
+  3. After user submits an order (market, limit, stop-loss, take-profit), a "Pending..." toast appears immediately and updates to "Executed!" when the OrderExecuted event is detected on-chain
+  4. If an operation fails or expires without execution, the toast updates to an error state with an actionable message (not stuck on "Pending..." forever)
+**Plans**: TBD
 
-### Phase 16: Keeper Logic and Infrastructure
-**Goal**: A fully functional keeper that detects, deduplicates, and sequentially executes deposits, withdrawals, and orders with health monitoring
-**Depends on**: Phase 15
-**Requirements**: DET-01, DET-02, DET-03, EXEC-01, EXEC-02, EXEC-03, EXEC-04, EXEC-05, INFRA-01, INFRA-02, INFRA-03, INFRA-04
+### Phase 19: Auto-Refresh on Execution
+**Goal**: User's balances and positions update automatically when operations execute, eliminating the need to manually refresh the page
+**Depends on**: Phase 18 (event detection infrastructure exists)
+**Requirements**: REF-01, REF-02
 **Success Criteria** (what must be TRUE):
-  1. Keeper detects DepositCreated, WithdrawalCreated, and OrderCreated events via WebSocket within 1 second of on-chain emission — verified by watching logs after submitting a deposit on the frontend
-  2. Safety-net poller reads all three DataStore lists (DEPOSIT_LIST, WITHDRAWAL_LIST, ORDER_LIST) every 15 seconds and enqueues any operations missed by the event watcher
-  3. Same operation key is never executed twice — dedup Set prevents double-execution from event+poll overlap
-  4. GET /health returns JSON with status, uptime, queue length, and keeper address; Docker health check passes with 30s start-period
-  5. Keeper completes in-flight transaction on SIGTERM before shutting down — no orphaned nonces
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 16-01-PLAN.md -- Detection layer (watcher, poller) and sequential executor with dedup, retry, token extraction
-- [x] 16-02-PLAN.md -- Health endpoint, index.ts wiring, graceful shutdown, Dockerfile verification
-
-### Phase 17: Deploy and Verify
-**Goal**: Keeper deployed to production and all three operation types verified end-to-end on live chain
-**Depends on**: Phase 16
-**Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04
-**Success Criteria** (what must be TRUE):
-  1. Keeper running on DigitalOcean droplet (142.93.203.222) via Docker Compose with BetterStack health monitoring active
-  2. A deposit submitted via the frontend executes successfully — user sees GM tokens appear
-  3. A withdrawal submitted via the frontend executes successfully — user receives collateral back
-  4. A market order submitted via the frontend executes successfully — user sees position opened/closed
-**Plans:** 2/2 plans complete
-Plans:
-- [ ] 17-01-PLAN.md -- Update docker-compose.yml and deploy keeper to DigitalOcean droplet
-- [ ] 17-02-PLAN.md -- Verify deposit, withdrawal, and order execution end-to-end
+  1. After a deposit executes, the user's GM token balance updates on the pools page without a page refresh
+  2. After a withdrawal executes, the user's USDC balance updates without a page refresh
+  3. After an order executes, the user's positions list on the trade page updates without a page refresh (new position appears or existing position closes)
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 → 16 → 17
+Phases execute in numeric order: 18 → 19
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -129,6 +116,8 @@ Phases execute in numeric order: 15 → 16 → 17
 | 12. Observability & Tuning | v1.3 | 2/2 | Complete | 2026-02-24 |
 | 13. Oracle Correctness | v1.4 | 4/4 | Complete | 2026-02-25 |
 | 14. Execution Speed | v1.4 | 2/2 | Complete | 2026-02-25 |
-| 15. Project Skeleton and Oracle | v1.5 | Complete    | 2026-02-26 | 2026-02-26 |
-| 16. Keeper Logic and Infrastructure | 2/2 | Complete   | 2026-02-26 | 2026-02-26 |
-| 17. Deploy and Verify | 2/2 | Complete    | 2026-02-26 | - |
+| 15. Project Skeleton and Oracle | v1.5 | 2/2 | Complete | 2026-02-26 |
+| 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
+| 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
+| 18. Event Detection and Toast Feedback | v1.6 | 0/TBD | Not started | - |
+| 19. Auto-Refresh on Execution | v1.6 | 0/TBD | Not started | - |
