@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Minimal Keeper Rewrite
-status: unknown
-last_updated: "2026-02-26T05:39:32.190Z"
+status: executing
+last_updated: "2026-02-26T05:50:00.000Z"
 progress:
   total_phases: 9
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.5 Phase 15 — Project Skeleton and Oracle
+**Current focus:** v1.5 Phase 15 complete — ready for Phase 16
 
 ## Current Position
 
-Phase: 15 of 17 (Project Skeleton and Oracle)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-02-26 — Completed 15-01 (Project Skeleton)
+Phase: 15 of 17 (Project Skeleton and Oracle) -- COMPLETE
+Plan: 2 of 2 in current phase (all done)
+Status: Phase 15 complete
+Last activity: 2026-02-26 — Completed 15-02 (Oracle Module)
 
-Progress: [##############░░░░░░] 82% (14/17 phases complete)
+Progress: [###############░░░░░] 88% (15/17 phases complete)
 
 ## Performance Metrics
 
@@ -44,8 +44,9 @@ Progress: [##############░░░░░░] 82% (14/17 phases complete)
 | 7-9 | v1.2 | 7/7 | Complete |
 | 10-12 | v1.3 | 6/6 | Complete |
 | 13-14 | v1.4 | 6/6 | Complete |
-| 15-17 | v1.5 | 1/TBD | In progress |
+| 15-17 | v1.5 | 2/TBD | In progress |
 | Phase 15 P01 | 3min | 2 tasks | 6 files |
+| Phase 15 P02 | 5min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -71,11 +72,13 @@ None.
 
 **v1.5 decisions:** Keep Lazer WebSocket (not Hermes HTTP) -- all 7 tokens use Lazer provider on-chain.
 **15-01:** Pinned pyth-lazer-sdk to exactly 5.2.0 (no caret) to avoid Node ^24 engine in 5.2.1+. Used console.error for config failures to avoid circular dep with pino logger. Kept PYTH_PRO_ACCESS_TOKEN env var name to match existing server .env.
+**15-02:** Cache all 7 tokens with single rawUpdate per binary message. 270s TTL = 300s MAX_ORACLE_PRICE_AGE minus 30s safety margin. Module-level state with exported functions (no class).
 **Prior decisions:** See .planning/PROJECT.md key decisions table.
 - [Phase 15]: Pinned pyth-lazer-sdk to exactly 5.2.0 to avoid Node ^24 engine requirement
+- [Phase 15]: 270s cache TTL prevents MaxPriceAgeExceeded errors from v1.3-v1.4
 
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 15-01-PLAN.md (Project Skeleton)
-Next: Execute 15-02-PLAN.md (Oracle Module)
+Stopped at: Completed 15-02-PLAN.md (Oracle Module) -- Phase 15 complete
+Next: Execute Phase 16 (Keeper Logic and Infrastructure)
