@@ -9,7 +9,7 @@
 
 - [x] **CFIX-01**: OrderHandler guards triggerPrice=0 before inverting on reversed markets — JPY/USD orders no longer revert
 - [x] **CFIX-02**: OrderHandler and ExchangeRouter redeployed atomically to Base Sepolia
-- [ ] **CFIX-03**: All service configs updated with new contract addresses (interface SDK, keepers, E2E tests)
+- [x] **CFIX-03**: All service configs updated with new contract addresses (interface SDK, keepers, E2E tests)
 
 ### Liquidation Verification
 
@@ -94,7 +94,7 @@ Deferred to v2+. Tracked but not in current roadmap.
 |-------------|-------|--------|
 | CFIX-01 | Phase 24 | Complete |
 | CFIX-02 | Phase 24 | Complete |
-| CFIX-03 | Phase 24 | Pending |
+| CFIX-03 | Phase 24 | Complete |
 | LIQ-01 | Phase 25 | Pending |
 | LIQ-02 | Phase 25 | Pending |
 | LIQ-03 | Phase 25 | Pending |

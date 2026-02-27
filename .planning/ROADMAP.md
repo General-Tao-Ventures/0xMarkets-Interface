@@ -81,7 +81,7 @@
 
 **Milestone Goal:** Fix the last contract bug (JPY/USD division-by-zero), verify the existing liquidation keeper pipeline works end-to-end on Base Sepolia, and harden it for reliability and performance.
 
-- [ ] **Phase 24: Contract Bug Fixes** - Fix OrderHandler div-by-zero on reversed markets, redeploy atomically with ExchangeRouter, propagate addresses to all services
+- [x] **Phase 24: Contract Bug Fixes** - Fix OrderHandler div-by-zero on reversed markets, redeploy atomically with ExchangeRouter, propagate addresses to all services (completed 2026-02-27)
 - [ ] **Phase 25: Liquidation Pipeline Verification** - Prove the liquidation keeper detects, executes, and records a real liquidation on Base Sepolia
 - [ ] **Phase 26: Liquidation Hardening and Performance** - Add reliability guards, timing instrumentation, dead code cleanup, and scan performance optimizations
 
@@ -154,6 +154,6 @@ Phases execute in numeric order: 24 -> 25 -> 26
 | 21. Keeper Execution Fixes | v1.6 | 1/1 | Complete | 2026-02-27 |
 | 22. Frontend Feedback | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 23. Automated E2E Testing | v1.6 | 2/2 | Complete | 2026-02-27 |
-| 24. Contract Bug Fixes | v1.7 | 1/2 | In Progress | - |
+| 24. Contract Bug Fixes | 2/2 | Complete   | 2026-02-27 | - |
 | 25. Liquidation Pipeline Verification | v1.7 | 0/TBD | Not started | - |
 | 26. Liquidation Hardening and Performance | v1.7 | 0/TBD | Not started | - |

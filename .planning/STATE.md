@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Liquidation Readiness
 status: executing
-last_updated: "2026-02-27"
+last_updated: "2026-02-27T23:28:02.604Z"
 progress:
-  total_phases: 3
-  completed_phases: 0
-  total_plans: 2
-  completed_plans: 1
+  total_phases: 17
+  completed_phases: 16
+  total_plans: 38
+  completed_plans: 37
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.7 Liquidation Readiness -- Phase 24 executing
+**Current focus:** v1.7 Liquidation Readiness -- Phase 24 complete, Phase 25 next
 
 ## Current Position
 
-Phase: 24 of 26 (Contract Bug Fixes)
-Plan: 2 of 2
-Status: Executing
-Last activity: 2026-02-27 -- Completed 24-01 (contract fix + deploy)
+Phase: 25 of 26 (Liquidation Pipeline Verification)
+Plan: 1 of TBD
+Status: Ready
+Last activity: 2026-02-27 -- Completed 24-02 (address propagation + E2E verification)
 
-Progress: [█████░░░░░] 50% (1/2 plans complete in phase, 1/TBD overall)
+Progress: [██████████] 100% Phase 24 complete (2/2 plans), starting Phase 25
 
 ## Performance Metrics
 
@@ -46,13 +46,14 @@ Progress: [█████░░░░░] 50% (1/2 plans complete in phase, 1/T
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
 | v1.6 | 18,20-23 | 10/10 | Complete |
-| v1.7 | 24-26 | 1/TBD | In progress |
+| v1.7 | 24-26 | 2/TBD | In progress |
 
 **v1.7 Execution:**
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 24 P01 | 25min | 3 | 3 |
+| Phase 24 P02 | 54min | 2 | 6 |
 
 ## Accumulated Context
 
@@ -61,7 +62,8 @@ Progress: [█████░░░░░] 50% (1/2 plans complete in phase, 1/T
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
 - ~~OrderHandler.sol division-by-zero on reversed markets (JPY/USD) when triggerPrice=0~~ -- FIXED in 24-01
 - ~~ExchangeRouter stores OrderHandler as immutable constructor arg -- must redeploy both atomically~~ -- DONE in 24-01
-- New contract addresses need propagation to all services (24-02): OrderHandler 0x63dE..04Ad, ExchangeRouter 0xF986..4321
+- ~~New contract addresses need propagation to all services (24-02)~~ -- DONE in 24-02
+- JPY/USD Pyth Lazer oracle data gap: "Best ask price is not present for the timestamp" -- order execution fails for JPY market on testnet
 - LIQUIDATION_KEEPER role on keeper wallet is unverified -- must check before Phase 25
 - Shared wallet nonce conflict between keeper-service and order-execution-keeper -- documented testnet risk
 
@@ -83,9 +85,11 @@ None.
 - **Research deference:** Research recommended deferring multicall (LPERF-01) but it is in v1.7 requirements, so included in Phase 26
 - **24-01 zero-guard pattern:** check != 0 before Precision.mulDiv instead of SafeMath wrapper -- simpler, zero stays zero after reversal
 - **24-01 role granting:** Used individual hardhat scripts instead of afterDeploy hooks due to Base Sepolia nonce conflicts
+- **24-02 ROUTER_PLUGIN encoding:** GMX role hashes use keccak256(abi.encode(string)) not keccak256(string) -- Plan 01 used wrong encoding, fixed in Plan 02
+- **24-02 JPY/USD oracle gap:** Order failure is Pyth Lazer data availability issue, not contract bug -- not blocking for Phase 24 scope
 
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 24-01-PLAN.md (contract fix + deploy)
-Next: Execute 24-02-PLAN.md (propagate addresses to all services)
+Stopped at: Completed 24-02-PLAN.md (address propagation + E2E verification)
+Next: Phase 25 (Liquidation Pipeline Verification)
