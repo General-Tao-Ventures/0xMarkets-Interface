@@ -125,7 +125,9 @@ Polling infrastructure carries forward into Phase 22.
   3. After submitting a market order, a "Pending..." toast appears immediately and updates to "Executed!" when the OrderExecuted event is detected on-chain
   4. GM token balances on the pools page auto-refresh after a deposit or withdrawal executes -- no manual page refresh
   5. Positions list on the trade page auto-refresh after an order executes -- new position appears or existing position closes without page refresh
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 22-01-PLAN.md -- Toast lifecycle polish: 5s auto-dismiss, order cancellation error reasons from keeper API, max 3 visible toasts
+- [ ] 22-02-PLAN.md -- Auto-refresh: SWR revalidation on execution/cancellation events for pool balances and positions, debounced
 
 ### Phase 23: Automated E2E Testing
 **Goal**: A repeatable test suite validates all 18 market x operation combinations, so regressions are caught before they reach users
@@ -165,5 +167,5 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 18. Event Detection and Toast Feedback | v1.6 | 3/3 | Complete | 2026-02-27 |
 | 20. Contract Address Audit | v1.6 | 2/2 | Complete | 2026-02-26 |
 | 21. Keeper Execution Fixes | v1.6 | 0/1 | Planned | - |
-| 22. Frontend Feedback | v1.6 | 0/TBD | Not started | - |
+| 22. Frontend Feedback | v1.6 | 0/2 | Planned | - |
 | 23. Automated E2E Testing | v1.6 | 0/TBD | Not started | - |
