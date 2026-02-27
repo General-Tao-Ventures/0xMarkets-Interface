@@ -21,8 +21,8 @@
 
 ### Frontend Feedback
 
-- [ ] **FB-01**: Toast shows "Pending..." immediately after deposit submission
-- [ ] **FB-02**: Toast updates to "Executed!" when DepositExecuted event is detected
+- [x] **FB-01**: Toast shows "Pending..." immediately after deposit submission
+- [x] **FB-02**: Toast updates to "Executed!" when DepositExecuted event is detected
 - [ ] **FB-03**: Toast shows "Pending..." immediately after withdrawal submission
 - [ ] **FB-04**: Toast updates to "Executed!" when WithdrawalExecuted event is detected
 - [ ] **FB-05**: Toast shows "Pending..." immediately after order submission
@@ -72,8 +72,8 @@ Deferred to v2+. Tracked but not in current roadmap.
 | EXEC-02 | Phase 21 | Pending |
 | EXEC-03 | Phase 21 | Pending |
 | EXEC-04 | Phase 21 | Pending |
-| FB-01 | Phase 22 | Pending |
-| FB-02 | Phase 22 | Pending |
+| FB-01 | Phase 18 | Complete |
+| FB-02 | Phase 18 | Complete |
 | FB-03 | Phase 22 | Pending |
 | FB-04 | Phase 22 | Pending |
 | FB-05 | Phase 22 | Pending |

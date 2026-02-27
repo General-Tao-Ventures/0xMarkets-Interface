@@ -66,15 +66,15 @@
 </details>
 
 <details>
-<summary>Superseded: v1.6 Execution Feedback — Phase 18 (partial)</summary>
+<summary>Complete: Phase 18 Event Detection and Toast Feedback (3/3 plans)</summary>
 
-Phase 18 was partially completed under the original v1.6 "Execution Feedback" scope.
-Plan 18-01 shipped (RPC polling fallback). Plans 18-02 and 18-03 were superseded when v1.6 scope
-was replaced with E2E Reliability. The polling infrastructure from 18-01 carries forward into Phase 22.
+Phase 18 originally scoped under v1.6 "Execution Feedback", now complete.
+All 3 plans shipped: polling infra, live verification, gap closure.
+Polling infrastructure carries forward into Phase 22.
 
 - [x] 18-01-PLAN.md — RPC polling fallback for reliable event detection and timeout handling
-- [ ] ~~18-02-PLAN.md — Verify toast lifecycle (superseded)~~
-- [ ] ~~18-03-PLAN.md — Gap closure (superseded)~~
+- [x] 18-02-PLAN.md — Verify toast lifecycle on live testnet (deposit/withdrawal/order all pass)
+- [x] 18-03-PLAN.md — Gap closure for deposit/withdrawal watchOrderTxn and polling stability
 
 </details>
 
@@ -162,7 +162,7 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 15. Project Skeleton and Oracle | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 16. Keeper Logic and Infrastructure | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
-| 18. Event Detection and Toast Feedback | v1.6 (old) | 1/3 | Superseded | - |
+| 18. Event Detection and Toast Feedback | v1.6 | 3/3 | Complete | 2026-02-27 |
 | 20. Contract Address Audit | v1.6 | 2/2 | Complete | 2026-02-26 |
 | 21. Keeper Execution Fixes | v1.6 | 0/1 | Planned | - |
 | 22. Frontend Feedback | v1.6 | 0/TBD | Not started | - |

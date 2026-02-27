@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
+milestone: v1.0
 milestone_name: E2E Reliability
-status: executing
-last_updated: "2026-02-26"
+status: unknown
+last_updated: "2026-02-27T04:58:51.401Z"
 progress:
-  total_phases: 4
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 2
+  total_phases: 14
+  completed_phases: 13
+  total_plans: 32
+  completed_plans: 31
 ---
 
 # Project State
@@ -45,14 +45,14 @@ Progress: [######░░░░] 25%
 | v1.3 | 10-12 | 6/6 | Complete |
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
-| v1.6 | 20-23 | 2/TBD | Executing |
+| v1.6 | 18,20-23 | 3/TBD | Executing |
 
 ## Accumulated Context
 
 ### Known Issues
 
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
-- Frontend toast lifecycle partially built (Phase 18, plan 18-01 shipped) but watchOrderTxn not wired for deposits/withdrawals
+- Frontend toast lifecycle verified working (Phase 18 complete: polling infra, verification, gap closure all shipped)
 - Random keeper execution failures across different markets -- mix of reverts, detection issues, and config problems
 - Keeper wallet (`0x972425...`) testnet ETH balance runs low; needs periodic top-up for deposit execution fees
 - Cloud keeper .env files need manual update with new addresses (local .env updated, cloud pending)
@@ -70,13 +70,14 @@ None.
 **Prior milestone decisions:** See .planning/PROJECT.md key decisions table.
 
 - **v1.6 scope:** Replaced original "Execution Feedback" (toast + auto-refresh only) with broader "E2E Reliability" -- contract audit must come first
-- **Phase 18:** 18-01 shipped (polling infra), 18-02/18-03 superseded by new scope. Polling infrastructure carries into Phase 22.
+- **Phase 18:** All 3 plans complete (18-01 polling infra, 18-02 live verification, 18-03 gap closure). Polling infrastructure carries into Phase 22.
 - **Phase numbering:** Skipped 19 (was planned under old scope), new phases start at 20
 - **20-01 audit:** Used Hardhat deployment artifacts as source of on-chain truth; verified via DataStore reads that all markets and tokens are correct but 35 infrastructure contracts are stale
 - **20-02 fix:** Applied all 35 fixes in one sweep, re-verified 89/89 match. Keeper .env files contain secrets so updated locally only; cloud requires manual deployment. 4/6 smoke test deposits confirmed (GOLD/JPY blocked by low testnet ETH, not addresses)
+- [Phase 18]: Toast lifecycle verified on live testnet: all 3 operation types (deposit, withdrawal, market order) show Pending -> Executed correctly
 
 ## Session Continuity
 
-Last session: 2026-02-26
-Stopped at: Completed 20-02-PLAN.md (Phase 20 complete)
-Next: Plan Phase 21 (Keeper Execution Fixes)
+Last session: 2026-02-27
+Stopped at: Completed 18-02-PLAN.md (toast lifecycle verified on live testnet)
+Next: Continue Phase 21 (Keeper Execution Fixes)
