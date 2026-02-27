@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: E2E Reliability
 status: unknown
-last_updated: "2026-02-27T06:50:00Z"
+last_updated: "2026-02-27T08:28:36.059Z"
 progress:
-  total_phases: 14
+  total_phases: 16
   completed_phases: 14
-  total_plans: 34
+  total_plans: 36
   completed_plans: 34
 ---
 
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.6 E2E Reliability -- Phase 22 Frontend Feedback complete
+**Current focus:** v1.6 E2E Reliability -- Phase 23 Automated E2E Testing
 
 ## Current Position
 
-Phase: 22 of 23 (Frontend Feedback) -- COMPLETE
-Plan: 2 of 2 (all complete)
-Status: Phase Complete
-Last activity: 2026-02-27 -- Completed 22-02 SWR auto-refresh (page-aware revalidation on execution events)
+Phase: 23 of 23 (Automated E2E Testing)
+Plan: 1 of 2 (23-01 complete)
+Status: Executing
+Last activity: 2026-02-27 -- Completed 23-01 E2E test infrastructure + deposit tests
 
 Progress: [##########] 100%
 
@@ -46,6 +46,7 @@ Progress: [##########] 100%
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
 | v1.6 | 18,20-23 | 6/TBD | Executing |
+| Phase 23 P01 | 12min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -77,9 +78,11 @@ None.
 - [Phase 18]: Toast lifecycle verified on live testnet: all 3 operation types (deposit, withdrawal, market order) show Pending -> Executed correctly
 - [Phase 22-01]: TOAST_AUTO_CLOSE_TIME set to 5000ms; ToastContainer limit set to 3; order cancellation error reasons fetched from keeper API
 - [Phase 22-02]: Page-aware SWR revalidation on execution events; 300ms debounce; pool data on /pools, positions on /trade, token balances universal
+- [Phase 23-01]: Raw EventLog2 topic matching for event detection (not ABI-based decoding); EventLog2 not EventLog1 for deposit/withdrawal/order events; standalone e2e/ project with pnpm
+- [Phase 23]: Raw EventLog2 topic matching for event detection (not ABI-based decoding); contract uses EventLog2 with complex EventLogData tuple
 
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 22-02-PLAN.md (SWR auto-refresh: page-aware revalidation on execution events)
-Next: Phase 22 complete. Proceed to Phase 23 if applicable.
+Stopped at: Completed 23-01-PLAN.md (E2E test infrastructure + deposit tests)
+Next: Execute 23-02-PLAN.md (withdrawal and order tests)
