@@ -92,26 +92,26 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFIX-01 | TBD | Pending |
-| CFIX-02 | TBD | Pending |
-| CFIX-03 | TBD | Pending |
-| LIQ-01 | TBD | Pending |
-| LIQ-02 | TBD | Pending |
-| LIQ-03 | TBD | Pending |
-| LIQ-04 | TBD | Pending |
-| LHARD-01 | TBD | Pending |
-| LHARD-02 | TBD | Pending |
-| LHARD-03 | TBD | Pending |
-| LHARD-04 | TBD | Pending |
-| LPERF-01 | TBD | Pending |
-| LPERF-02 | TBD | Pending |
-| LPERF-03 | TBD | Pending |
+| CFIX-01 | Phase 24 | Pending |
+| CFIX-02 | Phase 24 | Pending |
+| CFIX-03 | Phase 24 | Pending |
+| LIQ-01 | Phase 25 | Pending |
+| LIQ-02 | Phase 25 | Pending |
+| LIQ-03 | Phase 25 | Pending |
+| LIQ-04 | Phase 25 | Pending |
+| LPERF-03 | Phase 25 | Pending |
+| LHARD-01 | Phase 26 | Pending |
+| LHARD-02 | Phase 26 | Pending |
+| LHARD-03 | Phase 26 | Pending |
+| LHARD-04 | Phase 26 | Pending |
+| LPERF-01 | Phase 26 | Pending |
+| LPERF-02 | Phase 26 | Pending |
 
 **Coverage:**
 - v1.7 requirements: 14 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 14
+- Mapped to phases: 14/14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after initial definition*
+*Last updated: 2026-02-27 after roadmap creation*

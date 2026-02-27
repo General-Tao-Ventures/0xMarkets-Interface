@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Liquidation Readiness
-status: planning
+status: roadmap_complete
 last_updated: "2026-02-27"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,20 +18,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.7 Liquidation Readiness -- Defining requirements
+**Current focus:** v1.7 Liquidation Readiness -- Phase 24 ready to plan
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 24 of 26 (Contract Bug Fixes)
 Plan: --
-Status: Defining requirements
-Last activity: 2026-02-27 -- Milestone v1.7 started
+Status: Ready to plan
+Last activity: 2026-02-27 -- Roadmap created for v1.7 (3 phases, 14 requirements)
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
-**Velocity (v1.0-v1.5):**
-- Total plans completed: 43
-- Phases: 18 complete + 1 partial (18, superseded)
+**Velocity (v1.0-v1.6):**
+- Total plans completed: 49
+- Phases: 23 complete across 7 milestones
 
 **By Milestone:**
 
@@ -43,18 +45,18 @@ Last activity: 2026-02-27 -- Milestone v1.7 started
 | v1.3 | 10-12 | 6/6 | Complete |
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
-| v1.6 | 18,20-23 | 6/TBD | Executing |
-| Phase 23 P01 | 12min | 2 tasks | 8 files |
+| v1.6 | 18,20-23 | 10/10 | Complete |
+| v1.7 | 24-26 | 0/TBD | In progress |
 
 ## Accumulated Context
 
 ### Known Issues
 
 - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
-- Frontend toast lifecycle verified working (Phase 18 complete: polling infra, verification, gap closure all shipped)
-- Random keeper execution failures across different markets -- mix of reverts, detection issues, and config problems
-- Keeper wallet (`0x972425...`) testnet ETH balance runs low; needs periodic top-up for deposit execution fees
-- Cloud keeper .env files need manual update with new addresses (local .env updated, cloud pending)
+- OrderHandler.sol division-by-zero on reversed markets (JPY/USD) when triggerPrice=0 -- Phase 24 fix
+- ExchangeRouter stores OrderHandler as immutable constructor arg -- must redeploy both atomically
+- LIQUIDATION_KEEPER role on keeper wallet is unverified -- must check before Phase 25
+- Shared wallet nonce conflict between keeper-service and order-execution-keeper -- documented testnet risk
 
 ### Pending Todos
 
@@ -68,19 +70,13 @@ None.
 
 **Prior milestone decisions:** See .planning/PROJECT.md key decisions table.
 
-- **v1.6 scope:** Replaced original "Execution Feedback" (toast + auto-refresh only) with broader "E2E Reliability" -- contract audit must come first
-- **Phase 18:** All 3 plans complete (18-01 polling infra, 18-02 live verification, 18-03 gap closure). Polling infrastructure carries into Phase 22.
-- **Phase numbering:** Skipped 19 (was planned under old scope), new phases start at 20
-- **20-01 audit:** Used Hardhat deployment artifacts as source of on-chain truth; verified via DataStore reads that all markets and tokens are correct but 35 infrastructure contracts are stale
-- **20-02 fix:** Applied all 35 fixes in one sweep, re-verified 89/89 match. Keeper .env files contain secrets so updated locally only; cloud requires manual deployment. 4/6 smoke test deposits confirmed (GOLD/JPY blocked by low testnet ETH, not addresses)
-- [Phase 18]: Toast lifecycle verified on live testnet: all 3 operation types (deposit, withdrawal, market order) show Pending -> Executed correctly
-- [Phase 22-01]: TOAST_AUTO_CLOSE_TIME set to 5000ms; ToastContainer limit set to 3; order cancellation error reasons fetched from keeper API
-- [Phase 22-02]: Page-aware SWR revalidation on execution events; 300ms debounce; pool data on /pools, positions on /trade, token balances universal
-- [Phase 23-01]: Raw EventLog2 topic matching for event detection (not ABI-based decoding); EventLog2 not EventLog1 for deposit/withdrawal/order events; standalone e2e/ project with pnpm
-- [Phase 23]: Raw EventLog2 topic matching for event detection (not ABI-based decoding); contract uses EventLog2 with complex EventLogData tuple
+- **v1.7 scope:** Contract bug fix + liquidation verification + hardening/performance (3 phases)
+- **LPERF-03 in Phase 25:** Oracle mode must be Lazer before verification -- moved from performance to verification phase
+- **LPERF-01/02 merged with LHARD:** Quick depth combines hardening + performance into one phase (Phase 26)
+- **Research deference:** Research recommended deferring multicall (LPERF-01) but it is in v1.7 requirements, so included in Phase 26
 
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: v1.6 shipped, started v1.7 Liquidation Readiness milestone
-Next: Define requirements and create roadmap
+Stopped at: Roadmap created for v1.7 Liquidation Readiness
+Next: Plan Phase 24 (Contract Bug Fixes)

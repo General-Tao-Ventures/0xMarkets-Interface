@@ -8,7 +8,8 @@
 - ✅ **v1.3 Keeper Execution Speed** — Phases 10-12 (shipped 2026-02-24)
 - ✅ **v1.4 Maximum Keeper Speed** — Phases 13-14 (shipped 2026-02-25)
 - ✅ **v1.5 Minimal Keeper Rewrite** — Phases 15-17 (shipped 2026-02-26)
-- 🚧 **v1.6 E2E Reliability** — Phases 20-23 (in progress)
+- ✅ **v1.6 E2E Reliability** — Phases 18, 20-23 (shipped 2026-02-27)
+- 🚧 **v1.7 Liquidation Readiness** — Phases 24-26 (in progress)
 
 ## Phases
 
@@ -66,97 +67,65 @@
 </details>
 
 <details>
-<summary>Complete: Phase 18 Event Detection and Toast Feedback (3/3 plans)</summary>
+<summary>✅ v1.6 E2E Reliability (Phases 18, 20-23) — SHIPPED 2026-02-27</summary>
 
-Phase 18 originally scoped under v1.6 "Execution Feedback", now complete.
-All 3 plans shipped: polling infra, live verification, gap closure.
-Polling infrastructure carries forward into Phase 22.
-
-- [x] 18-01-PLAN.md — RPC polling fallback for reliable event detection and timeout handling
-- [x] 18-02-PLAN.md — Verify toast lifecycle on live testnet (deposit/withdrawal/order all pass)
-- [x] 18-03-PLAN.md — Gap closure for deposit/withdrawal watchOrderTxn and polling stability
+- [x] Phase 18: Event Detection and Toast Feedback (3/3 plans) — completed 2026-02-27
+- [x] Phase 20: Contract Address Audit (2/2 plans) — completed 2026-02-26
+- [x] Phase 21: Keeper Execution Fixes (1/1 plans) — completed 2026-02-27
+- [x] Phase 22: Frontend Feedback (2/2 plans) — completed 2026-02-27
+- [x] Phase 23: Automated E2E Testing (2/2 plans) — completed 2026-02-27
 
 </details>
 
-### v1.6 E2E Reliability (In Progress)
+### v1.7 Liquidation Readiness (In Progress)
 
-**Milestone Goal:** Every market x every operation (deposit, trade, withdrawal) works reliably end-to-end: user action -> keeper execution -> frontend toast + auto-refresh. No manual page refresh needed.
+**Milestone Goal:** Fix the last contract bug (JPY/USD division-by-zero), verify the existing liquidation keeper pipeline works end-to-end on Base Sepolia, and harden it for reliability and performance.
 
-- [x] **Phase 20: Contract Address Audit** - Verify all addresses across interface SDK, keeper, and contracts repo match on-chain reality (completed 2026-02-26)
-- [ ] **Phase 21: Keeper Execution Fixes** - All 6 markets execute deposits, withdrawals, and orders without reverts
-- [x] **Phase 22: Frontend Feedback** - Toast lifecycle and auto-refresh for all operation types (completed 2026-02-27)
-- [x] **Phase 23: Automated E2E Testing** - Scripts that verify all 18 market x operation combinations (completed 2026-02-27)
-- [ ] **Phase 24: Contract Bug Fixes** - Fix OrderHandler div-by-zero on reversed markets, redeploy affected contracts
+- [ ] **Phase 24: Contract Bug Fixes** - Fix OrderHandler div-by-zero on reversed markets, redeploy atomically with ExchangeRouter, propagate addresses to all services
+- [ ] **Phase 25: Liquidation Pipeline Verification** - Prove the liquidation keeper detects, executes, and records a real liquidation on Base Sepolia
+- [ ] **Phase 26: Liquidation Hardening and Performance** - Add reliability guards, timing instrumentation, dead code cleanup, and scan performance optimizations
 
 ## Phase Details
 
-### Phase 20: Contract Address Audit
-**Goal**: All contract addresses across every service are verified correct against on-chain state, so no execution failures come from stale config
-**Depends on**: Phase 17 (v1.5 complete -- keeper deployed and running)
-**Requirements**: AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04
-**Success Criteria** (what must be TRUE):
-  1. Every market address in the interface SDK (`sdk/src/configs/markets.ts`) resolves to a valid on-chain DataStore entry -- no phantom markets
-  2. Every token address in the order-execution-keeper-service matches the token contracts actually deployed on Base Sepolia
-  3. Oracle provider addresses in both keeper and interface match the on-chain DataStore oracle configuration for all 6 markets
-  4. All 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY) are enabled on-chain with non-zero reserve factors, OI limits, and pool caps
-  5. A single audit report documents every discrepancy found and every fix applied, so future redeployments have a checklist
-**Plans**: 2 plans
-- [x] 20-01-PLAN.md -- Write audit verification script, run against on-chain DataStore, produce audit report
-- [x] 20-02-PLAN.md -- Apply all fixes from audit report, SDK prebuild, re-verify, smoke test, keeper restart
-
-### Phase 21: Keeper Execution Fixes
-**Goal**: The order-execution-keeper executes all three operation types across all 6 markets without reverts, so every user action reaches completion
-**Depends on**: Phase 20 (addresses verified correct -- execution failures are real bugs, not config)
-**Requirements**: EXEC-01, EXEC-02, EXEC-03, EXEC-04
-**Success Criteria** (what must be TRUE):
-  1. A deposit submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
-  2. A withdrawal submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
-  3. A market order (long or short) submitted on any of the 6 markets is detected by the keeper within 10 seconds and executes without reverting
-  4. Keeper logs show zero revert errors across a full 6-market test pass (deposit + withdrawal + order per market = 18 operations)
-**Plans**: 1 plan
-- [ ] 21-01-PLAN.md -- Diagnose and fix all keeper execution failures across 6 markets x 3 operation types, verify 18/18 pass
-
-### Phase 22: Frontend Feedback
-**Goal**: Users see real-time toast notifications for every operation and never need to manually refresh to see updated balances or positions
-**Depends on**: Phase 21 (keeper executes reliably -- frontend can trust execution happens)
-**Requirements**: FB-01, FB-02, FB-03, FB-04, FB-05, FB-06, FB-07, FB-08
-**Success Criteria** (what must be TRUE):
-  1. After submitting a deposit, a "Pending..." toast appears immediately and updates to "Executed!" when the DepositExecuted event is detected on-chain
-  2. After submitting a withdrawal, a "Pending..." toast appears immediately and updates to "Executed!" when the WithdrawalExecuted event is detected on-chain
-  3. After submitting a market order, a "Pending..." toast appears immediately and updates to "Executed!" when the OrderExecuted event is detected on-chain
-  4. GM token balances on the pools page auto-refresh after a deposit or withdrawal executes -- no manual page refresh
-  5. Positions list on the trade page auto-refresh after an order executes -- new position appears or existing position closes without page refresh
-**Plans**: 2 plans
-- [ ] 22-01-PLAN.md -- Toast lifecycle polish: 5s auto-dismiss, order cancellation error reasons from keeper API, max 3 visible toasts
-- [ ] 22-02-PLAN.md -- Auto-refresh: SWR revalidation on execution/cancellation events for pool balances and positions, debounced
-
-### Phase 23: Automated E2E Testing
-**Goal**: A repeatable test suite validates all 18 market x operation combinations, so regressions are caught before they reach users
-**Depends on**: Phase 22 (full pipeline working -- tests validate the complete flow)
-**Requirements**: TEST-01, TEST-02, TEST-03
-**Success Criteria** (what must be TRUE):
-  1. Running the deposit test script produces a pass/fail result for each of the 6 markets (6 results total)
-  2. Running the withdrawal test script produces a pass/fail result for each of the 6 markets (6 results total)
-  3. Running the order test script produces a pass/fail result for each of the 6 markets (6 results total)
-  4. All 18 tests pass on a clean run against the deployed keeper and live Base Sepolia contracts
-**Plans**: 2 plans
-- [ ] 23-01-PLAN.md -- Shared E2E test infrastructure (viem scaffold, helpers, config) + deposit test script (6 markets)
-- [ ] 23-02-PLAN.md -- Withdrawal and order test scripts (6 markets each) + full 18/18 verification
-
 ### Phase 24: Contract Bug Fixes
-**Goal**: Fix known contract bugs discovered during E2E testing, redeploy affected contracts, and update all service configs
-**Depends on**: Phase 23 (E2E tests identify and document all contract-level issues)
-**Requirements**: TBD
+**Goal**: JPY/USD orders execute without reverting, the E2E test suite passes 18/18, and all services point to the fixed contracts
+**Depends on**: Phase 23 (E2E tests documented the bug; provides the 18/18 verification target)
+**Requirements**: CFIX-01, CFIX-02, CFIX-03
 **Success Criteria** (what must be TRUE):
-  1. OrderHandler guards `triggerPrice=0` before inverting on reversed markets — JPY/USD market orders no longer revert
-  2. Redeployed OrderHandler is wired into ExchangeRouter and all service configs updated
-  3. E2E test suite passes 18/18 without workarounds (triggerPrice=0 works for all markets)
+  1. A market order on JPY/USD executes without reverting -- the triggerPrice=0 division-by-zero is gone
+  2. `cast call <EXCHANGE_ROUTER> "orderHandler()(address)"` returns the NEW OrderHandler address -- ExchangeRouter was redeployed atomically, not just OrderHandler
+  3. All five services (interface SDK, order-execution-keeper, keeper-service, E2E tests, contracts repo) reference the new OrderHandler and ExchangeRouter addresses
+  4. The E2E test suite passes 18/18 (including JPY/USD which was previously skipped)
+**Plans**: TBD
+
+### Phase 25: Liquidation Pipeline Verification
+**Goal**: A real undercollateralized position on Base Sepolia is detected by the liquidation scanner, executed by the liquidation executor, and recorded in PostgreSQL -- proving the full pipeline works
+**Depends on**: Phase 24 (contract surface must be clean -- LiquidationUtils also hits triggerPrice=0 on reversed markets)
+**Requirements**: LIQ-01, LIQ-02, LIQ-03, LIQ-04, LPERF-03
+**Success Criteria** (what must be TRUE):
+  1. The keeper wallet has `LIQUIDATION_KEEPER` role on LiquidationHandler, verified via `cast call` on RoleStore
+  2. The keeper-service runs with `ORACLE_MODE=lazer` so its oracle cache is independent of the order-execution-keeper's uptime
+  3. A deliberately undercollateralized test position is detected as liquidatable by the scanner within one scan cycle (30s)
+  4. The executor submits `executeLiquidation` and the transaction succeeds on-chain (visible on Basescan)
+  5. The confirmator updates the PostgreSQL record from SUBMITTED to EXECUTED with the correct transaction hash
+**Plans**: TBD
+
+### Phase 26: Liquidation Hardening and Performance
+**Goal**: The liquidation pipeline handles edge cases gracefully, has observability instrumentation, and scans positions efficiently
+**Depends on**: Phase 25 (pipeline proven correct -- hardening and optimization do not mask correctness bugs)
+**Requirements**: LHARD-01, LHARD-02, LHARD-03, LHARD-04, LPERF-01, LPERF-02
+**Success Criteria** (what must be TRUE):
+  1. Submitting the same position key twice within 60 seconds results in exactly one liquidation attempt -- the deduplication guard prevents double-submission
+  2. A reverted liquidation transaction is recorded in PostgreSQL with status REVERTED and an error reason, not stuck as SUBMITTED forever
+  3. `riskEngine.ts` is removed or archived -- dead code is not in the active codebase
+  4. Keeper logs show per-stage timing (scan duration, check duration, submit duration, confirm duration) for each liquidation cycle
+  5. Position discovery uses a single multicall RPC request instead of N serial `getPosition()` calls
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 20 -> 21 -> 22 -> 23
+Phases execute in numeric order: 24 -> 25 -> 26
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -179,6 +148,9 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 17. Deploy and Verify | v1.5 | 2/2 | Complete | 2026-02-26 |
 | 18. Event Detection and Toast Feedback | v1.6 | 3/3 | Complete | 2026-02-27 |
 | 20. Contract Address Audit | v1.6 | 2/2 | Complete | 2026-02-26 |
-| 21. Keeper Execution Fixes | v1.6 | 0/1 | Planned | - |
-| 22. Frontend Feedback | 2/2 | Complete   | 2026-02-27 | - |
-| 23. Automated E2E Testing | 1/2 | Complete    | 2026-02-27 | - |
+| 21. Keeper Execution Fixes | v1.6 | 1/1 | Complete | 2026-02-27 |
+| 22. Frontend Feedback | v1.6 | 2/2 | Complete | 2026-02-27 |
+| 23. Automated E2E Testing | v1.6 | 2/2 | Complete | 2026-02-27 |
+| 24. Contract Bug Fixes | v1.7 | 0/TBD | Not started | - |
+| 25. Liquidation Pipeline Verification | v1.7 | 0/TBD | Not started | - |
+| 26. Liquidation Hardening and Performance | v1.7 | 0/TBD | Not started | - |
