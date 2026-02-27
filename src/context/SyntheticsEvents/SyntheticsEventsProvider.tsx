@@ -1,7 +1,9 @@
 import { TaskState } from "@gelatonetwork/relay-sdk";
 import { t } from "@lingui/macro";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useLatest } from "react-use";
+import { useSWRConfig } from "swr";
 
 import { isDevelopment } from "config/env";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
@@ -195,6 +197,60 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
     });
   }, [currentAccount, provider, setWebsocketTokenBalancesUpdates]);
 
+  // SWR revalidation for event-driven data refresh
+  const { mutate: globalMutate } = useSWRConfig();
+  const { pathname } = useLocation();
+
+  const poolRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const positionsRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Revalidates token balances (universal -- balances shown on both pages)
+  const triggerBalanceRefresh = useCallback(() => {
+    globalMutate(
+      (key: unknown) => Array.isArray(key) && key[1] === "useTokenBalances",
+      undefined,
+      { revalidate: true }
+    );
+  }, [globalMutate]);
+
+  // Pool data refresh -- only when user is on /pools or /pools/details
+  const triggerPoolRefresh = useCallback(() => {
+    triggerBalanceRefresh();
+    if (!pathname.startsWith("/pools")) return;
+    if (poolRefreshTimerRef.current) return;
+    poolRefreshTimerRef.current = setTimeout(() => {
+      poolRefreshTimerRef.current = null;
+      globalMutate(
+        (key: unknown) => Array.isArray(key) && key[1] === "useMarketTokensData",
+        undefined,
+        { revalidate: true }
+      );
+    }, 300);
+  }, [globalMutate, pathname, triggerBalanceRefresh]);
+
+  // Positions data refresh -- only when user is on /trade
+  const triggerPositionsRefresh = useCallback(() => {
+    triggerBalanceRefresh();
+    if (!pathname.startsWith("/trade")) return;
+    if (positionsRefreshTimerRef.current) return;
+    positionsRefreshTimerRef.current = setTimeout(() => {
+      positionsRefreshTimerRef.current = null;
+      globalMutate(
+        (key: unknown) => Array.isArray(key) && key[1] === "usePositionsData",
+        undefined,
+        { revalidate: true }
+      );
+    }, 300);
+  }, [globalMutate, pathname, triggerBalanceRefresh]);
+
+  // Cleanup debounce timers on unmount
+  useEffect(() => {
+    return () => {
+      if (poolRefreshTimerRef.current) clearTimeout(poolRefreshTimerRef.current);
+      if (positionsRefreshTimerRef.current) clearTimeout(positionsRefreshTimerRef.current);
+    };
+  }, []);
+
   // use ref to avoid re-subscribing on state changes
   eventLogHandlers.current = {
     OrderCreated: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -317,6 +373,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         return updateByKey(old, key, { executedTxnHash: txnParams.transactionHash });
       });
+
+      triggerPositionsRefresh();
     },
 
     OrderCancelled: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -388,6 +446,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
           setPendingPositionsUpdates((old) => setByKey(old, pendingPositionKey!, undefined));
         }
       }
+
+      triggerPositionsRefresh();
     },
 
     GlvDepositCreated: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -486,6 +546,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         setDepositStatuses((old) => updateByKey(old, key, { executedTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     DepositExecuted: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -500,6 +562,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         sendUserAnalyticsOrderResultEvent(chainId, metricId, true);
         setDepositStatuses((old) => updateByKey(old, key, { executedTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     DepositCancelled: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -514,6 +578,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         sendUserAnalyticsOrderResultEvent(chainId, metricId, false);
         setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     GlvDepositCancelled: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -529,6 +595,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     WithdrawalCreated: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -623,6 +691,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         setWithdrawalStatuses((old) => updateByKey(old, key, { executedTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     GlvWithdrawalExecuted: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -638,6 +708,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         setWithdrawalStatuses((old) => updateByKey(old, key, { executedTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     WithdrawalCancelled: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -654,6 +726,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     GlvWithdrawalCancelled: (eventData: EventLogData, txnParams: EventTxnParams) => {
@@ -670,6 +744,8 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
       }
+
+      triggerPoolRefresh();
     },
 
     ShiftCreated: (eventData: EventLogData, txnParams: EventTxnParams) => {
