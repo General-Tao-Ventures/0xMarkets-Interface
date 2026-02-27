@@ -1,16 +1,15 @@
 import {
   type Address,
   type PublicClient,
-  type WalletClient,
   type TransactionReceipt,
-  type Log,
-  decodeEventLog,
   formatEther,
   formatUnits,
+  keccak256,
   maxUint256,
+  toBytes,
 } from "viem";
-import { eventEmitterAbi, erc20Abi } from "./abis.js";
-import { USDC_ADDRESS, WETH_ADDRESS, CONTRACTS } from "./config.js";
+import { erc20Abi } from "./abis.js";
+import { USDC_ADDRESS, WETH_ADDRESS } from "./config.js";
 
 // ============================================================
 // Types
@@ -34,6 +33,34 @@ export interface TestResult {
   duration?: number;
 }
 
+// Use a loose type for walletClient to avoid chain generic issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyWalletClient = any;
+
+// ============================================================
+// Event signature constants
+// ============================================================
+
+// EventLog2 is the event emitted by the EventEmitter contract for
+// DepositCreated, DepositExecuted, DepositCancelled, etc.
+// The contract uses emitEventLog2() which emits:
+//   EventLog2(address msgSender, string eventName, string indexed eventNameHash,
+//             bytes32 indexed topic1, bytes32 indexed topic2, EventUtils.EventLogData eventData)
+// Topics layout: [eventSig, eventNameHash, topic1(=operationKey), topic2(=account)]
+
+// Pre-computed keccak256 of event name strings (used as indexed eventNameHash)
+const EVENT_NAME_HASHES: Record<string, `0x${string}`> = {
+  DepositCreated: keccak256(toBytes("DepositCreated")),
+  DepositExecuted: keccak256(toBytes("DepositExecuted")),
+  DepositCancelled: keccak256(toBytes("DepositCancelled")),
+  WithdrawalCreated: keccak256(toBytes("WithdrawalCreated")),
+  WithdrawalExecuted: keccak256(toBytes("WithdrawalExecuted")),
+  WithdrawalCancelled: keccak256(toBytes("WithdrawalCancelled")),
+  OrderCreated: keccak256(toBytes("OrderCreated")),
+  OrderExecuted: keccak256(toBytes("OrderExecuted")),
+  OrderCancelled: keccak256(toBytes("OrderCancelled")),
+};
+
 // ============================================================
 // ensureApprovals
 // ============================================================
@@ -43,11 +70,11 @@ export interface TestResult {
  * Also mint 500 USDC if balance < 200 USDC (mUSDC has public mint).
  */
 export async function ensureApprovals(
-  walletClient: WalletClient,
+  walletClient: AnyWalletClient,
   publicClient: PublicClient,
   routerAddress: Address
 ): Promise<void> {
-  const walletAddress = walletClient.account!.address;
+  const walletAddress: Address = walletClient.account!.address;
 
   // Check USDC balance
   const usdcBalance = await publicClient.readContract({
@@ -122,50 +149,38 @@ export async function ensureApprovals(
 // ============================================================
 
 /**
- * Parse transaction receipt logs to find the EventLog1 with eventName containing "Created"
- * (DepositCreated, WithdrawalCreated, OrderCreated) and extract topic1 (the operation key).
+ * Parse transaction receipt logs to find the EventLog2 event with eventNameHash
+ * matching "{OpType}Created" and extract topic1 (the operation key).
+ *
+ * EventLog2 topics layout:
+ *   topics[0] = event signature hash
+ *   topics[1] = keccak256(eventName) -- e.g. keccak256("DepositCreated")
+ *   topics[2] = topic1 (operation key = bytes32)
+ *   topics[3] = topic2 (account address padded to bytes32)
  */
 export function extractOperationKey(
   receipt: TransactionReceipt,
-  eventEmitterAddress: Address
+  eventEmitterAddress: Address,
+  opType: OpType = "Deposit"
 ): `0x${string}` | null {
+  const createdHash = EVENT_NAME_HASHES[`${opType}Created`];
+  if (!createdHash) return null;
+
   for (const log of receipt.logs) {
     // Only look at logs from the EventEmitter
     if (log.address.toLowerCase() !== eventEmitterAddress.toLowerCase()) {
       continue;
     }
 
-    // EventLog1 has 3 indexed topics: msgSender, eventNameHash, topic1
-    // Plus the event signature as topics[0]
-    // topics: [eventSig, msgSender, eventNameHash, topic1]
+    // EventLog2 has 3 indexed params + event sig = 4 topics
     if (!log.topics || log.topics.length < 4) {
       continue;
     }
 
-    try {
-      const decoded = decodeEventLog({
-        abi: eventEmitterAbi,
-        data: log.data,
-        topics: log.topics,
-      });
-
-      if (decoded.eventName === "EventLog1") {
-        const args = decoded.args as {
-          msgSender: Address;
-          eventName: string;
-          eventNameHash: string;
-          topic1: `0x${string}`;
-          eventData: `0x${string}`;
-        };
-
-        // Check if this is a "Created" event
-        if (args.eventName.includes("Created")) {
-          return args.topic1;
-        }
-      }
-    } catch {
-      // Not an EventLog1 log, skip
-      continue;
+    // Check if topics[1] (eventNameHash) matches our "{OpType}Created" hash
+    if (log.topics[1]?.toLowerCase() === createdHash.toLowerCase()) {
+      // topics[2] is topic1 = the operation key
+      return log.topics[2] as `0x${string}`;
     }
   }
 
@@ -177,8 +192,10 @@ export function extractOperationKey(
 // ============================================================
 
 /**
- * Poll EventEmitter getLogs for EventLog1 events where topic1 matches the operation key
- * and eventName matches `{OpType}Executed` or `{OpType}Cancelled`.
+ * Poll EventEmitter getLogs for EventLog2 events where topic1 (topics[2])
+ * matches the operation key and eventNameHash (topics[1]) matches
+ * `{OpType}Executed` or `{OpType}Cancelled`.
+ *
  * Polls every 2 seconds until timeout.
  */
 export async function waitForExecution(
@@ -189,8 +206,8 @@ export async function waitForExecution(
   timeoutMs: number = 60_000
 ): Promise<ExecutionResult> {
   const startTime = Date.now();
-  const executedName = `${opType}Executed`;
-  const cancelledName = `${opType}Cancelled`;
+  const executedHash = EVENT_NAME_HASHES[`${opType}Executed`];
+  const cancelledHash = EVENT_NAME_HASHES[`${opType}Cancelled`];
 
   // Get current block as starting point
   const currentBlock = await publicClient.getBlockNumber();
@@ -199,59 +216,36 @@ export async function waitForExecution(
 
   while (Date.now() - startTime < timeoutMs) {
     try {
-      const logs: Log[] = await publicClient.getLogs({
+      // Get all logs from EventEmitter with our operation key as topic1 (topics[2])
+      // We use raw topics filter: [null, null, operationKey] to match any event
+      // from EventEmitter where topics[2] = our operation key
+      const logs = await publicClient.getLogs({
         address: eventEmitterAddress,
-        event: {
-          type: "event",
-          name: "EventLog1",
-          inputs: [
-            { name: "msgSender", type: "address", indexed: true },
-            { name: "eventName", type: "string", indexed: false },
-            { name: "eventNameHash", type: "string", indexed: true },
-            { name: "topic1", type: "bytes32", indexed: true },
-            { name: "eventData", type: "bytes", indexed: false },
-          ],
-        },
-        args: {
-          topic1: operationKey,
-        },
+        // topics[0]=any event sig, topics[1]=any eventNameHash, topics[2]=operationKey
+        topics: [null, null, operationKey],
         fromBlock,
         toBlock: "latest",
-      });
+      } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       for (const log of logs) {
-        try {
-          const decoded = decodeEventLog({
-            abi: eventEmitterAbi,
-            data: log.data,
-            topics: log.topics,
-          });
+        if (!log.topics || log.topics.length < 3) continue;
 
-          if (decoded.eventName === "EventLog1") {
-            const args = decoded.args as {
-              eventName: string;
-              topic1: `0x${string}`;
-            };
+        const eventNameHash = log.topics[1];
 
-            if (args.eventName === executedName) {
-              return {
-                status: "executed",
-                blockNumber: log.blockNumber ?? undefined,
-                txHash: log.transactionHash ?? undefined,
-              };
-            }
+        if (eventNameHash?.toLowerCase() === executedHash?.toLowerCase()) {
+          return {
+            status: "executed",
+            blockNumber: log.blockNumber ?? undefined,
+            txHash: log.transactionHash ?? undefined,
+          };
+        }
 
-            if (args.eventName === cancelledName) {
-              return {
-                status: "cancelled",
-                blockNumber: log.blockNumber ?? undefined,
-                txHash: log.transactionHash ?? undefined,
-              };
-            }
-          }
-        } catch {
-          // Decoding error, skip this log
-          continue;
+        if (eventNameHash?.toLowerCase() === cancelledHash?.toLowerCase()) {
+          return {
+            status: "cancelled",
+            blockNumber: log.blockNumber ?? undefined,
+            txHash: log.transactionHash ?? undefined,
+          };
         }
       }
     } catch (err) {
