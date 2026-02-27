@@ -45,6 +45,28 @@ import { useToastAutoClose } from "./useToastAutoClose";
 import { TaskState } from "@gelatonetwork/relay-sdk";
 import "./StatusNotification.scss";
 
+const KEEPER_API_URL = "/api/order-keeper";
+
+function getOrderActionableMessage(errorReason: string | null): string {
+  if (!errorReason) return t`Your order was cancelled.`;
+
+  const lower = errorReason.toLowerCase();
+
+  if (lower.includes("oracletimestamps") || lower.includes("expired")) {
+    return t`Order expired before the keeper could execute it. Try again.`;
+  }
+  if (lower.includes("emptyorder")) {
+    return t`Your order was already processed. Check your positions.`;
+  }
+  if (lower.includes("minmarkettokens") || lower.includes("minoutputamount") || lower.includes("slippage")) {
+    return t`Price impact exceeded slippage tolerance. Try with higher slippage or smaller size.`;
+  }
+  if (lower.includes("execution reverted")) {
+    return t`Order execution failed on-chain. Please try again.`;
+  }
+  return t`Your order was cancelled.`;
+}
+
 type Props = {
   toastTimestamp: number;
   pendingOrderData: PendingOrderData;
@@ -68,6 +90,7 @@ export function OrderStatusNotification({
 
   const [orderStatusKey, setOrderStatusKey] = useState<string>();
   const [pendingExpressTxnKey, setPendingExpressTxnKey] = useState<string>();
+  const [keeperErrorReason, setKeeperErrorReason] = useState<string | null>(null);
 
   const contractOrderKey = pendingOrderData.orderKey;
   const pendingOrderKey = useMemo(() => getPendingOrderKey(pendingOrderData), [pendingOrderData]);
@@ -317,11 +340,13 @@ export function OrderStatusNotification({
       status = "error";
       // Don't show a BaseScan link for timeout (not a real tx hash)
     } else if (orderStatus?.cancelledTxnHash) {
-      text = t`Order cancelled`;
       txnHash = orderStatus?.cancelledTxnHash;
 
       if (orderData?.txnType !== "cancel") {
+        text = getOrderActionableMessage(keeperErrorReason);
         status = "error";
+      } else {
+        text = t`Order cancelled`;
       }
     }
 
@@ -333,6 +358,7 @@ export function OrderStatusNotification({
     orderStatus?.executedTxnHash,
     hideTxLink,
     elapsedSeconds,
+    keeperErrorReason,
   ]);
 
   useEffect(
@@ -387,6 +413,22 @@ export function OrderStatusNotification({
     },
     [pendingExpressTxns, pendingOrderKey, pendingExpressTxnKey, updatePendingExpressTxn, pendingOrderData.createdAt]
   );
+
+  useEffect(() => {
+    if (
+      orderStatus?.cancelledTxnHash &&
+      orderStatus.cancelledTxnHash !== EXECUTION_TIMEOUT_HASH &&
+      orderStatusKey &&
+      pendingOrderData.txnType !== "cancel"
+    ) {
+      fetch(`${KEEPER_API_URL}/api/orders/${orderStatusKey}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.errorReason) setKeeperErrorReason(data.errorReason);
+        })
+        .catch(() => {});
+    }
+  }, [orderStatus?.cancelledTxnHash, orderStatusKey, pendingOrderData.txnType]);
 
   useEffect(() => {
     if (hasError) {
