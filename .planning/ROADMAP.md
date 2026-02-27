@@ -99,7 +99,7 @@
 **Plans**: 2 plans
 Plans:
 - [x] 24-01-PLAN.md -- Fix OrderHandler.sol zero-guard and deploy both contracts to Base Sepolia
-- [ ] 24-02-PLAN.md -- Propagate new addresses to all services, remove JPY/USD skip, verify E2E 18/18
+- [x] 24-02-PLAN.md -- Propagate new addresses to all services, remove JPY/USD skip, verify E2E 18/18
 
 ### Phase 25: Liquidation Pipeline Verification
 **Goal**: A real undercollateralized position on Base Sepolia is detected by the liquidation scanner, executed by the liquidation executor, and recorded in PostgreSQL -- proving the full pipeline works
@@ -154,6 +154,6 @@ Phases execute in numeric order: 24 -> 25 -> 26
 | 21. Keeper Execution Fixes | v1.6 | 1/1 | Complete | 2026-02-27 |
 | 22. Frontend Feedback | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 23. Automated E2E Testing | v1.6 | 2/2 | Complete | 2026-02-27 |
-| 24. Contract Bug Fixes | 2/2 | Complete   | 2026-02-27 | - |
+| 24. Contract Bug Fixes | 2/2 | Complete    | 2026-02-27 | - |
 | 25. Liquidation Pipeline Verification | v1.7 | 0/TBD | Not started | - |
 | 26. Liquidation Hardening and Performance | v1.7 | 0/TBD | Not started | - |
