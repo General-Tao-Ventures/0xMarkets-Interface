@@ -1,389 +1,342 @@
-# Pitfalls Research
+# Domain Pitfalls
 
-**Domain:** Minimal keeper rewrite -- replacing 3,000+ line order-execution-keeper with ~300 line single-loop keeper
-**Researched:** 2026-02-25
-**Confidence:** HIGH (based on actual codebase analysis, known production incidents, and verified library documentation)
+**Domain:** Contract redeployment in multi-service ecosystem + liquidation keeper verification and optimization
+**Researched:** 2026-02-27
+**Confidence:** HIGH (based on direct codebase analysis of all five services and known production incidents)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Nonce Gap on Failed estimateGas / Pre-Send Revert
-
-**What goes wrong:**
-Viem's `nonceManager` (introduced in v2.15.0) increments the nonce atomically BEFORE the transaction is submitted. If `writeContract` fails during gas estimation (before the TX hits the mempool), the nonce is consumed but no transaction exists on-chain for that nonce. All subsequent transactions queue behind the gap forever. The current keeper already encountered this -- it uses a manual `getTransactionCount({ blockTag: "pending" })` call per attempt instead of the built-in nonceManager specifically to avoid this.
-
-**Why it happens:**
-The natural reflex when rewriting is to use viem's built-in `createNonceManager` since it was designed for exactly this use case. But viem issue #3142 documented that the nonce increments even when `estimateGas` fails, creating an unrecoverable gap. The fix (PR #3153) was merged, but only for the case where `prepareTransactionRequest` throws. If the transaction reverts at the RPC level (not estimateGas), the gap can still occur depending on the error path.
-
-**How to avoid:**
-Do NOT use viem's built-in `createNonceManager` for the minimal keeper. Instead, use the proven pattern from the current `baseExecutor.ts`: fetch nonce via `getTransactionCount({ blockTag: "pending" })` before each transaction, pass it explicitly, and retry with a fresh nonce fetch on `nonce too low` / `replacement transaction underpriced` errors. The sequential execution guarantee (single consumer loop + txMutex) means we never need parallel nonce management.
-
-**Warning signs:**
-- Transactions hang indefinitely after a single revert
-- Logs show "nonce too low" errors that don't self-heal
-- Health check shows items stuck in processing state
-
-**Phase to address:**
-Phase 1 (Core Architecture) -- the transaction submission function must be implemented correctly from day one. No recovery path exists once nonce gaps occur in production.
+Mistakes that cause reverts, stuck positions, or silent keeper failures.
 
 ---
 
-### Pitfall 2: Stale Pyth Lazer Cache After Silent WebSocket Disconnect
+### Pitfall 1: ExchangeRouter Immutable Constructor — Redeploying OrderHandler Alone Silently Fails
 
 **What goes wrong:**
-The Pyth Lazer WebSocket pool maintains 4 redundant connections. When ALL connections drop simultaneously (network blip, Pyth server maintenance, token expiry), the `updateCache` Map still holds the last received price data. The keeper reads "valid" cached data, includes it in oracle params, and submits the transaction. The on-chain contract checks `MAX_ORACLE_PRICE_AGE` (300 seconds) and reverts with `MaxPriceAgeExceeded` (or `0x5c0e53f0`). This is not hypothetical -- it was a production issue documented in `PROJECT.md` as a known issue.
+OrderHandler is fixed and redeployed. The fix works when called directly. But all user transactions flow through ExchangeRouter, which stores `orderHandler` as an `immutable` Solidity field set at construction time. The old ExchangeRouter still points to the old (buggy) OrderHandler address. Users submitting JPY orders continue to get division-by-zero reverts. The keeper executes deposits and withdrawals fine. Only orders fail. This looks like the fix didn't work.
 
 **Why it happens:**
-The cache has no TTL. `getLatestUpdate()` returns whatever is stored, regardless of age. The `allConnectionsDownListener` fires a log message but does not invalidate the cache or set a flag that prevents execution. The existing keeper's `handlePriceUpdate` sets `timestamp: BigInt(Math.floor(Date.now() / 1000))` using local time, NOT the Pyth-provided timestamp, so even the timestamp is unreliable for staleness detection.
+The natural instinct is "I'm fixing OrderHandler, so I deploy OrderHandler." But ExchangeRouter's constructor takes `OrderHandler` as a direct address argument baked into bytecode (`immutable`). It cannot be updated post-deployment. This is confirmed by the deploy script at `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/deployExchangeRouter.ts` — `constructorContracts` explicitly includes `"OrderHandler"`.
 
-**How to avoid:**
-1. Add a TTL check in `getLatestUpdate()` -- if the cached entry is older than `MAX_ORACLE_PRICE_AGE - SAFETY_MARGIN` (e.g., 300s - 30s = 270s), return `undefined` and force fallback or skip execution.
-2. Use Pyth's recommended `feedUpdateTimestamp` property (add it to the subscription `properties` array) instead of `Date.now()` for the timestamp. This tells you whether the price was freshly generated or carried forward.
-3. Track a `lastUpdateReceived` timestamp that resets on every WebSocket message. If no message for >10s, set an `oracleStale` flag that blocks execution.
-4. When `allConnectionsDownListener` fires, immediately set `oracleStale = true` and clear or mark the cache.
+**Consequences:**
+- JPY market orders continue to revert despite fix
+- Confusion about whether the fix was applied correctly
+- Developers spend hours re-verifying the Solidity fix when the real problem is stale wiring
 
-**Warning signs:**
-- Oracle build times drop to 0ms (reading from stale cache, no WS messages)
-- Executions revert with `MaxPriceAgeExceeded` in bursts
-- Health endpoint shows `oracleConnected: true` but no new prices for minutes
+**Prevention:**
+Always redeploy ExchangeRouter immediately after redeploying OrderHandler. Never test the fix through direct calls to OrderHandler — always test through ExchangeRouter to catch wiring issues.
 
-**Phase to address:**
-Phase 1 (Core Architecture) -- the oracle cache design must include TTL from the start. Retrofitting TTL after deployment means a period of silent price staleness.
+**Verification:**
+After deployment, call `cast call <NEW_EXCHANGE_ROUTER> "orderHandler()(address)"` and confirm it returns the new OrderHandler address, not the old one (`0xCf752B72B74eE7b35a405c445E9843968f53A397`).
+
+**Phase to address:** Phase 24 (contract bug fixes) — must be a single atomic deployment step: fix → compile → deploy OrderHandler → deploy ExchangeRouter.
 
 ---
 
-### Pitfall 3: Losing In-Flight Queue Items on Docker Restart
+### Pitfall 2: CONTROLLER Role Not Granted to New Contracts — onlyController Reverts
 
 **What goes wrong:**
-The current keeper persists `lastProcessedBlock` to PostgreSQL and uses it to backfill missed events on restart (DETECT-03 pattern). The minimal rewrite removes the database. If the keeper restarts (Docker restart, OOM kill, crash), the in-memory queue and the `lastProcessedBlock` are both lost. Without a backfill mechanism, any events that arrived between the crash and restart are permanently missed. Those deposits/withdrawals/orders sit on-chain forever, unexecuted.
+New OrderHandler or ExchangeRouter is deployed. Transactions begin reverting with an access control error (not the original bug). The new contract was deployed but the `RoleStore.grantRole` transaction failed silently, was skipped, or the deployer lacked sufficient gas. The `onlyController` modifier on all handler functions checks `roleStore.hasRole(CONTROLLER, msg.sender)` — without the role, nothing executes.
 
 **Why it happens:**
-The appeal of "no database" is simplicity -- the on-chain DataStore IS the source of truth for pending operations. The mistake is assuming that polling the DataStore on startup catches everything. It does, IF the polling scan reads the full pending list. But if the scan only reads new events (like the current event-based detection), items created during downtime are invisible.
+The `afterDeploy` hook in `deployOrderHandler.ts` calls `grantRoleIfNotGranted(deployedContract.address, "CONTROLLER")`. If this hook throws or is skipped (network hiccup, insufficient gas, deployer nonce conflict), the deployment artifact is written with the new address but the on-chain role was never granted. Hardhat does not fail the overall deployment in all cases when `afterDeploy` throws — it depends on the version and error type.
 
-**How to avoid:**
-The "no database" design works ONLY if every scan cycle reads the full pending operation list from on-chain DataStore (deposit keys, withdrawal keys, order keys), not just new events. The scan-based safety net at 15s intervals already does this in the current keeper via `depositScanner.scan()` which reads `DEPOSIT_LIST` from DataStore. The minimal rewrite MUST preserve this full-list scan pattern.
+**Consequences:**
+- All order execution reverts with access control error
+- Keeper logs show transaction reverted, no useful revert reason
+- The deployment artifact looks correct (new address) but the contract is non-functional
 
-Specifically:
-1. On startup, immediately scan ALL pending keys from DataStore (deposit list, withdrawal list, order list)
-2. Every safety-net poll cycle, re-scan the full lists (not just listen for new events)
-3. Event-based detection is an optimization for speed, not the source of truth
-4. No need to persist block numbers -- the DataStore pending lists ARE the recovery mechanism
+**Prevention:**
+After every deployment, explicitly verify roles using `cast`:
+```bash
+cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "CONTROLLER") <NEW_ORDER_HANDLER> --rpc-url https://sepolia.base.org
+cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "CONTROLLER") <NEW_EXCHANGE_ROUTER> --rpc-url https://sepolia.base.org
+cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "ROUTER_PLUGIN") <NEW_EXCHANGE_ROUTER> --rpc-url https://sepolia.base.org
+```
 
-**Warning signs:**
-- After restart, known pending deposits are not picked up
-- Users report deposits stuck after keeper downtime
-- Health endpoint shows 0 pending items when frontend shows pending operations
+All three must return `true`. If any returns `false`, manually call `grantRole` from the RoleStore admin account.
 
-**Phase to address:**
-Phase 1 (Core Architecture) -- the scan loop must be designed as full-list-scan from the start. Switching from event-only to full-scan later requires rethinking the entire detection model.
+**Phase to address:** Phase 24 — add explicit role verification as a mandatory post-deployment step before marking the phase complete.
 
 ---
 
-### Pitfall 4: Ghost Deposits Create Infinite Retry Loops Without DB State
+### Pitfall 3: Stale Addresses Across Five Services After Redeployment
 
 **What goes wrong:**
-A "ghost deposit" is a key that exists in the DataStore's `DEPOSIT_LIST` but has zeroed data on-chain (account = 0x0, amounts = 0). These occur when a deposit is cancelled or already executed but the key cleanup is delayed. The current keeper detects ghosts by reading the full deposit struct and checking `account === ZERO_ADDRESS`, then marks them CANCELLED in the database so they are never retried. Without the database, the keeper has no memory that a key was already classified as a ghost. Every 15-second scan cycle rediscovers the ghost, tries to execute it, reads the zeroed data, skips it... then rediscovers it again next cycle. This is not a crash risk but it is wasted RPC calls and log noise.
+OrderHandler and ExchangeRouter are redeployed with new addresses. The Interface is updated. But keeper-service and order-execution-keeper-service still have the old ExchangeRouter address in their `.env` files. The keepers attempt to execute operations against the old contracts, which silently succeed (the transactions go through) but execute against a contract that is no longer the canonical entry point. Worse, if the old ExchangeRouter's roles were revoked as part of cleanup, all keeper transactions revert.
 
 **Why it happens:**
-The on-chain DataStore key list is eventually consistent -- keys may linger after the operation data is cleared. The database served as "I already looked at this and it's dead" memory. Without it, there is no dedup across restarts.
+The address update guide in `.claude/contract-address-update-guide.md` lists the full checklist, but it is easy to miss individual service `.env` files — especially on the DigitalOcean droplet which has its own live `.env` files that differ from the local development copies.
 
-**How to avoid:**
-Use the existing `allKnown` Set from the `ExecutionQueue` pattern. When a ghost is detected (zeroed account), add it to an in-memory `ignoredKeys` set with a TTL. This prevents re-reading the same ghost every cycle. On restart, the ghost will be re-evaluated once (cheap -- one RPC read), classified as ghost again, and re-added to the ignore set. This is acceptable overhead.
+**The five services that must be updated:**
+1. Interface: `sdk/src/configs/contracts.ts`, `src/config/multichain.ts`
+2. keeper-service: `src/config.ts` (env vars) + DO droplet `.env`
+3. order-execution-keeper-service: `.env` + DO droplet `.env`
+4. 0xMarkets-squid: `src/processor.ts` (EventEmitter address only, unchanged here)
+5. 0xmarkets_contract: deployment artifacts (auto-updated by hardhat-deploy)
 
-Additionally, add a `MIN_DEPOSIT_AMOUNT` check -- if both `initialLongTokenAmount` and `initialShortTokenAmount` are 0, skip without even fetching the full deposit struct.
+**The DO droplet danger:** The deployed services on `142.93.203.222` have their own `.env` files that are NOT automatically updated when you update local files. After local `.env` changes are verified, the updated configs must be pushed to the droplet and both keeper services must be restarted.
 
-**Warning signs:**
-- Logs show repeated "deposit is stale (zeroed on-chain) -- skipping" for the same key
-- RPC call count is disproportionately high relative to actual pending operations
-- Scan cycle duration increases linearly with ghost count
+**Prevention:**
+Run the on-chain DataStore verification script after every deployment. The pattern from Phase 20 (contract address audit) reads the DataStore's canonical addresses directly from the chain and compares them against each service's configured values. Discrepancies fail loudly.
 
-**Phase to address:**
-Phase 2 (Executor Implementation) -- ghost detection is part of the execution path, not the core architecture.
+**Detection:** After redeployment, run a test deposit through the UI. If the keeper's transaction shows a revert reason related to "invalid handler" or "access denied," a service has a stale address.
+
+**Phase to address:** Phase 24 — the post-deployment checklist must include explicit address propagation to the DO droplet.
 
 ---
 
-### Pitfall 5: Docker Deployment Creates Duplicate Keeper During Restart Window
+### Pitfall 4: Nonce Conflicts Between keeper-service and order-execution-keeper-service Sharing One Wallet
 
 **What goes wrong:**
-`docker compose up -d --build order-execution-keeper` rebuilds the image and recreates the container. Docker's default behavior with `restart: unless-stopped` means the OLD container runs until the NEW one is ready. During this overlap window (10-30 seconds for image build, startup, Pyth connection), both keepers are running with the SAME private key. Both detect the same pending operations. Both try to submit transactions. Result: nonce conflicts, "replacement transaction underpriced" errors, doubled gas costs, and potential double-execution if timing aligns.
+Both keepers run with the same `PRIVATE_KEY` environment variable, meaning they share the same Ethereum account and therefore share the same nonce sequence. The order-execution-keeper uses manual nonce management: `getTransactionCount({ blockTag: "latest" })` before each submission. If keeper-service's liquidation executor submits a transaction simultaneously, both keepers read the same "current" nonce, both try to submit with that nonce, and one wins while the other gets `replacement transaction underpriced`. The loser's error handling may then retry with the same stale nonce, compounding the problem.
+
+**The critical asymmetry:** The order-execution-keeper has a well-tested sequential executor with nonce error recovery (`extractExpectedNonce`). The keeper-service's liquidation executor (`/src/core/executor.ts`) does NOT use this pattern — it calls `estimateFeesPerGas()` and `writeContract()` without manual nonce management, relying on viem's default behavior.
 
 **Why it happens:**
-Docker Compose does not implement blue-green deployment by default. `docker compose up -d` stops the old container THEN starts the new one (brief downtime). But with complex health checks and startup delays, the exact ordering depends on Docker version and configuration. The real danger is when using `docker compose up -d --scale order-execution-keeper=2` accidentally, or when the old container's shutdown takes longer than expected due to `waitForTransactionReceipt` blocking.
+Using a single keeper wallet is documented as an intentional "simpler for testnet" decision (`PROJECT.md` Key Decisions). It was acceptable when keeper-service only did price feeds and candles (no transactions). Liquidation execution adds transaction submission to keeper-service, creating genuine concurrency.
 
-**How to avoid:**
-1. Explicitly stop the old container before starting the new one: `docker compose stop order-execution-keeper && docker compose up -d --build order-execution-keeper`
-2. Add a SIGTERM handler that sets `shuttingDown = true` immediately, drains the current execution (waits for `waitForTransactionReceipt` to finish), then exits. The current keeper already has this pattern.
-3. Set `stop_grace_period: 120s` in docker-compose.yml to give the keeper time to finish in-flight transactions before Docker sends SIGKILL.
-4. Never use `--scale` for the keeper -- it MUST be a singleton.
-5. Consider a startup lock: on boot, read the pending nonce. If it doesn't match `getTransactionCount({ blockTag: "latest" })`, there may be a pending TX from the old instance. Wait for it to confirm before starting execution.
+**Current mitigations present:**
+- order-execution-keeper has `extractExpectedNonce` and retries with corrected nonce on "nonce too low"
+- Sequential executor design means order-execution-keeper only has one in-flight TX at a time
+- keeper-service liquidation executor has no concurrency protection
 
-**Warning signs:**
-- Nonce errors spike immediately after deployment
-- Two containers with the same image appear in `docker ps` briefly
-- Transactions appear to execute twice (double gas charges)
+**Consequence:** Liquidation execution and order/deposit/withdrawal execution will collide under concurrent load. The liquidation TX or the deposit TX will revert. The deposit will be retried (it stays in the DataStore). The liquidation candidate will be marked `FAILED` in the keeper-service database and never retried.
 
-**Phase to address:**
-Phase 3 (Docker Deployment) -- must be addressed as part of the deployment procedure, not afterthought.
+**Prevention options (in order of preference):**
+1. **Separate wallets (recommended for production):** Give keeper-service its own funded wallet with `LIQUIDATION_KEEPER` role. Completely eliminates the conflict. Zero code changes needed beyond a new `.env` var.
+2. **Transaction mutex shared across both keepers (testnet shortcut):** Not feasible — two separate processes, no shared memory.
+3. **Stagger execution windows:** Configure keeper-service to delay liquidation execution by 3 seconds after order-execution-keeper's last known submission time. Not reliable under load.
+4. **Accept conflicts as rare for testnet:** On testnet with low traffic, simultaneous liquidation + order execution is unlikely. The order-execution-keeper's `extractExpectedNonce` recovery handles most cases. Acceptable for v1.7 verification but must be fixed before production.
+
+**Detection:** Watch for `replacement transaction underpriced` or `nonce too low` errors in keeper-service logs at the same time that order-execution-keeper logs show normal execution. The timing correlation identifies a nonce conflict.
+
+**Phase to address:** Phase 24 or a dedicated wallet-split phase. For v1.7 (testnet verification), document this as a known risk. Mark it blocking for any production deployment.
 
 ---
 
-### Pitfall 6: WebSocket Event Subscription Silently Falls Back to HTTP Polling
+### Pitfall 5: Liquidation Executor Uses `getStoredPrice` With 60-Second Staleness Check — Depends on order-execution-keeper Staying Alive
 
 **What goes wrong:**
-Viem's `createPublicClient` with a `fallback([webSocket(), http()])` transport produces a transport with `type: "fallback"`, NOT `type: "webSocket"`. When `watchContractEvent` (or `watchEvent`) is called on this client, it silently degrades to HTTP polling instead of using WebSocket subscriptions. The keeper appears to work but detects events at poll intervals (seconds) instead of real-time (milliseconds).
+The keeper-service liquidation executor's `getTokenPrice` method reads prices from `PythLazerFeedProvider.getStoredPrice()` on-chain, with a 60-second staleness guard (`nowSeconds - storedPrice.timestamp > 60n`). This design assumes the order-execution-keeper is continuously pushing fresh prices to the `PythLazerFeedProvider` contract. If the order-execution-keeper goes down (Docker restart, crash, temporary OOM), the stored prices go stale within 60 seconds. The liquidation keeper then returns `null` for all token prices, skips all markets with a "stored price too stale" warning, and silently misses every liquidation opportunity during the downtime window.
 
-**Why it happens:**
-This is a known viem footgun (documented in the current codebase's `client.ts` comments referencing "viem issue #776"). The natural instinct when building a resilient client is to wrap WebSocket in a fallback -- but this defeats the purpose of WebSocket entirely.
+**Why this is dangerous for liquidations specifically:** A liquidation that was valid at the time of the scan may become invalid if prices move. But a position that should be liquidated immediately (e.g., price spiked sharply against the position) needs to be acted on within the same scan window. If prices go stale for even 60 seconds during volatile market conditions, legitimate liquidations are skipped.
 
-**How to avoid:**
-The current keeper's `getWsPublicClient()` already implements the correct pattern: create a SEPARATE WebSocket-only client (no fallback transport), and verify `transport.type === "webSocket"` after creation. If it's not "webSocket", return null and fall back to poll-only mode explicitly. The minimal rewrite must preserve this pattern:
-1. Create HTTP client for reads and transaction submission
-2. Create separate WebSocket client for event watching ONLY
-3. Verify transport type after creation
-4. If WebSocket unavailable, degrade to poll-only with a clear log warning
+**Prevention:**
+1. The liquidation keeper should have its OWN Pyth Lazer WebSocket connection and cache (independent of order-execution-keeper's on-chain price storage). The `PythLazerOracleService` already exists in keeper-service — it just needs to be started in `lazer` oracle mode and `getTokenPrice` should read from the local cache, not from on-chain stored prices.
+2. The current keeper-service `index.ts` already initializes `PythLazerOracleService` when `ORACLE_MODE=lazer` — but the `scanner.ts` `getTokenPrice` method ignores this and reads from the contract instead.
+3. Minimum fix: change `getTokenPrice` to try the local Lazer cache first, fall back to on-chain stored price if the cache miss.
 
-**Warning signs:**
-- Event detection latency is 2-4 seconds instead of <500ms
-- Logs show no WebSocket subscription confirmation message
-- `transport.type` is "fallback" or "http" instead of "webSocket"
+**Detection:** If order-execution-keeper has a brief restart and liquidation scanner logs show "stored price too stale" for all tokens during that window, this pitfall is manifesting.
 
-**Phase to address:**
-Phase 1 (Core Architecture) -- client setup is the first thing built.
+**Phase to address:** Phase 25 (liquidation verification) — fixing this dependency is part of making the liquidation path reliable.
 
 ---
 
-### Pitfall 7: Oracle Provider Address Mismatch With On-Chain Config
+### Pitfall 6: `discoverAccountsWithPositions` Fetches Every Position Key Individually — O(N) RPC Calls Per Scan
 
 **What goes wrong:**
-The on-chain `DataStore` has a mapping `ORACLE_PROVIDER_FOR_TOKEN` that maps each token address to its authorized oracle provider contract. If the keeper passes oracle data signed for the wrong provider (e.g., Pyth Hermes data to a token configured for Pyth Lazer, or vice versa), the execution reverts with `InvalidOracleProvider (0x05d102a2)`. This was a production-blocking bug that required v1.4 to fully resolve with per-token oracle routing.
+`positionFetcher.discoverAccountsWithPositions()` in keeper-service:
+1. Reads `getBytes32Count(POSITION_LIST_KEY)` to get total count
+2. Reads position keys in batches of 100 via `getBytes32ValuesAt`
+3. For EACH position key, makes an individual `getPosition(dataStore, key)` RPC call to extract the account address
+
+With 1000 open positions, this is 1000 serial RPC calls per scan cycle. At ~100ms per call on Base Sepolia, one scan cycle takes 100 seconds — longer than the 30-second scan interval. The `scanRunning` guard prevents overlapping scans, so every scan cycle is skipped until the previous one finishes. Effective scan frequency degrades to once every 100 seconds at 1000 positions.
 
 **Why it happens:**
-During the rewrite, it is tempting to simplify oracle handling by assuming all tokens use the same provider (e.g., all Lazer). But the on-chain config may have some tokens set to Hermes and others to Lazer, especially for FX tokens that lack Lazer entitlements. The current system has a complex per-token routing system (`isTokenLazerEntitled` + Hermes fallback) that must be preserved or simplified correctly.
+The `POSITION_LIST` in the DataStore stores position keys (`bytes32`), not the full position structs. To find which accounts have positions, you must decode each key back to an account — but position keys are hashes, not reversible. The only way to get the account is to read the full position struct from the contract.
 
-**How to avoid:**
-1. At startup, verify oracle provider consistency using `verifyOracleProviderConsistency()` -- read the on-chain `ORACLE_PROVIDER_FOR_TOKEN` for every configured token and compare against the keeper's configured provider addresses.
-2. If any token's on-chain provider doesn't match the keeper's Lazer provider, either: (a) skip that token, or (b) route it through the correct provider.
-3. Log mismatches as ERRORS, not warnings. A mismatch means that token's operations WILL fail.
-4. The simplest approach for the minimal rewrite: assume all tokens use PythLazerFeedProvider (since that's what's configured on-chain for all 6 markets). If a token fails verification, log an error and exclude it from executable operations.
+**Note for v1.7 testnet context:** With very few test positions (likely 5-20), this is not a problem. The pitfall becomes relevant at scale or during load testing.
 
-**Warning signs:**
-- Executions revert with `0x05d102a2` or `0x68b49e6c` error codes
-- Some markets work while others consistently fail
-- Oracle verification at startup shows mismatches
+**Prevention:**
+For now, document the O(N) limitation. The correct optimization is to use event-based account discovery: watch `PositionIncrease` events from EventEmitter to build an account registry, then only fetch positions for known accounts. This eliminates the DataStore iteration entirely. The `confirmator.ts` already watches the EventEmitter — extend it to track accounts with active positions.
 
-**Phase to address:**
-Phase 1 (Core Architecture) -- oracle provider verification must run at startup before any execution begins.
+**Detection:** Scan cycle duration in logs exceeds 30 seconds (the scan interval). "previous scan still running, skipping" warnings appear regularly.
+
+**Phase to address:** Phase 25 (liquidation optimization) — document as a known scale bottleneck. Implement event-based account discovery when testnet positions exceed 50.
 
 ---
 
-### Pitfall 8: Pyth Lazer Reconnection Storm After Token Expiry
+### Pitfall 7: `collateralUsd` in PositionSnapshot Is Not USD — It Is Raw Token Amount
 
 **What goes wrong:**
-When the Pyth Pro access token expires or is revoked, all 4 WebSocket connections drop simultaneously. The SDK's reconnection logic (exponential backoff, `maxRetryDelayMs: 1000`) tries to reconnect every connection aggressively. Each reconnection attempt fails with an auth error, generating 4 error logs per second. Meanwhile, the oracle cache goes stale (Pitfall 2), executions start failing, and the error log volume fills disk space on the DigitalOcean droplet.
+`positionFetcher.ts` sets `collateralUsd = pos.numbers.collateralAmount`. The comment says `// TODO: Convert using collateral token price`. But `collateralAmount` is the raw token amount (e.g., USDC with 6 decimals, so 1000 USDC = `1_000_000` wei). The `RiskEngine.checkLiquidation` uses this raw value as if it were a USD amount (`const collateral = position.collateralUsd`). All risk calculations are wrong by orders of magnitude.
 
-**Why it happens:**
-The Pyth Lazer SDK reconnects with `attempts: Infinity` by default. Auth failures are not distinguished from transient network errors, so the client never gives up. The `maxRetryDelayMs: 1000` (currently configured) caps backoff at 1 second, meaning even with 4 connections, that is at minimum 4 failed connection attempts per second, indefinitely.
+**However:** The scanner in `scanner.ts` does NOT use `RiskEngine.checkLiquidation`. It calls `Reader.isPositionLiquidatable()` directly on-chain, which computes everything correctly using the contract's internal pricing. The `RiskEngine` is only used to compute a `riskScore` for the database record, not to decide whether to liquidate.
 
-**How to avoid:**
-1. Set `maxRetryDelayMs` to something reasonable like `30000` (30s) to reduce reconnection storm intensity.
-2. Monitor the `allConnectionsDownListener` callback. If it fires and stays down for >60 seconds, the token is likely expired, not a transient issue. Log a FATAL-level message with the action to take ("check PYTH_PRO_ACCESS_TOKEN validity").
-3. Add a circuit breaker: after N consecutive failed connections across all pools (e.g., 20), stop reconnecting and set the keeper to "degraded mode" (poll-only with Hermes fallback, or pause execution entirely).
-4. Monitor Pyth Pro token expiry proactively. Set a calendar reminder before the token expires.
+**The consequence:** Risk scores in the database are wrong (will show extreme values). But liquidation decisions are based on the on-chain Reader call, which is correct. The bug is a data quality issue in the audit trail, not a correctness issue in the execution path.
 
-**Warning signs:**
-- Log output volume spikes dramatically
-- All oracle cache entries go stale simultaneously
-- `allConnectionsDownListener` fires but connections never recover
-- Disk usage on droplet increases rapidly
+**Prevention:** Fix the `collateralUsd` calculation before relying on risk scores for any alerting or dashboarding. For v1.7, note this as a known data quality issue in the audit trail but not a blocker for functional correctness.
 
-**Phase to address:**
-Phase 2 (Executor Implementation) -- when building the Pyth Lazer integration.
+**Phase to address:** Phase 25 (liquidation optimization) — fix the calculation as part of the risk scoring improvements.
 
 ---
 
-### Pitfall 9: viem `waitForTransactionReceipt` Blocks Drain Loop During Congestion
+### Pitfall 8: Executor Re-Fetches Position From Contract After It May Have Changed
 
 **What goes wrong:**
-The current keeper calls `waitForTransactionReceipt({ timeout: 60_000 })` after every transaction submission. During chain congestion, a transaction may sit in the mempool for the full 60 seconds before confirming. The drain loop is blocked for this entire time, unable to process any other pending operations. If 5 deposits arrive during this window, they queue up and execute 60s apart instead of in rapid succession.
+The liquidation execution flow in `executor.ts`:
+1. Scanner identifies a liquidatable position and saves a snapshot
+2. Scanner calls `executor.execute(candidate, decision)` synchronously
+3. Executor re-fetches the position from the contract via `positionFetcher.fetchAccountPositions`
+4. If no matching position is found (size > 0), the execution fails with "Position not found"
 
-**Why it happens:**
-The sequential execution design correctly prevents nonce conflicts, but `waitForTransactionReceipt` is a blocking call that holds the txMutex. The intent is to confirm success before moving on, but the confirmation is not necessary for correctness -- the nonce was already consumed, and the next transaction can use the next nonce immediately.
+Between step 1 (scanner decision) and step 3 (executor re-fetch), the position state on-chain may have changed:
+- The user closed their position voluntarily between the scan and the execution
+- Another keeper instance liquidated it first (impossible with single keeper, but relevant if testing with multiple)
+- The user added collateral and the position is no longer liquidatable
 
-**How to avoid:**
-For the minimal rewrite, consider a fire-and-confirm pattern:
-1. Submit transaction, capture the txHash
-2. Immediately release the execution slot and move to the next pending item
-3. Track submitted txHashes in a separate "confirmations pending" list
-4. A parallel confirmation checker polls for receipts and logs results
-5. If a receipt shows `status: "reverted"`, the operation needs re-evaluation (but the on-chain state already reflects the revert, so the next scan will re-discover it if needed)
+**The double-fetch pattern:** The executor re-fetches the position specifically to get `collateralToken` and `isLong`, which are needed for `executeLiquidation(account, market, collateralToken, isLong, oracleParams)`. These are stored in the position struct but not reliably in the scanner's snapshot.
 
-HOWEVER, this adds complexity. For the ~300 line minimal rewrite, the simpler approach is to accept the blocking wait but reduce the timeout to 15-20 seconds (on Base Sepolia with Flashblocks, transactions confirm in <2 seconds normally) and treat timeout as a transient error that triggers retry.
+**Consequence for closed positions:** The executor calls `executeLiquidation` with parameters from the snapshot for a position that no longer exists. The LiquidationHandler will revert because there is no position to liquidate. The executor catches the error and marks the candidate `FAILED`. This is correct behavior — but the `FAILED` status in the DB looks concerning and may trigger false alerts.
 
-**Warning signs:**
-- Queue depth grows while a single item is being processed
-- Execution latency shows 60000ms for individual items
-- Users report long waits between submitting and seeing execution
+**Prevention:** Treat `FAILED` liquidation executions as potentially benign (position closed before execution). Log them as INFO not ERROR when the position no longer exists at execution time. Do not alert on `FAILED` candidates without first checking whether the position still exists.
 
-**Phase to address:**
-Phase 2 (Executor Implementation) -- this is an execution design choice that affects throughput.
+**Phase to address:** Phase 25 — improve executor error classification to distinguish "position no longer exists" from genuine execution failures.
 
 ---
 
-### Pitfall 10: Losing the keccak256/encodeAbiParameters Pattern for DataStore Keys
-
-**What goes wrong:**
-Reading DataStore keys requires constructing the correct `bytes32` key using `keccak256(encodeAbiParameters(...))`. Solidity's `abi.encode` is NOT the same as viem's `encodePacked`. Using `encodePacked` produces a different hash, silently returning wrong data (empty arrays, zero values) from the DataStore. This was already a production bug documented in the project MEMORY.md.
-
-**Why it happens:**
-During a rewrite, the developer sees Solidity code like `keccak256(abi.encode("DEPOSIT_LIST"))` and translates it to viem using `encodePacked` because "packed" feels like it matches "encode". But `abi.encode` pads each argument to 32 bytes, while `abi.encodePacked` concatenates without padding. The hashes are completely different.
-
-**How to avoid:**
-Copy the existing `keys.ts` pattern exactly. Use `encodeAbiParameters([{ type: 'string' }], ['DEPOSIT_LIST'])` (NOT `encodePacked`). The existing keeper already has this correct -- the rewrite must not "simplify" it.
-
-Test the key construction at startup: read a known DataStore key (like `DEPOSIT_LIST` count) and verify it returns a non-zero value. If it returns 0 and there are known pending deposits, the key construction is wrong.
-
-**Warning signs:**
-- Scanner returns 0 pending deposits when the frontend shows pending operations
-- DataStore reads return empty arrays or zero values
-- No errors thrown -- just silently wrong data
-
-**Phase to address:**
-Phase 1 (Core Architecture) -- DataStore key construction is the foundation of the scanner.
+## Moderate Pitfalls
 
 ---
 
-## Technical Debt Patterns
+### Pitfall 9: SKIP_HANDLER_DEPLOYMENTS Environment Variable Silently Skips OrderHandler Redeploy
 
-Shortcuts that seem reasonable but create long-term problems.
+**What goes wrong:**
+`deployOrderHandler.ts` has `func.skip = async () => process.env.SKIP_HANDLER_DEPLOYMENTS ? true : false`. If this variable is set in the shell environment (perhaps from a previous partial deployment session or a different project's dotenv), `npx hardhat deploy --tags OrderHandler` runs, appears to succeed (Hardhat reports "nothing to deploy"), but deploys nothing. The old buggy OrderHandler remains at its old address.
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Skip DB entirely | -500 lines of Prisma/migration code, no postgres dependency | No execution history, no block tracking for backfill, no audit trail | Acceptable for v1.5 -- on-chain DataStore is the audit trail. Add structured logging to file for post-mortem analysis. |
-| Fixed 2M gas limit for all TXs | Saves an estimateGas RPC call per execution | Overpays gas on simple operations, underpays on complex ones | Acceptable on Base Sepolia (low gas costs). Revisit for mainnet. |
-| Single-process design | Simplicity, no IPC, no coordination | Cannot scale to multiple keeper instances | Acceptable until transaction volume exceeds ~1 TX/second throughput |
-| `Date.now()` for oracle timestamps | Avoids parsing Pyth's timestamp format | Clock skew between keeper machine and chain validators causes MaxPriceAgeExceeded | Never acceptable. Use `feedUpdateTimestamp` from Pyth response. |
-| Hardcoded contract addresses | No config file parsing | Address changes require code changes and rebuild | Acceptable for testnet. Use env vars for all addresses from day one. |
-| No Hermes fallback in minimal rewrite | Simpler oracle code (Lazer only) | FX tokens without Lazer entitlements become unexecutable | Acceptable ONLY if all 6 markets are verified to have Lazer entitlements. Otherwise, must include Hermes fallback path. |
+**Prevention:** Before deployment, explicitly verify `SKIP_HANDLER_DEPLOYMENTS` is unset:
+```bash
+echo $SKIP_HANDLER_DEPLOYMENTS  # must be empty
+unset SKIP_HANDLER_DEPLOYMENTS
+```
 
-## Integration Gotchas
+**Phase to address:** Phase 24 — add this verification to the pre-deployment checklist.
 
-Common mistakes when connecting to external services.
+---
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| Pyth Lazer WebSocket | Subscribing before SDK client is fully initialized (race condition in `PythLazerClient.create`) | Await `clientReady` promise before calling `subscribe()`. Current code does this correctly via the `connect()` method. |
-| Pyth Lazer WebSocket | Not including all 3 endpoints for redundancy | Pyth docs: "you must connect to all endpoints" -- `pyth-lazer-0`, `pyth-lazer-1`, `pyth-lazer-2`. The SDK handles this with `numConnections: 4` across the endpoint pool. |
-| Pyth Lazer binary format | Assuming each binary message contains data for a single feed | Binary responses contain data for ALL subscribed feeds. Cache the raw update for every registered token, not just the one that "matches" the feed ID. Current `handlePriceUpdate` does this correctly. |
-| Base Sepolia RPC (Flashblocks) | Using the Flashblocks RPC URL for WebSocket subscriptions | Flashblocks RPC is HTTP-only for preconfirmations. Use standard WS_RPC_URL for event subscriptions. |
-| Docker + Pyth WebSocket | Container restart causes 4 WebSocket reconnection attempts before data flows | Add a startup wait (current: 10 seconds) after Pyth connection before first scan. Verify feed data actually arrived with `verifyLazerFeeds()` pattern. |
-| viem WebSocket transport | Using `fallback([webSocket(), http()])` for event watching | Creates "fallback" transport type that silently polls via HTTP. Use separate WebSocket-only client. |
-| DataStore key encoding | Using viem `encodePacked` to match Solidity `abi.encode` | Must use `encodeAbiParameters` -- different encoding, different hash, silently wrong results. |
-| viem nonceManager | Using `createNonceManager` for sequential keeper transactions | Nonce gap on estimateGas failure. Use manual `getTransactionCount({ blockTag: "pending" })` instead. |
+### Pitfall 10: hardhat-deploy Skips Redeployment If Bytecode Matches Cached Deployment
 
-## Performance Traps
+**What goes wrong:**
+`hardhat-deploy` compares the new contract's bytecode against the cached deployment in `deployments/baseSepolia/`. If the bytecode matches (e.g., you compiled the same contract twice without changes), it skips deployment and uses the cached address. After fixing `OrderHandler.sol`, the bytecode will differ, so this is not a concern — unless the fix was reverted accidentally or the compilation produced the same bytecode via a no-op change.
 
-Patterns that work at small scale but fail as usage grows.
+**Detection:** After `npx hardhat deploy --tags OrderHandler`, verify the address in `deployments/baseSepolia/OrderHandler.json` differs from the old address (`0xCf752B72B74eE7b35a405c445E9843968f53A397`). If the address is unchanged, the deployment was skipped.
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Fetching full deposit struct for every key in DEPOSIT_LIST each scan cycle | Scan cycle takes 2-5 seconds with 50+ pending keys | Batch reads using multicall. Pre-filter by checking if key is already in `allKnown` set before fetching details. | >20 simultaneous pending operations |
-| Synchronous `waitForTransactionReceipt` in the drain loop | Queue backs up during chain congestion; 5 pending items take 5 minutes | Reduce timeout to 15s; accept that confirmation is best-effort. On-chain state is the source of truth. | Any period of >5s block times |
-| Restarting full WebSocket subscription on every reconnection | Pyth Lazer SDK creates new subscription, old one still active on server side | Let SDK handle reconnection internally. Don't call `subscribe()` again in `allConnectionsDownListener`. | Frequent network blips (>1/minute) |
-| Reading `getTransactionCount({ blockTag: "pending" })` before every TX | Adds 100-200ms RPC latency per execution | For sequential execution, track nonce locally: fetch once at startup, increment after each successful submission, reset to on-chain value on any nonce error. | >5 TXs in rapid succession |
+**Prevention:** Force redeployment if needed with `--reset` flag. Do not use `--reset` blindly — it redeploys ALL contracts, not just the targeted ones.
 
-## Security Mistakes
+**Phase to address:** Phase 24 — explicit address comparison is part of the post-deployment verification.
 
-Domain-specific security issues beyond general web security.
+---
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Private key in docker-compose.yml or committed to git | Key theft, fund drainage | Use `.env` file (already in `.gitignore`). Never hardcode in compose file. Current setup correctly uses `${PRIVATE_KEY}` env var reference. |
-| No gas balance monitoring | Keeper wallet runs out of ETH, all executions fail silently, users' deposits stuck | Add a startup check: if keeper wallet balance < 0.01 ETH, log FATAL and refuse to start. Check balance periodically and alert when low. |
-| Executing operations without validating oracle data freshness | Stale oracle prices lead to incorrect execution prices, potential economic loss | Always check timestamp of cached oracle data against `MAX_ORACLE_PRICE_AGE` before including in execution params. |
-| Not verifying transaction receipt status after execution | TX reverts on-chain but keeper marks it as "executed" | Always check `txReceipt.status === "success"`. If "reverted", mark for retry or investigation. |
+### Pitfall 11: `withOraclePrices` Modifier Staleness Check Uses On-Chain Block Timestamp, Not Keeper Clock
 
-## UX Pitfalls
+**What goes wrong:**
+The `LiquidationHandler.executeLiquidation` uses `withOraclePrices(oracleParams)` which calls `Oracle.setPrices`. Inside `Oracle.setPrices`, each price's timestamp is validated against `block.timestamp` with `MAX_ORACLE_PRICE_AGE` (300 seconds). The keeper's executor in `buildOracleParams` passes `update?.rawUpdate ?? "0x"` — when `rawUpdate` is "0x" (no cached update), the contract reads from stored prices via `PythLazerFeedProvider.getOraclePrice`, which returns whatever price was last pushed on-chain.
 
-Common user experience mistakes in this domain.
+**The trap:** On-chain stored prices are updated by the order-execution-keeper every ~5 seconds. But the `timestamp` field stored in the contract comes from the Pyth Lazer feed's original timestamp, not `block.timestamp`. If there is any clock drift between the Pyth feed timestamp and the chain's `block.timestamp`, the `MAX_ORACLE_PRICE_AGE` check can fail even with fresh prices.
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Keeper goes down with no user-facing indication | Users submit deposits that sit pending forever, assume the platform is broken | Health endpoint exposed at `/health`. Frontend should poll keeper health and show "Execution service unavailable" banner when unhealthy. |
-| Ghost deposits stuck in UI pending state | Users see "Pending" for deposits that were already cancelled on-chain | Frontend should check on-chain deposit state directly, not rely on keeper DB status. With no DB, this becomes the only option -- which is actually better. |
-| Execution latency visible as "pending" to user | User submits deposit, sees "Pending" for 10-30 seconds, panics | Frontend should show "Processing..." with a progress indicator. Display "Submitted to chain" as soon as the createDeposit TX confirms, "Executing..." when keeper picks it up. |
+**Prevention:** Test liquidation execution end-to-end on testnet before assuming it works. The oracle timestamp handling for liquidations may differ from deposit/withdrawal execution in subtle ways. Verify by observing actual `executeLiquidation` transactions on Basescan.
 
-## "Looks Done But Isn't" Checklist
+**Phase to address:** Phase 25 — requires live testnet testing, not just code review.
 
-Things that appear complete but are missing critical pieces.
+---
 
-- [ ] **Scanner reads all pending keys:** Verify the scan reads the FULL DataStore list (deposit + withdrawal + order keys), not just new events. Test by creating a deposit while the keeper is stopped, then starting the keeper -- it should pick it up.
-- [ ] **Oracle cache has TTL:** Verify that stale cache entries (>270s old) are NOT used for execution. Test by disconnecting the Pyth WebSocket and waiting 5 minutes -- executions should fail with "no oracle data" not with "MaxPriceAgeExceeded".
-- [ ] **Graceful shutdown completes in-flight TX:** Verify that `SIGTERM` waits for the current `waitForTransactionReceipt` to finish before exiting. Test by sending SIGTERM during an active execution -- the TX should confirm, not be abandoned.
-- [ ] **All 6 markets execute:** Verify deposits/withdrawals work for ETH, BTC, EUR, GBP, GOLD, and JPY markets. FX markets historically fail with oracle errors -- do not assume "it works for ETH so it works for all".
-- [ ] **Nonce recovery after crash:** Verify that after a process crash (kill -9), the keeper recovers the correct nonce on restart. Test by killing the process during execution and restarting -- the next TX should use the correct nonce.
-- [ ] **Docker health check passes:** Verify the `/health` endpoint returns 200 after startup wait + oracle initialization. The Dockerfile HEALTHCHECK has `start-period: 120s` -- ensure the keeper is fully initialized within this window.
-- [ ] **Event listener reconnects after WS drop:** Verify that if the WebSocket connection drops, the event listener reconnects AND the poll safety net catches events during the gap. Test by restarting the WS RPC endpoint.
-- [ ] **Ghost key dedup works across scan cycles:** Verify that after a ghost is detected once, subsequent scan cycles do NOT re-fetch and re-log it.
+### Pitfall 12: `onlyLiquidationKeeper` Role — keeper-service Must Have This Role Granted
+
+**What goes wrong:**
+`LiquidationHandler.executeLiquidation` has `onlyLiquidationKeeper` modifier (visible in `LiquidationHandler.sol` line 46). The keeper-service wallet must have the `LIQUIDATION_KEEPER` role in the RoleStore. If this role was not granted when the keeper was originally set up (it is separate from `ORDER_KEEPER` and `CONTROLLER`), all liquidation transactions will revert with an access control error.
+
+**Why likely not yet verified:** The liquidation keeper has never been run end-to-end (it is "pending verification" per `PROJECT.md`). The role may or may not have been granted when the contract was originally deployed.
+
+**Prevention:** Before running the liquidation keeper for the first time, verify the role:
+```bash
+cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "LIQUIDATION_KEEPER") <KEEPER_WALLET_ADDRESS> --rpc-url https://sepolia.base.org
+```
+If it returns `false`, grant it:
+```bash
+cast send <ROLE_STORE> "grantRole(bytes32,address)" $(cast keccak "LIQUIDATION_KEEPER") <KEEPER_WALLET_ADDRESS> --rpc-url https://sepolia.base.org --private-key <ADMIN_KEY>
+```
+
+**Phase to address:** Phase 25 — this is the first thing to check before any liquidation testing.
+
+---
+
+## Minor Pitfalls
+
+---
+
+### Pitfall 13: Scan Interval (30 seconds) May Miss Immediate Liquidation After Sharp Price Move
+
+**What goes wrong:**
+The keeper-service scan runs every 30 seconds (`SCAN_INTERVAL_SECONDS=30`). If a position becomes liquidatable due to a sudden price spike, it is not detected until the next scan cycle completes, which could be up to 29 seconds after the price move. On testnet with low latency, this is acceptable. On mainnet with competitive liquidators, this means losing every liquidation to bots scanning at 1-second intervals.
+
+**Prevention for v1.7:** 30 seconds is acceptable for testnet verification. Document the limitation. For production, the scan interval should be reduced to 2-5 seconds, and the oracle pricing should be pulled directly from the Lazer WebSocket cache (not from on-chain stored prices) to eliminate the oracle-freshness dependency during scanning.
+
+**Phase to address:** Phase 25 (optimization) — scan interval tuning is a performance parameter, not a correctness issue.
+
+---
+
+### Pitfall 14: PostgreSQL Database Must Be Migrated Before keeper-service Restart
+
+**What goes wrong:**
+The keeper-service uses Prisma with a PostgreSQL database. If the schema changes (new fields, renamed tables) between deployments without running `prisma migrate deploy`, the service crashes on startup with a Prisma schema mismatch error.
+
+**For v1.7:** No schema changes are planned. The liquidation tables (`position_snapshots`, `liquidation_candidates`, `signed_decisions`, `liquidation_executions`) already exist from the initial keeper-service deployment.
+
+**Prevention:** If schema changes are ever made, always run `prisma migrate deploy` on the DO droplet before restarting the service. The database is on the same droplet; SSH in and run it manually.
+
+**Phase to address:** Not a v1.7 concern unless schema changes are introduced.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| OrderHandler redeploy | ExchangeRouter immutable constructor not updated | Always deploy ExchangeRouter immediately after OrderHandler |
+| ExchangeRouter redeploy | CONTROLLER/ROUTER_PLUGIN roles not granted | Verify with `cast call` before any testing |
+| Address propagation to DO droplet | Stale addresses in live `.env` files | SSH to droplet, update `.env`, restart both keepers |
+| Liquidation first run | LIQUIDATION_KEEPER role not granted | Check role before first execution attempt |
+| Nonce management | Both keepers share wallet, concurrent TXs | Separate wallets or accept testnet race condition with documented risk |
+| Oracle for liquidations | Depends on order-execution-keeper's on-chain price store | Verify freshness window; use local Lazer cache for independence |
+| Account discovery | O(N) per-position RPC calls | Acceptable at testnet scale; document as scale blocker |
+| Risk score accuracy | collateralUsd is raw token amount, not USD | Non-blocking for v1.7; fix before using scores for alerts |
+| Skip flag on deployment | SKIP_HANDLER_DEPLOYMENTS env var skips redeploy silently | Unset before running hardhat deploy |
+| hardhat-deploy cache | Unchanged bytecode skips redeploy | Verify new address differs from old after deployment |
+| Oracle timestamp validation | On-chain timestamp vs block.timestamp drift | Verify with actual testnet liquidation execution |
+
+---
 
 ## Recovery Strategies
 
-When pitfalls occur despite prevention, how to recover.
+| Pitfall | Recovery Steps |
+|---------|---------------|
+| ExchangeRouter still points to old OrderHandler | Redeploy ExchangeRouter immediately; update all service addresses |
+| CONTROLLER role missing | Call `grantRole(CONTROLLER, newAddress)` from RoleStore admin; no redeployment needed |
+| LIQUIDATION_KEEPER role missing | Call `grantRole(LIQUIDATION_KEEPER, keeperWallet)` from RoleStore admin |
+| Stale addresses on DO droplet | SSH to `142.93.203.222`, update `.env` for both keepers, `docker compose restart` both services |
+| Nonce conflict between keepers | Let it resolve naturally (order-execution-keeper has recovery); if stuck, restart both keepers and let them re-sync nonces from chain |
+| Liquidation executor marks candidates FAILED | Check whether position still exists on-chain; if position was closed legitimately, FAILED status is correct. Re-check logic if position still exists. |
+| SKIP_HANDLER_DEPLOYMENTS silently skipped deploy | Unset the var, run deployment again; hardhat-deploy will compare bytecode and redeploy correctly |
 
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Nonce gap (stuck transactions) | LOW | SSH into droplet, restart the keeper container. On restart, `getTransactionCount({ blockTag: "pending" })` fetches the correct nonce. If a TX is stuck in mempool, submit a zero-value TX with the stuck nonce and higher gas to unstick it. |
-| Stale oracle cache | LOW | Restart the keeper. Pyth WebSocket reconnects, cache repopulates in 10 seconds. Pending operations will be re-discovered by the scanner. |
-| Ghost deposit infinite loop | LOW | Add the ghost key to an ignore list, or cancel it on-chain via the DepositHandler. Restart keeper to clear in-memory state. |
-| Docker duplicate keeper | MEDIUM | `docker compose stop order-execution-keeper` to stop both instances. Wait 30 seconds for any in-flight TXs to confirm. Then `docker compose up -d order-execution-keeper`. Check `getTransactionCount` matches expected nonce. |
-| Oracle provider mismatch | MEDIUM | Run the `configureOracleTokens.ts` deploy script to update on-chain DataStore mappings. Or update the keeper's configured provider address to match what's on-chain. Restart keeper after fix. |
-| DataStore key hash mismatch (wrong encoding) | HIGH | This is a code bug, not a runtime issue. Fix the encoding function, rebuild Docker image, redeploy. All pending operations are safe on-chain -- they just weren't being discovered. |
-| Private key compromise | CRITICAL | Immediately transfer all funds from the keeper wallet. Deploy new keeper wallet. Update on-chain RoleStore to revoke old keeper and authorize new one. Update .env and redeploy. |
-| Pyth token expired / reconnection storm | LOW | Replace `PYTH_PRO_ACCESS_TOKEN` in .env, restart keeper. If disk is full from log spam, `docker logs --tail 0` to truncate, then restart. |
-
-## Pitfall-to-Phase Mapping
-
-How roadmap phases should address these pitfalls.
-
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Nonce gap on failed estimateGas | Phase 1: Core Architecture | Unit test: mock a reverted estimateGas, verify next TX uses correct nonce |
-| Stale oracle cache | Phase 1: Core Architecture | Integration test: disconnect WS, wait 5 min, verify execution is blocked |
-| In-flight queue loss on restart | Phase 1: Core Architecture | E2E test: create deposit, kill keeper, restart, verify deposit executes |
-| Ghost deposit infinite retry | Phase 2: Executor Implementation | Log analysis: after 3 scan cycles, ghost key should appear in logs only once |
-| Docker duplicate keeper | Phase 3: Docker Deployment | Deployment runbook with explicit stop-then-start procedure |
-| WebSocket HTTP fallback | Phase 1: Core Architecture | Startup assertion: verify `transport.type === "webSocket"` |
-| Oracle provider mismatch | Phase 1: Core Architecture | Startup verification: `verifyOracleProviderConsistency()` with hard failure on mismatch |
-| Pyth reconnection storm | Phase 2: Executor Implementation | Config review: verify `maxRetryDelayMs >= 10000`, circuit breaker implemented |
-| waitForTransactionReceipt blocking | Phase 2: Executor Implementation | Load test: submit 5 deposits rapidly, verify all execute within 60s total |
-| keccak256/encodeAbiParameters mismatch | Phase 1: Core Architecture | Startup smoke test: read DEPOSIT_LIST count, verify it matches expected value |
+---
 
 ## Sources
 
-### Primary (HIGH confidence -- codebase analysis and production incidents)
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/index.ts` -- TxMutex, drainQueue, scanAndEnqueue, shutdown handler
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/executors/baseExecutor.ts` -- nonce management, submitTransaction retry logic, buildOracleParams per-token routing
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/oracle/pythLazerOracle.ts` -- WebSocket pool config, cache architecture, allConnectionsDownListener
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/queue/executionQueue.ts` -- dedup via allKnown, retry with backoff, ghost handling
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/listeners/eventListener.ts` -- backfill from lastProcessedBlock, DB dependency for recovery
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/core/blockchain/client.ts` -- WebSocket transport type verification, fallback transport pitfall
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/Dockerfile` -- health check config, startup period
-- `/Users/ken/Projects/0xM/docker-compose.yml` -- service definitions, restart policy, postgres dependency
-- `.planning/PROJECT.md` -- Known issues (MaxPriceAgeExceeded, InvalidOracleProvider, nonce conflicts, ghost deposits)
-
-### Secondary (MEDIUM confidence -- verified library documentation)
-- [viem createNonceManager documentation](https://viem.sh/docs/accounts/local/createNonceManager)
-- [viem issue #3142: nonceManager still incrementing if tx was not sent](https://github.com/wevm/viem/issues/3142)
-- [viem discussion #1338: Better nonce handling with parallel transactions](https://github.com/wevm/viem/discussions/1338)
-- [Pyth Lazer Getting Started documentation](https://docs.pyth.network/lazer/getting-started)
-- [Pyth Pro Subscribe to Prices documentation](https://docs.pyth.network/price-feeds/pro/subscribe-to-prices)
-- [@pythnetwork/pyth-lazer-sdk npm package](https://www.npmjs.com/package/@pythnetwork/pyth-lazer-sdk)
-- [Docker Rollout: Zero Downtime Deployment for Docker Compose](https://github.com/wowu/docker-rollout)
-- [GMX Synthetics keeper documentation](https://github.com/gmx-io/gmx-synthetics)
-
-### Tertiary (LOW confidence -- training data only)
-- Docker Compose stop/start behavior during `up -d --build` -- verified against Docker documentation but exact behavior may vary by Docker version
+### Primary (HIGH confidence — direct codebase analysis)
+- `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/deployOrderHandler.ts` — SKIP_HANDLER_DEPLOYMENTS skip logic, afterDeploy role grants
+- `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/deployExchangeRouter.ts` — immutable OrderHandler constructor arg, afterDeploy role grants
+- `/Users/ken/Projects/0xM/0xmarkets_contract/contracts/exchange/LiquidationHandler.sol` — onlyLiquidationKeeper modifier, executeLiquidation signature
+- `/Users/ken/Projects/0xM/keeper-service/src/core/scanner.ts` — discoverAccountsWithPositions O(N) pattern, getStoredPrice 60s staleness check
+- `/Users/ken/Projects/0xM/keeper-service/src/core/executor.ts` — no nonce management, double-fetch pattern, gas estimation
+- `/Users/ken/Projects/0xM/keeper-service/src/core/positionFetcher.ts` — collateralUsd = collateralAmount bug
+- `/Users/ken/Projects/0xM/keeper-service/src/core/riskEngine.ts` — uses collateralUsd as USD value (incorrect)
+- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/executor.ts` — extractExpectedNonce, sequential execution, nonce recovery
+- `/Users/ken/Projects/0xM/0xMarkets-Interface/.planning/PROJECT.md` — single wallet decision, liquidation keeper pending verification, nonce management notes
+- `/Users/ken/Projects/0xM/0xMarkets-Interface/.planning/phases/24-contract-bug-fixes/24-01-PLAN.md` — full contract redeploy context, interface listing, known addresses
 
 ---
-*Pitfalls research for: Minimal keeper rewrite (v1.5)*
-*Researched: 2026-02-25*
+*Pitfalls research for: v1.7 Liquidation Readiness (contract redeployment + liquidation keeper)*
+*Researched: 2026-02-27*
