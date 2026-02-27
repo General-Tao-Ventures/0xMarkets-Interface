@@ -121,7 +121,7 @@ export function AppRoutes() {
         <MainRoutes openSettings={openSettings} />
       </div>
       <ToastContainer
-        limit={1}
+        limit={3}
         transition={Zoom}
         position="bottom-right"
         autoClose={TOAST_AUTO_CLOSE_TIME}
