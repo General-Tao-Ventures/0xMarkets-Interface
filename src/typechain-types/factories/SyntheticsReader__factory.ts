@@ -525,6 +525,16 @@ const _abi = [
                     name: "borrowingFeeAmountForFeeReceiver",
                     type: "uint256",
                   },
+                  {
+                    internalType: "uint256",
+                    name: "borrowingFeeSecondaryReceiverFactor",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "borrowingFeeAmountForSecondaryReceiver",
+                    type: "uint256",
+                  },
                 ],
                 internalType:
                   "struct PositionPricingUtils.PositionBorrowingFees",
@@ -575,6 +585,16 @@ const _abi = [
                     name: "liquidationFeeAmountForFeeReceiver",
                     type: "uint256",
                   },
+                  {
+                    internalType: "uint256",
+                    name: "liquidationFeeSecondaryReceiverFactor",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "liquidationFeeAmountForSecondaryReceiver",
+                    type: "uint256",
+                  },
                 ],
                 internalType:
                   "struct PositionPricingUtils.PositionLiquidationFees",
@@ -615,7 +635,17 @@ const _abi = [
               },
               {
                 internalType: "uint256",
+                name: "positionFeeSecondaryReceiverFactor",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
                 name: "feeReceiverAmount",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
+                name: "secondaryFeeReceiverAmount",
                 type: "uint256",
               },
               {
@@ -3237,6 +3267,16 @@ const _abi = [
                     name: "borrowingFeeAmountForFeeReceiver",
                     type: "uint256",
                   },
+                  {
+                    internalType: "uint256",
+                    name: "borrowingFeeSecondaryReceiverFactor",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "borrowingFeeAmountForSecondaryReceiver",
+                    type: "uint256",
+                  },
                 ],
                 internalType:
                   "struct PositionPricingUtils.PositionBorrowingFees",
@@ -3287,6 +3327,16 @@ const _abi = [
                     name: "liquidationFeeAmountForFeeReceiver",
                     type: "uint256",
                   },
+                  {
+                    internalType: "uint256",
+                    name: "liquidationFeeSecondaryReceiverFactor",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "liquidationFeeAmountForSecondaryReceiver",
+                    type: "uint256",
+                  },
                 ],
                 internalType:
                   "struct PositionPricingUtils.PositionLiquidationFees",
@@ -3327,7 +3377,17 @@ const _abi = [
               },
               {
                 internalType: "uint256",
+                name: "positionFeeSecondaryReceiverFactor",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
                 name: "feeReceiverAmount",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
+                name: "secondaryFeeReceiverAmount",
                 type: "uint256",
               },
               {
@@ -3740,6 +3800,16 @@ const _abi = [
                     name: "borrowingFeeAmountForFeeReceiver",
                     type: "uint256",
                   },
+                  {
+                    internalType: "uint256",
+                    name: "borrowingFeeSecondaryReceiverFactor",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "borrowingFeeAmountForSecondaryReceiver",
+                    type: "uint256",
+                  },
                 ],
                 internalType:
                   "struct PositionPricingUtils.PositionBorrowingFees",
@@ -3790,6 +3860,16 @@ const _abi = [
                     name: "liquidationFeeAmountForFeeReceiver",
                     type: "uint256",
                   },
+                  {
+                    internalType: "uint256",
+                    name: "liquidationFeeSecondaryReceiverFactor",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "liquidationFeeAmountForSecondaryReceiver",
+                    type: "uint256",
+                  },
                 ],
                 internalType:
                   "struct PositionPricingUtils.PositionLiquidationFees",
@@ -3830,7 +3910,17 @@ const _abi = [
               },
               {
                 internalType: "uint256",
+                name: "positionFeeSecondaryReceiverFactor",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
                 name: "feeReceiverAmount",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
+                name: "secondaryFeeReceiverAmount",
                 type: "uint256",
               },
               {
@@ -4268,6 +4358,11 @@ const _abi = [
           {
             internalType: "uint256",
             name: "feeReceiverAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "secondaryFeeReceiverAmount",
             type: "uint256",
           },
           {

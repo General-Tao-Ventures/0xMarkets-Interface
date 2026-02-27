@@ -23,8 +23,8 @@ import type {
   TypedContractMethod,
 } from "./common";
 
-export declare namespace IDepositUtils {
-  export type CreateDepositParamsAddressesStruct = {
+export declare namespace DepositUtils {
+  export type CreateDepositParamsStruct = {
     receiver: AddressLike;
     callbackContract: AddressLike;
     uiFeeReceiver: AddressLike;
@@ -33,9 +33,13 @@ export declare namespace IDepositUtils {
     initialShortToken: AddressLike;
     longTokenSwapPath: AddressLike[];
     shortTokenSwapPath: AddressLike[];
+    minMarketTokens: BigNumberish;
+    shouldUnwrapNativeToken: boolean;
+    executionFee: BigNumberish;
+    callbackGasLimit: BigNumberish;
   };
 
-  export type CreateDepositParamsAddressesStructOutput = [
+  export type CreateDepositParamsStructOutput = [
     receiver: string,
     callbackContract: string,
     uiFeeReceiver: string,
@@ -43,7 +47,11 @@ export declare namespace IDepositUtils {
     initialLongToken: string,
     initialShortToken: string,
     longTokenSwapPath: string[],
-    shortTokenSwapPath: string[]
+    shortTokenSwapPath: string[],
+    minMarketTokens: bigint,
+    shouldUnwrapNativeToken: boolean,
+    executionFee: bigint,
+    callbackGasLimit: bigint
   ] & {
     receiver: string;
     callbackContract: string;
@@ -53,31 +61,10 @@ export declare namespace IDepositUtils {
     initialShortToken: string;
     longTokenSwapPath: string[];
     shortTokenSwapPath: string[];
-  };
-
-  export type CreateDepositParamsStruct = {
-    addresses: IDepositUtils.CreateDepositParamsAddressesStruct;
-    minMarketTokens: BigNumberish;
-    shouldUnwrapNativeToken: boolean;
-    executionFee: BigNumberish;
-    callbackGasLimit: BigNumberish;
-    dataList: BytesLike[];
-  };
-
-  export type CreateDepositParamsStructOutput = [
-    addresses: IDepositUtils.CreateDepositParamsAddressesStructOutput,
-    minMarketTokens: bigint,
-    shouldUnwrapNativeToken: boolean,
-    executionFee: bigint,
-    callbackGasLimit: bigint,
-    dataList: string[]
-  ] & {
-    addresses: IDepositUtils.CreateDepositParamsAddressesStructOutput;
     minMarketTokens: bigint;
     shouldUnwrapNativeToken: boolean;
     executionFee: bigint;
     callbackGasLimit: bigint;
-    dataList: string[];
   };
 }
 
@@ -150,7 +137,6 @@ export declare namespace IBaseOrderUtils {
     shouldUnwrapNativeToken: boolean;
     autoCancel: boolean;
     referralCode: BytesLike;
-    dataList: BytesLike[];
   };
 
   export type CreateOrderParamsStructOutput = [
@@ -161,8 +147,7 @@ export declare namespace IBaseOrderUtils {
     isLong: boolean,
     shouldUnwrapNativeToken: boolean,
     autoCancel: boolean,
-    referralCode: string,
-    dataList: string[]
+    referralCode: string
   ] & {
     addresses: IBaseOrderUtils.CreateOrderParamsAddressesStructOutput;
     numbers: IBaseOrderUtils.CreateOrderParamsNumbersStructOutput;
@@ -172,73 +157,69 @@ export declare namespace IBaseOrderUtils {
     shouldUnwrapNativeToken: boolean;
     autoCancel: boolean;
     referralCode: string;
-    dataList: string[];
   };
 }
 
-export declare namespace IShiftUtils {
-  export type CreateShiftParamsAddressesStruct = {
+export declare namespace ShiftUtils {
+  export type CreateShiftParamsStruct = {
     receiver: AddressLike;
     callbackContract: AddressLike;
     uiFeeReceiver: AddressLike;
     fromMarket: AddressLike;
     toMarket: AddressLike;
+    minMarketTokens: BigNumberish;
+    executionFee: BigNumberish;
+    callbackGasLimit: BigNumberish;
   };
 
-  export type CreateShiftParamsAddressesStructOutput = [
+  export type CreateShiftParamsStructOutput = [
     receiver: string,
     callbackContract: string,
     uiFeeReceiver: string,
     fromMarket: string,
-    toMarket: string
+    toMarket: string,
+    minMarketTokens: bigint,
+    executionFee: bigint,
+    callbackGasLimit: bigint
   ] & {
     receiver: string;
     callbackContract: string;
     uiFeeReceiver: string;
     fromMarket: string;
     toMarket: string;
-  };
-
-  export type CreateShiftParamsStruct = {
-    addresses: IShiftUtils.CreateShiftParamsAddressesStruct;
-    minMarketTokens: BigNumberish;
-    executionFee: BigNumberish;
-    callbackGasLimit: BigNumberish;
-    dataList: BytesLike[];
-  };
-
-  export type CreateShiftParamsStructOutput = [
-    addresses: IShiftUtils.CreateShiftParamsAddressesStructOutput,
-    minMarketTokens: bigint,
-    executionFee: bigint,
-    callbackGasLimit: bigint,
-    dataList: string[]
-  ] & {
-    addresses: IShiftUtils.CreateShiftParamsAddressesStructOutput;
     minMarketTokens: bigint;
     executionFee: bigint;
     callbackGasLimit: bigint;
-    dataList: string[];
   };
 }
 
-export declare namespace IWithdrawalUtils {
-  export type CreateWithdrawalParamsAddressesStruct = {
+export declare namespace WithdrawalUtils {
+  export type CreateWithdrawalParamsStruct = {
     receiver: AddressLike;
     callbackContract: AddressLike;
     uiFeeReceiver: AddressLike;
     market: AddressLike;
     longTokenSwapPath: AddressLike[];
     shortTokenSwapPath: AddressLike[];
+    minLongTokenAmount: BigNumberish;
+    minShortTokenAmount: BigNumberish;
+    shouldUnwrapNativeToken: boolean;
+    executionFee: BigNumberish;
+    callbackGasLimit: BigNumberish;
   };
 
-  export type CreateWithdrawalParamsAddressesStructOutput = [
+  export type CreateWithdrawalParamsStructOutput = [
     receiver: string,
     callbackContract: string,
     uiFeeReceiver: string,
     market: string,
     longTokenSwapPath: string[],
-    shortTokenSwapPath: string[]
+    shortTokenSwapPath: string[],
+    minLongTokenAmount: bigint,
+    minShortTokenAmount: bigint,
+    shouldUnwrapNativeToken: boolean,
+    executionFee: bigint,
+    callbackGasLimit: bigint
   ] & {
     receiver: string;
     callbackContract: string;
@@ -246,34 +227,11 @@ export declare namespace IWithdrawalUtils {
     market: string;
     longTokenSwapPath: string[];
     shortTokenSwapPath: string[];
-  };
-
-  export type CreateWithdrawalParamsStruct = {
-    addresses: IWithdrawalUtils.CreateWithdrawalParamsAddressesStruct;
-    minLongTokenAmount: BigNumberish;
-    minShortTokenAmount: BigNumberish;
-    shouldUnwrapNativeToken: boolean;
-    executionFee: BigNumberish;
-    callbackGasLimit: BigNumberish;
-    dataList: BytesLike[];
-  };
-
-  export type CreateWithdrawalParamsStructOutput = [
-    addresses: IWithdrawalUtils.CreateWithdrawalParamsAddressesStructOutput,
-    minLongTokenAmount: bigint,
-    minShortTokenAmount: bigint,
-    shouldUnwrapNativeToken: boolean,
-    executionFee: bigint,
-    callbackGasLimit: bigint,
-    dataList: string[]
-  ] & {
-    addresses: IWithdrawalUtils.CreateWithdrawalParamsAddressesStructOutput;
     minLongTokenAmount: bigint;
     minShortTokenAmount: bigint;
     shouldUnwrapNativeToken: boolean;
     executionFee: bigint;
     callbackGasLimit: bigint;
-    dataList: string[];
   };
 }
 
@@ -398,7 +356,7 @@ export interface ExchangeRouterInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createDeposit",
-    values: [IDepositUtils.CreateDepositParamsStruct]
+    values: [DepositUtils.CreateDepositParamsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "createOrder",
@@ -406,11 +364,11 @@ export interface ExchangeRouterInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createShift",
-    values: [IShiftUtils.CreateShiftParamsStruct]
+    values: [ShiftUtils.CreateShiftParamsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "createWithdrawal",
-    values: [IWithdrawalUtils.CreateWithdrawalParamsStruct]
+    values: [WithdrawalUtils.CreateWithdrawalParamsStruct]
   ): string;
   encodeFunctionData(functionFragment: "dataStore", values?: undefined): string;
   encodeFunctionData(
@@ -424,7 +382,7 @@ export interface ExchangeRouterInterface extends Interface {
   encodeFunctionData(
     functionFragment: "executeAtomicWithdrawal",
     values: [
-      IWithdrawalUtils.CreateWithdrawalParamsStruct,
+      WithdrawalUtils.CreateWithdrawalParamsStruct,
       OracleUtils.SetPricesParamsStruct
     ]
   ): string;
@@ -749,7 +707,7 @@ export interface ExchangeRouter extends BaseContract {
   >;
 
   createDeposit: TypedContractMethod<
-    [params: IDepositUtils.CreateDepositParamsStruct],
+    [params: DepositUtils.CreateDepositParamsStruct],
     [string],
     "payable"
   >;
@@ -761,13 +719,13 @@ export interface ExchangeRouter extends BaseContract {
   >;
 
   createShift: TypedContractMethod<
-    [params: IShiftUtils.CreateShiftParamsStruct],
+    [params: ShiftUtils.CreateShiftParamsStruct],
     [string],
     "payable"
   >;
 
   createWithdrawal: TypedContractMethod<
-    [params: IWithdrawalUtils.CreateWithdrawalParamsStruct],
+    [params: WithdrawalUtils.CreateWithdrawalParamsStruct],
     [string],
     "payable"
   >;
@@ -780,7 +738,7 @@ export interface ExchangeRouter extends BaseContract {
 
   executeAtomicWithdrawal: TypedContractMethod<
     [
-      params: IWithdrawalUtils.CreateWithdrawalParamsStruct,
+      params: WithdrawalUtils.CreateWithdrawalParamsStruct,
       oracleParams: OracleUtils.SetPricesParamsStruct
     ],
     [void],
@@ -972,7 +930,7 @@ export interface ExchangeRouter extends BaseContract {
   getFunction(
     nameOrSignature: "createDeposit"
   ): TypedContractMethod<
-    [params: IDepositUtils.CreateDepositParamsStruct],
+    [params: DepositUtils.CreateDepositParamsStruct],
     [string],
     "payable"
   >;
@@ -986,14 +944,14 @@ export interface ExchangeRouter extends BaseContract {
   getFunction(
     nameOrSignature: "createShift"
   ): TypedContractMethod<
-    [params: IShiftUtils.CreateShiftParamsStruct],
+    [params: ShiftUtils.CreateShiftParamsStruct],
     [string],
     "payable"
   >;
   getFunction(
     nameOrSignature: "createWithdrawal"
   ): TypedContractMethod<
-    [params: IWithdrawalUtils.CreateWithdrawalParamsStruct],
+    [params: WithdrawalUtils.CreateWithdrawalParamsStruct],
     [string],
     "payable"
   >;
@@ -1010,7 +968,7 @@ export interface ExchangeRouter extends BaseContract {
     nameOrSignature: "executeAtomicWithdrawal"
   ): TypedContractMethod<
     [
-      params: IWithdrawalUtils.CreateWithdrawalParamsStruct,
+      params: WithdrawalUtils.CreateWithdrawalParamsStruct,
       oracleParams: OracleUtils.SetPricesParamsStruct
     ],
     [void],

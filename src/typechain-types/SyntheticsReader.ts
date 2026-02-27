@@ -356,18 +356,24 @@ export declare namespace PositionPricingUtils {
     borrowingFeeAmount: BigNumberish;
     borrowingFeeReceiverFactor: BigNumberish;
     borrowingFeeAmountForFeeReceiver: BigNumberish;
+    borrowingFeeSecondaryReceiverFactor: BigNumberish;
+    borrowingFeeAmountForSecondaryReceiver: BigNumberish;
   };
 
   export type PositionBorrowingFeesStructOutput = [
     borrowingFeeUsd: bigint,
     borrowingFeeAmount: bigint,
     borrowingFeeReceiverFactor: bigint,
-    borrowingFeeAmountForFeeReceiver: bigint
+    borrowingFeeAmountForFeeReceiver: bigint,
+    borrowingFeeSecondaryReceiverFactor: bigint,
+    borrowingFeeAmountForSecondaryReceiver: bigint
   ] & {
     borrowingFeeUsd: bigint;
     borrowingFeeAmount: bigint;
     borrowingFeeReceiverFactor: bigint;
     borrowingFeeAmountForFeeReceiver: bigint;
+    borrowingFeeSecondaryReceiverFactor: bigint;
+    borrowingFeeAmountForSecondaryReceiver: bigint;
   };
 
   export type PositionUiFeesStruct = {
@@ -391,18 +397,24 @@ export declare namespace PositionPricingUtils {
     liquidationFeeAmount: BigNumberish;
     liquidationFeeReceiverFactor: BigNumberish;
     liquidationFeeAmountForFeeReceiver: BigNumberish;
+    liquidationFeeSecondaryReceiverFactor: BigNumberish;
+    liquidationFeeAmountForSecondaryReceiver: BigNumberish;
   };
 
   export type PositionLiquidationFeesStructOutput = [
     liquidationFeeUsd: bigint,
     liquidationFeeAmount: bigint,
     liquidationFeeReceiverFactor: bigint,
-    liquidationFeeAmountForFeeReceiver: bigint
+    liquidationFeeAmountForFeeReceiver: bigint,
+    liquidationFeeSecondaryReceiverFactor: bigint,
+    liquidationFeeAmountForSecondaryReceiver: bigint
   ] & {
     liquidationFeeUsd: bigint;
     liquidationFeeAmount: bigint;
     liquidationFeeReceiverFactor: bigint;
     liquidationFeeAmountForFeeReceiver: bigint;
+    liquidationFeeSecondaryReceiverFactor: bigint;
+    liquidationFeeAmountForSecondaryReceiver: bigint;
   };
 
   export type PositionFeesStruct = {
@@ -416,7 +428,9 @@ export declare namespace PositionPricingUtils {
     positionFeeFactor: BigNumberish;
     protocolFeeAmount: BigNumberish;
     positionFeeReceiverFactor: BigNumberish;
+    positionFeeSecondaryReceiverFactor: BigNumberish;
     feeReceiverAmount: BigNumberish;
+    secondaryFeeReceiverAmount: BigNumberish;
     feeAmountForPool: BigNumberish;
     positionFeeAmountForPool: BigNumberish;
     positionFeeAmount: BigNumberish;
@@ -436,7 +450,9 @@ export declare namespace PositionPricingUtils {
     positionFeeFactor: bigint,
     protocolFeeAmount: bigint,
     positionFeeReceiverFactor: bigint,
+    positionFeeSecondaryReceiverFactor: bigint,
     feeReceiverAmount: bigint,
+    secondaryFeeReceiverAmount: bigint,
     feeAmountForPool: bigint,
     positionFeeAmountForPool: bigint,
     positionFeeAmount: bigint,
@@ -454,7 +470,9 @@ export declare namespace PositionPricingUtils {
     positionFeeFactor: bigint;
     protocolFeeAmount: bigint;
     positionFeeReceiverFactor: bigint;
+    positionFeeSecondaryReceiverFactor: bigint;
     feeReceiverAmount: bigint;
+    secondaryFeeReceiverAmount: bigint;
     feeAmountForPool: bigint;
     positionFeeAmountForPool: bigint;
     positionFeeAmount: bigint;
@@ -785,6 +803,7 @@ export declare namespace Shift {
 export declare namespace SwapPricingUtils {
   export type SwapFeesStruct = {
     feeReceiverAmount: BigNumberish;
+    secondaryFeeReceiverAmount: BigNumberish;
     feeAmountForPool: BigNumberish;
     amountAfterFees: BigNumberish;
     uiFeeReceiver: AddressLike;
@@ -794,6 +813,7 @@ export declare namespace SwapPricingUtils {
 
   export type SwapFeesStructOutput = [
     feeReceiverAmount: bigint,
+    secondaryFeeReceiverAmount: bigint,
     feeAmountForPool: bigint,
     amountAfterFees: bigint,
     uiFeeReceiver: string,
@@ -801,6 +821,7 @@ export declare namespace SwapPricingUtils {
     uiFeeAmount: bigint
   ] & {
     feeReceiverAmount: bigint;
+    secondaryFeeReceiverAmount: bigint;
     feeAmountForPool: bigint;
     amountAfterFees: bigint;
     uiFeeReceiver: string;
