@@ -86,6 +86,7 @@ Polling infrastructure carries forward into Phase 22.
 - [ ] **Phase 21: Keeper Execution Fixes** - All 6 markets execute deposits, withdrawals, and orders without reverts
 - [x] **Phase 22: Frontend Feedback** - Toast lifecycle and auto-refresh for all operation types (completed 2026-02-27)
 - [ ] **Phase 23: Automated E2E Testing** - Scripts that verify all 18 market x operation combinations
+- [ ] **Phase 24: Contract Bug Fixes** - Fix OrderHandler div-by-zero on reversed markets, redeploy affected contracts
 
 ## Phase Details
 
@@ -141,6 +142,16 @@ Polling infrastructure carries forward into Phase 22.
 **Plans**: 2 plans
 - [ ] 23-01-PLAN.md -- Shared E2E test infrastructure (viem scaffold, helpers, config) + deposit test script (6 markets)
 - [ ] 23-02-PLAN.md -- Withdrawal and order test scripts (6 markets each) + full 18/18 verification
+
+### Phase 24: Contract Bug Fixes
+**Goal**: Fix known contract bugs discovered during E2E testing, redeploy affected contracts, and update all service configs
+**Depends on**: Phase 23 (E2E tests identify and document all contract-level issues)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. OrderHandler guards `triggerPrice=0` before inverting on reversed markets — JPY/USD market orders no longer revert
+  2. Redeployed OrderHandler is wired into ExchangeRouter and all service configs updated
+  3. E2E test suite passes 18/18 without workarounds (triggerPrice=0 works for all markets)
+**Plans**: TBD
 
 ## Progress
 

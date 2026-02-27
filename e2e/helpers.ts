@@ -25,7 +25,7 @@ export interface ExecutionResult {
 
 export interface TestResult {
   market: string;
-  status: "PASS" | "FAIL";
+  status: "PASS" | "FAIL" | "SKIP";
   txHash?: string;
   executionTxHash?: string;
   operationKey?: string;
@@ -274,14 +274,15 @@ export function formatResults(results: TestResult[]): void {
 
   for (const r of results) {
     const name = r.market.padEnd(maxNameLen);
-    const statusIcon = r.status === "PASS" ? "PASS" : "FAIL";
+    const statusIcon = r.status === "SKIP" ? "SKIP" : r.status === "PASS" ? "PASS" : "FAIL";
     const detail = r.error ? ` (${r.error})` : "";
     console.log(`  ${name}  ${statusIcon}${detail}`);
   }
 
   const passed = results.filter((r) => r.status === "PASS").length;
+  const skipped = results.filter((r) => r.status === "SKIP").length;
   const total = results.length;
-  console.log(`\n${passed}/${total} PASSED`);
+  console.log(`\n${passed}/${total} PASSED${skipped > 0 ? ` (${skipped} skipped)` : ""}`);
 }
 
 // ============================================================
