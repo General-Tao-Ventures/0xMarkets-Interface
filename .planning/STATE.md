@@ -1,33 +1,31 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: E2E Reliability
-status: unknown
-last_updated: "2026-02-27T20:19:59.484Z"
+milestone: v1.7
+milestone_name: Liquidation Readiness
+status: planning
+last_updated: "2026-02-27"
 progress:
-  total_phases: 16
-  completed_phases: 15
-  total_plans: 36
-  completed_plans: 35
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-26)
+See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.6 E2E Reliability -- Phase 23 Automated E2E Testing
+**Current focus:** v1.7 Liquidation Readiness -- Defining requirements
 
 ## Current Position
 
-Phase: 23 of 23 (Automated E2E Testing)
-Plan: 1 of 2 (23-01 complete)
-Status: Executing
-Last activity: 2026-02-27 -- Completed 23-01 E2E test infrastructure + deposit tests
-
-Progress: [##########] 100%
+Phase: Not started (defining requirements)
+Plan: --
+Status: Defining requirements
+Last activity: 2026-02-27 -- Milestone v1.7 started
 
 ## Performance Metrics
 
@@ -84,5 +82,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 23-01-PLAN.md (E2E test infrastructure + deposit tests)
-Next: Execute 23-02-PLAN.md (withdrawal and order tests)
+Stopped at: v1.6 shipped, started v1.7 Liquidation Readiness milestone
+Next: Define requirements and create roadmap

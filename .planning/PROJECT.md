@@ -10,9 +10,9 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.5 Minimal Keeper Rewrite (2026-02-26)
+**Shipped:** v1.6 E2E Reliability (2026-02-27)
 
-Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSocket oracle cache, event watcher + safety-net polling + sequential executor. Deployed to DigitalOcean, all operation types verified e2e.
+Contract address audit across all services, frontend toast lifecycle and auto-refresh, automated E2E test suite (17/18 pass, JPY skipped due to contract bug). Keeper execution fixes verified manually.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
@@ -21,6 +21,7 @@ Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSoc
 - v1.3 Keeper Execution Speed (2026-02-24) — event-driven detection, pipeline optimization, observability
 - v1.4 Maximum Keeper Speed (2026-02-25) — oracle correctness, execution speed, timing instrumentation
 - v1.5 Minimal Keeper Rewrite (2026-02-26) — clean 300-line keeper, Lazer oracle cache, deployed and verified
+- v1.6 E2E Reliability (2026-02-27) — contract audit, toast lifecycle, auto-refresh, E2E test suite
 
 ## Requirements
 
@@ -55,20 +56,22 @@ Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSoc
 - ✓ Clean keeper rewrite: single-loop with event watcher + safety-net polling + sequential executor — v1.5
 - ✓ Pyth Lazer WebSocket oracle cache for all 7 tokens with 270s TTL — v1.5
 - ✓ Keeper deployed to DigitalOcean, all operation types verified e2e — v1.5
+- ✓ Contract addresses verified correct across all services via on-chain DataStore audit — v1.6
+- ✓ All 6 markets × 3 operations execute without reverts (keeper verified manually) — v1.6
+- ✓ Toast lifecycle: Pending → Executed! for deposits, withdrawals, and orders — v1.6
+- ✓ Auto-refresh: pool balances and positions update after execution without page refresh — v1.6
+- ✓ E2E test suite: 17/18 market×operation combinations pass (JPY skipped, contract bug) — v1.6
 
 ### Active
 
-## Current Milestone: v1.6 E2E Reliability
+## Current Milestone: v1.7 Liquidation Readiness
 
-**Goal:** Every market × every operation (deposit, trade, withdrawal) works reliably end-to-end: user action → keeper execution → frontend toast + auto-refresh. No manual page refresh needed.
+**Goal:** Fix remaining contract bugs, verify the existing liquidation keeper works end-to-end, and optimize it for performance and efficiency.
 
 **Target features:**
-- Contract address audit: verify all addresses across interface SDK, keeper, and contracts repo match on-chain reality
-- Systematic diagnosis: test all 6 markets × 3 operations, catalog every failure mode
-- Keeper fixes: resolve reverts, detection issues, oracle/gas/config problems per market
-- Frontend fixes: toast lifecycle (Pending → Executed!) and auto-refresh balances/positions
-- Automated E2E test scripts: verify all 18 market×operation combinations
-- Manual verification: full frontend UX works without page refresh
+- Contract bug fixes: guard triggerPrice=0 in OrderHandler for reversed markets, redeploy, update all service configs
+- Liquidation verification: confirm keeper-service liquidation pipeline (scanner → riskEngine → executor) works on Base Sepolia
+- Liquidation performance: optimize scanning speed, risk assessment efficiency, and execution latency
 
 ### Out of Scope
 
@@ -93,11 +96,12 @@ Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSoc
 - **Oracle mode:** Pyth Lazer only (v1.5 keeper uses Lazer WebSocket exclusively)
 - **Pyth Pro API key:** QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN (crypto account)
 - **Test suite:** 136 pass, 1 skipped (live RPC), 0 failures
+- **Liquidation keeper:** Already exists in keeper-service (scanner → riskEngine → executor with PostgreSQL audit trail) — needs verification and optimization
 - **Known issues:**
   - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
   - batch_report 404 from metrics (GMX analytics endpoint not implemented — cosmetic)
   - pendingImpactAmount defaults to 0n (documented workaround — correct behavior)
-  - Frontend lacks execution status notifications — user must refresh to see results
+  - OrderHandler.sol division-by-zero on reversed markets (JPY/USD) when triggerPrice=0 — Phase 24 fix
 
 ## Constraints
 
@@ -126,7 +130,8 @@ Replaced 3,000+ line keeper with ~300 line single-loop keeper. Pyth Lazer WebSoc
 | Per-token Lazer/Hermes fallback | Graceful degradation per token vs global switch | ✓ Good |
 | Transaction mutex for nonce conflicts | Serializes execution + cleanup paths | ✓ Good |
 
-| Contract audit before testing | Multiple deployments mean stale addresses are likely | — Pending |
+| Contract audit before testing | Multiple deployments mean stale addresses are likely | ✓ Good — 89/89 verified |
+| Liquidation keeper in keeper-service | Already has scanner+riskEngine+executor, no need for standalone | — Pending verification |
 
 ---
-*Last updated: 2026-02-26 after v1.6 scope replaced with E2E Reliability*
+*Last updated: 2026-02-27 after v1.7 Liquidation Readiness milestone started*
