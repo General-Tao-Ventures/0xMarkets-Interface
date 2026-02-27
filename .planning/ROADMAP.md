@@ -138,7 +138,9 @@ Polling infrastructure carries forward into Phase 22.
   2. Running the withdrawal test script produces a pass/fail result for each of the 6 markets (6 results total)
   3. Running the order test script produces a pass/fail result for each of the 6 markets (6 results total)
   4. All 18 tests pass on a clean run against the deployed keeper and live Base Sepolia contracts
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 23-01-PLAN.md -- Shared E2E test infrastructure (viem scaffold, helpers, config) + deposit test script (6 markets)
+- [ ] 23-02-PLAN.md -- Withdrawal and order test scripts (6 markets each) + full 18/18 verification
 
 ## Progress
 
@@ -168,4 +170,4 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 20. Contract Address Audit | v1.6 | 2/2 | Complete | 2026-02-26 |
 | 21. Keeper Execution Fixes | v1.6 | 0/1 | Planned | - |
 | 22. Frontend Feedback | 2/2 | Complete   | 2026-02-27 | - |
-| 23. Automated E2E Testing | v1.6 | 0/TBD | Not started | - |
+| 23. Automated E2E Testing | v1.6 | 0/2 | Planned | - |
