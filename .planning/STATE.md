@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: E2E Reliability
 status: unknown
-last_updated: "2026-02-27T06:32:00Z"
+last_updated: "2026-02-27T06:50:00Z"
 progress:
   total_phases: 14
-  completed_phases: 13
-  total_plans: 32
-  completed_plans: 32
+  completed_phases: 14
+  total_plans: 34
+  completed_plans: 34
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.6 E2E Reliability -- Phase 22 Frontend Feedback (plan 01 complete)
+**Current focus:** v1.6 E2E Reliability -- Phase 22 Frontend Feedback complete
 
 ## Current Position
 
-Phase: 22 of 23 (Frontend Feedback)
-Plan: 02 of 2
-Status: Executing
-Last activity: 2026-02-27 -- Completed 22-01 toast polish (5s auto-dismiss, order error reasons, max 3 toasts)
+Phase: 22 of 23 (Frontend Feedback) -- COMPLETE
+Plan: 2 of 2 (all complete)
+Status: Phase Complete
+Last activity: 2026-02-27 -- Completed 22-02 SWR auto-refresh (page-aware revalidation on execution events)
 
-Progress: [######░░░░] 25%
+Progress: [##########] 100%
 
 ## Performance Metrics
 
@@ -45,7 +45,7 @@ Progress: [######░░░░] 25%
 | v1.3 | 10-12 | 6/6 | Complete |
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
-| v1.6 | 18,20-23 | 4/TBD | Executing |
+| v1.6 | 18,20-23 | 6/TBD | Executing |
 
 ## Accumulated Context
 
@@ -76,9 +76,10 @@ None.
 - **20-02 fix:** Applied all 35 fixes in one sweep, re-verified 89/89 match. Keeper .env files contain secrets so updated locally only; cloud requires manual deployment. 4/6 smoke test deposits confirmed (GOLD/JPY blocked by low testnet ETH, not addresses)
 - [Phase 18]: Toast lifecycle verified on live testnet: all 3 operation types (deposit, withdrawal, market order) show Pending -> Executed correctly
 - [Phase 22-01]: TOAST_AUTO_CLOSE_TIME set to 5000ms; ToastContainer limit set to 3; order cancellation error reasons fetched from keeper API
+- [Phase 22-02]: Page-aware SWR revalidation on execution events; 300ms debounce; pool data on /pools, positions on /trade, token balances universal
 
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 22-01-PLAN.md (toast polish: 5s auto-dismiss, order error reasons, max 3 toasts)
-Next: Execute Phase 22 Plan 02 (SWR auto-refresh)
+Stopped at: Completed 22-02-PLAN.md (SWR auto-refresh: page-aware revalidation on execution events)
+Next: Phase 22 complete. Proceed to Phase 23 if applicable.
