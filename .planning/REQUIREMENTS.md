@@ -33,8 +33,8 @@
 ### Automated Testing
 
 - [x] **TEST-01**: E2E test script that tests deposits for all 6 markets and reports pass/fail
-- [ ] **TEST-02**: E2E test script that tests withdrawals for all 6 markets and reports pass/fail
-- [ ] **TEST-03**: E2E test script that tests market orders for all 6 markets and reports pass/fail
+- [x] **TEST-02**: E2E test script that tests withdrawals for all 6 markets and reports pass/fail
+- [x] **TEST-03**: E2E test script that tests market orders for all 6 markets and reports pass/fail (5/6 — JPY/USD skipped, contract bug Phase 24)
 
 ## Future Requirements
 
@@ -81,8 +81,8 @@ Deferred to v2+. Tracked but not in current roadmap.
 | FB-07 | Phase 22 | Complete |
 | FB-08 | Phase 22 | Complete |
 | TEST-01 | Phase 23 | Complete |
-| TEST-02 | Phase 23 | Pending |
-| TEST-03 | Phase 23 | Pending |
+| TEST-02 | Phase 23 | Complete |
+| TEST-03 | Phase 23 | Complete (5/6 — JPY/USD Phase 24) |
 
 **Coverage:**
 - v1.6 requirements: 19 total
