@@ -1,0 +1,19 @@
+{
+  "name": "0xmarkets-e2e-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:deposits": "tsx test-deposits.ts",
+    "test:withdrawals": "tsx test-withdrawals.ts",
+    "test:orders": "tsx test-orders.ts",
+    "test:all": "tsx test-deposits.ts && tsx test-withdrawals.ts && tsx test-orders.ts"
+  },
+  "dependencies": {
+    "viem": "^2.44.4",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
