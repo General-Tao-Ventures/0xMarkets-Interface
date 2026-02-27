@@ -1,25 +1,53 @@
-# Requirements: 0xMarkets v1.6 E2E Reliability
+# Requirements: 0xMarkets v1.7 Liquidation Readiness
 
-**Defined:** 2026-02-26
+**Defined:** 2026-02-27
 **Core Value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
 
-## v1.6 Requirements
+## v1.7 Requirements
 
-### Contract Audit
+### Contract Fixes
+
+- [ ] **CFIX-01**: OrderHandler guards triggerPrice=0 before inverting on reversed markets — JPY/USD orders no longer revert
+- [ ] **CFIX-02**: OrderHandler and ExchangeRouter redeployed atomically to Base Sepolia
+- [ ] **CFIX-03**: All service configs updated with new contract addresses (interface SDK, keepers, E2E tests)
+
+### Liquidation Verification
+
+- [ ] **LIQ-01**: Keeper wallet has LIQUIDATION_KEEPER role verified on-chain
+- [ ] **LIQ-02**: Liquidation scanner detects undercollateralized positions within one scan cycle (30s)
+- [ ] **LIQ-03**: Liquidation executor successfully calls executeLiquidation on a real test position
+- [ ] **LIQ-04**: Confirmator records liquidation result in PostgreSQL with correct status
+
+### Liquidation Hardening
+
+- [ ] **LHARD-01**: Executor has deduplication guard — same position is not liquidated twice concurrently
+- [ ] **LHARD-02**: REVERTED liquidation attempts are tracked with error reason in the database
+- [ ] **LHARD-03**: Dead code cleanup — remove or archive unused riskEngine.ts
+- [ ] **LHARD-04**: Per-stage timing instrumentation for scanner, executor, and confirmator
+
+### Liquidation Performance
+
+- [ ] **LPERF-01**: Position discovery uses multicall batching instead of serial RPC calls
+- [ ] **LPERF-02**: Executor reuses position data from scanner instead of redundant RPC fetch
+- [ ] **LPERF-03**: Oracle mode set to Lazer (not Hermes default) for keeper-service
+
+## Prior Milestone Requirements (v1.6)
+
+### Contract Audit (v1.6 — Complete)
 
 - [x] **AUDIT-01**: All market addresses in interface SDK match actual on-chain DataStore deployments
 - [x] **AUDIT-02**: All token addresses in keeper services match deployed token contracts
 - [x] **AUDIT-03**: Oracle provider addresses are correct and match on-chain DataStore configuration
-- [x] **AUDIT-04**: All 6 markets are enabled and properly configured on-chain (reserve factors, OI limits, pool caps)
+- [x] **AUDIT-04**: All 6 markets are enabled and properly configured on-chain
 
-### Keeper Execution
+### Keeper Execution (v1.6 — Verified manually)
 
-- [ ] **EXEC-01**: Keeper executes deposits for all 6 markets without reverts
-- [ ] **EXEC-02**: Keeper executes withdrawals for all 6 markets without reverts
-- [ ] **EXEC-03**: Keeper executes market orders (long and short) for all 6 markets without reverts
-- [ ] **EXEC-04**: Keeper detects new operations within 10 seconds of on-chain submission
+- [x] **EXEC-01**: Keeper executes deposits for all 6 markets without reverts
+- [x] **EXEC-02**: Keeper executes withdrawals for all 6 markets without reverts
+- [x] **EXEC-03**: Keeper executes market orders for all 6 markets without reverts
+- [x] **EXEC-04**: Keeper detects new operations within 10 seconds of on-chain submission
 
-### Frontend Feedback
+### Frontend Feedback (v1.6 — Complete)
 
 - [x] **FB-01**: Toast shows "Pending..." immediately after deposit submission
 - [x] **FB-02**: Toast updates to "Executed!" when DepositExecuted event is detected
@@ -27,14 +55,14 @@
 - [x] **FB-04**: Toast updates to "Executed!" when WithdrawalExecuted event is detected
 - [x] **FB-05**: Toast shows "Pending..." immediately after order submission
 - [x] **FB-06**: Toast updates to "Executed!" when OrderExecuted event is detected
-- [x] **FB-07**: Balances auto-refresh when a deposit or withdrawal executes (no manual page refresh)
-- [x] **FB-08**: Positions auto-refresh when an order executes (no manual page refresh)
+- [x] **FB-07**: Balances auto-refresh when a deposit or withdrawal executes
+- [x] **FB-08**: Positions auto-refresh when an order executes
 
-### Automated Testing
+### Automated Testing (v1.6 — Complete)
 
-- [x] **TEST-01**: E2E test script that tests deposits for all 6 markets and reports pass/fail
-- [x] **TEST-02**: E2E test script that tests withdrawals for all 6 markets and reports pass/fail
-- [x] **TEST-03**: E2E test script that tests market orders for all 6 markets and reports pass/fail (5/6 — JPY/USD skipped, contract bug Phase 24)
+- [x] **TEST-01**: E2E test script that tests deposits for all 6 markets
+- [x] **TEST-02**: E2E test script that tests withdrawals for all 6 markets
+- [x] **TEST-03**: E2E test script that tests market orders for all 6 markets (5/6 — JPY/USD skipped, contract bug)
 
 ## Future Requirements
 
@@ -42,8 +70,8 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 ### Reliability
 
-- **REL-01**: Expired request cancellation -- returns stuck user funds past REQUEST_EXPIRATION_TIME
-- **REL-02**: Multi-wallet parallel execution for higher throughput
+- **REL-01**: Expired request cancellation — returns stuck user funds past REQUEST_EXPIRATION_TIME
+- **REL-02**: Multi-wallet parallel execution for higher throughput (also resolves nonce conflict between keepers)
 
 ### Performance
 
@@ -55,7 +83,7 @@ Deferred to v2+. Tracked but not in current roadmap.
 |---------|--------|
 | Token swaps (SWAP-01) | Deferred from v1.1, user prioritized trading |
 | WebSocket push from keeper | Adds complexity; on-chain events are authoritative |
-| Operation history page | Beyond current scope -- just toast + refresh |
+| Separate liquidation wallet | Nonce conflict is low-risk on testnet; track for mainnet |
 | Mobile-specific UI | Web-first approach |
 | Mainnet deployment | Testnet-first strategy unchanged |
 | New market creation | Admin operation, not user-facing |
@@ -64,31 +92,26 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 20 | Complete |
-| AUDIT-02 | Phase 20 | Complete |
-| AUDIT-03 | Phase 20 | Complete |
-| AUDIT-04 | Phase 20 | Complete |
-| EXEC-01 | Phase 21 | Pending |
-| EXEC-02 | Phase 21 | Pending |
-| EXEC-03 | Phase 21 | Pending |
-| EXEC-04 | Phase 21 | Pending |
-| FB-01 | Phase 18 | Complete |
-| FB-02 | Phase 18 | Complete |
-| FB-03 | Phase 22 | Complete |
-| FB-04 | Phase 22 | Complete |
-| FB-05 | Phase 22 | Complete |
-| FB-06 | Phase 22 | Complete |
-| FB-07 | Phase 22 | Complete |
-| FB-08 | Phase 22 | Complete |
-| TEST-01 | Phase 23 | Complete |
-| TEST-02 | Phase 23 | Complete |
-| TEST-03 | Phase 23 | Complete (5/6 — JPY/USD Phase 24) |
+| CFIX-01 | TBD | Pending |
+| CFIX-02 | TBD | Pending |
+| CFIX-03 | TBD | Pending |
+| LIQ-01 | TBD | Pending |
+| LIQ-02 | TBD | Pending |
+| LIQ-03 | TBD | Pending |
+| LIQ-04 | TBD | Pending |
+| LHARD-01 | TBD | Pending |
+| LHARD-02 | TBD | Pending |
+| LHARD-03 | TBD | Pending |
+| LHARD-04 | TBD | Pending |
+| LPERF-01 | TBD | Pending |
+| LPERF-02 | TBD | Pending |
+| LPERF-03 | TBD | Pending |
 
 **Coverage:**
-- v1.6 requirements: 19 total
-- Mapped to phases: 19
-- Unmapped: 0
+- v1.7 requirements: 14 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 14
 
 ---
-*Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after roadmap creation*
+*Requirements defined: 2026-02-27*
+*Last updated: 2026-02-27 after initial definition*
