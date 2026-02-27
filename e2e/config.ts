@@ -54,7 +54,7 @@ export const config = {
 
 // Contract addresses (from SDK contracts.ts -- Base Sepolia)
 export const CONTRACTS = {
-  ExchangeRouter: "0x5AcE07B0E746662A2BB172a7A3C652C198bAf631" as Address,
+  ExchangeRouter: "0xF98622Ff9Dfd6bC7877EB0653cbE1bA7dCC54321" as Address,
   DepositVault: "0x4AFE24c4e2477F54aFa4bF30d6D7385e588dfeC4" as Address,
   WithdrawalVault: "0x64D496E867000875Dd19C808592fAB6Fc99cBE7F" as Address,
   OrderVault: "0x18916C70dFEb3fA3366089d35464aC40f5a1D903" as Address,
