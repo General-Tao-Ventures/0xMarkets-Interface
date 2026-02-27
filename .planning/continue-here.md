@@ -1,51 +1,58 @@
-# Continue Here — Keeper Execution Speed
+# Continue Here — Phase 1 Complete, New Milestone Pending
 
-**Date:** 2026-02-25
-**Branch:** ken/integration (interface), main (order-execution-keeper), feat/candles-endpoint (keeper-service)
-
----
-
-## COMPLETED THIS SESSION
-
-1. **keeper-service bytes32 fix** ✅ — removed broken `oracleWatcher.getMarketData()` call in scanner.ts
-2. **keeper-service deployed** ✅ — clean startup, no WebSocket churn, no errors
-3. **Both repos committed and pushed** ✅
-4. **Architecture refactor: cache-only oracle** ✅ — order-execution-keeper
-   - Removed ALL background `updatePriceOnChain` calls (were sending 7 txs every 5s, causing nonce chaos)
-   - `buildOracleParams` passes inline price data from WebSocket cache — no separate on-chain updates needed
-   - Replaced `estimateGas` RPC call with fixed 2M gas limit (saves round-trip)
-   - Reduced scan interval from 5min to 15s
-   - Deployed and verified: zero nonce conflicts from execution path
+**Date:** 2026-02-26
+**Branch:** ken/integration
 
 ---
 
-## REMAINING TASKS
+## COMPLETED: Unified Execution Polling (Phase 1 of keeper fix)
 
-### 1. Fix `cancelExpiredDeposits` nonce conflicts
+### What was done
+Merged receipt watching + execution polling into a single unified polling loop that starts immediately when user submits a TX. No WebSocket dependency.
 
-**File:** `order-execution-keeper-service/src/core/scanners/depositScanner.ts` lines 255-310
+**Files changed:**
+- `src/context/SyntheticsEvents/useExecutionPolling.ts` — Full rewrite:
+  - Accepts `watchedTxnHashes`, `setWatchedTxnHashes`, `eventLogHandlers`
+  - Phase A: Receipt detection (polls for user's TX receipt, parses OrderCreated)
+  - Phase B: Execution detection (polls eth_getLogs for OrderExecuted/Cancelled)
+  - Starts immediately when watched TX hashes exist OR pending operations exist
+  - Removed `isStuckOperation` / `POLL_DELAY_MS` artificial delays
+- `src/context/SyntheticsEvents/SyntheticsEventsProvider.tsx`:
+  - Removed separate `receiptWatcher` useEffect (merged into unified polling)
+  - Passes new params to `useExecutionPolling`
+  - Cleaned up unused imports (ethers, parseEventLogData, abis, ContractsChainId, getContract)
 
-The `cancelExpiredDeposits()` method fires rapid sequential `cancelDeposit` txs without nonce management. Each tx uses viem's default nonce (which can be stale when previous tx hasn't confirmed). Fix: either await each receipt before sending next, or use explicit nonce increment pattern.
+**TypeScript:** Compiles clean, no errors.
 
-### 2. Reset stuck DB state and verify execution
-
-After fixing cancel nonce issue:
-```bash
-ssh root@142.93.203.222 "cd /opt/0xmarkets && docker compose exec postgres psql -U keeper -d order_execution_keeper -c \"UPDATE deposit_requests SET status = 'PENDING' WHERE status = 'FAILED';\""
-ssh root@142.93.203.222 "cd /opt/0xmarkets && docker compose restart order-execution-keeper"
+### Expected flow (new)
+```
+T+0s:  User submits TX → watchOrderTxn(txHash) → polling starts immediately
+T+2s:  First poll: receipt found → OrderCreated parsed → contract key known
+T+2s:  Same poll cycle: immediately queries for OrderExecuted by key
+T+5s:  Next poll: finds OrderExecuted → toast shows "Order executed" ✓
 ```
 
-Then create a fresh deposit on the frontend and verify it executes within seconds.
+### Testing needed
+1. Submit an ETH long on localhost:3010
+2. Watch browser console for `[execution-polling]` logs
+3. Toast should transition: Sending → Fulfilling → Order executed (~5-10s)
 
-### 3. Commit remaining interface changes
+---
 
-The interface repo on `ken/integration` has uncommitted changes (pools page, planning docs).
+## NEXT: User wants new milestone (`/gsd:new-milestone`)
 
-### Key addresses
-| Contract | Address |
-|----------|---------|
-| PythLazerFeedProvider | `0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05` |
-| DepositHandler | `0x9388B07f807eB870aD36d350d80DC0c214a7f04f` |
-| EventEmitter | `0x1E4cBc2ea12B190D6222D568151b5e708e1477F8` |
-| Keeper wallet | `0x48Cb0d738C9B3F44F60f7338F788fa093FD25828` |
-| DO Droplet | `142.93.203.222` |
+Context ran out before the new-milestone workflow could run. User should:
+1. `/clear` to get fresh context
+2. `/gsd:new-milestone` to start the next milestone
+
+### User's stated goals for next milestone
+From the conversation, the user wants to improve the keeper/execution architecture:
+- Reliable order execution and toast notifications
+- Potentially Gelato Automate as backup keeper
+- Potentially OP Stack rollup for dedicated blockspace
+- Quick, consistent user experience with no stuck orders
+
+### Other uncommitted changes (from earlier work)
+- `src/lib/rpc/index.ts:49` — Chainstack WS endpoint
+- `src/context/SyntheticsEvents/useExecutionPolling.ts` — Faster polling (3s interval)
+- `vite.config.ts:85` — Proxy to localhost:37018 (revert for prod)
