@@ -216,10 +216,8 @@ async function main() {
   console.log("\nChecking approvals...");
   await ensureApprovals(walletClient, publicClient, CONTRACTS.SyntheticsRouter);
 
-  // KNOWN BUG: JPY/USD orders revert due to OrderHandler.sol div-by-zero on reversed markets.
-  // triggerPrice=0 causes Precision.mulDiv(FLOAT_PRECISION, FLOAT_PRECISION, 0) revert.
-  // Tracked in Phase 24 (Contract Bug Fixes). Skip JPY/USD until contract is fixed.
-  const SKIP_MARKETS = new Set(["JPY/USD"]);
+  // All markets now testable after OrderHandler.sol zero-guard fix (Phase 24-01)
+  const SKIP_MARKETS = new Set<string>();
 
   // Filter markets by MARKET env var (optional)
   const marketFilter = process.env.MARKET;
