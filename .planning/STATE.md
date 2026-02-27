@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: E2E Reliability
 status: unknown
-last_updated: "2026-02-27T04:58:51.401Z"
+last_updated: "2026-02-27T06:32:00Z"
 progress:
   total_phases: 14
   completed_phases: 13
   total_plans: 32
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Project State
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.6 E2E Reliability -- Phase 21 Keeper Execution Fixes (ready)
+**Current focus:** v1.6 E2E Reliability -- Phase 22 Frontend Feedback (plan 01 complete)
 
 ## Current Position
 
-Phase: 21 of 23 (Keeper Execution Fixes)
-Plan: 01 of 1
-Status: Planned
-Last activity: 2026-02-26 -- Completed Phase 20 (all 35 infra addresses fixed, 89/89 on-chain match)
+Phase: 22 of 23 (Frontend Feedback)
+Plan: 02 of 2
+Status: Executing
+Last activity: 2026-02-27 -- Completed 22-01 toast polish (5s auto-dismiss, order error reasons, max 3 toasts)
 
 Progress: [######░░░░] 25%
 
@@ -45,7 +45,7 @@ Progress: [######░░░░] 25%
 | v1.3 | 10-12 | 6/6 | Complete |
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
-| v1.6 | 18,20-23 | 3/TBD | Executing |
+| v1.6 | 18,20-23 | 4/TBD | Executing |
 
 ## Accumulated Context
 
@@ -75,9 +75,10 @@ None.
 - **20-01 audit:** Used Hardhat deployment artifacts as source of on-chain truth; verified via DataStore reads that all markets and tokens are correct but 35 infrastructure contracts are stale
 - **20-02 fix:** Applied all 35 fixes in one sweep, re-verified 89/89 match. Keeper .env files contain secrets so updated locally only; cloud requires manual deployment. 4/6 smoke test deposits confirmed (GOLD/JPY blocked by low testnet ETH, not addresses)
 - [Phase 18]: Toast lifecycle verified on live testnet: all 3 operation types (deposit, withdrawal, market order) show Pending -> Executed correctly
+- [Phase 22-01]: TOAST_AUTO_CLOSE_TIME set to 5000ms; ToastContainer limit set to 3; order cancellation error reasons fetched from keeper API
 
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 18-02-PLAN.md (toast lifecycle verified on live testnet)
-Next: Continue Phase 21 (Keeper Execution Fixes)
+Stopped at: Completed 22-01-PLAN.md (toast polish: 5s auto-dismiss, order error reasons, max 3 toasts)
+Next: Execute Phase 22 Plan 02 (SWR auto-refresh)

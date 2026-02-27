@@ -23,10 +23,10 @@
 
 - [x] **FB-01**: Toast shows "Pending..." immediately after deposit submission
 - [x] **FB-02**: Toast updates to "Executed!" when DepositExecuted event is detected
-- [ ] **FB-03**: Toast shows "Pending..." immediately after withdrawal submission
-- [ ] **FB-04**: Toast updates to "Executed!" when WithdrawalExecuted event is detected
-- [ ] **FB-05**: Toast shows "Pending..." immediately after order submission
-- [ ] **FB-06**: Toast updates to "Executed!" when OrderExecuted event is detected
+- [x] **FB-03**: Toast shows "Pending..." immediately after withdrawal submission
+- [x] **FB-04**: Toast updates to "Executed!" when WithdrawalExecuted event is detected
+- [x] **FB-05**: Toast shows "Pending..." immediately after order submission
+- [x] **FB-06**: Toast updates to "Executed!" when OrderExecuted event is detected
 - [ ] **FB-07**: Balances auto-refresh when a deposit or withdrawal executes (no manual page refresh)
 - [ ] **FB-08**: Positions auto-refresh when an order executes (no manual page refresh)
 
@@ -74,10 +74,10 @@ Deferred to v2+. Tracked but not in current roadmap.
 | EXEC-04 | Phase 21 | Pending |
 | FB-01 | Phase 18 | Complete |
 | FB-02 | Phase 18 | Complete |
-| FB-03 | Phase 22 | Pending |
-| FB-04 | Phase 22 | Pending |
-| FB-05 | Phase 22 | Pending |
-| FB-06 | Phase 22 | Pending |
+| FB-03 | Phase 22 | Complete |
+| FB-04 | Phase 22 | Complete |
+| FB-05 | Phase 22 | Complete |
+| FB-06 | Phase 22 | Complete |
 | FB-07 | Phase 22 | Pending |
 | FB-08 | Phase 22 | Pending |
 | TEST-01 | Phase 23 | Pending |

@@ -167,5 +167,5 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 18. Event Detection and Toast Feedback | v1.6 | 3/3 | Complete | 2026-02-27 |
 | 20. Contract Address Audit | v1.6 | 2/2 | Complete | 2026-02-26 |
 | 21. Keeper Execution Fixes | v1.6 | 0/1 | Planned | - |
-| 22. Frontend Feedback | v1.6 | 0/2 | Planned | - |
+| 22. Frontend Feedback | 1/2 | In Progress|  | - |
 | 23. Automated E2E Testing | v1.6 | 0/TBD | Not started | - |
