@@ -57,3 +57,58 @@
 
 ---
 
+## v1.3 Keeper Execution Speed (Shipped: 2026-02-24)
+
+**Phases completed:** 3 phases (10-12), 6 plans
+**Timeline:** 2026-02-23 → 2026-02-24
+
+**Key accomplishments:**
+- Event-driven detection replaces polling for deposit/withdrawal/order events
+- Execution pipeline optimization with parallel oracle+gas estimation
+- Observability with structured timing metrics and per-stage instrumentation
+
+---
+
+## v1.4 Maximum Keeper Speed (Shipped: 2026-02-25)
+
+**Phases completed:** 2 phases (13-14), 6 plans
+**Timeline:** 2026-02-24 → 2026-02-25
+
+**Key accomplishments:**
+- Per-token Lazer/Hermes oracle routing — all 6 markets execute without reverts
+- On-chain oracle provider verification at keeper startup
+- Flashblocks RPC for ~200ms TX preconfirmations
+- Background oracle updates at 5s intervals with 30s safety margin
+
+---
+
+## v1.5 Minimal Keeper Rewrite (Shipped: 2026-02-26)
+
+**Phases completed:** 3 phases (15-17), 6 plans
+**Timeline:** 2026-02-25 → 2026-02-26
+
+**Key accomplishments:**
+- Replaced 3,000+ line keeper with ~300 line single-loop keeper
+- Pyth Lazer WebSocket oracle cache for all 7 tokens with 270s TTL
+- Event watcher + safety-net polling + sequential executor
+- Deployed to DigitalOcean, all operation types verified e2e
+
+---
+
+## v1.6 E2E Reliability (Shipped: 2026-02-27)
+
+**Phases completed:** 5 phases (18, 20-23), 10 plans
+**Timeline:** 2026-02-26 → 2026-02-27
+
+**Key accomplishments:**
+- Contract address audit: 89/89 addresses verified correct across all services via on-chain DataStore
+- Frontend toast lifecycle: Pending → Executed! for deposits, withdrawals, and orders
+- Auto-refresh: pool balances and positions update after execution without page refresh
+- Automated E2E test suite: 17/18 market×operation combinations pass (JPY/USD skipped — contract bug)
+- Keeper execution fixes verified manually across all 6 markets
+
+**Known Gaps:**
+- JPY/USD orders fail with division-by-zero in OrderHandler (triggerPrice=0 on reversed markets) — deferred to v1.7 Phase 24
+
+---
+
