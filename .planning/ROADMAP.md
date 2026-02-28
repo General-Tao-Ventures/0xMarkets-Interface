@@ -88,7 +88,7 @@
 
 </details>
 
-### 🚧 v1.8 Deployment (In Progress)
+### v1.8 Deployment (In Progress)
 
 **Milestone Goal:** Deploy all v1.7 keeper updates to DigitalOcean, push frontend to Vercel, set up CI/CD for automated future deployments, and verify full system end-to-end.
 
@@ -103,13 +103,16 @@
 **Goal**: All code repositories are in sync (local to GitHub to server) with correct production configs
 **Depends on**: Nothing (first phase of v1.8)
 **Requirements**: GIT-01, GIT-02, GIT-03, CFG-01, CFG-02, CFG-03
+**Plans:** 2 plans
+Plans:
+- [ ] 28-01-PLAN.md — Push all repos to GitHub and update docker-compose.yml with v1.7 addresses
+- [ ] 28-02-PLAN.md — Initialize git on DO server, pull code, verify config
 **Success Criteria** (what must be TRUE):
   1. `git log` on GitHub shows all 16 keeper-service commits from v1.7 work
   2. keeper-service directory on DO server is a git repo that can `git pull` from GitHub
   3. Server docker-compose.yml contains the v1.7 OrderHandler and ExchangeRouter addresses
   4. Server .env has ORACLE_MODE=lazer and all required environment variables present
   5. Frontend branch pushed to GitHub (Vercel auto-deploy triggered)
-**Plans**: TBD
 
 ### Phase 29: Docker Deploy & Database
 **Goal**: All three Docker containers (postgres, keeper-service, order-execution-keeper) are running with current code on the DO server
@@ -173,7 +176,7 @@
 | 25. Liquidation Pipeline Verification | v1.7 | 4/4 | Complete | 2026-02-28 |
 | 26. Liquidation Hardening and Performance | v1.7 | 2/2 | Complete | 2026-02-28 |
 | 27. Liquidation Pipeline E2E Execution | v1.7 | 1/1 | Complete | 2026-02-28 |
-| 28. Git Sync & Server Config | v1.8 | 0/TBD | Not started | - |
+| 28. Git Sync & Server Config | v1.8 | 0/2 | Not started | - |
 | 29. Docker Deploy & Database | v1.8 | 0/TBD | Not started | - |
 | 30. CI/CD Automation | v1.8 | 0/TBD | Not started | - |
 | 31. Frontend & E2E Verification | v1.8 | 0/TBD | Not started | - |
