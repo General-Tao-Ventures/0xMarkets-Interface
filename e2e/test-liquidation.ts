@@ -36,25 +36,19 @@ import {
 const TARGET_MARKET = "WETH/USD";
 
 // Collateral and size strategy:
-// - The WETH/USD pool has $1548 USDC, 95% reserve factor => $1471 max reserved
-// - Current OI: $695 LONG + $675 SHORT = $1370 reserved => ~$101 headroom
-// - Reserve calculation includes BOTH size AND collateral
-// - $20 collateral + $400 size SHORT was previously executed (but fees ate collateral)
-// - With $100 collateral, even $25 size gets cancelled (collateral inflates reserve calc)
-// - Use minimal collateral ($5 USDC) to minimize reserve impact, accept that position
-//   will be near-instant liquidation due to fees eating into the tiny collateral.
-// - A position that's immediately liquidatable is IDEAL for testing the pipeline.
-const COLLATERAL_AMOUNT = 5_000_000n; // 5 USDC (6 decimals)
+// - Pool has ~$10,256 USDC, reserve factor 0.95 => ~$4,871 max per side
+// - OI Long: ~$4,400 (headroom ~$471), OI Short: ~$4,580 (headroom ~$291)
+// - Previous test runs inflated OI; must fit new positions within remaining headroom
+// - Use $10 USDC collateral with moderate size for high leverage (~20-30x)
+// - High leverage ensures position is near-liquidation for pipeline testing
+const COLLATERAL_AMOUNT = 10_000_000n; // 10 USDC (6 decimals)
 
-// Size tiers: With $5 collateral, we need sizes that fit within pool headroom.
-// The $400 SHORT previously worked with $20 collateral. With $5, smaller sizes should fit.
+// Size tiers: must fit within ~$291 short / ~$471 long headroom
+// Include collateral in reserve calc estimate
 const SIZE_TIERS = [
   { label: "$200",  value: 200n * 10n ** 30n },
   { label: "$100",  value: 100n * 10n ** 30n },
   { label: "$50",   value: 50n * 10n ** 30n },
-  { label: "$25",   value: 25n * 10n ** 30n },
-  { label: "$10",   value: 10n * 10n ** 30n },
-  { label: "$5",    value: 5n * 10n ** 30n },
 ];
 
 // Try both directions -- pool may have reserves on one side but not the other
@@ -126,7 +120,7 @@ async function createPosition(
     },
     numbers: {
       sizeDeltaUsd,
-      initialCollateralDeltaAmount: 0n,
+      initialCollateralDeltaAmount: COLLATERAL_AMOUNT,
       triggerPrice: 0n,
       acceptablePrice: isLong ? maxUint256 : 0n,
       executionFee: EXECUTION_FEE,
