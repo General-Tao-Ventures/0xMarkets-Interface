@@ -38,21 +38,42 @@ interface MarketAttempt {
   label: string;
 }
 
+// Try synthetic markets first -- they have near-zero open interest and available reserves.
+// WETH/USD and WBTC/USD pools are exhausted (InsufficientReserve on all directions).
+// Note: JPY/USD excluded due to known Pyth Lazer oracle data gap.
 const MARKET_ATTEMPTS: MarketAttempt[] = [
-  { marketName: "WETH/USD", isLong: true,  label: "WETH/USD LONG" },
+  { marketName: "GOLD/USD", isLong: false, label: "GOLD/USD SHORT" },
+  { marketName: "GOLD/USD", isLong: true,  label: "GOLD/USD LONG" },
+  { marketName: "EUR/USD",  isLong: false, label: "EUR/USD SHORT" },
+  { marketName: "EUR/USD",  isLong: true,  label: "EUR/USD LONG" },
+  { marketName: "GBP/USD",  isLong: false, label: "GBP/USD SHORT" },
+  { marketName: "GBP/USD",  isLong: true,  label: "GBP/USD LONG" },
+  { marketName: "WBTC/USD", isLong: false, label: "WBTC/USD SHORT" },
   { marketName: "WETH/USD", isLong: false, label: "WETH/USD SHORT" },
   { marketName: "WBTC/USD", isLong: true,  label: "WBTC/USD LONG" },
-  { marketName: "WBTC/USD", isLong: false, label: "WBTC/USD SHORT" },
+  { marketName: "WETH/USD", isLong: true,  label: "WETH/USD LONG" },
 ];
 
-const COLLATERAL_AMOUNT = 5_000_000n; // 5 USDC (6 decimals) — small collateral
+// Use enough collateral for the position to survive execution fees (~$0.50-$2 impact/position fees).
+// The position must survive creation so the scanner can detect and liquidate it later.
+// Increased from $10 to $50 USDC to ensure positions survive after fees.
+const COLLATERAL_AMOUNT = 50_000_000n; // 50 USDC (6 decimals)
+
+// Size tiers: With $50 USDC collateral, target high leverage for near-liquidation positions.
+// Max leverage on these markets is typically 50x. We start just under that and work down.
+// A position at 40-50x leverage with $50 collateral = $2000-$2500 size, very near liquidation.
 const SIZE_TIERS = [
-  { label: "$200", value: 200n * 10n ** 30n },
-  { label: "$150", value: 150n * 10n ** 30n },
-  { label: "$100", value: 100n * 10n ** 30n },
-  { label: "$50",  value: 50n * 10n ** 30n },
-  { label: "$25",  value: 25n * 10n ** 30n },
-  { label: "$10",  value: 10n * 10n ** 30n },
+  { label: "$2500", value: 2500n * 10n ** 30n },
+  { label: "$2000", value: 2000n * 10n ** 30n },
+  { label: "$1500", value: 1500n * 10n ** 30n },
+  { label: "$1000", value: 1000n * 10n ** 30n },
+  { label: "$750",  value: 750n * 10n ** 30n },
+  { label: "$500",  value: 500n * 10n ** 30n },
+  { label: "$400",  value: 400n * 10n ** 30n },
+  { label: "$300",  value: 300n * 10n ** 30n },
+  { label: "$200",  value: 200n * 10n ** 30n },
+  { label: "$150",  value: 150n * 10n ** 30n },
+  { label: "$100",  value: 100n * 10n ** 30n },
 ];
 
 // ============================================================
@@ -100,7 +121,7 @@ async function createPosition(
 
   const walletAddress = config.walletAddress as Address;
 
-  console.log(`\n--- Attempting position: ${sizeLabel} size, $5 USDC collateral ---`);
+  console.log(`\n--- Attempting position: ${sizeLabel} size, ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC collateral ---`);
   console.log(`  Market: ${marketName} (${market.market})`);
   console.log(`  Collateral: ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
   console.log(`  Size: ${sizeLabel} USD`);
@@ -207,11 +228,45 @@ async function createPosition(
         isLong
       );
 
+      // Verify the position actually exists on-chain (not immediately closed by fees)
+      const positionSizeOnChain = await publicClient.readContract({
+        address: CONTRACTS.DataStore,
+        abi: [{ name: "getUint", type: "function", stateMutability: "view",
+                inputs: [{ name: "key", type: "bytes32" }],
+                outputs: [{ name: "", type: "uint256" }] }] as const,
+        functionName: "getUint",
+        args: [keccak256(encodeAbiParameters(
+          [{ type: "bytes32" }, { type: "string" }],
+          [positionKey, "sizeInUsd"]
+        ))],
+      });
+
+      if (positionSizeOnChain === 0n) {
+        console.log(`\n  WARNING: Order was executed but position has zero size on-chain.`);
+        console.log(`  The position was likely immediately closed (fees exceeded collateral).`);
+        console.log(`  Trying next size tier with more surviving collateral...`);
+        return false;
+      }
+
+      const positionCollateralOnChain = await publicClient.readContract({
+        address: CONTRACTS.DataStore,
+        abi: [{ name: "getUint", type: "function", stateMutability: "view",
+                inputs: [{ name: "key", type: "bytes32" }],
+                outputs: [{ name: "", type: "uint256" }] }] as const,
+        functionName: "getUint",
+        args: [keccak256(encodeAbiParameters(
+          [{ type: "bytes32" }, { type: "string" }],
+          [positionKey, "collateralAmount"]
+        ))],
+      });
+
       console.log(`\n=== POSITION CREATED SUCCESSFULLY ===`);
       console.log(`  Account:          ${walletAddress}`);
       console.log(`  Market:           ${marketName} (${market.market})`);
-      console.log(`  Collateral:       ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
-      console.log(`  Size:             ${sizeLabel} USD`);
+      console.log(`  Collateral sent:  ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
+      console.log(`  On-chain collat:  ${formatUnits(positionCollateralOnChain, 6)} USDC`);
+      console.log(`  On-chain size:    ${formatUnits(positionSizeOnChain, 30)} USD`);
+      console.log(`  Effective levg:   ~${(Number(positionSizeOnChain) / Number(positionCollateralOnChain * 10n**24n)).toFixed(1)}x`);
       console.log(`  Direction:        ${isLong ? "Long" : "Short"}`);
       console.log(`  Position key:     ${positionKey}`);
       console.log(`  Order TX:         ${txHash}`);
@@ -253,7 +308,7 @@ async function createPosition(
 async function main() {
   console.log("=== Liquidation Test: Create Undercollateralized Position ===");
   console.log(`Wallet: ${config.walletAddress}`);
-  console.log(`Strategy: Minimal collateral ($5 USDC) with extreme leverage`);
+  console.log(`Strategy: $${formatUnits(COLLATERAL_AMOUNT, 6)} USDC collateral with high leverage`);
   console.log(`Markets to try: ${MARKET_ATTEMPTS.map(a => a.label).join(", ")}\n`);
 
   // Check balances
