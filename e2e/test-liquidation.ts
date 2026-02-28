@@ -29,26 +29,28 @@ import {
 // Configuration
 // ============================================================
 
-// WETH/USD only -- user added $1000 USDC liquidity to this pool.
+// WETH/USD only -- pool seeded with 10,000 USDC in Phase 27 (19,252 USDC total).
 // Synthetic markets (GOLD, EUR, GBP) have oracle "best ask price" data gaps
 // that prevent the order-execution-keeper from executing orders.
 // WBTC/USD has no liquidity.
 const TARGET_MARKET = "WETH/USD";
 
 // Collateral and size strategy:
-// - Pool has ~$10,256 USDC, reserve factor 0.95 => ~$4,871 max per side
-// - OI Long: ~$4,400 (headroom ~$471), OI Short: ~$4,580 (headroom ~$291)
-// - Previous test runs inflated OI; must fit new positions within remaining headroom
-// - Use $10 USDC collateral with moderate size for high leverage (~20-30x)
-// - High leverage ensures position is near-liquidation for pipeline testing
-const COLLATERAL_AMOUNT = 10_000_000n; // 10 USDC (6 decimals)
+// - Pool has ~$19,252 USDC, reserve factor 0.95 => ~$18,289 max per side
+// - OI Long: ~$4,600, OI Short: ~$4,580 -- ample headroom after Phase 27 seeding
+// - $10-$50 USDC collateral was too low -- position fees (borrowing, impact) consumed all
+// - Use $200 USDC collateral with $5000-$10000 size for high leverage
+// - At 25-50x leverage, a 2-4% price move triggers liquidation
+const COLLATERAL_AMOUNT = 200_000_000n; // 200 USDC (6 decimals)
 
-// Size tiers: must fit within ~$291 short / ~$471 long headroom
-// Include collateral in reserve calc estimate
+// Size tiers: pool has ample headroom after 10,000 USDC seeding
+// $200 collateral with $5000 size = 25x leverage
 const SIZE_TIERS = [
-  { label: "$200",  value: 200n * 10n ** 30n },
-  { label: "$100",  value: 100n * 10n ** 30n },
-  { label: "$50",   value: 50n * 10n ** 30n },
+  { label: "$10000", value: 10000n * 10n ** 30n },
+  { label: "$5000",  value: 5000n * 10n ** 30n },
+  { label: "$3000",  value: 3000n * 10n ** 30n },
+  { label: "$2000",  value: 2000n * 10n ** 30n },
+  { label: "$1000",  value: 1000n * 10n ** 30n },
 ];
 
 // Try both directions -- pool may have reserves on one side but not the other
@@ -208,18 +210,49 @@ async function createPosition(
         isLong
       );
 
-      // Verify the position actually exists on-chain (not immediately closed by fees)
-      const positionSizeOnChain = await publicClient.readContract({
-        address: CONTRACTS.DataStore,
-        abi: [{ name: "getUint", type: "function", stateMutability: "view",
-                inputs: [{ name: "key", type: "bytes32" }],
-                outputs: [{ name: "", type: "uint256" }] }] as const,
-        functionName: "getUint",
-        args: [keccak256(encodeAbiParameters(
-          [{ type: "bytes32" }, { type: "string" }],
-          [positionKey, "sizeInUsd"]
-        ))],
+      // Verify the position actually exists on-chain using Reader.getPosition
+      // (direct DataStore key queries use a two-level hash that's error-prone)
+      const READER_GET_POSITION_ABI = [{
+        type: "function" as const, name: "getPosition" as const,
+        inputs: [
+          { name: "dataStore", type: "address" as const },
+          { name: "key", type: "bytes32" as const },
+        ],
+        outputs: [{
+          type: "tuple" as const, components: [
+            { type: "tuple" as const, name: "addresses", components: [
+              { name: "account", type: "address" as const },
+              { name: "market", type: "address" as const },
+              { name: "collateralToken", type: "address" as const },
+            ]},
+            { type: "tuple" as const, name: "numbers", components: [
+              { name: "sizeInUsd", type: "uint256" as const },
+              { name: "sizeInTokens", type: "uint256" as const },
+              { name: "collateralAmount", type: "uint256" as const },
+              { name: "borrowingFactor", type: "uint256" as const },
+              { name: "fundingFeeAmountPerSize", type: "uint256" as const },
+              { name: "longTokenClaimableFundingAmountPerSize", type: "uint256" as const },
+              { name: "shortTokenClaimableFundingAmountPerSize", type: "uint256" as const },
+              { name: "increasedAtTime", type: "uint256" as const },
+              { name: "decreasedAtTime", type: "uint256" as const },
+            ]},
+            { type: "tuple" as const, name: "flags", components: [
+              { name: "isLong", type: "bool" as const },
+              { name: "reversed", type: "bool" as const },
+            ]},
+          ],
+        }],
+        stateMutability: "view" as const,
+      }] as const;
+
+      const positionData = await publicClient.readContract({
+        address: CONTRACTS.SyntheticsReader,
+        abi: READER_GET_POSITION_ABI,
+        functionName: "getPosition",
+        args: [CONTRACTS.DataStore, positionKey],
       });
+
+      const positionSizeOnChain = positionData.numbers.sizeInUsd;
 
       if (positionSizeOnChain === 0n) {
         console.log(`\n  WARNING: Order was executed but position has zero size on-chain.`);
@@ -228,17 +261,7 @@ async function createPosition(
         return false;
       }
 
-      const positionCollateralOnChain = await publicClient.readContract({
-        address: CONTRACTS.DataStore,
-        abi: [{ name: "getUint", type: "function", stateMutability: "view",
-                inputs: [{ name: "key", type: "bytes32" }],
-                outputs: [{ name: "", type: "uint256" }] }] as const,
-        functionName: "getUint",
-        args: [keccak256(encodeAbiParameters(
-          [{ type: "bytes32" }, { type: "string" }],
-          [positionKey, "collateralAmount"]
-        ))],
-      });
+      const positionCollateralOnChain = positionData.numbers.collateralAmount;
 
       console.log(`\n=== POSITION CREATED SUCCESSFULLY ===`);
       console.log(`  Account:          ${walletAddress}`);
