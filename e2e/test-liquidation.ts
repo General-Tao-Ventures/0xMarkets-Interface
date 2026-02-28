@@ -29,28 +29,30 @@ import {
 // Configuration
 // ============================================================
 
-const MARKET_NAME = "WETH/USD";
-const market = MARKETS[MARKET_NAME];
-if (!market) {
-  console.error(`FATAL: Market ${MARKET_NAME} not found in config`);
-  process.exit(1);
+// Strategy: Try multiple markets and directions to find one with available reserves.
+// Each "attempt" is a (market, direction) pair. We try all size tiers for each attempt
+// before moving to the next. This handles the testnet pool reserve exhaustion issue.
+interface MarketAttempt {
+  marketName: string;
+  isLong: boolean;
+  label: string;
 }
 
-// LONG position with minimal collateral and high leverage.
-// We use LONG because the wallet already has a SHORT position at max leverage.
-// A LONG position is a separate position key and won't conflict.
-// If ETH drops even slightly, this ultra-leveraged position becomes liquidatable.
-const IS_LONG = true;
+const MARKET_ATTEMPTS: MarketAttempt[] = [
+  { marketName: "WETH/USD", isLong: true,  label: "WETH/USD LONG" },
+  { marketName: "WETH/USD", isLong: false, label: "WETH/USD SHORT" },
+  { marketName: "WBTC/USD", isLong: true,  label: "WBTC/USD LONG" },
+  { marketName: "WBTC/USD", isLong: false, label: "WBTC/USD SHORT" },
+];
+
 const COLLATERAL_AMOUNT = 5_000_000n; // 5 USDC (6 decimals) — small collateral
 const SIZE_TIERS = [
-  { label: "$500", value: 500n * 10n ** 30n },
-  { label: "$400", value: 400n * 10n ** 30n },
-  { label: "$300", value: 300n * 10n ** 30n },
-  { label: "$250", value: 250n * 10n ** 30n },
   { label: "$200", value: 200n * 10n ** 30n },
   { label: "$150", value: 150n * 10n ** 30n },
   { label: "$100", value: 100n * 10n ** 30n },
   { label: "$50",  value: 50n * 10n ** 30n },
+  { label: "$25",  value: 25n * 10n ** 30n },
+  { label: "$10",  value: 10n * 10n ** 30n },
 ];
 
 // ============================================================
@@ -84,14 +86,25 @@ function computePositionKey(
 // Create undercollateralized position
 // ============================================================
 
-async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<boolean> {
+async function createPosition(
+  sizeDeltaUsd: bigint,
+  sizeLabel: string,
+  marketName: string,
+  isLong: boolean
+): Promise<boolean> {
+  const market = MARKETS[marketName];
+  if (!market) {
+    console.log(`  Market ${marketName} not found in config. Skipping.`);
+    return false;
+  }
+
   const walletAddress = config.walletAddress as Address;
 
   console.log(`\n--- Attempting position: ${sizeLabel} size, $5 USDC collateral ---`);
-  console.log(`  Market: ${MARKET_NAME} (${market.market})`);
+  console.log(`  Market: ${marketName} (${market.market})`);
   console.log(`  Collateral: ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
   console.log(`  Size: ${sizeLabel} USD`);
-  console.log(`  Direction: ${IS_LONG ? "Long" : "Short"}`);
+  console.log(`  Direction: ${isLong ? "Long" : "Short"}`);
   console.log(`  Estimated leverage: ~${Number(sizeDeltaUsd / (10n ** 30n))}x`);
 
   const orderParams = {
@@ -108,14 +121,14 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
       sizeDeltaUsd,
       initialCollateralDeltaAmount: 0n,
       triggerPrice: 0n,
-      acceptablePrice: IS_LONG ? maxUint256 : 0n,
+      acceptablePrice: isLong ? maxUint256 : 0n,
       executionFee: EXECUTION_FEE,
       callbackGasLimit: 0n,
       minOutputAmount: 0n,
       validFromTime: 0n,
     },
     orderType: 2, // MarketIncrease
-    isLong: IS_LONG,
+    isLong,
     shouldUnwrapNativeToken: false,
     decreasePositionSwapType: 0,
     autoCancel: false,
@@ -191,15 +204,15 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
         walletAddress,
         market.market,
         USDC_ADDRESS,
-        IS_LONG
+        isLong
       );
 
       console.log(`\n=== POSITION CREATED SUCCESSFULLY ===`);
       console.log(`  Account:          ${walletAddress}`);
-      console.log(`  Market:           ${MARKET_NAME} (${market.market})`);
+      console.log(`  Market:           ${marketName} (${market.market})`);
       console.log(`  Collateral:       ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
       console.log(`  Size:             ${sizeLabel} USD`);
-      console.log(`  Direction:        ${IS_LONG ? "Long" : "Short"}`);
+      console.log(`  Direction:        ${isLong ? "Long" : "Short"}`);
       console.log(`  Position key:     ${positionKey}`);
       console.log(`  Order TX:         ${txHash}`);
       console.log(`  Execution TX:     ${executionResult.txHash}`);
@@ -240,8 +253,8 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
 async function main() {
   console.log("=== Liquidation Test: Create Undercollateralized Position ===");
   console.log(`Wallet: ${config.walletAddress}`);
-  console.log(`Market: ${MARKET_NAME}`);
-  console.log(`Strategy: Minimal collateral ($5 USDC) with extreme leverage, ${IS_LONG ? "LONG" : "SHORT"}\n`);
+  console.log(`Strategy: Minimal collateral ($5 USDC) with extreme leverage`);
+  console.log(`Markets to try: ${MARKET_ATTEMPTS.map(a => a.label).join(", ")}\n`);
 
   // Check balances
   const walletAddress = config.walletAddress as Address;
@@ -286,23 +299,35 @@ async function main() {
     console.log("  Orders will not be executed. Start it first, or the order will time out.");
   }
 
-  // Try each size tier, highest leverage first
-  for (const tier of SIZE_TIERS) {
-    console.log(`\n========================================`);
-    console.log(`Trying size tier: ${tier.label}`);
-    console.log(`========================================`);
+  // Try each market/direction combination with all size tiers
+  for (const attempt of MARKET_ATTEMPTS) {
+    console.log(`\n${"=".repeat(60)}`);
+    console.log(`  Trying: ${attempt.label}`);
+    console.log(`${"=".repeat(60)}`);
 
-    const success = await createPosition(tier.value, tier.label);
-    if (success) {
-      console.log(`\nPosition created successfully at ${tier.label} size.`);
-      process.exit(0);
+    for (const tier of SIZE_TIERS) {
+      console.log(`\n--- Size tier: ${tier.label} on ${attempt.label} ---`);
+
+      const success = await createPosition(
+        tier.value,
+        tier.label,
+        attempt.marketName,
+        attempt.isLong
+      );
+      if (success) {
+        console.log(`\nPosition created successfully: ${tier.label} on ${attempt.label}.`);
+        process.exit(0);
+      }
+
+      console.log(`  ${tier.label} on ${attempt.label} did not work. Trying next...`);
     }
 
-    console.log(`\nSize ${tier.label} did not work. Trying next tier...`);
+    console.log(`\nAll size tiers exhausted for ${attempt.label}. Moving to next market/direction.`);
   }
 
-  console.error(`\nFATAL: All size tiers failed. Could not create undercollateralized position.`);
-  console.error(`Check the market's max leverage setting and available liquidity.`);
+  console.error(`\nFATAL: All market/direction/size combinations failed.`);
+  console.error(`All testnet pools appear to have exhausted open interest reserves.`);
+  console.error(`Please add liquidity to a pool via the Buy GM flow before retrying.`);
   process.exit(1);
 }
 
