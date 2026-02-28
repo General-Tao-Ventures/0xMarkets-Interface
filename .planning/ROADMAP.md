@@ -9,7 +9,7 @@
 - ✅ **v1.4 Maximum Keeper Speed** — Phases 13-14 (shipped 2026-02-25)
 - ✅ **v1.5 Minimal Keeper Rewrite** — Phases 15-17 (shipped 2026-02-26)
 - ✅ **v1.6 E2E Reliability** — Phases 18, 20-23 (shipped 2026-02-27)
-- 🚧 **v1.7 Liquidation Readiness** — Phases 24-26 (in progress)
+- 🚧 **v1.7 Liquidation Readiness** — Phases 24-27 (in progress)
 
 ## Phases
 
@@ -84,6 +84,7 @@
 - [x] **Phase 24: Contract Bug Fixes** - Fix OrderHandler div-by-zero on reversed markets, redeploy atomically with ExchangeRouter, propagate addresses to all services (completed 2026-02-27)
 - [x] **Phase 25: Liquidation Pipeline Verification** - Prove the liquidation keeper detects, executes, and records a real liquidation on Base Sepolia (4/4 plans complete; LIQ-03/LIQ-04 deferred due to pool reserves) (completed 2026-02-28)
 - [x] **Phase 26: Liquidation Hardening and Performance** - Add reliability guards, timing instrumentation, dead code cleanup, and scan performance optimizations (completed 2026-02-28)
+- [ ] **Phase 27: Liquidation Pipeline End-to-End Execution** - Close LIQ-03/LIQ-04 gaps: fix oracle address divergence, fund testnet pool, execute and confirm a real liquidation
 
 ## Phase Details
 
@@ -130,8 +131,21 @@ Plans:
   5. Position discovery uses a single multicall RPC request instead of N serial `getPosition()` calls
 **Plans**: 2 plans
 Plans:
-- [ ] 26-01-PLAN.md -- Add dedup guard, revert tracking, and delete dead riskEngine.ts
-- [ ] 26-02-PLAN.md -- Multicall batching, position data reuse, and per-stage timing instrumentation
+- [x] 26-01-PLAN.md -- Add dedup guard, revert tracking, and delete dead riskEngine.ts
+- [x] 26-02-PLAN.md -- Multicall batching, position data reuse, and per-stage timing instrumentation
+
+### Phase 27: Liquidation Pipeline End-to-End Execution
+**Goal**: Close the remaining LIQ-03/LIQ-04 gaps by executing a real liquidation on Base Sepolia — the executor submits executeLiquidation, the TX succeeds on-chain, and the confirmator records the result in PostgreSQL
+**Depends on**: Phase 26 (hardening must be in place before final verification)
+**Requirements**: LIQ-03, LIQ-04
+**Gap Closure**: Closes gaps from v1.7 audit (2 requirements, 1 integration, 1 flow)
+**Success Criteria** (what must be TRUE):
+  1. Scanner and executor use the same oracle provider address — no price source divergence
+  2. WETH/USD pool on Base Sepolia has >$5,000 USDC liquidity (sufficient headroom for test positions)
+  3. A high-leverage test position is created and becomes undercollateralized (via market movement or collateral withdrawal)
+  4. The executor submits `executeLiquidation` and the transaction succeeds on-chain (visible on Basescan)
+  5. The confirmator updates the PostgreSQL record from SUBMITTED to EXECUTED with the correct transaction hash
+**Plans**: TBD (run `/gsd:plan-phase 27`)
 
 ## Progress
 
@@ -164,4 +178,5 @@ Phases execute in numeric order: 24 -> 25 -> 26
 | 23. Automated E2E Testing | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 24. Contract Bug Fixes | v1.7 | 2/2 | Complete | 2026-02-27 |
 | 25. Liquidation Pipeline Verification | v1.7 | 4/4 | Complete | 2026-02-28 |
-| 26. Liquidation Hardening and Performance | 2/2 | Complete    | 2026-02-28 | - |
+| 26. Liquidation Hardening and Performance | v1.7 | 2/2 | Complete | 2026-02-28 |
+| 27. Liquidation Pipeline E2E Execution | v1.7 | 0/? | Planned | - |

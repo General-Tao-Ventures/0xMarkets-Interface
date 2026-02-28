@@ -15,7 +15,7 @@
 
 - [x] **LIQ-01**: Keeper wallet has LIQUIDATION_KEEPER role verified on-chain
 - [x] **LIQ-02**: Liquidation scanner detects undercollateralized positions within one scan cycle (30s)
-- [x] **LIQ-03**: Liquidation executor successfully calls executeLiquidation on a real test position
+- [ ] **LIQ-03**: Liquidation executor successfully calls executeLiquidation on a real test position
 - [ ] **LIQ-04**: Confirmator records liquidation result in PostgreSQL with correct status
 
 ### Liquidation Hardening
@@ -97,8 +97,8 @@ Deferred to v2+. Tracked but not in current roadmap.
 | CFIX-03 | Phase 24 | Complete |
 | LIQ-01 | Phase 25 | Complete |
 | LIQ-02 | Phase 25 | Complete |
-| LIQ-03 | Phase 25 | Complete |
-| LIQ-04 | Phase 25 | Pending |
+| LIQ-03 | Phase 27 | Pending |
+| LIQ-04 | Phase 27 | Pending |
 | LPERF-03 | Phase 25 | Complete |
 | LHARD-01 | Phase 26 | Complete |
 | LHARD-02 | Phase 26 | Complete |
@@ -114,4 +114,4 @@ Deferred to v2+. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after roadmap creation*
+*Last updated: 2026-02-28 after gap closure phase creation*

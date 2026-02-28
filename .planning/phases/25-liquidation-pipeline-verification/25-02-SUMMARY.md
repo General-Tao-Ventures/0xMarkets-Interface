@@ -50,7 +50,7 @@ patterns-established:
   - "Executor gas estimation as validation gate before submitting liquidation TX"
   - "Scanner cooldown map for failed positions to prevent scan thrashing"
 
-requirements-completed: [LIQ-02, LIQ-03]
+requirements-completed: [LIQ-02]
 
 # Metrics
 duration: 2h6min
