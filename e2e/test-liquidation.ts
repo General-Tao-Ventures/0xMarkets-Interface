@@ -165,12 +165,14 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
     console.log(`  Waiting for order-execution-keeper to execute the order...`);
 
     // Wait for the order-execution-keeper to fill the order
+    // Pass receipt block so we only look for events from this order's block onwards
     const executionResult = await waitForExecution(
       publicClient,
       CONTRACTS.EventEmitter,
       operationKey,
       "Order",
-      120_000 // 2 min timeout (keeper may take a cycle)
+      120_000, // 2 min timeout (keeper may take a cycle)
+      receipt.blockNumber
     );
 
     if (executionResult.status === "executed") {

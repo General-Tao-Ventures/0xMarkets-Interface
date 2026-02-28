@@ -203,25 +203,22 @@ export async function waitForExecution(
   eventEmitterAddress: Address,
   operationKey: `0x${string}`,
   opType: OpType,
-  timeoutMs: number = 60_000
+  timeoutMs: number = 60_000,
+  startFromBlock?: bigint
 ): Promise<ExecutionResult> {
   const startTime = Date.now();
   const executedHash = EVENT_NAME_HASHES[`${opType}Executed`];
   const cancelledHash = EVENT_NAME_HASHES[`${opType}Cancelled`];
 
-  // Get current block as starting point
-  const currentBlock = await publicClient.getBlockNumber();
-  // Look back a few blocks to not miss anything
-  const fromBlock = currentBlock > 5n ? currentBlock - 5n : 0n;
+  // Use provided block or look back a few blocks from current
+  const fromBlock =
+    startFromBlock ??
+    (await publicClient.getBlockNumber().then((b) => (b > 5n ? b - 5n : 0n)));
 
   while (Date.now() - startTime < timeoutMs) {
     try {
-      // Get all logs from EventEmitter with our operation key as topic1 (topics[2])
-      // We use raw topics filter: [null, null, operationKey] to match any event
-      // from EventEmitter where topics[2] = our operation key
       const logs = await publicClient.getLogs({
         address: eventEmitterAddress,
-        // topics[0]=any event sig, topics[1]=any eventNameHash, topics[2]=operationKey
         topics: [null, null, operationKey],
         fromBlock,
         toBlock: "latest",
@@ -229,6 +226,9 @@ export async function waitForExecution(
 
       for (const log of logs) {
         if (!log.topics || log.topics.length < 3) continue;
+
+        // Verify topics[2] matches our operation key (RPC may not filter correctly)
+        if (log.topics[2]?.toLowerCase() !== operationKey.toLowerCase()) continue;
 
         const eventNameHash = log.topics[1];
 
