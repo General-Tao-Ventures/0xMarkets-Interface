@@ -36,16 +36,21 @@ if (!market) {
   process.exit(1);
 }
 
-// SHORT position: more likely to be liquidated if ETH trends up (which it has been).
-// $5 USDC collateral (must exceed $1 MIN_COLLATERAL_USD after fees).
-// High leverage to be close to liquidation threshold.
-const IS_LONG = false;
-const COLLATERAL_AMOUNT = 5_000_000n; // 5 USDC (6 decimals)
+// LONG position with minimal collateral and high leverage.
+// We use LONG because the wallet already has a SHORT position at max leverage.
+// A LONG position is a separate position key and won't conflict.
+// If ETH drops even slightly, this ultra-leveraged position becomes liquidatable.
+const IS_LONG = true;
+const COLLATERAL_AMOUNT = 5_000_000n; // 5 USDC (6 decimals) — small collateral
 const SIZE_TIERS = [
+  { label: "$500", value: 500n * 10n ** 30n },
+  { label: "$400", value: 400n * 10n ** 30n },
+  { label: "$300", value: 300n * 10n ** 30n },
   { label: "$250", value: 250n * 10n ** 30n },
+  { label: "$200", value: 200n * 10n ** 30n },
   { label: "$150", value: 150n * 10n ** 30n },
   { label: "$100", value: 100n * 10n ** 30n },
-  { label: "$50", value: 50n * 10n ** 30n },
+  { label: "$50",  value: 50n * 10n ** 30n },
 ];
 
 // ============================================================
@@ -82,7 +87,7 @@ function computePositionKey(
 async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<boolean> {
   const walletAddress = config.walletAddress as Address;
 
-  console.log(`\n--- Attempting position: ${sizeLabel} size, $1 USDC collateral ---`);
+  console.log(`\n--- Attempting position: ${sizeLabel} size, $5 USDC collateral ---`);
   console.log(`  Market: ${MARKET_NAME} (${market.market})`);
   console.log(`  Collateral: ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
   console.log(`  Size: ${sizeLabel} USD`);
@@ -236,7 +241,7 @@ async function main() {
   console.log("=== Liquidation Test: Create Undercollateralized Position ===");
   console.log(`Wallet: ${config.walletAddress}`);
   console.log(`Market: ${MARKET_NAME}`);
-  console.log(`Strategy: Minimal collateral ($1 USDC) with high leverage, ${IS_LONG ? "LONG" : "SHORT"}\n`);
+  console.log(`Strategy: Minimal collateral ($5 USDC) with extreme leverage, ${IS_LONG ? "LONG" : "SHORT"}\n`);
 
   // Check balances
   const walletAddress = config.walletAddress as Address;
