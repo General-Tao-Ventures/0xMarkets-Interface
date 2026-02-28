@@ -77,7 +77,16 @@ Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → 
 
 ### Active
 
-(None — next milestone requirements TBD via `/gsd:new-milestone`)
+## Current Milestone: v1.8 Deployment
+
+**Goal:** Deploy all keeper updates to DigitalOcean, push frontend to Vercel, and set up GitHub Actions CI/CD for automated future deployments.
+
+**Target features:**
+- Push keeper-service and order-execution-keeper-service code to DO server
+- Update server configs (contract addresses, ORACLE_MODE=lazer)
+- Set up GitHub Actions CI/CD for both keeper repos
+- Deploy frontend to Vercel via git push
+- End-to-end verification of deployed services
 
 ### Out of Scope
 
@@ -146,4 +155,4 @@ Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → 
 | Accept pipeline verification via gas-estimation | Pool reserves prevent final TX but code paths proven | ✓ Good — operational, not code issue |
 
 ---
-*Last updated: 2026-02-28 after v1.7 milestone*
+*Last updated: 2026-02-28 after v1.8 milestone start*
