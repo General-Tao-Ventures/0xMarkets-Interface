@@ -68,29 +68,29 @@ Requirements for v1.8 Deployment milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GIT-01 | TBD | Pending |
-| GIT-02 | TBD | Pending |
-| GIT-03 | TBD | Pending |
-| CFG-01 | TBD | Pending |
-| CFG-02 | TBD | Pending |
-| CFG-03 | TBD | Pending |
-| DB-01 | TBD | Pending |
-| DB-02 | TBD | Pending |
-| DEPLOY-01 | TBD | Pending |
-| DEPLOY-02 | TBD | Pending |
-| DEPLOY-03 | TBD | Pending |
-| CICD-01 | TBD | Pending |
-| CICD-02 | TBD | Pending |
-| FE-01 | TBD | Pending |
-| FE-02 | TBD | Pending |
-| VER-01 | TBD | Pending |
-| VER-02 | TBD | Pending |
+| GIT-01 | Phase 28 | Pending |
+| GIT-02 | Phase 28 | Pending |
+| GIT-03 | Phase 28 | Pending |
+| CFG-01 | Phase 28 | Pending |
+| CFG-02 | Phase 28 | Pending |
+| CFG-03 | Phase 28 | Pending |
+| DB-01 | Phase 29 | Pending |
+| DB-02 | Phase 29 | Pending |
+| DEPLOY-01 | Phase 29 | Pending |
+| DEPLOY-02 | Phase 29 | Pending |
+| DEPLOY-03 | Phase 29 | Pending |
+| CICD-01 | Phase 30 | Pending |
+| CICD-02 | Phase 30 | Pending |
+| FE-01 | Phase 31 | Pending |
+| FE-02 | Phase 31 | Pending |
+| VER-01 | Phase 31 | Pending |
+| VER-02 | Phase 31 | Pending |
 
 **Coverage:**
 - v1.8 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️
+- Mapped to phases: 17
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-02-28 after roadmap creation*
