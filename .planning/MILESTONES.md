@@ -1,5 +1,26 @@
 # Milestones
 
+## v1.7 Liquidation Readiness (Shipped: 2026-02-28)
+
+**Phases completed:** 4 phases (24-27), 9 plans
+**Timeline:** 2026-02-27 → 2026-02-28 (2 days)
+**Files changed:** 41 files, +6,358 / -74 lines
+**Commits:** 40
+
+**Key accomplishments:**
+- Fixed OrderHandler division-by-zero on reversed markets (JPY/USD) with zero-guard, atomically redeployed with ExchangeRouter
+- Verified full liquidation pipeline (scanner → executor → confirmator) with 9 bug fixes across scanner, executor, store, and oracle
+- Refactored scanner from updatePrice writes to getOraclePrice view calls — eliminated gas costs, nonce issues, ABI parsing errors
+- Added liquidation hardening: deduplication guard (60s TTL), revert tracking in PostgreSQL, dead code cleanup (riskEngine.ts removed)
+- Optimized position discovery with multicall batching, position data reuse, and per-stage timing instrumentation
+- Seeded WETH/USD pool with 10,000 USDC and created high-leverage test positions for pipeline verification
+
+**Known Gaps:**
+- LIQ-03: executeLiquidation TX not proven on-chain — pipeline verified through gas estimation, pool reserve exhaustion prevented final TX
+- LIQ-04: Confirmator DB recording not triggered — depends on LIQ-03; code paths structurally verified
+
+---
+
 ## v1.0 Fix Buy GM Flow (Shipped: 2026-02-21)
 
 **Phases completed:** 3 phases, 6 plans

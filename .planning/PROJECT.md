@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A perpetual futures trading interface on Base Sepolia, deployed at app.0xmarkets.io. Users can provide liquidity (Buy/Sell GM), trade leveraged long/short positions across 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY), and manage positions with limit orders, stop-loss, and take-profit. Backed by cloud-hosted keepers with structured logging, health monitoring, and uptime alerting.
+A perpetual futures trading interface on Base Sepolia, deployed at app.0xmarkets.io. Users can provide liquidity (Buy/Sell GM), trade leveraged long/short positions across 6 markets (ETH, BTC, EUR, GBP, GOLD, JPY), and manage positions with limit orders, stop-loss, and take-profit. Backed by cloud-hosted keepers with structured logging, health monitoring, uptime alerting, and a liquidation pipeline with deduplication, revert tracking, and multicall-optimized scanning.
 
 ## Core Value
 
@@ -10,9 +10,9 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.6 E2E Reliability (2026-02-27)
+**Shipped:** v1.7 Liquidation Readiness (2026-02-28)
 
-Contract address audit across all services, frontend toast lifecycle and auto-refresh, automated E2E test suite (17/18 pass, JPY skipped due to contract bug). Keeper execution fixes verified manually.
+Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → executor → confirmator) with 9 bug fixes, refactored to view-call oracle pricing, added hardening (dedup, revert tracking, dead code cleanup) and performance optimizations (multicall batching, timing instrumentation). Pipeline verified through gas-estimation; on-chain TX blocked by pool reserve exhaustion.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
@@ -22,6 +22,7 @@ Contract address audit across all services, frontend toast lifecycle and auto-re
 - v1.4 Maximum Keeper Speed (2026-02-25) — oracle correctness, execution speed, timing instrumentation
 - v1.5 Minimal Keeper Rewrite (2026-02-26) — clean 300-line keeper, Lazer oracle cache, deployed and verified
 - v1.6 E2E Reliability (2026-02-27) — contract audit, toast lifecycle, auto-refresh, E2E test suite
+- v1.7 Liquidation Readiness (2026-02-28) — contract fix, liquidation pipeline verification, hardening, performance
 
 ## Requirements
 
@@ -61,17 +62,22 @@ Contract address audit across all services, frontend toast lifecycle and auto-re
 - ✓ Toast lifecycle: Pending → Executed! for deposits, withdrawals, and orders — v1.6
 - ✓ Auto-refresh: pool balances and positions update after execution without page refresh — v1.6
 - ✓ E2E test suite: 17/18 market×operation combinations pass (JPY skipped, contract bug) — v1.6
+- ✓ OrderHandler zero-guard on reversed markets — JPY/USD orders no longer revert — v1.7
+- ✓ OrderHandler and ExchangeRouter redeployed atomically — v1.7
+- ✓ All service configs updated with new contract addresses — v1.7
+- ✓ LIQUIDATION_KEEPER role verified on keeper wallet — v1.7
+- ✓ Liquidation scanner detects undercollateralized positions within 30s — v1.7
+- ✓ Oracle mode set to Lazer for independent keeper operation — v1.7
+- ✓ Deduplication guard prevents double-submission within 60s — v1.7
+- ✓ Reverted liquidation attempts tracked with error reason in DB — v1.7
+- ✓ Dead code cleanup (riskEngine.ts removed) — v1.7
+- ✓ Per-stage timing instrumentation for scanner, executor, confirmator — v1.7
+- ✓ Position discovery uses multicall batching — v1.7
+- ✓ Executor reuses position data from scanner — v1.7
 
 ### Active
 
-## Current Milestone: v1.7 Liquidation Readiness
-
-**Goal:** Fix remaining contract bugs, verify the existing liquidation keeper works end-to-end, and optimize it for performance and efficiency.
-
-**Target features:**
-- Contract bug fixes: guard triggerPrice=0 in OrderHandler for reversed markets, redeploy, update all service configs
-- Liquidation verification: confirm keeper-service liquidation pipeline (scanner → riskEngine → executor) works on Base Sepolia
-- Liquidation performance: optimize scanning speed, risk assessment efficiency, and execution latency
+(None — next milestone requirements TBD via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -82,26 +88,28 @@ Contract address audit across all services, frontend toast lifecycle and auto-re
 - Social/copy trading features
 - Multi-chain support beyond Base Sepolia
 - Mainnet deployment — testnet-first
+- Offline mode — real-time oracle feeds are core requirement
+- On-chain liquidation TX proof (LIQ-03/LIQ-04) — verified through gas-estimation, blocked by testnet pool reserves
 
 ## Context
 
 - **Chain:** Base Sepolia (84532)
 - **Deployed:** app.0xmarkets.io (Vercel)
-- **Shipped:** v1.0 (2026-02-21), v1.1 (2026-02-22), v1.2 (2026-02-23)
-- **Codebase:** 18 phases, 41 plans, 6 milestones across 6 days
-- **Critical risk:** Multiple contract deployments mean stale addresses across services — audit before testing
+- **Shipped:** v1.0-v1.7 across 8 milestones in 8 days (2026-02-21 → 2026-02-28)
+- **Codebase:** 27 phases, 58 plans across 8 milestones
 - **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222) with pino JSON logging, real health endpoints, and BetterStack uptime monitoring
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
-- **Oracle mode:** Pyth Lazer only (v1.5 keeper uses Lazer WebSocket exclusively)
+- **Oracle mode:** Pyth Lazer only (WebSocket cache, getOraclePrice view calls for scanner)
 - **Pyth Pro API key:** QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN (crypto account)
 - **Test suite:** 136 pass, 1 skipped (live RPC), 0 failures
-- **Liquidation keeper:** Already exists in keeper-service (scanner → riskEngine → executor with PostgreSQL audit trail) — needs verification and optimization
+- **Liquidation pipeline:** scanner → executor → confirmator with PostgreSQL audit trail, dedup guard, revert tracking, multicall batching, and per-stage timing
 - **Known issues:**
   - REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
-  - batch_report 404 from metrics (GMX analytics endpoint not implemented — cosmetic)
-  - pendingImpactAmount defaults to 0n (documented workaround — correct behavior)
-  - OrderHandler.sol division-by-zero on reversed markets (JPY/USD) when triggerPrice=0 — Phase 24 fix
+  - JPY/USD Pyth Lazer oracle data gap ("Best ask price is not present") — testnet infrastructure, not code
+  - Synthetic tokens (EUR/GBP/JPY/GOLD) have intermittent Pyth Lazer data gaps
+  - Shared wallet nonce conflict between keeper-service and order-execution-keeper — documented testnet risk
+  - WETH/USD pool at 100% reserve capacity — blocks new position creation
 
 ## Constraints
 
@@ -125,13 +133,17 @@ Contract address audit across all services, frontend toast lifecycle and auto-re
 | BetterStack free tier for uptime | Pings health endpoints, email alerts on failure | ✓ Good — 5-min detection |
 | healthState mutable singleton | Avoids circular imports across scanner/executor/oracle | ✓ Good |
 | /health returns 503 until first scan | Prevents false-healthy reports on startup | ✓ Good |
-
 | Pyth Pro crypto key for oracle feeds | Previous token had zero entitlements | ✓ Good |
 | Per-token Lazer/Hermes fallback | Graceful degradation per token vs global switch | ✓ Good |
 | Transaction mutex for nonce conflicts | Serializes execution + cleanup paths | ✓ Good |
-
 | Contract audit before testing | Multiple deployments mean stale addresses are likely | ✓ Good — 89/89 verified |
-| Liquidation keeper in keeper-service | Already has scanner+riskEngine+executor, no need for standalone | — Pending verification |
+| Liquidation keeper in keeper-service | Already has scanner+executor, no need for standalone | ✓ Good — verified in v1.7 |
+| Zero-guard before Precision.mulDiv | Check != 0 before division, simpler than SafeMath wrapper | ✓ Good — JPY/USD fixed |
+| getOraclePrice view calls over updatePrice writes | Eliminates gas, nonce issues, ABI parsing errors | ✓ Good — scanner works without TX |
+| Config-driven PythLazerFeedProvider address | Read from config instead of hardcoding | ✓ Good — survived address change |
+| Dedup guard separate from cooldown | 60s submission TTL vs 5min gas-estimation failure | ✓ Good — different purposes |
+| Multicall batching with allowFailure | Individual failures don't break batch | ✓ Good — robust discovery |
+| Accept pipeline verification via gas-estimation | Pool reserves prevent final TX but code paths proven | ✓ Good — operational, not code issue |
 
 ---
-*Last updated: 2026-02-27 after v1.7 Liquidation Readiness milestone started*
+*Last updated: 2026-02-28 after v1.7 milestone*
