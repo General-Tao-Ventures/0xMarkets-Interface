@@ -9,15 +9,15 @@ Requirements for v1.8 Deployment milestone. Each maps to roadmap phases.
 
 ### Git Sync
 
-- [ ] **GIT-01**: All local keeper-service commits pushed to remote (16 commits on `ken/keeper-updates`)
-- [ ] **GIT-02**: Frontend branch pushed to remote to trigger Vercel deploy
+- [x] **GIT-01**: All local keeper-service commits pushed to remote (16 commits on `ken/keeper-updates`)
+- [x] **GIT-02**: Frontend branch pushed to remote to trigger Vercel deploy
 - [ ] **GIT-03**: keeper-service initialized as git repo on DO server (currently raw files)
 
 ### Server Config
 
-- [ ] **CFG-01**: docker-compose.yml updated with v1.7 contract addresses (OrderHandler, ExchangeRouter)
-- [ ] **CFG-02**: ORACLE_MODE switched from `hermes` to `lazer` in server .env
-- [ ] **CFG-03**: Any missing env vars added (EXCHANGE_ROUTER_ADDRESS if needed)
+- [x] **CFG-01**: docker-compose.yml updated with v1.7 contract addresses (OrderHandler, ExchangeRouter)
+- [x] **CFG-02**: ORACLE_MODE switched from `hermes` to `lazer` in server .env
+- [x] **CFG-03**: Any missing env vars added (EXCHANGE_ROUTER_ADDRESS if needed)
 
 ### Database
 
@@ -68,12 +68,12 @@ Requirements for v1.8 Deployment milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GIT-01 | Phase 28 | Pending |
-| GIT-02 | Phase 28 | Pending |
+| GIT-01 | Phase 28 | Complete |
+| GIT-02 | Phase 28 | Complete |
 | GIT-03 | Phase 28 | Pending |
-| CFG-01 | Phase 28 | Pending |
-| CFG-02 | Phase 28 | Pending |
-| CFG-03 | Phase 28 | Pending |
+| CFG-01 | Phase 28 | Complete |
+| CFG-02 | Phase 28 | Complete |
+| CFG-03 | Phase 28 | Complete |
 | DB-01 | Phase 29 | Pending |
 | DB-02 | Phase 29 | Pending |
 | DEPLOY-01 | Phase 29 | Pending |
