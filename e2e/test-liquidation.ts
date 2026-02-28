@@ -29,51 +29,38 @@ import {
 // Configuration
 // ============================================================
 
-// Strategy: Try multiple markets and directions to find one with available reserves.
-// Each "attempt" is a (market, direction) pair. We try all size tiers for each attempt
-// before moving to the next. This handles the testnet pool reserve exhaustion issue.
-interface MarketAttempt {
-  marketName: string;
-  isLong: boolean;
-  label: string;
-}
+// WETH/USD only -- user added $1000 USDC liquidity to this pool.
+// Synthetic markets (GOLD, EUR, GBP) have oracle "best ask price" data gaps
+// that prevent the order-execution-keeper from executing orders.
+// WBTC/USD has no liquidity.
+const TARGET_MARKET = "WETH/USD";
 
-// Try synthetic markets first -- they have near-zero open interest and available reserves.
-// WETH/USD and WBTC/USD pools are exhausted (InsufficientReserve on all directions).
-// Note: JPY/USD excluded due to known Pyth Lazer oracle data gap.
-const MARKET_ATTEMPTS: MarketAttempt[] = [
-  { marketName: "GOLD/USD", isLong: false, label: "GOLD/USD SHORT" },
-  { marketName: "GOLD/USD", isLong: true,  label: "GOLD/USD LONG" },
-  { marketName: "EUR/USD",  isLong: false, label: "EUR/USD SHORT" },
-  { marketName: "EUR/USD",  isLong: true,  label: "EUR/USD LONG" },
-  { marketName: "GBP/USD",  isLong: false, label: "GBP/USD SHORT" },
-  { marketName: "GBP/USD",  isLong: true,  label: "GBP/USD LONG" },
-  { marketName: "WBTC/USD", isLong: false, label: "WBTC/USD SHORT" },
-  { marketName: "WETH/USD", isLong: false, label: "WETH/USD SHORT" },
-  { marketName: "WBTC/USD", isLong: true,  label: "WBTC/USD LONG" },
-  { marketName: "WETH/USD", isLong: true,  label: "WETH/USD LONG" },
+// Collateral and size strategy:
+// - The WETH/USD pool has $1548 USDC, 95% reserve factor => $1471 max reserved
+// - Current OI: $695 LONG + $675 SHORT = $1370 reserved => ~$101 headroom
+// - Reserve calculation includes BOTH size AND collateral
+// - $20 collateral + $400 size SHORT was previously executed (but fees ate collateral)
+// - With $100 collateral, even $25 size gets cancelled (collateral inflates reserve calc)
+// - Use minimal collateral ($5 USDC) to minimize reserve impact, accept that position
+//   will be near-instant liquidation due to fees eating into the tiny collateral.
+// - A position that's immediately liquidatable is IDEAL for testing the pipeline.
+const COLLATERAL_AMOUNT = 5_000_000n; // 5 USDC (6 decimals)
+
+// Size tiers: With $5 collateral, we need sizes that fit within pool headroom.
+// The $400 SHORT previously worked with $20 collateral. With $5, smaller sizes should fit.
+const SIZE_TIERS = [
+  { label: "$200",  value: 200n * 10n ** 30n },
+  { label: "$100",  value: 100n * 10n ** 30n },
+  { label: "$50",   value: 50n * 10n ** 30n },
+  { label: "$25",   value: 25n * 10n ** 30n },
+  { label: "$10",   value: 10n * 10n ** 30n },
+  { label: "$5",    value: 5n * 10n ** 30n },
 ];
 
-// Use enough collateral for the position to survive execution fees (~$0.50-$2 impact/position fees).
-// The position must survive creation so the scanner can detect and liquidate it later.
-// Increased from $10 to $50 USDC to ensure positions survive after fees.
-const COLLATERAL_AMOUNT = 50_000_000n; // 50 USDC (6 decimals)
-
-// Size tiers: With $50 USDC collateral, target high leverage for near-liquidation positions.
-// Max leverage on these markets is typically 50x. We start just under that and work down.
-// A position at 40-50x leverage with $50 collateral = $2000-$2500 size, very near liquidation.
-const SIZE_TIERS = [
-  { label: "$2500", value: 2500n * 10n ** 30n },
-  { label: "$2000", value: 2000n * 10n ** 30n },
-  { label: "$1500", value: 1500n * 10n ** 30n },
-  { label: "$1000", value: 1000n * 10n ** 30n },
-  { label: "$750",  value: 750n * 10n ** 30n },
-  { label: "$500",  value: 500n * 10n ** 30n },
-  { label: "$400",  value: 400n * 10n ** 30n },
-  { label: "$300",  value: 300n * 10n ** 30n },
-  { label: "$200",  value: 200n * 10n ** 30n },
-  { label: "$150",  value: 150n * 10n ** 30n },
-  { label: "$100",  value: 100n * 10n ** 30n },
+// Try both directions -- pool may have reserves on one side but not the other
+const DIRECTIONS: Array<{ isLong: boolean; label: string }> = [
+  { isLong: true,  label: "LONG" },
+  { isLong: false, label: "SHORT" },
 ];
 
 // ============================================================
@@ -126,7 +113,6 @@ async function createPosition(
   console.log(`  Collateral: ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
   console.log(`  Size: ${sizeLabel} USD`);
   console.log(`  Direction: ${isLong ? "Long" : "Short"}`);
-  console.log(`  Estimated leverage: ~${Number(sizeDeltaUsd / (10n ** 30n))}x`);
 
   const orderParams = {
     addresses: {
@@ -191,7 +177,7 @@ async function createPosition(
     console.log(`  Order TX mined in block ${receipt.blockNumber}`);
 
     if (receipt.status === "reverted") {
-      console.log(`  Order TX reverted. Max leverage may have been exceeded.`);
+      console.log(`  Order TX reverted. Likely InsufficientReserve or max leverage exceeded.`);
       return false;
     }
 
@@ -212,7 +198,7 @@ async function createPosition(
       CONTRACTS.EventEmitter,
       operationKey,
       "Order",
-      120_000, // 2 min timeout (keeper may take a cycle)
+      180_000, // 3 min timeout (keeper may take a full cycle)
       receipt.blockNumber
     );
 
@@ -266,13 +252,15 @@ async function createPosition(
       console.log(`  Collateral sent:  ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
       console.log(`  On-chain collat:  ${formatUnits(positionCollateralOnChain, 6)} USDC`);
       console.log(`  On-chain size:    ${formatUnits(positionSizeOnChain, 30)} USD`);
-      console.log(`  Effective levg:   ~${(Number(positionSizeOnChain) / Number(positionCollateralOnChain * 10n**24n)).toFixed(1)}x`);
+      if (positionCollateralOnChain > 0n) {
+        console.log(`  Effective levg:   ~${(Number(positionSizeOnChain) / Number(positionCollateralOnChain * 10n**24n)).toFixed(1)}x`);
+      }
       console.log(`  Direction:        ${isLong ? "Long" : "Short"}`);
       console.log(`  Position key:     ${positionKey}`);
       console.log(`  Order TX:         ${txHash}`);
       console.log(`  Execution TX:     ${executionResult.txHash}`);
       console.log(`\n=== NEXT STEPS ===`);
-      console.log(`  1. Start keeper-service: cd /Users/ken/Projects/0xM/keeper-service && npm run dev`);
+      console.log(`  1. keeper-service scanner should detect this position`);
       console.log(`  2. Watch for "found liquidatable position" in keeper logs`);
       console.log(`  3. Verify liquidation_candidates and liquidation_executions in PostgreSQL`);
       console.log(`  4. Check Basescan TX for the executeLiquidation call`);
@@ -285,18 +273,13 @@ async function createPosition(
       console.log(`  This may indicate max leverage exceeded or insufficient liquidity.`);
       return false;
     } else {
-      console.log(`  TIMEOUT: Order-execution-keeper did not execute within 120s.`);
+      console.log(`  TIMEOUT: Order-execution-keeper did not execute within 180s.`);
       console.log(`  Ensure the order-execution-keeper is running on port 37018.`);
       return false;
     }
   } catch (err) {
-    const msg = (err as Error).message?.slice(0, 200) || "Unknown error";
+    const msg = (err as Error).message?.slice(0, 300) || "Unknown error";
     console.log(`  FAILED: ${msg}`);
-
-    if (msg.toLowerCase().includes("leverage") || msg.toLowerCase().includes("max_leverage")) {
-      console.log(`  Max leverage exceeded. Will try a smaller size.`);
-    }
-
     return false;
   }
 }
@@ -308,8 +291,8 @@ async function createPosition(
 async function main() {
   console.log("=== Liquidation Test: Create Undercollateralized Position ===");
   console.log(`Wallet: ${config.walletAddress}`);
-  console.log(`Strategy: $${formatUnits(COLLATERAL_AMOUNT, 6)} USDC collateral with high leverage`);
-  console.log(`Markets to try: ${MARKET_ATTEMPTS.map(a => a.label).join(", ")}\n`);
+  console.log(`Target market: ${TARGET_MARKET}`);
+  console.log(`Strategy: $${formatUnits(COLLATERAL_AMOUNT, 6)} USDC collateral with high leverage\n`);
 
   // Check balances
   const walletAddress = config.walletAddress as Address;
@@ -324,18 +307,13 @@ async function main() {
   console.log(`USDC balance: ${formatUnits(usdcBalance, 6)}`);
   console.log(`ETH balance:  ${formatEther(ethBalance)}`);
 
-  if (usdcBalance < COLLATERAL_AMOUNT) {
-    console.log(`\nInsufficient USDC balance. Need at least ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC.`);
-    console.log(`Current balance: ${formatUnits(usdcBalance, 6)} USDC`);
-  }
-
   if (ethBalance < EXECUTION_FEE) {
     console.error(`\nFATAL: Insufficient ETH for execution fee.`);
     console.error(`Need at least ${formatEther(EXECUTION_FEE)} ETH, have ${formatEther(ethBalance)} ETH.`);
     process.exit(1);
   }
 
-  // Ensure approvals (also mints USDC if balance < 200)
+  // Ensure approvals (also mints 500 USDC if balance < 200)
   console.log("\nChecking approvals...");
   await ensureApprovals(walletClient, publicClient, CONTRACTS.SyntheticsRouter);
 
@@ -344,45 +322,45 @@ async function main() {
   try {
     const resp = await fetch("http://localhost:37018/health");
     if (resp.ok) {
-      console.log("  Order-execution-keeper is running.");
+      const health = await resp.json();
+      console.log(`  Order-execution-keeper is running. Seen: ${health.seenCount}, Queue: ${health.queueLength}`);
     } else {
       console.log(`  WARNING: Order-execution-keeper returned status ${resp.status}`);
-      console.log("  Orders may not be executed. Proceeding anyway...");
     }
   } catch {
     console.log("  WARNING: Order-execution-keeper not reachable at localhost:37018");
     console.log("  Orders will not be executed. Start it first, or the order will time out.");
   }
 
-  // Try each market/direction combination with all size tiers
-  for (const attempt of MARKET_ATTEMPTS) {
+  // Try each direction with all size tiers
+  for (const dir of DIRECTIONS) {
     console.log(`\n${"=".repeat(60)}`);
-    console.log(`  Trying: ${attempt.label}`);
+    console.log(`  Trying: ${TARGET_MARKET} ${dir.label}`);
     console.log(`${"=".repeat(60)}`);
 
     for (const tier of SIZE_TIERS) {
-      console.log(`\n--- Size tier: ${tier.label} on ${attempt.label} ---`);
+      console.log(`\n--- Size tier: ${tier.label} on ${TARGET_MARKET} ${dir.label} ---`);
 
       const success = await createPosition(
         tier.value,
         tier.label,
-        attempt.marketName,
-        attempt.isLong
+        TARGET_MARKET,
+        dir.isLong
       );
       if (success) {
-        console.log(`\nPosition created successfully: ${tier.label} on ${attempt.label}.`);
+        console.log(`\nPosition created successfully: ${tier.label} on ${TARGET_MARKET} ${dir.label}.`);
         process.exit(0);
       }
 
-      console.log(`  ${tier.label} on ${attempt.label} did not work. Trying next...`);
+      console.log(`  ${tier.label} on ${TARGET_MARKET} ${dir.label} did not work. Trying next...`);
     }
 
-    console.log(`\nAll size tiers exhausted for ${attempt.label}. Moving to next market/direction.`);
+    console.log(`\nAll size tiers exhausted for ${TARGET_MARKET} ${dir.label}. Moving to next direction.`);
   }
 
-  console.error(`\nFATAL: All market/direction/size combinations failed.`);
-  console.error(`All testnet pools appear to have exhausted open interest reserves.`);
-  console.error(`Please add liquidity to a pool via the Buy GM flow before retrying.`);
+  console.error(`\nFATAL: All size/direction combinations failed for ${TARGET_MARKET}.`);
+  console.error(`The pool may need more liquidity or the order-execution-keeper may have oracle issues.`);
+  console.error(`Check order-keeper logs: tail -50 /tmp/order-keeper.log`);
   process.exit(1);
 }
 

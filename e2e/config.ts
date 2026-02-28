@@ -68,8 +68,9 @@ export const CONTRACTS = {
 export const USDC_ADDRESS: Address = "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b";
 export const WETH_ADDRESS: Address = "0x4200000000000000000000000000000000000006";
 
-// Execution fee: 0.001 ETH
-export const EXECUTION_FEE = 1_000_000_000_000_000n; // 1e15 wei
+// Execution fee: 0.00005 ETH (MIN_EXECUTION_FEE on testnet is 0, so we minimize gas spend)
+// Base Sepolia gas is cheap (~5-6 gwei), so 0.00005 ETH is plenty for keeper execution
+export const EXECUTION_FEE = 50_000_000_000_000n; // 5e13 wei
 
 // Market definitions (from SDK markets.ts -- all use USDC as long and short token)
 export const MARKETS: Record<string, { market: Address; indexToken: Address }> = {
