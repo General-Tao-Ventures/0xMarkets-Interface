@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Deployment
 status: active
-last_updated: "2026-02-28T22:47:00.000Z"
+last_updated: "2026-02-28T23:15:00.000Z"
 progress:
   total_phases: 31
-  completed_phases: 27
-  total_plans: 59
-  completed_plans: 59
+  completed_phases: 28
+  total_plans: 61
+  completed_plans: 61
 ---
 
 # Project State
@@ -18,26 +18,27 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.8 Deployment — Phase 28: Git Sync & Server Config
+**Current focus:** v1.8 Deployment — Phase 29: Docker Deploy & Database
 
 ## Current Position
 
-Phase: 28 of 31 (Git Sync & Server Config)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-02-28 — Completed 28-01 (Git Sync & Docker Compose Update)
+Phase: 29 of 31 (Docker Deploy & Database)
+Plan: 0 of TBD in current phase
+Status: Ready for planning
+Last activity: 2026-02-28 — Completed 28-02 (Server Git Init & Config Verification)
 
-Progress: [============================..] 87% (27/31 phases)
+Progress: [=============================.] 90% (28/31 phases)
 
 ## Performance Metrics
 
 **Velocity (v1.0-v1.8):**
-- Total plans completed: 59
-- Phases: 27 complete across 8 milestones
+- Total plans completed: 61
+- Phases: 28 complete across 8 milestones
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 28    | 01   | 2min     | 2     | 1     |
+| 28    | 02   | 5min     | 2     | 0     |
 
 ## Accumulated Context
 
@@ -48,12 +49,14 @@ Progress: [============================..] 87% (27/31 phases)
 - Shared wallet nonce conflict between keeper-service and order-execution-keeper — documented testnet risk
 - WETH/USD pool at 100% reserve capacity — blocks new position/liquidation testing
 
-### Server State (after 28-01)
+### Server State (after 28-02)
 
-- All 3 repos pushed to GitHub (keeper-service 16 commits, frontend 63 commits, order-keeper already synced)
-- docker-compose.yml updated locally with v1.7 addresses, ORACLE_MODE=lazer, ORACLE_PROVIDER_ADDRESS
-- Server still running old code -- Plan 02 handles git setup, pull, and container rebuild
-- docker-compose.yml is in /Users/ken/Projects/0xM/ which is NOT a git repo (will be rsync'd)
+- All 3 repos pushed to GitHub and pulled on DO server
+- keeper-service on server: git repo on ken/keeper-updates (HEAD bff78a4), path /opt/0xmarkets/keeper-service/
+- order-execution-keeper on server: git repo on ken/keeper-rebuild (HEAD 37c313a), path /opt/0xmarkets/order-execution-keeper-service/
+- docker-compose.yml on server has all v1.7 addresses, ORACLE_MODE=lazer, ORACLE_PROVIDER_ADDRESS, FLASHBLOCKS_RPC_URL
+- Server .env has 6 required secrets, stale ORACLE_MODE=hermes removed
+- Containers NOT yet rebuilt -- Phase 29 handles Docker rebuild
 
 ### Pending Todos
 
@@ -70,9 +73,13 @@ See .planning/PROJECT.md key decisions table for full history.
 - [28-01] docker-compose.yml not in a git repo -- updated locally, will transfer to server in Plan 02
 - [28-01] ORACLE_MODE hardcoded to "lazer" (not env var default) to prevent hermes fallback
 - [28-01] order-execution-keeper uses DataStore-registered oracle provider (0xc5810) as PYTH_LAZER_FEED_PROVIDER_ADDRESS
+- [28-02] Server path is /opt/0xmarkets/ (not /root/0xmarkets/ as originally assumed)
+- [28-02] GitHub org is General-Tao-Ventures (not taoshidev)
+- [28-02] Used fresh clone + swap for keeper-service git init (avoids dirty tree conflicts)
+- [28-02] Removed stale ORACLE_MODE=hermes from server .env
 
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 28-01-PLAN.md
-Next: Execute 28-02-PLAN.md (Server Deployment)
+Stopped at: Completed 28-02-PLAN.md (Phase 28 complete)
+Next: Plan Phase 29 (Docker Deploy & Database)

@@ -11,7 +11,7 @@ Requirements for v1.8 Deployment milestone. Each maps to roadmap phases.
 
 - [x] **GIT-01**: All local keeper-service commits pushed to remote (16 commits on `ken/keeper-updates`)
 - [x] **GIT-02**: Frontend branch pushed to remote to trigger Vercel deploy
-- [ ] **GIT-03**: keeper-service initialized as git repo on DO server (currently raw files)
+- [x] **GIT-03**: keeper-service initialized as git repo on DO server (currently raw files)
 
 ### Server Config
 
@@ -70,7 +70,7 @@ Requirements for v1.8 Deployment milestone. Each maps to roadmap phases.
 |-------------|-------|--------|
 | GIT-01 | Phase 28 | Complete |
 | GIT-02 | Phase 28 | Complete |
-| GIT-03 | Phase 28 | Pending |
+| GIT-03 | Phase 28 | Complete |
 | CFG-01 | Phase 28 | Complete |
 | CFG-02 | Phase 28 | Complete |
 | CFG-03 | Phase 28 | Complete |
