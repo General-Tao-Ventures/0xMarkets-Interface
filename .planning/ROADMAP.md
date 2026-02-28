@@ -118,12 +118,14 @@ Plans:
 **Goal**: All three Docker containers (postgres, keeper-service, order-execution-keeper) are running with current code on the DO server
 **Depends on**: Phase 28
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DB-01, DB-02
+**Plans:** 1 plan
+Plans:
+- [ ] 29-01-PLAN.md — Pull code, rebuild containers, verify migrations and data, confirm health
 **Success Criteria** (what must be TRUE):
   1. `docker ps` on the server shows all three containers in healthy/running state
   2. keeper-service container is running the v1.7 code (with liquidation pipeline, multicall batching)
   3. order-execution-keeper container is running current code with updated contract addresses
   4. Prisma migrations applied without errors and existing database data is preserved
-**Plans**: TBD
 
 ### Phase 30: CI/CD Automation
 **Goal**: Pushing to a deploy branch on GitHub automatically deploys to the DO server without manual SSH
@@ -177,6 +179,6 @@ Plans:
 | 26. Liquidation Hardening and Performance | v1.7 | 2/2 | Complete | 2026-02-28 |
 | 27. Liquidation Pipeline E2E Execution | v1.7 | 1/1 | Complete | 2026-02-28 |
 | 28. Git Sync & Server Config | v1.8 | Complete    | 2026-02-28 | 2026-02-28 |
-| 29. Docker Deploy & Database | v1.8 | 0/TBD | Not started | - |
+| 29. Docker Deploy & Database | v1.8 | 0/1 | Not started | - |
 | 30. CI/CD Automation | v1.8 | 0/TBD | Not started | - |
 | 31. Frontend & E2E Verification | v1.8 | 0/TBD | Not started | - |
