@@ -128,7 +128,10 @@ Plans:
   3. `riskEngine.ts` is removed or archived -- dead code is not in the active codebase
   4. Keeper logs show per-stage timing (scan duration, check duration, submit duration, confirm duration) for each liquidation cycle
   5. Position discovery uses a single multicall RPC request instead of N serial `getPosition()` calls
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 26-01-PLAN.md -- Add dedup guard, revert tracking, and delete dead riskEngine.ts
+- [ ] 26-02-PLAN.md -- Multicall batching, position data reuse, and per-stage timing instrumentation
 
 ## Progress
 
@@ -159,6 +162,6 @@ Phases execute in numeric order: 24 -> 25 -> 26
 | 21. Keeper Execution Fixes | v1.6 | 1/1 | Complete | 2026-02-27 |
 | 22. Frontend Feedback | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 23. Automated E2E Testing | v1.6 | 2/2 | Complete | 2026-02-27 |
-| 24. Contract Bug Fixes | 2/2 | Complete    | 2026-02-27 | - |
+| 24. Contract Bug Fixes | v1.7 | 2/2 | Complete | 2026-02-27 |
 | 25. Liquidation Pipeline Verification | v1.7 | 4/4 | Complete | 2026-02-28 |
-| 26. Liquidation Hardening and Performance | v1.7 | 0/TBD | Not started | - |
+| 26. Liquidation Hardening and Performance | v1.7 | 0/2 | Not started | - |
