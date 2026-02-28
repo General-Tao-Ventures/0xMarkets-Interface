@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Liquidation Readiness
 status: in-progress
-last_updated: "2026-02-28T04:59:00.000Z"
+last_updated: "2026-02-28T02:43:00.000Z"
 progress:
   total_phases: 17
   completed_phases: 16
-  total_plans: 39
-  completed_plans: 38
+  total_plans: 41
+  completed_plans: 39
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.7 Liquidation Readiness -- Phase 25 Plan 01 complete, Plan 02 next
+**Current focus:** v1.7 Liquidation Readiness -- Phase 25 Plan 03 complete (gap closure), Plan 04 next
 
 ## Current Position
 
 Phase: 25 of 26 (Liquidation Pipeline Verification)
-Plan: 2 of 2
-Status: Complete (with testnet constraint on LIQ-04)
-Last activity: 2026-02-27 -- Completed 25-02 (E2E pipeline verification, 9 bug fixes, testnet pool reserves blocker)
+Plan: 3 of 4
+Status: In Progress (gap closure plans)
+Last activity: 2026-02-28 -- Completed 25-03 (PythLazer address fix across all keeper configs)
 
-Progress: [█████████░] 90% Phase 25 complete (2/2 plans complete, LIQ-04 deferred)
+Progress: [████████░░] 75% Phase 25 (3/4 plans complete, Plan 04 remaining)
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Progress: [█████████░] 90% Phase 25 complete (2/2 plans comp
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
 | v1.6 | 18,20-23 | 10/10 | Complete |
-| v1.7 | 24-26 | 3/TBD | In progress |
+| v1.7 | 24-26 | 5/TBD | In progress |
 
 **v1.7 Execution:**
 
@@ -56,6 +56,7 @@ Progress: [█████████░] 90% Phase 25 complete (2/2 plans comp
 | Phase 24 P02 | 54min | 2 | 6 |
 | Phase 25 P01 | 15min | 2 | 4 |
 | Phase 25 P02 | 2h6min | 2 | 7 |
+| Phase 25 P03 | 2min | 1 | 3 |
 
 ## Accumulated Context
 
@@ -97,9 +98,10 @@ None.
 - **25-02 Scanner cooldown:** 5-minute cooldown on positions where gas estimation shows PositionShouldNotBeLiquidated
 - **25-02 Unnamed tuple ABI:** viem parseAbi requires (type, type, ...) not tuple(name type, ...) -- access results by index
 - **25-02 Testnet blocker:** InsufficientReserveForOpenInterest prevents new positions on WETH/USD -- LIQ-04 deferred to Phase 26
+- **25-03 PythLazer address fix:** On-chain cast call confirms 0x8a3eb351 active (ok=true), 0xc5810FC reverts -- working tree and .env files were reverted from correct committed state
 
 ## Session Continuity
 
-Last session: 2026-02-27
-Stopped at: Completed 25-02-PLAN.md (E2E pipeline verification -- 9 bugs fixed, testnet pool reserves blocker)
-Next: Phase 26 (liquidation hardening + pool liquidity for LIQ-04 completion)
+Last session: 2026-02-28
+Stopped at: Completed 25-03-PLAN.md (PythLazer address fix across all keeper configs)
+Next: Phase 25 Plan 04 (gap closure), then Phase 26

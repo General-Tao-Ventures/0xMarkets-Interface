@@ -160,5 +160,5 @@ Phases execute in numeric order: 24 -> 25 -> 26
 | 22. Frontend Feedback | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 23. Automated E2E Testing | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 24. Contract Bug Fixes | 2/2 | Complete    | 2026-02-27 | - |
-| 25. Liquidation Pipeline Verification | 2/2 | Complete   | 2026-02-28 | - |
+| 25. Liquidation Pipeline Verification | 3/4 | In Progress|  | - |
 | 26. Liquidation Hardening and Performance | v1.7 | 0/TBD | Not started | - |
