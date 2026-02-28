@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Liquidation Readiness
 status: in-progress
-last_updated: "2026-02-28T02:43:00.000Z"
+last_updated: "2026-02-28T17:49:00.000Z"
 progress:
   total_phases: 17
   completed_phases: 16
-  total_plans: 41
-  completed_plans: 40
+  total_plans: 42
+  completed_plans: 41
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.7 Liquidation Readiness -- Phase 25 Plan 03 complete (gap closure), Plan 04 next
+**Current focus:** v1.7 Liquidation Readiness -- Phase 26 Plan 01 complete (hardening), Plan 02 next
 
 ## Current Position
 
-Phase: 25 of 26 (Liquidation Pipeline Verification)
-Plan: 4 of 4
-Status: Complete (LIQ-03/LIQ-04 deferred to Phase 26 due to pool reserves)
-Last activity: 2026-02-28 -- Completed 25-04 (E2E pipeline gap closure -- blocked by pool liquidity)
+Phase: 26 of 26 (Liquidation Hardening and Performance)
+Plan: 1 of 2
+Status: In Progress
+Last activity: 2026-02-28 -- Completed 26-01 (dedup guard, revert tracking, dead code cleanup)
 
-Progress: [██████████] 100% Phase 25 (4/4 plans complete)
+Progress: [█████-----] 50% Phase 26 (1/2 plans complete)
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Progress: [██████████] 100% Phase 25 (4/4 plans complete)
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
 | v1.6 | 18,20-23 | 10/10 | Complete |
-| v1.7 | 24-26 | 5/TBD | In progress |
+| v1.7 | 24-26 | 7/8 | In progress |
 
 **v1.7 Execution:**
 
@@ -58,6 +58,7 @@ Progress: [██████████] 100% Phase 25 (4/4 plans complete)
 | Phase 25 P02 | 2h6min | 2 | 7 |
 | Phase 25 P03 | 2min | 1 | 3 |
 | Phase 25 P04 | 86min | 2 | 2 |
+| Phase 26 P01 | 2min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -102,9 +103,12 @@ None.
 - **25-03 PythLazer address fix:** On-chain cast call confirms 0x8a3eb351 active (ok=true), 0xc5810FC reverts -- working tree and .env files were reverted from correct committed state
 - **25-04 Pool reserve saturation:** WETH/USD pool has $1548 USDC but $1370 already reserved (95% factor = $1471 max). Only ~$101 headroom blocks position creation. LIQ-03/LIQ-04 deferred to Phase 26.
 - **25-04 Synthetic oracle gap:** GOLD/EUR/GBP Pyth Lazer feeds missing "best ask price" data -- order execution fails for these markets
+- **26-01 Dedup vs cooldown:** submissionDedup (60s TTL for successful submissions) is separate from failedCooldown (5min for gas-estimation failures) -- different purposes
+- **26-01 Fire-and-forget receipts:** watchReceipt() is non-blocking so executor can process other candidates concurrently
+- **26-01 Timeout handling:** Receipt watcher timeout errors logged but do not update status -- stuck detection deferred to future phase
 
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 25-04-PLAN.md (E2E pipeline gap closure -- pool liquidity blocker)
-Next: Phase 26 (hardening/performance), LIQ-03/LIQ-04 retry when pool has >$5000 liquidity
+Stopped at: Completed 26-01-PLAN.md (dedup guard, revert tracking, dead code cleanup)
+Next: Phase 26 Plan 02 (multicall batching and performance), LIQ-03/LIQ-04 retry when pool has >$5000 liquidity

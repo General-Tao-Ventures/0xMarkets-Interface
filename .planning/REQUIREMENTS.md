@@ -20,9 +20,9 @@
 
 ### Liquidation Hardening
 
-- [ ] **LHARD-01**: Executor has deduplication guard — same position is not liquidated twice concurrently
-- [ ] **LHARD-02**: REVERTED liquidation attempts are tracked with error reason in the database
-- [ ] **LHARD-03**: Dead code cleanup — remove or archive unused riskEngine.ts
+- [x] **LHARD-01**: Executor has deduplication guard — same position is not liquidated twice concurrently
+- [x] **LHARD-02**: REVERTED liquidation attempts are tracked with error reason in the database
+- [x] **LHARD-03**: Dead code cleanup — remove or archive unused riskEngine.ts
 - [ ] **LHARD-04**: Per-stage timing instrumentation for scanner, executor, and confirmator
 
 ### Liquidation Performance
@@ -100,9 +100,9 @@ Deferred to v2+. Tracked but not in current roadmap.
 | LIQ-03 | Phase 25 | Complete |
 | LIQ-04 | Phase 25 | Pending |
 | LPERF-03 | Phase 25 | Complete |
-| LHARD-01 | Phase 26 | Pending |
-| LHARD-02 | Phase 26 | Pending |
-| LHARD-03 | Phase 26 | Pending |
+| LHARD-01 | Phase 26 | Complete |
+| LHARD-02 | Phase 26 | Complete |
+| LHARD-03 | Phase 26 | Complete |
 | LHARD-04 | Phase 26 | Pending |
 | LPERF-01 | Phase 26 | Pending |
 | LPERF-02 | Phase 26 | Pending |
