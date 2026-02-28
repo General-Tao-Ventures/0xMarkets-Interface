@@ -111,10 +111,12 @@ Plans:
   3. A deliberately undercollateralized test position is detected as liquidatable by the scanner within one scan cycle (30s)
   4. The executor submits `executeLiquidation` and the transaction succeeds on-chain (visible on Basescan)
   5. The confirmator updates the PostgreSQL record from SUBMITTED to EXECUTED with the correct transaction hash
-**Plans**: 2 plans
+**Plans**: 4 plans
 Plans:
 - [x] 25-01-PLAN.md -- Fix PythLazerFeedProvider address, set oracle mode to Lazer, verify LIQUIDATION_KEEPER role
-- [ ] 25-02-PLAN.md -- End-to-end liquidation pipeline test
+- [x] 25-02-PLAN.md -- End-to-end liquidation pipeline test (partial -- 9 bug fixes, testnet pool reserves blocker)
+- [ ] 25-03-PLAN.md -- Gap closure: fix wrong PythLazerFeedProvider address in all config files
+- [ ] 25-04-PLAN.md -- Gap closure: execute full liquidation pipeline (executor TX + confirmator status)
 
 ### Phase 26: Liquidation Hardening and Performance
 **Goal**: The liquidation pipeline handles edge cases gracefully, has observability instrumentation, and scans positions efficiently
