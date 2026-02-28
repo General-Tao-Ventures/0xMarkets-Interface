@@ -82,7 +82,7 @@
 **Milestone Goal:** Fix the last contract bug (JPY/USD division-by-zero), verify the existing liquidation keeper pipeline works end-to-end on Base Sepolia, and harden it for reliability and performance.
 
 - [x] **Phase 24: Contract Bug Fixes** - Fix OrderHandler div-by-zero on reversed markets, redeploy atomically with ExchangeRouter, propagate addresses to all services (completed 2026-02-27)
-- [ ] **Phase 25: Liquidation Pipeline Verification** - Prove the liquidation keeper detects, executes, and records a real liquidation on Base Sepolia
+- [ ] **Phase 25: Liquidation Pipeline Verification** - Prove the liquidation keeper detects, executes, and records a real liquidation on Base Sepolia (1/2 plans complete)
 - [ ] **Phase 26: Liquidation Hardening and Performance** - Add reliability guards, timing instrumentation, dead code cleanup, and scan performance optimizations
 
 ## Phase Details
@@ -111,7 +111,10 @@ Plans:
   3. A deliberately undercollateralized test position is detected as liquidatable by the scanner within one scan cycle (30s)
   4. The executor submits `executeLiquidation` and the transaction succeeds on-chain (visible on Basescan)
   5. The confirmator updates the PostgreSQL record from SUBMITTED to EXECUTED with the correct transaction hash
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [x] 25-01-PLAN.md -- Fix PythLazerFeedProvider address, set oracle mode to Lazer, verify LIQUIDATION_KEEPER role
+- [ ] 25-02-PLAN.md -- End-to-end liquidation pipeline test
 
 ### Phase 26: Liquidation Hardening and Performance
 **Goal**: The liquidation pipeline handles edge cases gracefully, has observability instrumentation, and scans positions efficiently
@@ -155,5 +158,5 @@ Phases execute in numeric order: 24 -> 25 -> 26
 | 22. Frontend Feedback | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 23. Automated E2E Testing | v1.6 | 2/2 | Complete | 2026-02-27 |
 | 24. Contract Bug Fixes | 2/2 | Complete    | 2026-02-27 | - |
-| 25. Liquidation Pipeline Verification | v1.7 | 0/TBD | Not started | - |
+| 25. Liquidation Pipeline Verification | v1.7 | 1/2 | In progress | - |
 | 26. Liquidation Hardening and Performance | v1.7 | 0/TBD | Not started | - |

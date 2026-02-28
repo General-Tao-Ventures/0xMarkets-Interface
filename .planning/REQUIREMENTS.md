@@ -13,7 +13,7 @@
 
 ### Liquidation Verification
 
-- [ ] **LIQ-01**: Keeper wallet has LIQUIDATION_KEEPER role verified on-chain
+- [x] **LIQ-01**: Keeper wallet has LIQUIDATION_KEEPER role verified on-chain
 - [ ] **LIQ-02**: Liquidation scanner detects undercollateralized positions within one scan cycle (30s)
 - [ ] **LIQ-03**: Liquidation executor successfully calls executeLiquidation on a real test position
 - [ ] **LIQ-04**: Confirmator records liquidation result in PostgreSQL with correct status
@@ -29,7 +29,7 @@
 
 - [ ] **LPERF-01**: Position discovery uses multicall batching instead of serial RPC calls
 - [ ] **LPERF-02**: Executor reuses position data from scanner instead of redundant RPC fetch
-- [ ] **LPERF-03**: Oracle mode set to Lazer (not Hermes default) for keeper-service
+- [x] **LPERF-03**: Oracle mode set to Lazer (not Hermes default) for keeper-service
 
 ## Prior Milestone Requirements (v1.6)
 
@@ -95,11 +95,11 @@ Deferred to v2+. Tracked but not in current roadmap.
 | CFIX-01 | Phase 24 | Complete |
 | CFIX-02 | Phase 24 | Complete |
 | CFIX-03 | Phase 24 | Complete |
-| LIQ-01 | Phase 25 | Pending |
+| LIQ-01 | Phase 25 | Complete |
 | LIQ-02 | Phase 25 | Pending |
 | LIQ-03 | Phase 25 | Pending |
 | LIQ-04 | Phase 25 | Pending |
-| LPERF-03 | Phase 25 | Pending |
+| LPERF-03 | Phase 25 | Complete |
 | LHARD-01 | Phase 26 | Pending |
 | LHARD-02 | Phase 26 | Pending |
 | LHARD-03 | Phase 26 | Pending |
