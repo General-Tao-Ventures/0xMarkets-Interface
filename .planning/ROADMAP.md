@@ -145,12 +145,14 @@ Plans:
   3. A high-leverage test position is created and becomes undercollateralized (via market movement or collateral withdrawal)
   4. The executor submits `executeLiquidation` and the transaction succeeds on-chain (visible on Basescan)
   5. The confirmator updates the PostgreSQL record from SUBMITTED to EXECUTED with the correct transaction hash
-**Plans**: TBD (run `/gsd:plan-phase 27`)
+**Plans**: 1 plan
+Plans:
+- [ ] 27-01-PLAN.md -- Seed WETH/USD pool with 10,000 USDC, create high-leverage position, observe full liquidation pipeline execution and DB confirmation
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 24 -> 25 -> 26
+Phases execute in numeric order: 24 -> 25 -> 26 -> 27
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -179,4 +181,4 @@ Phases execute in numeric order: 24 -> 25 -> 26
 | 24. Contract Bug Fixes | v1.7 | 2/2 | Complete | 2026-02-27 |
 | 25. Liquidation Pipeline Verification | v1.7 | 4/4 | Complete | 2026-02-28 |
 | 26. Liquidation Hardening and Performance | v1.7 | 2/2 | Complete | 2026-02-28 |
-| 27. Liquidation Pipeline E2E Execution | v1.7 | 0/? | Planned | - |
+| 27. Liquidation Pipeline E2E Execution | v1.7 | 0/1 | Planned | - |
