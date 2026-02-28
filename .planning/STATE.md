@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Liquidation Readiness
-status: in-progress
-last_updated: "2026-02-28T17:49:00.000Z"
+status: complete
+last_updated: "2026-02-28T17:54:00.000Z"
 progress:
   total_phases: 17
-  completed_phases: 16
+  completed_phases: 17
   total_plans: 42
-  completed_plans: 41
+  completed_plans: 42
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.7 Liquidation Readiness -- Phase 26 Plan 01 complete (hardening), Plan 02 next
+**Current focus:** v1.7 Liquidation Readiness -- Phase 26 complete (all plans)
 
 ## Current Position
 
 Phase: 26 of 26 (Liquidation Hardening and Performance)
-Plan: 1 of 2
-Status: In Progress
-Last activity: 2026-02-28 -- Completed 26-01 (dedup guard, revert tracking, dead code cleanup)
+Plan: 2 of 2
+Status: Complete
+Last activity: 2026-02-28 -- Completed 26-02 (multicall batching, position data reuse, timing instrumentation)
 
-Progress: [█████-----] 50% Phase 26 (1/2 plans complete)
+Progress: [██████████] 100% Phase 26 (2/2 plans complete)
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Progress: [█████-----] 50% Phase 26 (1/2 plans complete)
 | v1.4 | 13-14 | 6/6 | Complete |
 | v1.5 | 15-17 | 6/6 | Complete |
 | v1.6 | 18,20-23 | 10/10 | Complete |
-| v1.7 | 24-26 | 7/8 | In progress |
+| v1.7 | 24-26 | 8/8 | Complete |
 
 **v1.7 Execution:**
 
@@ -59,6 +59,7 @@ Progress: [█████-----] 50% Phase 26 (1/2 plans complete)
 | Phase 25 P03 | 2min | 1 | 3 |
 | Phase 25 P04 | 86min | 2 | 2 |
 | Phase 26 P01 | 2min | 2 | 3 |
+| Phase 26 P02 | 2min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -106,9 +107,12 @@ None.
 - **26-01 Dedup vs cooldown:** submissionDedup (60s TTL for successful submissions) is separate from failedCooldown (5min for gas-estimation failures) -- different purposes
 - **26-01 Fire-and-forget receipts:** watchReceipt() is non-blocking so executor can process other candidates concurrently
 - **26-01 Timeout handling:** Receipt watcher timeout errors logged but do not update status -- stuck detection deferred to future phase
+- **26-02 Multicall allowFailure:** allowFailure:true on multicall so individual position key failures don't break the batch
+- **26-02 Position data pipeline:** Scanner passes collateralToken/isLong to executor, with fetchPositionByKey fallback for independent calls
+- **26-02 Structured timing:** All timing as numeric pino fields (totalDurationMs, submitDurationMs, confirmDurationMs) for machine-parseable logs
 
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 26-01-PLAN.md (dedup guard, revert tracking, dead code cleanup)
-Next: Phase 26 Plan 02 (multicall batching and performance), LIQ-03/LIQ-04 retry when pool has >$5000 liquidity
+Stopped at: Completed 26-02-PLAN.md (multicall batching, position data reuse, timing instrumentation)
+Next: v1.7 milestone complete. LIQ-03/LIQ-04 (testnet liquidation execution) retry when pool has >$5000 liquidity

@@ -23,12 +23,12 @@
 - [x] **LHARD-01**: Executor has deduplication guard — same position is not liquidated twice concurrently
 - [x] **LHARD-02**: REVERTED liquidation attempts are tracked with error reason in the database
 - [x] **LHARD-03**: Dead code cleanup — remove or archive unused riskEngine.ts
-- [ ] **LHARD-04**: Per-stage timing instrumentation for scanner, executor, and confirmator
+- [x] **LHARD-04**: Per-stage timing instrumentation for scanner, executor, and confirmator
 
 ### Liquidation Performance
 
-- [ ] **LPERF-01**: Position discovery uses multicall batching instead of serial RPC calls
-- [ ] **LPERF-02**: Executor reuses position data from scanner instead of redundant RPC fetch
+- [x] **LPERF-01**: Position discovery uses multicall batching instead of serial RPC calls
+- [x] **LPERF-02**: Executor reuses position data from scanner instead of redundant RPC fetch
 - [x] **LPERF-03**: Oracle mode set to Lazer (not Hermes default) for keeper-service
 
 ## Prior Milestone Requirements (v1.6)
@@ -103,9 +103,9 @@ Deferred to v2+. Tracked but not in current roadmap.
 | LHARD-01 | Phase 26 | Complete |
 | LHARD-02 | Phase 26 | Complete |
 | LHARD-03 | Phase 26 | Complete |
-| LHARD-04 | Phase 26 | Pending |
-| LPERF-01 | Phase 26 | Pending |
-| LPERF-02 | Phase 26 | Pending |
+| LHARD-04 | Phase 26 | Complete |
+| LPERF-01 | Phase 26 | Complete |
+| LPERF-02 | Phase 26 | Complete |
 
 **Coverage:**
 - v1.7 requirements: 14 total
