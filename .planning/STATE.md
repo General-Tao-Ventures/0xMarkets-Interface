@@ -8,7 +8,7 @@ progress:
   total_phases: 17
   completed_phases: 16
   total_plans: 41
-  completed_plans: 39
+  completed_plans: 40
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 25 of 26 (Liquidation Pipeline Verification)
-Plan: 3 of 4
-Status: In Progress (gap closure plans)
-Last activity: 2026-02-28 -- Completed 25-03 (PythLazer address fix across all keeper configs)
+Plan: 4 of 4
+Status: Complete (LIQ-03/LIQ-04 deferred to Phase 26 due to pool reserves)
+Last activity: 2026-02-28 -- Completed 25-04 (E2E pipeline gap closure -- blocked by pool liquidity)
 
-Progress: [████████░░] 75% Phase 25 (3/4 plans complete, Plan 04 remaining)
+Progress: [██████████] 100% Phase 25 (4/4 plans complete)
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [████████░░] 75% Phase 25 (3/4 plans complete, Pla
 | Phase 25 P01 | 15min | 2 | 4 |
 | Phase 25 P02 | 2h6min | 2 | 7 |
 | Phase 25 P03 | 2min | 1 | 3 |
+| Phase 25 P04 | 86min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -99,9 +100,11 @@ None.
 - **25-02 Unnamed tuple ABI:** viem parseAbi requires (type, type, ...) not tuple(name type, ...) -- access results by index
 - **25-02 Testnet blocker:** InsufficientReserveForOpenInterest prevents new positions on WETH/USD -- LIQ-04 deferred to Phase 26
 - **25-03 PythLazer address fix:** On-chain cast call confirms 0x8a3eb351 active (ok=true), 0xc5810FC reverts -- working tree and .env files were reverted from correct committed state
+- **25-04 Pool reserve saturation:** WETH/USD pool has $1548 USDC but $1370 already reserved (95% factor = $1471 max). Only ~$101 headroom blocks position creation. LIQ-03/LIQ-04 deferred to Phase 26.
+- **25-04 Synthetic oracle gap:** GOLD/EUR/GBP Pyth Lazer feeds missing "best ask price" data -- order execution fails for these markets
 
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 25-03-PLAN.md (PythLazer address fix across all keeper configs)
-Next: Phase 25 Plan 04 (gap closure), then Phase 26
+Stopped at: Completed 25-04-PLAN.md (E2E pipeline gap closure -- pool liquidity blocker)
+Next: Phase 26 (hardening/performance), LIQ-03/LIQ-04 retry when pool has >$5000 liquidity
