@@ -36,14 +36,16 @@ if (!market) {
   process.exit(1);
 }
 
-// Minimal collateral ($1 USDC) with high size for maximum leverage.
-// We try multiple size tiers in case the market enforces a max leverage cap.
-const COLLATERAL_AMOUNT = 1_000_000n; // 1 USDC (6 decimals)
+// SHORT position: more likely to be liquidated if ETH trends up (which it has been).
+// $5 USDC collateral (must exceed $1 MIN_COLLATERAL_USD after fees).
+// High leverage to be close to liquidation threshold.
+const IS_LONG = false;
+const COLLATERAL_AMOUNT = 5_000_000n; // 5 USDC (6 decimals)
 const SIZE_TIERS = [
+  { label: "$250", value: 250n * 10n ** 30n },
+  { label: "$150", value: 150n * 10n ** 30n },
+  { label: "$100", value: 100n * 10n ** 30n },
   { label: "$50", value: 50n * 10n ** 30n },
-  { label: "$30", value: 30n * 10n ** 30n },
-  { label: "$20", value: 20n * 10n ** 30n },
-  { label: "$10", value: 10n * 10n ** 30n },
 ];
 
 // ============================================================
@@ -84,7 +86,7 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
   console.log(`  Market: ${MARKET_NAME} (${market.market})`);
   console.log(`  Collateral: ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
   console.log(`  Size: ${sizeLabel} USD`);
-  console.log(`  Direction: Long`);
+  console.log(`  Direction: ${IS_LONG ? "Long" : "Short"}`);
   console.log(`  Estimated leverage: ~${Number(sizeDeltaUsd / (10n ** 30n))}x`);
 
   const orderParams = {
@@ -101,14 +103,14 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
       sizeDeltaUsd,
       initialCollateralDeltaAmount: 0n,
       triggerPrice: 0n,
-      acceptablePrice: maxUint256,
+      acceptablePrice: IS_LONG ? maxUint256 : 0n,
       executionFee: EXECUTION_FEE,
       callbackGasLimit: 0n,
       minOutputAmount: 0n,
       validFromTime: 0n,
     },
     orderType: 2, // MarketIncrease
-    isLong: true,
+    isLong: IS_LONG,
     shouldUnwrapNativeToken: false,
     decreasePositionSwapType: 0,
     autoCancel: false,
@@ -184,7 +186,7 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
         walletAddress,
         market.market,
         USDC_ADDRESS,
-        true // isLong
+        IS_LONG
       );
 
       console.log(`\n=== POSITION CREATED SUCCESSFULLY ===`);
@@ -192,7 +194,7 @@ async function createPosition(sizeDeltaUsd: bigint, sizeLabel: string): Promise<
       console.log(`  Market:           ${MARKET_NAME} (${market.market})`);
       console.log(`  Collateral:       ${formatUnits(COLLATERAL_AMOUNT, 6)} USDC`);
       console.log(`  Size:             ${sizeLabel} USD`);
-      console.log(`  Direction:        Long`);
+      console.log(`  Direction:        ${IS_LONG ? "Long" : "Short"}`);
       console.log(`  Position key:     ${positionKey}`);
       console.log(`  Order TX:         ${txHash}`);
       console.log(`  Execution TX:     ${executionResult.txHash}`);
@@ -234,7 +236,7 @@ async function main() {
   console.log("=== Liquidation Test: Create Undercollateralized Position ===");
   console.log(`Wallet: ${config.walletAddress}`);
   console.log(`Market: ${MARKET_NAME}`);
-  console.log(`Strategy: Minimal collateral ($1 USDC) with high leverage\n`);
+  console.log(`Strategy: Minimal collateral ($1 USDC) with high leverage, ${IS_LONG ? "LONG" : "SHORT"}\n`);
 
   // Check balances
   const walletAddress = config.walletAddress as Address;
