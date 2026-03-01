@@ -179,6 +179,6 @@ Plans:
 | 26. Liquidation Hardening and Performance | v1.7 | 2/2 | Complete | 2026-02-28 |
 | 27. Liquidation Pipeline E2E Execution | v1.7 | 1/1 | Complete | 2026-02-28 |
 | 28. Git Sync & Server Config | v1.8 | Complete    | 2026-02-28 | 2026-02-28 |
-| 29. Docker Deploy & Database | v1.8 | 1/1 | Complete | 2026-03-01 |
+| 29. Docker Deploy & Database | v1.8 | Complete    | 2026-03-01 | 2026-03-01 |
 | 30. CI/CD Automation | v1.8 | 0/TBD | Not started | - |
 | 31. Frontend & E2E Verification | v1.8 | 0/TBD | Not started | - |
