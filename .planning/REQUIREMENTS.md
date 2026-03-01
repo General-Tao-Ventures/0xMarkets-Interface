@@ -21,14 +21,14 @@ Requirements for v1.8 Deployment milestone. Each maps to roadmap phases.
 
 ### Database
 
-- [ ] **DB-01**: Prisma migrations verified to apply cleanly on Docker rebuild
-- [ ] **DB-02**: Existing data preserved through migration (no destructive changes)
+- [x] **DB-01**: Prisma migrations verified to apply cleanly on Docker rebuild
+- [x] **DB-02**: Existing data preserved through migration (no destructive changes)
 
 ### Docker Deploy
 
-- [ ] **DEPLOY-01**: keeper-service pulled and Docker image rebuilt on DO
-- [ ] **DEPLOY-02**: order-execution-keeper-service pulled and Docker image rebuilt on DO
-- [ ] **DEPLOY-03**: All three containers (postgres, keeper, order-keeper) healthy after restart
+- [x] **DEPLOY-01**: keeper-service pulled and Docker image rebuilt on DO
+- [x] **DEPLOY-02**: order-execution-keeper-service pulled and Docker image rebuilt on DO
+- [x] **DEPLOY-03**: All three containers (postgres, keeper, order-keeper) healthy after restart
 
 ### CI/CD
 
@@ -74,11 +74,11 @@ Requirements for v1.8 Deployment milestone. Each maps to roadmap phases.
 | CFG-01 | Phase 28 | Complete |
 | CFG-02 | Phase 28 | Complete |
 | CFG-03 | Phase 28 | Complete |
-| DB-01 | Phase 29 | Pending |
-| DB-02 | Phase 29 | Pending |
-| DEPLOY-01 | Phase 29 | Pending |
-| DEPLOY-02 | Phase 29 | Pending |
-| DEPLOY-03 | Phase 29 | Pending |
+| DB-01 | Phase 29 | Complete |
+| DB-02 | Phase 29 | Complete |
+| DEPLOY-01 | Phase 29 | Complete |
+| DEPLOY-02 | Phase 29 | Complete |
+| DEPLOY-03 | Phase 29 | Complete |
 | CICD-01 | Phase 30 | Pending |
 | CICD-02 | Phase 30 | Pending |
 | FE-01 | Phase 31 | Pending |

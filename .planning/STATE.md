@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Deployment
 status: unknown
-last_updated: "2026-02-28T23:07:27.057Z"
+last_updated: "2026-03-01T03:09:59.268Z"
 progress:
-  total_phases: 17
-  completed_phases: 16
-  total_plans: 38
-  completed_plans: 37
+  total_phases: 18
+  completed_phases: 17
+  total_plans: 39
+  completed_plans: 38
 ---
 
 # Project State
@@ -18,27 +18,28 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.8 Deployment — Phase 29: Docker Deploy & Database
+**Current focus:** v1.8 Deployment — Phase 30: CI/CD Automation
 
 ## Current Position
 
-Phase: 29 of 31 (Docker Deploy & Database)
+Phase: 30 of 31 (CI/CD Automation)
 Plan: 0 of TBD in current phase
 Status: Ready for planning
-Last activity: 2026-02-28 — Completed 28-02 (Server Git Init & Config Verification)
+Last activity: 2026-03-01 — Completed 29-01 (Docker Deploy & Database)
 
-Progress: [=============================.] 90% (28/31 phases)
+Progress: [=============================.] 94% (29/31 phases)
 
 ## Performance Metrics
 
 **Velocity (v1.0-v1.8):**
-- Total plans completed: 61
-- Phases: 28 complete across 8 milestones
+- Total plans completed: 62
+- Phases: 29 complete across 8 milestones
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 28    | 01   | 2min     | 2     | 1     |
 | 28    | 02   | 5min     | 2     | 0     |
+| 29    | 01   | 15min    | 3     | 0     |
 
 ## Accumulated Context
 
@@ -49,14 +50,17 @@ Progress: [=============================.] 90% (28/31 phases)
 - Shared wallet nonce conflict between keeper-service and order-execution-keeper — documented testnet risk
 - WETH/USD pool at 100% reserve capacity — blocks new position/liquidation testing
 
-### Server State (after 28-02)
+### Server State (after 29-01)
 
 - All 3 repos pushed to GitHub and pulled on DO server
-- keeper-service on server: git repo on ken/keeper-updates (HEAD bff78a4), path /opt/0xmarkets/keeper-service/
-- order-execution-keeper on server: git repo on ken/keeper-rebuild (HEAD 37c313a), path /opt/0xmarkets/order-execution-keeper-service/
+- keeper-service on server: git repo on ken/keeper-updates, path /opt/0xmarkets/keeper-service/
+- order-execution-keeper on server: git repo on ken/keeper-rebuild, path /opt/0xmarkets/order-execution-keeper-service/
 - docker-compose.yml on server has all v1.7 addresses, ORACLE_MODE=lazer, ORACLE_PROVIDER_ADDRESS, FLASHBLOCKS_RPC_URL
-- Server .env has 6 required secrets, stale ORACLE_MODE=hermes removed
-- Containers NOT yet rebuilt -- Phase 29 handles Docker rebuild
+- Server .env has 6 required secrets
+- All 3 Docker containers running and healthy (postgres, keeper-service, order-execution-keeper)
+- Prisma migrations applied (2 migrations, none pending), price_candles 140k+ rows preserved
+- keeper-service health: HTTP 200, liquidation scanner active (30s cycles)
+- order-execution-keeper health: HTTP 200, 7 cached tokens, oracle fresh
 
 ### Pending Todos
 
@@ -77,9 +81,11 @@ See .planning/PROJECT.md key decisions table for full history.
 - [28-02] GitHub org is General-Tao-Ventures (not taoshidev)
 - [28-02] Used fresh clone + swap for keeper-service git init (avoids dirty tree conflicts)
 - [28-02] Removed stale ORACLE_MODE=hermes from server .env
+- [Phase 29]: Docker rebuild preserves pgdata volume -- data survived across container rebuild
+- [Phase 29]: Prisma auto-migration on container CMD is reliable for this deployment model
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: Completed 28-02-PLAN.md (Phase 28 complete)
-Next: Plan Phase 29 (Docker Deploy & Database)
+Last session: 2026-03-01
+Stopped at: Completed 29-01-PLAN.md (Phase 29 complete)
+Next: Plan Phase 30 (CI/CD Automation)

@@ -93,7 +93,7 @@
 **Milestone Goal:** Deploy all v1.7 keeper updates to DigitalOcean, push frontend to Vercel, set up CI/CD for automated future deployments, and verify full system end-to-end.
 
 - [x] **Phase 28: Git Sync & Server Config** - Push local code, init git on server, update contract addresses and oracle mode
-- [ ] **Phase 29: Docker Deploy & Database** - Rebuild containers on DO, verify migrations, confirm all services healthy
+- [x] **Phase 29: Docker Deploy & Database** - Rebuild containers on DO, verify migrations, confirm all services healthy (completed 2026-03-01)
 - [ ] **Phase 30: CI/CD Automation** - GitHub Actions workflows for push-to-deploy on both keeper repos
 - [ ] **Phase 31: Frontend & E2E Verification** - Deploy frontend to Vercel, verify full system from browser to chain
 
@@ -118,7 +118,7 @@ Plans:
 **Goal**: All three Docker containers (postgres, keeper-service, order-execution-keeper) are running with current code on the DO server
 **Depends on**: Phase 28
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DB-01, DB-02
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 29-01-PLAN.md — Pull code, rebuild containers, verify migrations and data, confirm health
 **Success Criteria** (what must be TRUE):
@@ -179,6 +179,6 @@ Plans:
 | 26. Liquidation Hardening and Performance | v1.7 | 2/2 | Complete | 2026-02-28 |
 | 27. Liquidation Pipeline E2E Execution | v1.7 | 1/1 | Complete | 2026-02-28 |
 | 28. Git Sync & Server Config | v1.8 | Complete    | 2026-02-28 | 2026-02-28 |
-| 29. Docker Deploy & Database | v1.8 | 0/1 | Not started | - |
+| 29. Docker Deploy & Database | v1.8 | 1/1 | Complete | 2026-03-01 |
 | 30. CI/CD Automation | v1.8 | 0/TBD | Not started | - |
 | 31. Frontend & E2E Verification | v1.8 | 0/TBD | Not started | - |
