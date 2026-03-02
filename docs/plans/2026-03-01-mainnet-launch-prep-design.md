@@ -190,11 +190,19 @@ Rolling restarts ensure at least one worker is always running during deploys. No
 | Scrub deployer private key from git history (`docs/keeper-infrastructure.md`) | Not started | Dev |
 | Set up CI/CD pipeline for keeper deploys | Not started | Dev |
 | Real USDC liquidity — seed initial pools | Not started | Ken |
+| Write CarthaVault V2 implementation with 0xMarkets integration | Not started | Dev |
+| Test V2 upgrade on Base Sepolia (both systems already deployed there) | Not started | Dev |
+| Transfer Cartha beacon ownership to multisig | Not started | Ken |
+| Upgrade Cartha vault beacon to V2 on mainnet | Not started | Ken + Dev |
+| Deploy Cartha Liquidity Keeper service | Not started | Dev |
+| Turn off PRE_DEX_EQUAL_WEIGHTS in validator | Not started | Dev |
 
 ### Phase 1: Soft Launch (Week 1-2)
 
-- Deploy contracts to Base mainnet with multisig as admin
-- Launch with **4-6 markets** only (ETH/USD, BTC/USD, SOL/USD, and 1-2 synthetics)
+- Deploy 0xMarkets contracts to Base mainnet with multisig as admin
+- Upgrade Cartha vault beacon to V2 — vaults gain `deployLiquidity()`
+- Keeper deploys vault USDC into 0xMarkets pools — **liquidity from day one**
+- Launch with **6 markets** matching Cartha vaults (ETH, BTC, EUR, GBP, GOLD, JPY)
 - Run 2 keeper wallets (conservative, validate everything works)
 - Invite limited users (whitelist or just no marketing push)
 - Kill switches enabled on all operations
@@ -228,6 +236,166 @@ If a critical issue is found post-launch:
 
 ---
 
+## 5. Cartha Vault Integration — Bittensor-Incentivized Liquidity
+
+### Overview
+
+Cartha vaults (Bittensor SN35) are already live on Base mainnet with miners locking USDC into child vaults that map 1:1 to 0xMarkets markets. The integration deploys this idle USDC as active trading liquidity in 0xMarkets pools, solving the cold-start liquidity problem on day one.
+
+### The Flywheel
+
+```
+TAO emissions --> incentivize miners to lock USDC in Cartha vaults
+                        |
+                        v
+              Vaults deposit USDC into 0xMarkets pools (via beacon upgrade)
+                        |
+                        v
+              Deep liquidity --> tight spreads --> more traders
+                        |
+                        v
+              Trading fees flow back to vaults (GM token appreciation)
+                        |
+                        v
+              Pool performance --> higher pool weights (PRE_DEX_EQUAL_WEIGHTS off)
+                        |
+                        v
+              More miner capital attracted to best-performing pools
+```
+
+### Vault-to-Market Mapping
+
+Cartha child vaults already map to 0xMarkets markets:
+
+| Cartha Vault | 0xMarkets Market | Category |
+|---|---|---|
+| cvBTC | BTC/USD | Cryptos |
+| cvETH | ETH/USD | Cryptos |
+| cvEUR | EUR/USD | Currencies |
+| cvGBP | GBP/USD | Currencies |
+| cvJPY | JPY/USD | Currencies |
+| cvGOLD | GOLD/USD | Commodities |
+
+### Integration Approach: Beacon Upgrade (Vault-as-Depositor)
+
+Cartha vaults use Beacon proxies — all child vaults share one implementation. Upgrading the beacon upgrades every vault atomically. Existing miner locks, LP shares, and USDC balances are untouched (storage is in the proxy, not the implementation).
+
+**New functions added to CarthaVault V2:**
+
+```solidity
+// Deploy idle USDC into the corresponding 0xMarkets pool
+function deployLiquidity(uint256 amount) external onlyRole(KEEPER_BOT);
+
+// Withdraw USDC from the 0xMarkets pool back to the vault
+function withdrawLiquidity(uint256 gmTokenAmount) external onlyRole(KEEPER_BOT);
+```
+
+**New storage appended to CarthaVaultStorage:**
+
+```solidity
+// Appended at end of struct (ERC-7201 safe)
+address marketRouter;           // 0xMarkets ExchangeRouter
+address marketDepositVault;     // 0xMarkets DepositVault
+address marketWithdrawalVault;  // 0xMarkets WithdrawalVault
+address marketToken;            // GM token address for this market
+uint256 deployedLiquidity;      // GM tokens held (tracking)
+```
+
+### Deposit Flow (Vault -> 0xMarkets Pool)
+
+The 0xMarkets deposit is a two-step async process:
+
+1. **Vault calls ExchangeRouter.multicall:**
+   - `sendWnt(DepositVault, executionFee)` — small ETH fee for keeper gas
+   - `sendTokens(USDC, DepositVault, amount)` — sends USDC to deposit vault
+   - `createDeposit(params)` — queues the deposit, sets vault as `receiver` and `callbackContract`
+
+2. **0xMarkets keeper executes the deposit:**
+   - Oracle prices fetched, GM tokens minted to the Cartha vault
+   - `afterDepositExecution()` callback fires on the vault (optional — for accounting)
+
+3. **Vault now holds GM tokens** — its `totalAssets()` reflects both idle USDC + GM token value
+
+### Withdrawal Flow (0xMarkets Pool -> Vault)
+
+When miners release locks or LPs withdraw, the vault needs USDC back:
+
+1. **Vault calls ExchangeRouter.multicall:**
+   - `sendWnt(WithdrawalVault, executionFee)`
+   - `sendTokens(GM_token, WithdrawalVault, amount)` — sends GM tokens
+   - `createWithdrawal(params)` — queues the withdrawal, vault as `receiver`
+
+2. **0xMarkets keeper executes the withdrawal:**
+   - GM tokens burned, USDC returned to the vault
+   - `afterWithdrawalExecution()` callback fires
+
+### Updating totalAssets()
+
+The child vault's `_totalValueLocked()` currently returns `IERC20(USDC).balanceOf(address(this))` — raw USDC balance. With GM tokens held, this underreports the vault's true value.
+
+V2 override:
+
+```solidity
+function _totalValueLocked() internal view override returns (uint256) {
+    uint256 idleUsdc = IERC20(asset).balanceOf(address(this));
+    uint256 deployedValue = _gmTokenValueInUsdc(); // GM tokens * pool price
+    return idleUsdc + deployedValue;
+}
+```
+
+`_gmTokenValueInUsdc()` reads the GM token balance and converts to USDC value using the 0xMarkets Reader contract's `getMarketTokenPrice()`.
+
+### Required Approvals (One-Time Setup After Upgrade)
+
+Each child vault needs:
+- `USDC.approve(Router, type(uint256).max)` — for deposits
+- `GM_token.approve(Router, type(uint256).max)` — for withdrawals
+
+Called by the KEEPER_BOT or ADMIN via a setup function post-upgrade.
+
+### Keeper Orchestration
+
+A new **Cartha Liquidity Keeper** manages the flow:
+
+| Action | Trigger | Frequency |
+|---|---|---|
+| `deployLiquidity()` | Idle USDC in vault exceeds threshold | Every epoch (weekly) or on large deposits |
+| `withdrawLiquidity()` | Miner release/LP withdrawal needs more USDC than idle balance | On-demand |
+| `rebalance()` | Pool weights drift from targets | Weekly (existing) |
+
+The keeper maintains a **target deployment ratio** (e.g., 80% deployed to 0xMarkets, 20% idle for withdrawals). This prevents every withdrawal from requiring an async 0xMarkets withdrawal.
+
+### Security Considerations
+
+1. **Beacon owner** — currently the admin EOA. Transfer to multisig before mainnet upgrade.
+2. **GM token risk** — if traders are net profitable, GM token value decreases (LPs take the other side of trades). Miners/LPs bear this risk. Document clearly.
+3. **Async gap** — between `createDeposit` and keeper execution, USDC is in the DepositVault (not the Cartha vault and not yet GM tokens). The vault must handle this intermediate state.
+4. **Callback failures are swallowed** — 0xMarkets callbacks don't revert on error. The vault cannot rely on callbacks for critical accounting; it should track pending deposits separately.
+5. **Withdrawal delay** — withdrawals require keeper execution. If 0xMarkets keepers are slow, Cartha vault withdrawals are delayed. The idle USDC buffer mitigates this.
+
+### Pool Weight Activation
+
+Once vaults are depositing into 0xMarkets pools, turn off `PRE_DEX_EQUAL_WEIGHTS` in the validator:
+
+- Pool weights derived from `calculateTargetAllocations()` on parent vaults
+- Parent vaults can set target weights based on trading fee performance of each market
+- Higher-fee markets attract more capital automatically
+- Validators score miners based on real pool performance, not equal weights
+
+### Launch Sequence
+
+1. Deploy 0xMarkets contracts to Base mainnet (Section 1)
+2. Write and test CarthaVault V2 implementation with 0xMarkets integration
+3. Transfer beacon ownership to multisig
+4. Upgrade beacon — all child vaults gain `deployLiquidity()`/`withdrawLiquidity()`
+5. Configure market addresses on each child vault (ADMIN call)
+6. Set approvals (KEEPER_BOT call)
+7. Deploy Cartha Liquidity Keeper service
+8. Keeper calls `deployLiquidity()` — USDC flows from vaults into 0xMarkets pools
+9. 0xMarkets launches with pre-seeded liquidity from Bittensor miners
+
+---
+
 ## Decision Log
 
 | Decision | Rationale |
@@ -238,3 +406,6 @@ If a critical issue is found post-launch:
 | Gradual market rollout (4-6 then batches) | Validates execution and oracle reliability before scaling |
 | Redis + BullMQ for job queue | Crash-resilient, shared dedup across workers, priority tiers, visibility for alerting |
 | Gelato as fallback layer only | Decentralized safety net for missed orders without primary-path latency cost |
+| Cartha vault beacon upgrade (Vault-as-Depositor) | Vaults already live on Base mainnet with matching markets. Beacon proxy upgrade is zero-migration. Pre-seeds liquidity from day one |
+| 80/20 deployment ratio (deployed/idle) | Idle USDC buffer prevents every LP withdrawal from triggering async 0xMarkets withdrawal |
+| Pool weights from trading performance | Turn off PRE_DEX_EQUAL_WEIGHTS once vaults deposit into real pools. Self-optimizing capital allocation |
