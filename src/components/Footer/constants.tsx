@@ -28,6 +28,7 @@ export function getFooterLinks(isHome) {
       { label: t`Media Kit`, link: "https://docs.0xmarkets.io/media-kit", external: true },
     ],
     app: [
+      { label: t`Faucet`, link: "https://faucet.0xMarkets.io", external: true },
       { label: t`Media Kit`, link: "https://docs.0xmarkets.io/media-kit", external: true },
       { label: t`Charts by TradingView`, link: "https://www.tradingview.com/", external: true },
     ],
