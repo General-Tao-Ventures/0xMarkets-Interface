@@ -17,6 +17,7 @@ export type MultiTransactionStatus<TEventData> = {
   data?: TEventData;
   createdTxnHash?: string;
   cancelledTxnHash?: string;
+  cancelledReason?: string;
   gelatoTaskId?: string;
   updatedTxnHash?: string;
   executedTxnHash?: string;

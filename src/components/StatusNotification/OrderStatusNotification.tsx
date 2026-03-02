@@ -45,21 +45,37 @@ import { useToastAutoClose } from "./useToastAutoClose";
 import { TaskState } from "@gelatonetwork/relay-sdk";
 import "./StatusNotification.scss";
 
-const KEEPER_API_URL = "/api/order-keeper";
-
 function getOrderActionableMessage(errorReason: string | null): string {
   if (!errorReason) return t`Your order was cancelled.`;
 
   const lower = errorReason.toLowerCase();
 
+  if (lower.includes("ordernotfulfillableatacceptableprice")) {
+    return t`The execution price didn't meet your acceptable price. Try with higher slippage.`;
+  }
+  if (lower.includes("insufficientswapoutputamount") || lower.includes("minoutputamount")) {
+    return t`Insufficient swap liquidity. Try a smaller amount.`;
+  }
+  if (lower.includes("minmarkettokens") || lower.includes("slippage")) {
+    return t`Price impact exceeded slippage tolerance. Try with higher slippage or smaller size.`;
+  }
+  if (lower.includes("insufficientreserveforopeninterest")) {
+    return t`Not enough liquidity in this market. Try a smaller position.`;
+  }
+  if (lower.includes("liquidatableposition")) {
+    return t`This order would create a liquidatable position. Reduce leverage.`;
+  }
+  if (lower.includes("insufficientcollateralusd") || lower.includes("insufficientcollateralAmount")) {
+    return t`Insufficient collateral. Add more collateral or reduce size.`;
+  }
+  if (lower.includes("insufficientexecutionfee")) {
+    return t`Execution fee was insufficient. Try again.`;
+  }
   if (lower.includes("oracletimestamps") || lower.includes("expired")) {
     return t`Order expired before the keeper could execute it. Try again.`;
   }
   if (lower.includes("emptyorder")) {
     return t`Your order was already processed. Check your positions.`;
-  }
-  if (lower.includes("minmarkettokens") || lower.includes("minoutputamount") || lower.includes("slippage")) {
-    return t`Price impact exceeded slippage tolerance. Try with higher slippage or smaller size.`;
   }
   if (lower.includes("execution reverted")) {
     return t`Order execution failed on-chain. Please try again.`;
@@ -90,7 +106,6 @@ export function OrderStatusNotification({
 
   const [orderStatusKey, setOrderStatusKey] = useState<string>();
   const [pendingExpressTxnKey, setPendingExpressTxnKey] = useState<string>();
-  const [keeperErrorReason, setKeeperErrorReason] = useState<string | null>(null);
 
   const contractOrderKey = pendingOrderData.orderKey;
   const pendingOrderKey = useMemo(() => getPendingOrderKey(pendingOrderData), [pendingOrderData]);
@@ -343,7 +358,7 @@ export function OrderStatusNotification({
       txnHash = orderStatus?.cancelledTxnHash;
 
       if (orderData?.txnType !== "cancel") {
-        text = getOrderActionableMessage(keeperErrorReason);
+        text = getOrderActionableMessage(orderStatus?.cancelledReason ?? null);
         status = "error";
       } else {
         text = t`Order cancelled`;
@@ -354,11 +369,11 @@ export function OrderStatusNotification({
   }, [
     orderData,
     orderStatus?.cancelledTxnHash,
+    orderStatus?.cancelledReason,
     orderStatus?.createdTxnHash,
     orderStatus?.executedTxnHash,
     hideTxLink,
     elapsedSeconds,
-    keeperErrorReason,
   ]);
 
   useEffect(
@@ -413,22 +428,6 @@ export function OrderStatusNotification({
     },
     [pendingExpressTxns, pendingOrderKey, pendingExpressTxnKey, updatePendingExpressTxn, pendingOrderData.createdAt]
   );
-
-  useEffect(() => {
-    if (
-      orderStatus?.cancelledTxnHash &&
-      orderStatus.cancelledTxnHash !== EXECUTION_TIMEOUT_HASH &&
-      orderStatusKey &&
-      pendingOrderData.txnType !== "cancel"
-    ) {
-      fetch(`${KEEPER_API_URL}/api/orders/${orderStatusKey}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.errorReason) setKeeperErrorReason(data.errorReason);
-        })
-        .catch(() => {});
-    }
-  }, [orderStatus?.cancelledTxnHash, orderStatusKey, pendingOrderData.txnType]);
 
   useEffect(() => {
     if (hasError) {

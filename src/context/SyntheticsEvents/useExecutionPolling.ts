@@ -228,12 +228,12 @@ export function useExecutionPolling({
             [DEPOSIT_EXECUTED_HASH, DEPOSIT_CANCELLED_HASH],
             eventEmitter,
             pending.key,
-            (key, txnHash, isExecuted) => {
+            (key, txnHash, isExecuted, cancelledReason) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
                 setDepositStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
               } else {
-                setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash }));
+                setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash, cancelledReason }));
               }
             }
           );
@@ -262,12 +262,12 @@ export function useExecutionPolling({
             [WITHDRAWAL_EXECUTED_HASH, WITHDRAWAL_CANCELLED_HASH],
             eventEmitter,
             pending.key,
-            (key, txnHash, isExecuted) => {
+            (key, txnHash, isExecuted, cancelledReason) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
                 setWithdrawalStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
               } else {
-                setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash }));
+                setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash, cancelledReason }));
               }
             }
           );
@@ -296,12 +296,12 @@ export function useExecutionPolling({
             [ORDER_EXECUTED_HASH, ORDER_CANCELLED_HASH],
             eventEmitter,
             pending.key,
-            (key, txnHash, isExecuted) => {
+            (key, txnHash, isExecuted, cancelledReason) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
                 setOrderStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
               } else {
-                setOrderStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash }));
+                setOrderStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash, cancelledReason }));
               }
             }
           );
@@ -338,7 +338,7 @@ async function pollForEvents(
   eventNameHashes: string[],
   eventEmitter: ethers.Contract,
   operationKey: string,
-  onFound: (key: string, txnHash: string, isExecuted: boolean) => void
+  onFound: (key: string, txnHash: string, isExecuted: boolean, cancelledReason?: string) => void
 ) {
   // Query recent blocks -- use a reasonable lookback (last ~500 blocks, ~15 min on Base)
   const latestBlock = await provider.getBlockNumber();
@@ -384,6 +384,7 @@ async function pollForEvents(
       // Extract the key from bytes32Items.items
       const eventLogData = eventData as {
         bytes32Items?: { items?: Array<{ key: string; value: string }> };
+        stringItems?: { items?: Array<{ key: string; value: string }> };
       };
 
       const items = eventLogData?.bytes32Items?.items;
@@ -399,7 +400,11 @@ async function pollForEvents(
       // Determine if this is an execution or cancellation
       const isExecuted = eventNameHash === eventNameHashes[0]; // First hash is always the Executed variant
 
-      onFound(operationKey, log.transactionHash, isExecuted);
+      // Extract cancellation reason from stringItems if available
+      const reasonItem = eventLogData?.stringItems?.items?.find((item: { key: string; value: string }) => item.key === "reason");
+      const cancelledReason = !isExecuted && reasonItem ? reasonItem.value : undefined;
+
+      onFound(operationKey, log.transactionHash, isExecuted, cancelledReason);
       return; // Found a match, stop searching
     } catch (e) {
       console.warn("[execution-polling] pollForEvents: error parsing log:", e);

@@ -382,6 +382,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
       const key = eventData.bytes32Items.items.key;
       const account = eventData.addressItems.items.account;
+      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
 
       if (account !== currentAccount) {
         return;
@@ -391,6 +392,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         if (old[key]) {
           return updateByKey(old, key, {
             cancelledTxnHash: txnParams.transactionHash,
+            cancelledReason,
             isViewed: false,
           });
         } else {
@@ -398,6 +400,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
             key,
             createdAt: Date.now(),
             cancelledTxnHash: txnParams.transactionHash,
+            cancelledReason,
           });
         }
       });
@@ -570,13 +573,14 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
+      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
 
       if (depositStatuses[key]?.data) {
         const metricId = getGMSwapMetricId(depositStatuses[key].data!);
 
         sendOrderCancelledMetric(metricId, eventData);
         sendUserAnalyticsOrderResultEvent(chainId, metricId, false);
-        setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
+        setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash, cancelledReason }));
       }
 
       triggerPoolRefresh();
@@ -586,6 +590,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
+      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
 
       if (depositStatuses[key]?.data) {
         const metricId = getGLVSwapMetricId(depositStatuses[key].data! as GLVDepositCreatedEventData);
@@ -593,7 +598,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         sendOrderCancelledMetric(metricId, eventData);
         sendUserAnalyticsOrderResultEvent(chainId, metricId, false);
 
-        setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
+        setDepositStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash, cancelledReason }));
       }
 
       triggerPoolRefresh();
@@ -716,6 +721,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
+      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
 
       if (withdrawalStatuses[key]?.data) {
         const metricId = getGLVSwapMetricId({
@@ -724,7 +730,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         });
         sendOrderCancelledMetric(metricId, eventData);
 
-        setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
+        setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash, cancelledReason }));
       }
 
       triggerPoolRefresh();
@@ -734,6 +740,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
+      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
 
       if (withdrawalStatuses[key]?.data) {
         const metricId = getGMSwapMetricId({
@@ -742,7 +749,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         });
         sendOrderCancelledMetric(metricId, eventData);
 
-        setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
+        setWithdrawalStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash, cancelledReason }));
       }
 
       triggerPoolRefresh();
@@ -806,6 +813,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
+      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
 
       if (shiftStatuses[key].data) {
         const metricId = getShiftGMMetricId({
@@ -816,7 +824,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
         sendOrderCancelledMetric(metricId, eventData);
 
-        setShiftStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash }));
+        setShiftStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnParams.transactionHash, cancelledReason }));
       }
     },
 
