@@ -10,7 +10,7 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.7 Liquidation Readiness (2026-02-28)
+**Shipped:** v1.8 Deployment (2026-03-01)
 
 Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → executor → confirmator) with 9 bug fixes, refactored to view-call oracle pricing, added hardening (dedup, revert tracking, dead code cleanup) and performance optimizations (multicall batching, timing instrumentation). Pipeline verified through gas-estimation; on-chain TX blocked by pool reserve exhaustion.
 
@@ -77,16 +77,18 @@ Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → 
 
 ### Active
 
-## Current Milestone: v1.8 Deployment
+## Current Milestone: v1.9 Event Indexer
 
-**Goal:** Deploy all keeper updates to DigitalOcean, push frontend to Vercel, and set up GitHub Actions CI/CD for automated future deployments.
+**Goal:** Build a full on-chain event indexer into the data-verification-service, recording all contract events (orders, positions, deposits, withdrawals, shifts, market state, GLV, referrals, oracle prices) into a 50-table PostgreSQL schema, and deploy to DigitalOcean.
 
 **Target features:**
-- Push keeper-service and order-execution-keeper-service code to DO server
-- Update server configs (contract addresses, ORACLE_MODE=lazer)
-- Set up GitHub Actions CI/CD for both keeper repos
-- Deploy frontend to Vercel via git push
-- End-to-end verification of deployed services
+- 50-table PostgreSQL schema with schema namespaces (orders, positions, deposits, withdrawals, shifts, market, glv, referrals, oracle)
+- Event decoder ported from squid's eventDecoder.ts (decode EventLogData from raw log bytes)
+- EventEmitter WebSocket listener for EventLog1 + EventLog2 events
+- Event router mapping decoded events to correct database tables
+- Cursor-based resumption (track last processed block for crash recovery)
+- Deploy updated service to DO droplet alongside existing keepers
+- Health check extended with event indexer status
 
 ### Out of Scope
 
@@ -155,4 +157,4 @@ Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → 
 | Accept pipeline verification via gas-estimation | Pool reserves prevent final TX but code paths proven | ✓ Good — operational, not code issue |
 
 ---
-*Last updated: 2026-02-28 after v1.8 milestone start*
+*Last updated: 2026-03-03 after v1.9 milestone start*
