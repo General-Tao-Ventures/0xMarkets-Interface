@@ -641,9 +641,13 @@ export const formatPositionMessage = (
     }
 
     const leftoverCollateralUsd =
-      initialCollateralUsd === undefined
+      initialCollateralUsd === undefined ||
+      tradeAction.basePnlUsd === undefined ||
+      borrowingFeeUsd === undefined ||
+      fundingFeeUsd === undefined ||
+      positionFeeUsd === undefined
         ? undefined
-        : initialCollateralUsd + tradeAction.basePnlUsd! - borrowingFeeUsd! - fundingFeeUsd! - positionFeeUsd!;
+        : initialCollateralUsd + tradeAction.basePnlUsd - borrowingFeeUsd - fundingFeeUsd - positionFeeUsd;
 
     const formattedLeftoverCollateral = formatUsd(leftoverCollateralUsd!);
     const formattedMinCollateral = formatUsd(liquidationCollateralUsd)!;
