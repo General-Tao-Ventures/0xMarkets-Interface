@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Event Indexer
 status: completed
-stopped_at: Completed 33-01-PLAN.md
-last_updated: "2026-03-03T22:24:40.847Z"
-last_activity: 2026-03-03 — Completed 33-01 event indexer loop
+stopped_at: Completed 34-01-PLAN.md
+last_updated: "2026-03-03T22:37:28.310Z"
+last_activity: 2026-03-03 — Completed 34-01 deploy verify
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 7
+  completed_plans: 6
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — Phase 33 complete, event indexer loop ready for deployment
+**Current focus:** v1.9 Event Indexer — Phase 34 complete, deployment config verified
 
 ## Current Position
 
-Phase: 33-event-listener
+Phase: 34-deploy-verify
 Plan: 01/01 complete
-Status: Phase 33 complete
-Last activity: 2026-03-03 — Completed 33-01 event indexer loop
+Status: Phase 34 complete
+Last activity: 2026-03-03 — Completed 34-01 deploy verify
 
 ## Accumulated Context
 
@@ -91,9 +91,11 @@ See .planning/PROJECT.md key decisions table for full history.
 - 33-01: First run sets cursor to current block (no historical replay on initial deploy)
 - 33-01: Per-event error handling: log and continue, single bad event does not crash indexer
 - [Phase 33-event-listener]: Used viem WebSocket auto-reconnect for real-time event subscription
+- 34-01: Used simple rolling average for eventsPerMinute (count/uptime, no windowed tracking)
+- 34-01: Docker build verification skipped (no local daemon) -- pnpm build sufficient
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:21:59.647Z
-Stopped at: Completed 33-01-PLAN.md
-Next: Phase 34 (deployment or next milestone phase)
+Last session: 2026-03-03T22:37:28.307Z
+Stopped at: Completed 34-01-PLAN.md
+Next: Deploy to DO droplet (git pull + docker compose up --build -d)

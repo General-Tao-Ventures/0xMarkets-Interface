@@ -34,10 +34,10 @@
 
 ### Deploy
 
-- [ ] **DEPLOY-01**: Updated service builds and runs in Docker on DO droplet
-- [ ] **DEPLOY-02**: SQL migration runs on container startup alongside Prisma migrations
-- [ ] **DEPLOY-03**: Health check endpoint reports event indexer status (last block, events/min)
-- [ ] **DEPLOY-04**: Existing market snapshotter and price recorder continue working unchanged
+- [x] **DEPLOY-01**: Updated service builds and runs in Docker on DO droplet
+- [x] **DEPLOY-02**: SQL migration runs on container startup alongside Prisma migrations
+- [x] **DEPLOY-03**: Health check endpoint reports event indexer status (last block, events/min)
+- [x] **DEPLOY-04**: Existing market snapshotter and price recorder continue working unchanged
 
 ## Future Requirements
 
@@ -79,10 +79,10 @@
 | ROUTE-02 | Phase 32 | Complete |
 | ROUTE-03 | Phase 32 | Complete |
 | ROUTE-04 | Phase 32 | Complete |
-| DEPLOY-01 | Phase 34 | Pending |
-| DEPLOY-02 | Phase 34 | Pending |
-| DEPLOY-03 | Phase 34 | Pending |
-| DEPLOY-04 | Phase 34 | Pending |
+| DEPLOY-01 | Phase 34 | Complete |
+| DEPLOY-02 | Phase 34 | Complete |
+| DEPLOY-03 | Phase 34 | Complete |
+| DEPLOY-04 | Phase 34 | Complete |
 
 **Coverage:**
 - v1.9 requirements: 19 total
