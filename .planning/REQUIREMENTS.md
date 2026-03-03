@@ -27,10 +27,10 @@
 
 ### Router
 
-- [ ] **ROUTE-01**: Decoded events are routed to correct table by eventName (e.g. OrderCreated → orders.created)
-- [ ] **ROUTE-02**: All 50 event types have insert handlers that map decoded fields to table columns
-- [ ] **ROUTE-03**: Unknown event names are logged and skipped (no crash)
-- [ ] **ROUTE-04**: Conditional nullable fields handled (e.g. positions.fees referral/pro/liquidation fields)
+- [x] **ROUTE-01**: Decoded events are routed to correct table by eventName (e.g. OrderCreated → orders.created)
+- [x] **ROUTE-02**: All 50 event types have insert handlers that map decoded fields to table columns
+- [x] **ROUTE-03**: Unknown event names are logged and skipped (no crash)
+- [x] **ROUTE-04**: Conditional nullable fields handled (e.g. positions.fees referral/pro/liquidation fields)
 
 ### Deploy
 
@@ -75,10 +75,10 @@
 | LIST-02 | Phase 33 | Pending |
 | LIST-03 | Phase 33 | Pending |
 | LIST-04 | Phase 33 | Pending |
-| ROUTE-01 | Phase 32 | Pending |
-| ROUTE-02 | Phase 32 | Pending |
-| ROUTE-03 | Phase 32 | Pending |
-| ROUTE-04 | Phase 32 | Pending |
+| ROUTE-01 | Phase 32 | Complete |
+| ROUTE-02 | Phase 32 | Complete |
+| ROUTE-03 | Phase 32 | Complete |
+| ROUTE-04 | Phase 32 | Complete |
 | DEPLOY-01 | Phase 34 | Pending |
 | DEPLOY-02 | Phase 34 | Pending |
 | DEPLOY-03 | Phase 34 | Pending |

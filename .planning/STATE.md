@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Event Indexer
 status: executing
-stopped_at: Completed 32-01-PLAN.md
-last_updated: "2026-03-03T21:56:47.871Z"
-last_activity: 2026-03-03 — Completed 32-01 event decoder
+stopped_at: Completed 32-02-PLAN.md
+last_updated: "2026-03-03T22:03:19.000Z"
+last_activity: 2026-03-03 — Completed 32-02 event router
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — Phase 32 in progress (plan 01 complete)
+**Current focus:** v1.9 Event Indexer — Phase 32 complete, ready for Phase 33
 
 ## Current Position
 
 Phase: 32-event-decoder-router
-Plan: 01/02 complete
-Status: Phase 32 in progress
-Last activity: 2026-03-03 — Completed 32-01 event decoder
+Plan: 02/02 complete
+Status: Phase 32 complete
+Last activity: 2026-03-03 — Completed 32-02 event router
 
 ## Accumulated Context
 
@@ -53,7 +53,7 @@ Last activity: 2026-03-03 — Completed 32-01 event decoder
 - Market snapshotter: per-block multicall reads for 6 markets (working)
 - Price recorder: per-second Pyth Lazer WebSocket for 7 assets (working, GOLD issue)
 - Database: 2 Prisma tables (market_snapshots, price_ticks)
-- Event indexer: DECODER COMPLETE (32-01), router next (32-02)
+- Event indexer: DECODER + ROUTER COMPLETE (32-01, 32-02), indexer loop next
 - Event decoder uses viem decodeAbiParameters (ported from squid's ethers v6)
 - 52 event name constants, DecodedEventData type, helper getters all in src/events/
 
@@ -81,9 +81,12 @@ See .planning/PROJECT.md key decisions table for full history.
 - 32-01: Normalize addresses/hex to lowercase at decode time for consistent downstream comparison
 - 32-01: 52 event constants (actual squid count) rather than plan's stated 50
 - [Phase 32]: Used viem decodeAbiParameters with named fields for structured event decoding
+- 32-02: 51 handlers (not 49/50) matching actual 52 event constants minus DistributionCreated
+- 32-02: All SQL column names double-quoted for reserved word safety (oracle.timestamp)
+- 32-02: Position fee column specs shared between FeesCollected and FeesInfo handlers
 
 ## Session Continuity
 
-Last session: 2026-03-03T21:56:44.672Z
-Stopped at: Completed 32-01-PLAN.md
-Next: Execute 32-02 (event router)
+Last session: 2026-03-03T22:03:19.000Z
+Stopped at: Completed 32-02-PLAN.md
+Next: Phase 33 (event indexer loop)
