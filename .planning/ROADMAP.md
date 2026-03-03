@@ -11,7 +11,7 @@
 - ✅ **v1.6 E2E Reliability** — Phases 18-23
 - ✅ **v1.7 Liquidation Readiness** — Phases 24-27
 - ✅ **v1.8 Deployment** — Phases 28-30
-- 🔵 **v1.9 Event Indexer** — Phases 31-34
+- ✅ **v1.9 Event Indexer** — Phases 31-34
 
 ---
 
@@ -68,10 +68,10 @@ Plans:
 **Goal**: Deploy updated data-verification-service to DO and verify all collectors working
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04
 **Depends on**: Phase 33
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 34-01-PLAN.md — Prepare deployment config (WS_RPC_URL in docker-compose, health endpoint rate metric, verify Docker build)
-- [ ] 34-02-PLAN.md — Deploy to DO droplet and verify all collectors working (human action + verification)
+- [x] 34-01-PLAN.md — Prepare deployment config (WS_RPC_URL in docker-compose, health endpoint rate metric, verify Docker build)
+- [x] 34-02-PLAN.md — Deploy to DO droplet and verify all collectors working (human action + verification)
 **Success criteria**:
 1. Docker image builds with new dependencies (pg client for raw SQL)
 2. Container startup runs both Prisma migrations and raw SQL schema migration

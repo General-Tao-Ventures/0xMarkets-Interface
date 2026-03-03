@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Event Indexer
 status: completed
-stopped_at: Completed 34-01-PLAN.md
-last_updated: "2026-03-03T22:37:28.310Z"
-last_activity: 2026-03-03 — Completed 34-01 deploy verify
+stopped_at: Completed 34-02-PLAN.md
+last_updated: "2026-03-03T22:55:46Z"
+last_activity: 2026-03-03 — Completed 34-02 deploy and verify (milestone complete)
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — Phase 34 complete, deployment config verified
+**Current focus:** v1.9 Event Indexer — MILESTONE COMPLETE, all 4 phases deployed and verified
 
 ## Current Position
 
 Phase: 34-deploy-verify
-Plan: 01/01 complete
-Status: Phase 34 complete
-Last activity: 2026-03-03 — Completed 34-01 deploy verify
+Plan: 02/02 complete
+Status: v1.9 milestone complete
+Last activity: 2026-03-03 — Completed 34-02 deploy and verify
 
 ## Accumulated Context
 
@@ -53,11 +53,13 @@ Last activity: 2026-03-03 — Completed 34-01 deploy verify
 - Market snapshotter: per-block multicall reads for 6 markets (working)
 - Price recorder: per-second Pyth Lazer WebSocket for 7 assets (working, GOLD issue)
 - Database: 2 Prisma tables (market_snapshots, price_ticks)
-- Event indexer: COMPLETE (31-schema, 32-decoder/router, 33-listener all done)
+- Event indexer: DEPLOYED AND VERIFIED on DO droplet
 - Event decoder uses viem decodeAbiParameters (ported from squid's ethers v6)
 - 52 event name constants, DecodedEventData type, helper getters all in src/events/
 - Event indexer loop: cursor recovery, 2000-block chunk replay, real-time WebSocket subscription
-- WS_RPC_URL env var required on DO droplet before restarting service
+- All 10 SQL migrations executed on droplet, 50 event tables across 9 PG schemas
+- Health endpoint at :37019/health reports all 3 collector metrics
+- WS_RPC_URL configured in parent docker-compose.yml on droplet
 
 ### Pending Todos
 
@@ -93,9 +95,11 @@ See .planning/PROJECT.md key decisions table for full history.
 - [Phase 33-event-listener]: Used viem WebSocket auto-reconnect for real-time event subscription
 - 34-01: Used simple rolling average for eventsPerMinute (count/uptime, no windowed tracking)
 - 34-01: Docker build verification skipped (no local daemon) -- pnpm build sufficient
+- 34-02: Used scp file sync instead of git pull for deployment (local code is source of truth)
+- 34-02: Rebuilt container with --no-cache for clean image with all event indexer code
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:37:28.307Z
-Stopped at: Completed 34-01-PLAN.md
-Next: Deploy to DO droplet (git pull + docker compose up --build -d)
+Last session: 2026-03-03T22:55:46Z
+Stopped at: Completed 34-02-PLAN.md (v1.9 milestone complete)
+Next: None -- v1.9 Event Indexer milestone fully deployed and verified
