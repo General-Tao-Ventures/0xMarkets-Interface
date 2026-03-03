@@ -56,7 +56,7 @@ Plans:
 **Depends on**: Phase 32
 **Plans:** 1/1 plans complete
 Plans:
-- [ ] 33-01-PLAN.md — Create event indexer with cursor management, historical replay, WebSocket listener, and service wiring
+- [x] 33-01-PLAN.md — Create event indexer with cursor management, historical replay, WebSocket listener, and service wiring
 **Success criteria**:
 1. WebSocket subscription to EventEmitter EventLog1 + EventLog2 events
 2. Auto-reconnect on disconnection (viem WebSocket transport handles this)
@@ -68,6 +68,10 @@ Plans:
 **Goal**: Deploy updated data-verification-service to DO and verify all collectors working
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04
 **Depends on**: Phase 33
+**Plans:** 2 plans
+Plans:
+- [ ] 34-01-PLAN.md — Prepare deployment config (WS_RPC_URL in docker-compose, health endpoint rate metric, verify Docker build)
+- [ ] 34-02-PLAN.md — Deploy to DO droplet and verify all collectors working (human action + verification)
 **Success criteria**:
 1. Docker image builds with new dependencies (pg client for raw SQL)
 2. Container startup runs both Prisma migrations and raw SQL schema migration
