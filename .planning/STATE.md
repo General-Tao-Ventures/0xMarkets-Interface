@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Event Indexer
-status: Defining requirements
-stopped_at: Phase 31 context gathered
-last_updated: "2026-03-03T19:34:02.834Z"
-last_activity: 2026-03-03 — Milestone v1.9 started
+status: Executing Phase 31
+stopped_at: Completed 31-01-PLAN.md
+last_updated: "2026-03-03T19:57:35.372Z"
+last_activity: 2026-03-03 — Completed 31-01 event schema SQL files
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — Defining requirements
+**Current focus:** v1.9 Event Indexer — Phase 31 executing
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-03 — Milestone v1.9 started
+Phase: 31-event-schema
+Plan: 01 complete, 02 next
+Status: Executing Phase 31
+Last activity: 2026-03-03 — Completed 31-01 event schema SQL files
 
 ## Accumulated Context
 
@@ -69,8 +69,14 @@ None.
 
 See .planning/PROJECT.md key decisions table for full history.
 
+- 31-01: Used NUMERIC(78,0) for all uint256/int256 to preserve full 78-digit precision
+- 31-01: Composite PK (block_number, log_index) for natural uniqueness from on-chain data
+- 31-01: ClaimableFundingUpdated uses nullable time_key/next_pool_value for two Solidity overloads
+- 31-01: Position fee tables have nullable referral/pro/liquidation columns matching conditional emit logic
+- 31-01: DistributionCreated skipped (no contract emit function exists)
+
 ## Session Continuity
 
-Last session: 2026-03-03T19:34:02.828Z
-Stopped at: Phase 31 context gathered
-Next: Complete requirements, create roadmap
+Last session: 2026-03-03T19:56:34Z
+Stopped at: Completed 31-01-PLAN.md
+Next: Execute 31-02-PLAN.md (migration runner)

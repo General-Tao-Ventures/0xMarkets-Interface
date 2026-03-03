@@ -7,9 +7,9 @@
 
 ### Schema
 
-- [ ] **SCHEMA-01**: 50-table PostgreSQL schema created with schema namespaces (orders, positions, deposits, withdrawals, shifts, market, glv, referrals, oracle)
-- [ ] **SCHEMA-02**: All table columns match contract EventUtils field names and types exactly
-- [ ] **SCHEMA-03**: Indexes on key, account, market, and block_number columns for query performance
+- [x] **SCHEMA-01**: 50-table PostgreSQL schema created with schema namespaces (orders, positions, deposits, withdrawals, shifts, market, glv, referrals, oracle)
+- [x] **SCHEMA-02**: All table columns match contract EventUtils field names and types exactly
+- [x] **SCHEMA-03**: Indexes on key, account, market, and block_number columns for query performance
 - [ ] **SCHEMA-04**: Raw SQL migration runs idempotently (CREATE SCHEMA/TABLE IF NOT EXISTS)
 
 ### Decoder
@@ -64,9 +64,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 31 | Pending |
-| SCHEMA-02 | Phase 31 | Pending |
-| SCHEMA-03 | Phase 31 | Pending |
+| SCHEMA-01 | Phase 31 | Complete |
+| SCHEMA-02 | Phase 31 | Complete |
+| SCHEMA-03 | Phase 31 | Complete |
 | SCHEMA-04 | Phase 31 | Pending |
 | DEC-01 | Phase 32 | Pending |
 | DEC-02 | Phase 32 | Pending |

@@ -25,7 +25,7 @@
 **Depends on**: None
 **Plans:** 2 plans
 Plans:
-- [ ] 31-01-PLAN.md — Write all 10 SQL migration files (49 event tables + 1 cursor table across 9 PG schemas)
+- [x] 31-01-PLAN.md — Write all 10 SQL migration files (49 event tables + 1 cursor table across 9 PG schemas)
 - [ ] 31-02-PLAN.md — Create Node.js migration runner and update Dockerfile CMD
 **Success criteria**:
 1. Raw SQL migration creates 9 schemas and 50 tables matching contract EventUtils exactly
