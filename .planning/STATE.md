@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Event Indexer
-status: completed
-stopped_at: Completed 31-02-PLAN.md (Phase 31 complete)
-last_updated: "2026-03-03T20:05:32.045Z"
-last_activity: 2026-03-03 — Completed 31-02 migration runner
+status: executing
+stopped_at: Completed 32-01-PLAN.md
+last_updated: "2026-03-03T21:56:47.871Z"
+last_activity: 2026-03-03 — Completed 32-01 event decoder
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — Phase 31 complete, Phase 32 next
+**Current focus:** v1.9 Event Indexer — Phase 32 in progress (plan 01 complete)
 
 ## Current Position
 
-Phase: 31-event-schema (COMPLETE)
-Plan: 02/02 complete
-Status: Phase 31 complete
-Last activity: 2026-03-03 — Completed 31-02 migration runner
+Phase: 32-event-decoder-router
+Plan: 01/02 complete
+Status: Phase 32 in progress
+Last activity: 2026-03-03 — Completed 32-01 event decoder
 
 ## Accumulated Context
 
@@ -53,9 +53,9 @@ Last activity: 2026-03-03 — Completed 31-02 migration runner
 - Market snapshotter: per-block multicall reads for 6 markets (working)
 - Price recorder: per-second Pyth Lazer WebSocket for 7 assets (working, GOLD issue)
 - Database: 2 Prisma tables (market_snapshots, price_ticks)
-- Event indexer: NOT YET BUILT — this milestone's focus
-- Existing squid eventDecoder.ts can be ported (ethers v6 ABI decoder)
-- EventEmitter ABI available in order-execution-keeper (EventLog1 + EventLog2)
+- Event indexer: DECODER COMPLETE (32-01), router next (32-02)
+- Event decoder uses viem decodeAbiParameters (ported from squid's ethers v6)
+- 52 event name constants, DecodedEventData type, helper getters all in src/events/
 
 ### Pending Todos
 
@@ -77,9 +77,13 @@ See .planning/PROJECT.md key decisions table for full history.
 - 31-02: Used pg Client (not Prisma) for raw SQL execution since event tables use PG schema namespaces
 - 31-02: Migration runner aborts on error to prevent app starting with incomplete schema
 - 31-02: Resolve SQL directory via process.cwd() for dev/Docker compatibility
+- 32-01: Used viem decodeAbiParameters with named fields for structured decoding (no positional indexing)
+- 32-01: Normalize addresses/hex to lowercase at decode time for consistent downstream comparison
+- 32-01: 52 event constants (actual squid count) rather than plan's stated 50
+- [Phase 32]: Used viem decodeAbiParameters with named fields for structured event decoding
 
 ## Session Continuity
 
-Last session: 2026-03-03T20:01:14Z
-Stopped at: Completed 31-02-PLAN.md (Phase 31 complete)
-Next: Execute Phase 32 (event decoder)
+Last session: 2026-03-03T21:56:44.672Z
+Stopped at: Completed 32-01-PLAN.md
+Next: Execute 32-02 (event router)

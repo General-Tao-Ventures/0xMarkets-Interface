@@ -38,7 +38,7 @@ Plans:
 **Goal**: Port the squid's event decoder and build insert handlers for all 50 event types
 **Requirements**: DEC-01, DEC-02, DEC-03, ROUTE-01, ROUTE-02, ROUTE-03, ROUTE-04
 **Depends on**: Phase 31
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 32-01-PLAN.md — Port event decoder from ethers to viem, create types and event key constants
 - [ ] 32-02-PLAN.md — Create insert builder, all 49 event handlers, and event router

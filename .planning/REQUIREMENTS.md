@@ -14,9 +14,9 @@
 
 ### Decoder
 
-- [ ] **DEC-01**: Event decoder parses EventLogData from raw log bytes into typed Maps (address, uint, int, bool, bytes32, bytes, string items)
-- [ ] **DEC-02**: Decoder handles both EventLog1 (1 indexed topic) and EventLog2 (2 indexed topics)
-- [ ] **DEC-03**: Decoder extracts msgSender, eventName, and all eventData fields
+- [x] **DEC-01**: Event decoder parses EventLogData from raw log bytes into typed Maps (address, uint, int, bool, bytes32, bytes, string items)
+- [x] **DEC-02**: Decoder handles both EventLog1 (1 indexed topic) and EventLog2 (2 indexed topics)
+- [x] **DEC-03**: Decoder extracts msgSender, eventName, and all eventData fields
 
 ### Listener
 
@@ -68,9 +68,9 @@
 | SCHEMA-02 | Phase 31 | Complete |
 | SCHEMA-03 | Phase 31 | Complete |
 | SCHEMA-04 | Phase 31 | Complete |
-| DEC-01 | Phase 32 | Pending |
-| DEC-02 | Phase 32 | Pending |
-| DEC-03 | Phase 32 | Pending |
+| DEC-01 | Phase 32 | Complete |
+| DEC-02 | Phase 32 | Complete |
+| DEC-03 | Phase 32 | Complete |
 | LIST-01 | Phase 33 | Pending |
 | LIST-02 | Phase 33 | Pending |
 | LIST-03 | Phase 33 | Pending |
