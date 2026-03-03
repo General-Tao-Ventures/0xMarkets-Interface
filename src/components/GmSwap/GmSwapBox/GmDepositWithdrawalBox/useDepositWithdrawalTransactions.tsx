@@ -49,6 +49,7 @@ interface Props {
   selectedMarketInfoForGlv?: MarketInfo;
   isMarketTokenDeposit?: boolean;
   isFirstBuy: boolean;
+  contractEstimatedMarketTokenAmount?: bigint;
 }
 
 export const useDepositWithdrawalTransactions = ({
@@ -72,6 +73,7 @@ export const useDepositWithdrawalTransactions = ({
   glvInfo,
   isMarketTokenDeposit,
   isFirstBuy,
+  contractEstimatedMarketTokenAmount,
 }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const chainId = useSelector(selectChainId);
@@ -175,7 +177,7 @@ export const useDepositWithdrawalTransactions = ({
         longTokenAmount: longTokenAmount ?? 0n,
         shortTokenAmount: shortTokenAmount ?? 0n,
         marketTokenAddress: marketToken.address,
-        minMarketTokens: marketTokenAmount,
+        minMarketTokens: contractEstimatedMarketTokenAmount ?? marketTokenAmount,
         executionFee: executionFee.feeTokenAmount,
         executionGasLimit: executionFee.gasLimit,
         allowedSlippage: DEFAULT_SLIPPAGE_AMOUNT,
@@ -217,6 +219,7 @@ export const useDepositWithdrawalTransactions = ({
       setPendingDeposit,
       watchOrderTxn,
       isMarketTokenDeposit,
+      contractEstimatedMarketTokenAmount,
     ]
   );
 
