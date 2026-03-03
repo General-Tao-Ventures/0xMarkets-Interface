@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Event Indexer
 status: Executing Phase 31
-stopped_at: Completed 31-01-PLAN.md
-last_updated: "2026-03-03T19:57:35.372Z"
-last_activity: 2026-03-03 — Completed 31-01 event schema SQL files
+stopped_at: Completed 31-02-PLAN.md (Phase 31 complete)
+last_updated: "2026-03-03T20:01:14Z"
+last_activity: 2026-03-03 — Completed 31-02 migration runner
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — Phase 31 executing
+**Current focus:** v1.9 Event Indexer — Phase 31 complete, Phase 32 next
 
 ## Current Position
 
-Phase: 31-event-schema
-Plan: 01 complete, 02 next
-Status: Executing Phase 31
-Last activity: 2026-03-03 — Completed 31-01 event schema SQL files
+Phase: 31-event-schema (COMPLETE)
+Plan: 02/02 complete
+Status: Phase 31 complete
+Last activity: 2026-03-03 — Completed 31-02 migration runner
 
 ## Accumulated Context
 
@@ -74,9 +74,12 @@ See .planning/PROJECT.md key decisions table for full history.
 - 31-01: ClaimableFundingUpdated uses nullable time_key/next_pool_value for two Solidity overloads
 - 31-01: Position fee tables have nullable referral/pro/liquidation columns matching conditional emit logic
 - 31-01: DistributionCreated skipped (no contract emit function exists)
+- 31-02: Used pg Client (not Prisma) for raw SQL execution since event tables use PG schema namespaces
+- 31-02: Migration runner aborts on error to prevent app starting with incomplete schema
+- 31-02: Resolve SQL directory via process.cwd() for dev/Docker compatibility
 
 ## Session Continuity
 
-Last session: 2026-03-03T19:56:34Z
-Stopped at: Completed 31-01-PLAN.md
-Next: Execute 31-02-PLAN.md (migration runner)
+Last session: 2026-03-03T20:01:14Z
+Stopped at: Completed 31-02-PLAN.md (Phase 31 complete)
+Next: Execute Phase 32 (event decoder)
