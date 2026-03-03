@@ -23,6 +23,10 @@
 **Goal**: Create the 50-table PostgreSQL schema with proper namespaces, types, and indexes
 **Requirements**: SCHEMA-01, SCHEMA-02, SCHEMA-03, SCHEMA-04
 **Depends on**: None
+**Plans:** 2 plans
+Plans:
+- [ ] 31-01-PLAN.md — Write all 10 SQL migration files (49 event tables + 1 cursor table across 9 PG schemas)
+- [ ] 31-02-PLAN.md — Create Node.js migration runner and update Dockerfile CMD
 **Success criteria**:
 1. Raw SQL migration creates 9 schemas and 50 tables matching contract EventUtils exactly
 2. All NUMERIC(78,0) columns for uint256/int256, TEXT for addresses/bytes32, TEXT[] for address arrays
