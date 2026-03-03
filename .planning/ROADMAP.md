@@ -26,7 +26,7 @@
 **Plans:** 2/2 plans complete
 Plans:
 - [x] 31-01-PLAN.md — Write all 10 SQL migration files (49 event tables + 1 cursor table across 9 PG schemas)
-- [ ] 31-02-PLAN.md — Create Node.js migration runner and update Dockerfile CMD
+- [x] 31-02-PLAN.md — Create Node.js migration runner and update Dockerfile CMD
 **Success criteria**:
 1. Raw SQL migration creates 9 schemas and 50 tables matching contract EventUtils exactly
 2. All NUMERIC(78,0) columns for uint256/int256, TEXT for addresses/bytes32, TEXT[] for address arrays
@@ -38,6 +38,10 @@ Plans:
 **Goal**: Port the squid's event decoder and build insert handlers for all 50 event types
 **Requirements**: DEC-01, DEC-02, DEC-03, ROUTE-01, ROUTE-02, ROUTE-03, ROUTE-04
 **Depends on**: Phase 31
+**Plans:** 2 plans
+Plans:
+- [ ] 32-01-PLAN.md — Port event decoder from ethers to viem, create types and event key constants
+- [ ] 32-02-PLAN.md — Create insert builder, all 49 event handlers, and event router
 **Success criteria**:
 1. EventLogData bytes decoded into typed Maps (address, uint, int, bool, bytes32, bytes, string items + array variants)
 2. Both EventLog1 and EventLog2 formats handled correctly
