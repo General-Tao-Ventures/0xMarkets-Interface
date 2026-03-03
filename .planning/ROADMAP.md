@@ -40,8 +40,8 @@ Plans:
 **Depends on**: Phase 31
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 32-01-PLAN.md — Port event decoder from ethers to viem, create types and event key constants
-- [ ] 32-02-PLAN.md — Create insert builder, all 49 event handlers, and event router
+- [x] 32-01-PLAN.md — Port event decoder from ethers to viem, create types and event key constants
+- [x] 32-02-PLAN.md — Create insert builder, all 49 event handlers, and event router
 **Success criteria**:
 1. EventLogData bytes decoded into typed Maps (address, uint, int, bool, bytes32, bytes, string items + array variants)
 2. Both EventLog1 and EventLog2 formats handled correctly
@@ -54,6 +54,9 @@ Plans:
 **Goal**: WebSocket listener on EventEmitter with auto-reconnect and block cursor resumption
 **Requirements**: LIST-01, LIST-02, LIST-03, LIST-04
 **Depends on**: Phase 32
+**Plans:** 1 plan
+Plans:
+- [ ] 33-01-PLAN.md — Create event indexer with cursor management, historical replay, WebSocket listener, and service wiring
 **Success criteria**:
 1. WebSocket subscription to EventEmitter EventLog1 + EventLog2 events
 2. Auto-reconnect on disconnection (viem WebSocket transport handles this)
