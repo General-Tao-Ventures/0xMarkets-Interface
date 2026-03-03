@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Event Indexer
 status: completed
-stopped_at: Completed 32-02-PLAN.md
-last_updated: "2026-03-03T22:08:42.773Z"
-last_activity: 2026-03-03 — Completed 32-02 event router
+stopped_at: Completed 33-01-PLAN.md
+last_updated: "2026-03-03T22:21:59.649Z"
+last_activity: 2026-03-03 — Completed 33-01 event indexer loop
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 3
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — Phase 32 complete, ready for Phase 33
+**Current focus:** v1.9 Event Indexer — Phase 33 complete, event indexer loop ready for deployment
 
 ## Current Position
 
-Phase: 32-event-decoder-router
-Plan: 02/02 complete
-Status: Phase 32 complete
-Last activity: 2026-03-03 — Completed 32-02 event router
+Phase: 33-event-listener
+Plan: 01/01 complete
+Status: Phase 33 complete
+Last activity: 2026-03-03 — Completed 33-01 event indexer loop
 
 ## Accumulated Context
 
@@ -53,9 +53,11 @@ Last activity: 2026-03-03 — Completed 32-02 event router
 - Market snapshotter: per-block multicall reads for 6 markets (working)
 - Price recorder: per-second Pyth Lazer WebSocket for 7 assets (working, GOLD issue)
 - Database: 2 Prisma tables (market_snapshots, price_ticks)
-- Event indexer: DECODER + ROUTER COMPLETE (32-01, 32-02), indexer loop next
+- Event indexer: COMPLETE (31-schema, 32-decoder/router, 33-listener all done)
 - Event decoder uses viem decodeAbiParameters (ported from squid's ethers v6)
 - 52 event name constants, DecodedEventData type, helper getters all in src/events/
+- Event indexer loop: cursor recovery, 2000-block chunk replay, real-time WebSocket subscription
+- WS_RPC_URL env var required on DO droplet before restarting service
 
 ### Pending Todos
 
@@ -84,9 +86,14 @@ See .planning/PROJECT.md key decisions table for full history.
 - 32-02: 51 handlers (not 49/50) matching actual 52 event constants minus DistributionCreated
 - 32-02: All SQL column names double-quoted for reserved word safety (oracle.timestamp)
 - 32-02: Position fee column specs shared between FeesCollected and FeesInfo handlers
+- 33-01: Used viem WebSocket auto-reconnect (no custom reconnect logic)
+- 33-01: Block timestamps cached per-chunk to avoid redundant getBlock RPC calls
+- 33-01: First run sets cursor to current block (no historical replay on initial deploy)
+- 33-01: Per-event error handling: log and continue, single bad event does not crash indexer
+- [Phase 33-event-listener]: Used viem WebSocket auto-reconnect for real-time event subscription
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:03:19.000Z
-Stopped at: Completed 32-02-PLAN.md
-Next: Phase 33 (event indexer loop)
+Last session: 2026-03-03T22:21:59.647Z
+Stopped at: Completed 33-01-PLAN.md
+Next: Phase 34 (deployment or next milestone phase)

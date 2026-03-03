@@ -20,10 +20,10 @@
 
 ### Listener
 
-- [ ] **LIST-01**: WebSocket listener subscribes to EventEmitter contract for EventLog1 and EventLog2 events
-- [ ] **LIST-02**: Listener auto-reconnects on WebSocket disconnection
-- [ ] **LIST-03**: Cursor tracks last processed block number for crash recovery
-- [ ] **LIST-04**: On startup, listener replays missed blocks from cursor to current head
+- [x] **LIST-01**: WebSocket listener subscribes to EventEmitter contract for EventLog1 and EventLog2 events
+- [x] **LIST-02**: Listener auto-reconnects on WebSocket disconnection
+- [x] **LIST-03**: Cursor tracks last processed block number for crash recovery
+- [x] **LIST-04**: On startup, listener replays missed blocks from cursor to current head
 
 ### Router
 
@@ -71,10 +71,10 @@
 | DEC-01 | Phase 32 | Complete |
 | DEC-02 | Phase 32 | Complete |
 | DEC-03 | Phase 32 | Complete |
-| LIST-01 | Phase 33 | Pending |
-| LIST-02 | Phase 33 | Pending |
-| LIST-03 | Phase 33 | Pending |
-| LIST-04 | Phase 33 | Pending |
+| LIST-01 | Phase 33 | Complete |
+| LIST-02 | Phase 33 | Complete |
+| LIST-03 | Phase 33 | Complete |
+| LIST-04 | Phase 33 | Complete |
 | ROUTE-01 | Phase 32 | Complete |
 | ROUTE-02 | Phase 32 | Complete |
 | ROUTE-03 | Phase 32 | Complete |

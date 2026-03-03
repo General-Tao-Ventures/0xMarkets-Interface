@@ -54,7 +54,7 @@ Plans:
 **Goal**: WebSocket listener on EventEmitter with auto-reconnect and block cursor resumption
 **Requirements**: LIST-01, LIST-02, LIST-03, LIST-04
 **Depends on**: Phase 32
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 33-01-PLAN.md — Create event indexer with cursor management, historical replay, WebSocket listener, and service wiring
 **Success criteria**:
