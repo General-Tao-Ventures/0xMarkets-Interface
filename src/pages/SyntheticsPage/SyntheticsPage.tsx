@@ -341,7 +341,7 @@ export function SyntheticsPage(p: Props) {
       <ChartHeader />
       <div className="flex gap-8 pt-0 max-lg:flex-col lg:grow">
         <div className="Exchange-left flex grow flex-col gap-8">
-          <OneClickPromoBanner openSettings={openSettings} />
+          {/* <OneClickPromoBanner openSettings={openSettings} /> */}
           <Chart />
           {!isTablet && (
             <div className="flex grow flex-col overflow-hidden rounded-8 border border-slate-800 bg-slate-750" data-qa="trade-table-large">
