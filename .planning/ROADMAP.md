@@ -36,10 +36,10 @@
   2. A limit increase order executes on-chain without reverting when trigger price is reached
   3. A stop-loss order executes on-chain without reverting when trigger price is reached
   4. A take-profit order executes on-chain without reverting when trigger price is reached
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 35-01-PLAN.md — TBD
+- [ ] 35-01-PLAN.md — Diagnose deployed keeper health and verify trigger order E2E execution
 
 ### Phase 36: E2E Test Suite
 **Goal**: A single test suite run proves every operation type works end-to-end against the live testnet
@@ -79,7 +79,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 35. Trigger Order Fix | 0/? | Not started | - |
+| 35. Trigger Order Fix | 0/1 | Planned | - |
 | 36. E2E Test Suite | 0/? | Not started | - |
 | 37. Frontend Verification | 0/? | Not started | - |
 
