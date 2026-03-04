@@ -12,14 +12,14 @@
 
 ### E2E Test Suite
 
-- [ ] **E2E-01**: Deposits execute end-to-end against live testnet (createDeposit → keeper executes → GM minted)
-- [ ] **E2E-02**: Withdrawals execute end-to-end (createWithdrawal → keeper executes → USDC returned)
-- [ ] **E2E-03**: Market orders execute end-to-end (MarketIncrease open, MarketDecrease close)
-- [ ] **E2E-04**: Limit orders execute when trigger price conditions are met
-- [ ] **E2E-05**: Stop-loss orders execute when trigger price conditions are met
-- [ ] **E2E-06**: Take-profit orders execute when trigger price conditions are met
-- [ ] **E2E-07**: Liquidation flow executes on a market with available reserves (BTC, EUR, etc.)
-- [ ] **E2E-08**: All E2E tests run as a single suite with pass/fail summary
+- [x] **E2E-01**: Deposits execute end-to-end against live testnet (createDeposit → keeper executes → GM minted)
+- [x] **E2E-02**: Withdrawals execute end-to-end (createWithdrawal → keeper executes → USDC returned)
+- [x] **E2E-03**: Market orders execute end-to-end (MarketIncrease open, MarketDecrease close)
+- [x] **E2E-04**: Limit orders execute when trigger price conditions are met
+- [x] **E2E-05**: Stop-loss orders execute when trigger price conditions are met
+- [x] **E2E-06**: Take-profit orders execute when trigger price conditions are met
+- [x] **E2E-07**: Liquidation flow executes on a market with available reserves (BTC, EUR, etc.)
+- [x] **E2E-08**: All E2E tests run as a single suite with pass/fail summary
 
 ### Frontend Accuracy
 
@@ -63,14 +63,14 @@
 |-------------|-------|--------|
 | TRIG-01 | Phase 35 | Complete |
 | TRIG-02 | Phase 35 | Complete |
-| E2E-01 | Phase 36 | Pending |
-| E2E-02 | Phase 36 | Pending |
-| E2E-03 | Phase 36 | Pending |
-| E2E-04 | Phase 36 | Pending |
-| E2E-05 | Phase 36 | Pending |
-| E2E-06 | Phase 36 | Pending |
-| E2E-07 | Phase 36 | Pending |
-| E2E-08 | Phase 36 | Pending |
+| E2E-01 | Phase 36 | Complete |
+| E2E-02 | Phase 36 | Complete |
+| E2E-03 | Phase 36 | Complete |
+| E2E-04 | Phase 36 | Complete |
+| E2E-05 | Phase 36 | Complete |
+| E2E-06 | Phase 36 | Complete |
+| E2E-07 | Phase 36 | Complete |
+| E2E-08 | Phase 36 | Complete |
 | FE-01 | Phase 37 | Pending |
 | FE-02 | Phase 37 | Pending |
 | FE-03 | Phase 37 | Pending |
