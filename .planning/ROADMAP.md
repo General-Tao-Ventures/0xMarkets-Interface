@@ -56,7 +56,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 36-01-PLAN.md — Complete E2E test gaps (close positions, liquidation market, unified runner) and run full suite
+- [x] 36-01-PLAN.md — Complete E2E test gaps (close positions, liquidation market, unified runner) and run full suite
 
 ### Phase 37: Frontend Verification
 **Goal**: The frontend at app.0xmarkets.io accurately reflects on-chain state and all pages/forms work without errors
@@ -68,10 +68,11 @@ Plans:
   3. Order statuses (pending, executed, cancelled) in the UI match on-chain order state
   4. Wallet token balances (USDC, ETH) displayed in the UI match on-chain balances
   5. All pages (Trade, Pools, Dashboard, Earn) load without console errors, forms submit correctly, and toast notifications resolve from Pending to Executed
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 37-01-PLAN.md — TBD
+- [ ] 37-01-PLAN.md — On-chain state verification script (pools, positions, orders, balances)
+- [ ] 37-02-PLAN.md — Human verification of frontend against on-chain data and UI functionality
 
 ## Progress
 
@@ -81,7 +82,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 35. Trigger Order Fix | 1/1 | Complete    | 2026-03-04 |
 | 36. E2E Test Suite | 1/1 | Complete    | 2026-03-04 |
-| 37. Frontend Verification | 0/? | Not started | - |
+| 37. Frontend Verification | 0/2 | Not started | - |
 
 ---
 *Created: 2026-03-04*
