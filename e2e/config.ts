@@ -62,6 +62,7 @@ export const CONTRACTS = {
   EventEmitter: "0xd5aAfa71f745645Db84cB4877873701ddAf2514c" as Address,
   SyntheticsReader: "0x1e6Ca8042e7BC258BBbA35C5C86F013b4eceC03C" as Address,
   SyntheticsRouter: "0x33153255bed0219b571483e6a0801Fa0B916f7D7" as Address,
+  PythLazer: "0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05" as Address,
 } as const;
 
 // Token addresses

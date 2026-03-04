@@ -44,6 +44,13 @@ export function createRawTradeActionTransformer(
         return undefined;
       }
 
+      const initialCollateralDeltaAmount = bigNumberify(rawAction.initialCollateralDeltaAmount);
+      const minOutputAmount = bigNumberify(rawAction.minOutputAmount);
+
+      if (initialCollateralDeltaAmount === undefined || minOutputAmount === undefined) {
+        return undefined;
+      }
+
       const tradeAction: SwapTradeAction = {
         id: rawAction.id,
         srcChainId: rawAction.srcChainId ? Number(rawAction.srcChainId) : undefined,
@@ -53,8 +60,8 @@ export function createRawTradeActionTransformer(
         orderType,
         orderKey: rawAction.orderKey,
         initialCollateralTokenAddress: rawAction.initialCollateralTokenAddress!,
-        initialCollateralDeltaAmount: bigNumberify(rawAction.initialCollateralDeltaAmount)!,
-        minOutputAmount: bigNumberify(rawAction.minOutputAmount)!,
+        initialCollateralDeltaAmount,
+        minOutputAmount,
         executionAmountOut: rawAction.executionAmountOut ? bigNumberify(rawAction.executionAmountOut) : undefined,
         shouldUnwrapNativeToken: rawAction.shouldUnwrapNativeToken!,
         targetCollateralToken,
@@ -94,6 +101,20 @@ export function createRawTradeActionTransformer(
         return undefined;
       }
 
+      const initialCollateralDeltaAmount = bigNumberify(rawAction.initialCollateralDeltaAmount);
+      const sizeDeltaUsd = bigNumberify(rawAction.sizeDeltaUsd);
+      const acceptablePrice = bigNumberify(rawAction.acceptablePrice);
+      const minOutputAmount = bigNumberify(rawAction.minOutputAmount);
+
+      if (
+        initialCollateralDeltaAmount === undefined ||
+        sizeDeltaUsd === undefined ||
+        acceptablePrice === undefined ||
+        minOutputAmount === undefined
+      ) {
+        return undefined;
+      }
+
       const tradeAction: PositionTradeAction = {
         id: rawAction.id,
         eventName: rawAction.eventName as TradeActionType,
@@ -106,16 +127,16 @@ export function createRawTradeActionTransformer(
         initialCollateralTokenAddress,
         initialCollateralToken,
         targetCollateralToken,
-        initialCollateralDeltaAmount: bigNumberify(rawAction.initialCollateralDeltaAmount)!,
-        sizeDeltaUsd: bigNumberify(rawAction.sizeDeltaUsd)!,
+        initialCollateralDeltaAmount,
+        sizeDeltaUsd,
         triggerPrice: rawAction.triggerPrice
           ? parseContractPrice(bigNumberify(rawAction.triggerPrice)!, indexToken.decimals)
           : undefined,
-        acceptablePrice: parseContractPrice(bigNumberify(rawAction.acceptablePrice)!, indexToken.decimals),
+        acceptablePrice: parseContractPrice(acceptablePrice, indexToken.decimals),
         executionPrice: rawAction.executionPrice
           ? parseContractPrice(bigNumberify(rawAction.executionPrice)!, indexToken.decimals)
           : undefined,
-        minOutputAmount: bigNumberify(rawAction.minOutputAmount)!,
+        minOutputAmount,
 
         collateralTokenPriceMax: rawAction.collateralTokenPriceMax
           ? parseContractPrice(bigNumberify(rawAction.collateralTokenPriceMax)!, initialCollateralToken.decimals)

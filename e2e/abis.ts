@@ -132,6 +132,13 @@ export const exchangeRouterAbi = [
     ],
     outputs: [{ name: "", type: "bytes32" }],
   },
+  {
+    name: "cancelOrder",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [{ name: "key", type: "bytes32" }],
+    outputs: [],
+  },
 ] as const;
 
 // EventEmitter ABI -- EventLog1 event for execution detection
@@ -187,5 +194,94 @@ export const erc20Abi = [
       { name: "amount", type: "uint256" },
     ],
     outputs: [],
+  },
+] as const;
+
+// PythLazer stored price ABI -- read current oracle price for a token
+export const pythLazerAbi = [
+  {
+    name: "getStoredPrice",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "token", type: "address" }],
+    outputs: [
+      { name: "ok", type: "bool" },
+      {
+        name: "price",
+        type: "tuple",
+        components: [
+          { name: "token", type: "address" },
+          { name: "min", type: "uint256" },
+          { name: "max", type: "uint256" },
+          { name: "timestamp", type: "uint256" },
+          { name: "provider", type: "address" },
+        ],
+      },
+    ],
+  },
+] as const;
+
+// SyntheticsReader ABI -- getAccountOrders to verify pending orders
+export const syntheticsReaderAbi = [
+  {
+    name: "getAccountOrders",
+    type: "function",
+    stateMutability: "view",
+    inputs: [
+      { name: "dataStore", type: "address" },
+      { name: "account", type: "address" },
+      { name: "start", type: "uint256" },
+      { name: "end", type: "uint256" },
+    ],
+    outputs: [
+      {
+        name: "orders",
+        type: "tuple[]",
+        components: [
+          {
+            name: "addresses",
+            type: "tuple",
+            components: [
+              { name: "account", type: "address" },
+              { name: "receiver", type: "address" },
+              { name: "cancellationReceiver", type: "address" },
+              { name: "callbackContract", type: "address" },
+              { name: "uiFeeReceiver", type: "address" },
+              { name: "market", type: "address" },
+              { name: "initialCollateralToken", type: "address" },
+              { name: "swapPath", type: "address[]" },
+            ],
+          },
+          {
+            name: "numbers",
+            type: "tuple",
+            components: [
+              { name: "orderType", type: "uint256" },
+              { name: "decreasePositionSwapType", type: "uint256" },
+              { name: "sizeDeltaUsd", type: "uint256" },
+              { name: "initialCollateralDeltaAmount", type: "uint256" },
+              { name: "triggerPrice", type: "uint256" },
+              { name: "acceptablePrice", type: "uint256" },
+              { name: "executionFee", type: "uint256" },
+              { name: "callbackGasLimit", type: "uint256" },
+              { name: "minOutputAmount", type: "uint256" },
+              { name: "updatedAtBlock", type: "uint256" },
+              { name: "updatedAtTime", type: "uint256" },
+              { name: "validFromTime", type: "uint256" },
+            ],
+          },
+          {
+            name: "flags",
+            type: "tuple",
+            components: [
+              { name: "isLong", type: "bool" },
+              { name: "shouldUnwrapNativeToken", type: "bool" },
+              { name: "isFrozen", type: "bool" },
+              { name: "autoCancel", type: "bool" },
+            ],
+          },
+        ],
+      },
+    ],
   },
 ] as const;

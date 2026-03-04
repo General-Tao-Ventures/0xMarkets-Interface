@@ -77,7 +77,7 @@ import { Chart } from "components/TVChart/Chart";
 import ChartHeader from "components/TVChart/ChartHeader";
 import { FavoriteTokenBar } from "components/FavoriteTokenBar/FavoriteTokenBar";
 
-import logoIcon from "img/logo-icon.svg";
+import logoIcon from "img/logo_0xMarkets.svg";
 import LogoText from "img/logo-text.svg?react";
 
 export type Props = {

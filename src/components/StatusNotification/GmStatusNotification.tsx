@@ -57,18 +57,22 @@ function select<A, B, C>(
   }
 }
 
-const KEEPER_API_URL = "/api/order-keeper";
-
 function getActionableMessage(errorReason: string | null): string {
   if (!errorReason) return t`Your deposit was cancelled. Your USDC has been returned.`;
 
   const lower = errorReason.toLowerCase();
 
+  if (lower.includes("minmarkettokens")) {
+    return t`Price moved too much. Try increasing slippage tolerance or reducing deposit size.`;
+  }
   if (lower.includes("oracletimestamps") || lower.includes("expired") || lower.includes("expiration")) {
     return t`Deposit expired before the keeper could execute it. Your USDC has been returned. Try again.`;
   }
   if (lower.includes("emptydeposit") || lower.includes("0x95b66fe9")) {
     return t`Your deposit was already processed. Check your wallet balance.`;
+  }
+  if (lower.includes("insufficientexecutionfee")) {
+    return t`Execution fee was insufficient. Try again.`;
   }
   if (lower.includes("execution reverted")) {
     return t`Deposit execution failed on-chain. Your USDC has been returned. Please try again.`;
@@ -81,13 +85,36 @@ function getWithdrawalActionableMessage(errorReason: string | null): string {
 
   const lower = errorReason.toLowerCase();
 
+  if (lower.includes("insufficientswapoutputamount")) {
+    return t`Insufficient swap liquidity. Try a smaller amount.`;
+  }
   if (lower.includes("oracletimestamps") || lower.includes("expired") || lower.includes("expiration")) {
     return t`Withdrawal expired before the keeper could execute it. Your GM tokens have been returned. Try again.`;
+  }
+  if (lower.includes("insufficientexecutionfee")) {
+    return t`Execution fee was insufficient. Try again.`;
   }
   if (lower.includes("emptywithdrawal") || lower.includes("execution reverted")) {
     return t`Withdrawal execution failed on-chain. Your GM tokens have been returned. Please try again.`;
   }
   return t`Your withdrawal was cancelled. Your GM tokens have been returned.`;
+}
+
+function getShiftActionableMessage(errorReason: string | null): string {
+  if (!errorReason) return t`Shift order cancelled.`;
+
+  const lower = errorReason.toLowerCase();
+
+  if (lower.includes("minmarkettokens")) {
+    return t`Price moved too much. Try increasing slippage tolerance or reducing shift size.`;
+  }
+  if (lower.includes("oracletimestamps") || lower.includes("expired") || lower.includes("expiration")) {
+    return t`Shift expired before the keeper could execute it. Try again.`;
+  }
+  if (lower.includes("insufficientexecutionfee")) {
+    return t`Execution fee was insufficient. Try again.`;
+  }
+  return t`Shift order cancelled.`;
 }
 
 export function GmStatusNotification({
@@ -145,8 +172,6 @@ export function GmStatusNotification({
   const elapsedSeconds = useDepositElapsed(depositCreatedAt);
   const withdrawalCreatedAt = withdrawalStatus?.createdAt;
   const withdrawalElapsedSeconds = useDepositElapsed(withdrawalCreatedAt);
-  const [keeperErrorReason, setKeeperErrorReason] = useState<string | null>(null);
-  const [withdrawalErrorReason, setWithdrawalErrorReason] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isCancellingWithdrawal, setIsCancellingWithdrawal] = useState(false);
 
@@ -336,7 +361,7 @@ export function GmStatusNotification({
         text = t`Deposit timed out. The keeper may be down. Try again or check your wallet balance.`;
         status = "error";
       } else if (depositStatus?.cancelledTxnHash) {
-        text = getActionableMessage(keeperErrorReason);
+        text = getActionableMessage(depositStatus.cancelledReason ?? null);
         status = "error";
         txnHash = depositStatus.cancelledTxnHash;
       } else if (depositStatus?.executedTxnHash) {
@@ -362,7 +387,7 @@ export function GmStatusNotification({
         text = t`Withdrawal timed out. The keeper may be down. Try again or check your GM token balance.`;
         status = "error";
       } else if (withdrawalStatus?.cancelledTxnHash) {
-        text = getWithdrawalActionableMessage(withdrawalErrorReason);
+        text = getWithdrawalActionableMessage(withdrawalStatus.cancelledReason ?? null);
         status = "error";
         txnHash = withdrawalStatus.cancelledTxnHash;
       } else if (withdrawalStatus?.executedTxnHash) {
@@ -397,7 +422,7 @@ export function GmStatusNotification({
       }
 
       if (shiftStatus?.cancelledTxnHash) {
-        text = t`Shift order cancelled.`;
+        text = getShiftActionableMessage(shiftStatus.cancelledReason ?? null);
         status = "error";
         txnHash = shiftStatus?.cancelledTxnHash;
       }
@@ -406,16 +431,17 @@ export function GmStatusNotification({
     return <TransactionStatus status={status} txnHash={txnHash} text={text} />;
   }, [
     depositStatus?.cancelledTxnHash,
+    depositStatus?.cancelledReason,
     depositStatus?.createdTxnHash,
     depositStatus?.executedTxnHash,
     elapsedSeconds,
-    keeperErrorReason,
     operation,
     shiftStatus?.cancelledTxnHash,
+    shiftStatus?.cancelledReason,
     shiftStatus?.createdTxnHash,
     shiftStatus?.executedTxnHash,
     withdrawalElapsedSeconds,
-    withdrawalErrorReason,
+    withdrawalStatus?.cancelledReason,
     withdrawalStatus?.cancelledTxnHash,
     withdrawalStatus?.createdTxnHash,
     withdrawalStatus?.executedTxnHash,
@@ -490,27 +516,6 @@ export function GmStatusNotification({
     }
   }, [hasError, toastTimestamp]);
 
-  useEffect(() => {
-    if (depositStatus?.cancelledTxnHash && depositStatus.cancelledTxnHash !== EXECUTION_TIMEOUT_HASH && depositStatusKey) {
-      fetch(`${KEEPER_API_URL}/api/deposits/${depositStatusKey}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.errorReason) setKeeperErrorReason(data.errorReason);
-        })
-        .catch(() => {});
-    }
-  }, [depositStatus?.cancelledTxnHash, depositStatusKey]);
-
-  useEffect(() => {
-    if (withdrawalStatus?.cancelledTxnHash && withdrawalStatus.cancelledTxnHash !== EXECUTION_TIMEOUT_HASH && withdrawalStatusKey) {
-      fetch(`${KEEPER_API_URL}/api/withdrawals/${withdrawalStatusKey}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.errorReason) setWithdrawalErrorReason(data.errorReason);
-        })
-        .catch(() => {});
-    }
-  }, [withdrawalStatus?.cancelledTxnHash, withdrawalStatusKey]);
 
   const handleCancelDeposit = async () => {
     if (!signer || !depositStatusKey || isCancelling) return;

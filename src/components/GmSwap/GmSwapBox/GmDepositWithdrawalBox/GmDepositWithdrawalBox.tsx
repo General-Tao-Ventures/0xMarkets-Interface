@@ -46,6 +46,8 @@ import { SelectedPool } from "../SelectedPool";
 import { Mode, Operation } from "../types";
 import { useGmWarningState } from "../useGmWarningState";
 import { InfoRows } from "./InfoRows";
+import { useDepositAmountOut } from "domain/synthetics/markets/useDepositAmountOut";
+
 import { useDepositWithdrawalAmounts } from "./useDepositWithdrawalAmounts";
 import { useDepositWithdrawalFees } from "./useDepositWithdrawalFees";
 import { useGmDepositWithdrawalBoxState } from "./useGmDepositWithdrawalBoxState";
@@ -350,6 +352,14 @@ export function GmSwapBoxDepositWithdrawal(p: GmSwapBoxProps) {
     glvInfo,
   });
 
+  const contractEstimatedMarketTokenAmount = useDepositAmountOut(chainId, {
+    marketInfo,
+    tokensData,
+    longTokenAmount: (amounts as any)?.longTokenAmount ?? 0n,
+    shortTokenAmount: (amounts as any)?.shortTokenAmount ?? 0n,
+    enabled: isDeposit && !glvInfo,
+  });
+
   const { fees, executionFee } = useDepositWithdrawalFees({
     amounts,
     chainId,
@@ -389,6 +399,7 @@ export function GmSwapBoxDepositWithdrawal(p: GmSwapBoxProps) {
     isMarketTokenDeposit: isMarketTokenDeposit,
     marketsInfoData,
     glvAndMarketsInfoData,
+    contractEstimatedMarketTokenAmount,
   });
 
   const firstTokenMaxDetails = useMaxAvailableAmount({

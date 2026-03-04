@@ -49,6 +49,7 @@ interface Props {
   marketsInfoData?: MarketsInfoData;
   glvAndMarketsInfoData: GlvAndGmMarketsInfoData;
   selectedMarketInfoForGlv?: MarketInfo;
+  contractEstimatedMarketTokenAmount?: bigint;
 }
 
 const processingTextMap = {
@@ -91,6 +92,7 @@ export const useGmSwapSubmitState = ({
   glvInfo,
   isMarketTokenDeposit,
   glvAndMarketsInfoData,
+  contractEstimatedMarketTokenAmount,
 }: Props): SubmitButtonState => {
   const chainId = useSelector(selectChainId);
   const hasOutdatedUi = useHasOutdatedUi();
@@ -130,6 +132,7 @@ export const useGmSwapSubmitState = ({
     selectedMarketInfoForGlv,
     marketTokenUsd,
     isFirstBuy,
+    contractEstimatedMarketTokenAmount,
   });
 
   const onConnectAccount = useCallback(() => {
