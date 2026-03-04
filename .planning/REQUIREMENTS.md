@@ -1,94 +1,90 @@
-# Requirements: 0xMarkets Event Indexer
+# Requirements: 0xMarkets E2E Verification
 
-**Defined:** 2026-03-03
-**Core Value:** Record all on-chain contract events for data verification and analysis
+**Defined:** 2026-03-04
+**Core Value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
 
-## v1.9 Requirements
+## v1.10 Requirements
 
-### Schema
+### Trigger Order Fix
 
-- [x] **SCHEMA-01**: 50-table PostgreSQL schema created with schema namespaces (orders, positions, deposits, withdrawals, shifts, market, glv, referrals, oracle)
-- [x] **SCHEMA-02**: All table columns match contract EventUtils field names and types exactly
-- [x] **SCHEMA-03**: Indexes on key, account, market, and block_number columns for query performance
-- [x] **SCHEMA-04**: Raw SQL migration runs idempotently (CREATE SCHEMA/TABLE IF NOT EXISTS)
+- [ ] **TRIG-01**: Diagnose root cause of InvalidOrderPrices (0x0481a15a) error on trigger order execution
+- [ ] **TRIG-02**: Fix trigger order execution so limit increase, stop-loss, and take-profit orders execute successfully on-chain
 
-### Decoder
+### E2E Test Suite
 
-- [x] **DEC-01**: Event decoder parses EventLogData from raw log bytes into typed Maps (address, uint, int, bool, bytes32, bytes, string items)
-- [x] **DEC-02**: Decoder handles both EventLog1 (1 indexed topic) and EventLog2 (2 indexed topics)
-- [x] **DEC-03**: Decoder extracts msgSender, eventName, and all eventData fields
+- [ ] **E2E-01**: Deposits execute end-to-end against live testnet (createDeposit → keeper executes → GM minted)
+- [ ] **E2E-02**: Withdrawals execute end-to-end (createWithdrawal → keeper executes → USDC returned)
+- [ ] **E2E-03**: Market orders execute end-to-end (MarketIncrease open, MarketDecrease close)
+- [ ] **E2E-04**: Limit orders execute when trigger price conditions are met
+- [ ] **E2E-05**: Stop-loss orders execute when trigger price conditions are met
+- [ ] **E2E-06**: Take-profit orders execute when trigger price conditions are met
+- [ ] **E2E-07**: Liquidation flow executes on a market with available reserves (BTC, EUR, etc.)
+- [ ] **E2E-08**: All E2E tests run as a single suite with pass/fail summary
 
-### Listener
+### Frontend Accuracy
 
-- [x] **LIST-01**: WebSocket listener subscribes to EventEmitter contract for EventLog1 and EventLog2 events
-- [x] **LIST-02**: Listener auto-reconnects on WebSocket disconnection
-- [x] **LIST-03**: Cursor tracks last processed block number for crash recovery
-- [x] **LIST-04**: On startup, listener replays missed blocks from cursor to current head
+- [ ] **FE-01**: Pool balances displayed in UI match on-chain contract state
+- [ ] **FE-02**: Position size, collateral, PnL in UI match on-chain position data
+- [ ] **FE-03**: Order status (pending/executed/cancelled) in UI matches on-chain state
+- [ ] **FE-04**: Token balances (USDC, ETH) in wallet display match on-chain balances
 
-### Router
+### Frontend Functionality
 
-- [x] **ROUTE-01**: Decoded events are routed to correct table by eventName (e.g. OrderCreated → orders.created)
-- [x] **ROUTE-02**: All 50 event types have insert handlers that map decoded fields to table columns
-- [x] **ROUTE-03**: Unknown event names are logged and skipped (no crash)
-- [x] **ROUTE-04**: Conditional nullable fields handled (e.g. positions.fees referral/pro/liquidation fields)
-
-### Deploy
-
-- [x] **DEPLOY-01**: Updated service builds and runs in Docker on DO droplet
-- [x] **DEPLOY-02**: SQL migration runs on container startup alongside Prisma migrations
-- [x] **DEPLOY-03**: Health check endpoint reports event indexer status (last block, events/min)
-- [x] **DEPLOY-04**: Existing market snapshotter and price recorder continue working unchanged
+- [ ] **UI-01**: All pages load without console errors (Trade, Pools, Dashboard, Earn)
+- [ ] **UI-02**: Trade form submits orders correctly (market, limit, TP/SL)
+- [ ] **UI-03**: Deposit and withdrawal forms submit correctly
+- [ ] **UI-04**: Toast notifications appear and resolve (Pending → Executed)
 
 ## Future Requirements
 
-### Backfill
+### Error UX
 
-- **BACKFILL-01**: Replay historical blocks from genesis to populate past events
-- **BACKFILL-02**: Backfill runs as separate mode (not real-time listener)
+- **ERR-01**: Decode reasonBytes from cancelled events and show human-readable error messages
+- **ERR-02**: Surface revert reasons for failed deposits/orders in the UI
 
-### Query API
+### Advanced Testing
 
-- **API-01**: REST endpoints to query stored events by key, account, market
-- **API-02**: Pagination support for large result sets
+- **TEST-01**: Multi-market parallel E2E suite (all 6 markets in single run)
+- **TEST-02**: Automated regression suite on CI (GitHub Actions)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Virtual inventory events | Not needed for verification (VirtualSwapInventoryUpdated, VirtualPositionInventoryUpdated) |
-| Real-time WebSocket API for consumers | Overkill for current needs — DB queries sufficient |
-| Prisma models for event tables | Raw SQL preferred — 50 tables with PG schema namespaces don't fit Prisma well |
-| Frontend integration | This is a backend data service only |
+| CI/CD integration | Manual test runs sufficient for v1.10, automate later |
+| Multi-chain testing | Base Sepolia only |
+| Performance benchmarking | Focus on correctness, not speed |
+| Mobile UI testing | Web-first |
+| Mainnet deployment | Testnet verification milestone |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 31 | Complete |
-| SCHEMA-02 | Phase 31 | Complete |
-| SCHEMA-03 | Phase 31 | Complete |
-| SCHEMA-04 | Phase 31 | Complete |
-| DEC-01 | Phase 32 | Complete |
-| DEC-02 | Phase 32 | Complete |
-| DEC-03 | Phase 32 | Complete |
-| LIST-01 | Phase 33 | Complete |
-| LIST-02 | Phase 33 | Complete |
-| LIST-03 | Phase 33 | Complete |
-| LIST-04 | Phase 33 | Complete |
-| ROUTE-01 | Phase 32 | Complete |
-| ROUTE-02 | Phase 32 | Complete |
-| ROUTE-03 | Phase 32 | Complete |
-| ROUTE-04 | Phase 32 | Complete |
-| DEPLOY-01 | Phase 34 | Complete |
-| DEPLOY-02 | Phase 34 | Complete |
-| DEPLOY-03 | Phase 34 | Complete |
-| DEPLOY-04 | Phase 34 | Complete |
+| TRIG-01 | — | Pending |
+| TRIG-02 | — | Pending |
+| E2E-01 | — | Pending |
+| E2E-02 | — | Pending |
+| E2E-03 | — | Pending |
+| E2E-04 | — | Pending |
+| E2E-05 | — | Pending |
+| E2E-06 | — | Pending |
+| E2E-07 | — | Pending |
+| E2E-08 | — | Pending |
+| FE-01 | — | Pending |
+| FE-02 | — | Pending |
+| FE-03 | — | Pending |
+| FE-04 | — | Pending |
+| UI-01 | — | Pending |
+| UI-02 | — | Pending |
+| UI-03 | — | Pending |
+| UI-04 | — | Pending |
 
 **Coverage:**
-- v1.9 requirements: 19 total
-- Mapped to phases: 19
-- Unmapped: 0 ✓
+- v1.10 requirements: 18 total
+- Mapped to phases: 0
+- Unmapped: 18 ⚠️
 
 ---
-*Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Requirements defined: 2026-03-04*
+*Last updated: 2026-03-04 after initial definition*
