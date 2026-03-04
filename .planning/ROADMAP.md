@@ -53,10 +53,10 @@ Plans:
   5. Stop-loss and take-profit tests confirm execution when trigger price conditions are met
   6. Liquidation test creates an undercollateralized position on a market with available reserves (BTC, EUR, etc.) and confirms the keeper liquidates it
   7. Running the full suite produces a pass/fail summary covering all operation types
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 36-01-PLAN.md — TBD
+- [ ] 36-01-PLAN.md — Complete E2E test gaps (close positions, liquidation market, unified runner) and run full suite
 
 ### Phase 37: Frontend Verification
 **Goal**: The frontend at app.0xmarkets.io accurately reflects on-chain state and all pages/forms work without errors
@@ -80,7 +80,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 35. Trigger Order Fix | 1/1 | Complete    | 2026-03-04 |
-| 36. E2E Test Suite | 0/? | Not started | - |
+| 36. E2E Test Suite | 0/1 | Not started | - |
 | 37. Frontend Verification | 0/? | Not started | - |
 
 ---
