@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: Event Indexer
-status: completed
-stopped_at: Completed 34-02-PLAN.md (v1.9 milestone complete)
-last_updated: "2026-03-03T23:02:53.216Z"
-last_activity: 2026-03-03 — Completed 34-02 deploy and verify
+milestone: v1.10
+milestone_name: E2E Verification
+status: active
+stopped_at: null
+last_updated: "2026-03-04T21:30:00.000Z"
+last_activity: 2026-03-04 — Milestone v1.10 started
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-03)
+See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.9 Event Indexer — MILESTONE COMPLETE, all 4 phases deployed and verified
+**Current focus:** v1.10 E2E Verification — fix trigger orders, comprehensive E2E suite, frontend verification
 
 ## Current Position
 
-Phase: 34-deploy-verify
-Plan: 02/02 complete
-Status: v1.9 milestone complete
-Last activity: 2026-03-03 — Completed 34-02 deploy and verify
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-04 — Milestone v1.10 started
 
 ## Accumulated Context
 
@@ -100,6 +100,6 @@ See .planning/PROJECT.md key decisions table for full history.
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:55:46Z
-Stopped at: Completed 34-02-PLAN.md (v1.9 milestone complete)
-Next: None -- v1.9 Event Indexer milestone fully deployed and verified
+Last session: 2026-03-04
+Stopped at: Starting v1.10 milestone
+Next: Define requirements and create roadmap

@@ -10,9 +10,9 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.8 Deployment (2026-03-01)
+**Shipped:** v1.9 Event Indexer (2026-03-03)
 
-Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → executor → confirmator) with 9 bug fixes, refactored to view-call oracle pricing, added hardening (dedup, revert tracking, dead code cleanup) and performance optimizations (multicall batching, timing instrumentation). Pipeline verified through gas-estimation; on-chain TX blocked by pool reserve exhaustion.
+Built full on-chain event indexer into data-verification-service with 50-table PostgreSQL schema, viem-based event decoder, WebSocket listener with crash recovery, and cursor-based resumption. Deployed to DO droplet alongside existing keepers.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
@@ -77,18 +77,16 @@ Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → 
 
 ### Active
 
-## Current Milestone: v1.9 Event Indexer
+## Current Milestone: v1.10 E2E Verification
 
-**Goal:** Build a full on-chain event indexer into the data-verification-service, recording all contract events (orders, positions, deposits, withdrawals, shifts, market state, GLV, referrals, oracle prices) into a 50-table PostgreSQL schema, and deploy to DigitalOcean.
+**Goal:** Fix trigger order execution, run a comprehensive E2E test suite covering all operation types against live testnet, and verify the frontend is correctly configured (on-chain state accuracy + UI functionality).
 
 **Target features:**
-- 50-table PostgreSQL schema with schema namespaces (orders, positions, deposits, withdrawals, shifts, market, glv, referrals, oracle)
-- Event decoder ported from squid's eventDecoder.ts (decode EventLogData from raw log bytes)
-- EventEmitter WebSocket listener for EventLog1 + EventLog2 events
-- Event router mapping decoded events to correct database tables
-- Cursor-based resumption (track last processed block for crash recovery)
-- Deploy updated service to DO droplet alongside existing keepers
-- Health check extended with event indexer status
+- Fix InvalidOrderPrices (0x0481a15a) error blocking trigger order execution (limit, TP/SL)
+- E2E test suite: deposits, withdrawals, market orders, limit orders, TP/SL, liquidations
+- Liquidation testing on markets with available reserves (BTC, EUR, etc.)
+- Frontend verification: on-chain state matches UI (balances, positions, order status)
+- Frontend verification: UI functionality (pages load, forms work, no errors, correct routing)
 
 ### Out of Scope
 
@@ -157,4 +155,4 @@ Fixed OrderHandler division-by-zero, verified liquidation pipeline (scanner → 
 | Accept pipeline verification via gas-estimation | Pool reserves prevent final TX but code paths proven | ✓ Good — operational, not code issue |
 
 ---
-*Last updated: 2026-03-03 after v1.9 milestone start*
+*Last updated: 2026-03-04 after v1.10 milestone start*
