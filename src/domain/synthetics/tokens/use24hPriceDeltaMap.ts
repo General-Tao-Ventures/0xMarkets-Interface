@@ -53,6 +53,11 @@ export function use24hPriceDeltaMap(
           }
 
           const deltaPrice = tokenDelta.close - tokenDelta.open;
+
+          if (tokenDelta.open <= 0 || Math.abs(deltaPrice / tokenDelta.open) > 10) {
+            return [tokenAddress, undefined];
+          }
+
           const deltaPercentage = (deltaPrice * 100) / tokenDelta.open;
           const deltaPercentageStr =
             deltaPercentage > 0 ? `+${deltaPercentage.toFixed(2)}%` : `${deltaPercentage.toFixed(2)}%`;
