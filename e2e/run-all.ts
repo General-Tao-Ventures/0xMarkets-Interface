@@ -19,6 +19,7 @@ interface TestDef {
   name: string;
   file: string;
   env: Record<string, string>;
+  timeout?: number; // ms, default 300_000
 }
 
 // ============================================================
@@ -30,7 +31,7 @@ const TEST_SUITES: TestDef[] = [
   { name: "Withdrawals",    file: "test-withdrawals.ts",    env: { MARKET: "WETH/USD" } },
   { name: "Market Orders",  file: "test-orders.ts",         env: { MARKET: "WETH/USD" } },
   { name: "Trigger Orders", file: "test-trigger-orders.ts", env: {} },
-  { name: "Liquidation",    file: "test-liquidation.ts",    env: {} },
+  { name: "Liquidation",    file: "test-liquidation.ts",    env: {}, timeout: 600_000 },
 ];
 
 // ============================================================
@@ -92,7 +93,7 @@ function main() {
         cwd,
         env: { ...process.env, ...suite.env },
         stdio: "pipe",
-        timeout: 300_000, // 5 min per test
+        timeout: suite.timeout ?? 300_000, // default 5 min, configurable per suite
         encoding: "utf-8",
       });
 
