@@ -4,10 +4,10 @@ milestone: v1.10
 milestone_name: E2E Verification
 status: active
 stopped_at: null
-last_updated: "2026-03-04T21:30:00.000Z"
-last_activity: 2026-03-04 — Milestone v1.10 started
+last_updated: "2026-03-04T22:00:00.000Z"
+last_activity: 2026-03-04 — Roadmap created for v1.10
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,46 +20,49 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.10 E2E Verification — fix trigger orders, comprehensive E2E suite, frontend verification
+**Current focus:** Phase 35 — Trigger Order Fix
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 35 of 37 (Trigger Order Fix)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-04 — Milestone v1.10 started
+Status: Ready to plan
+Last activity: 2026-03-04 — Roadmap created for v1.10
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0 (v1.10)
+- Average duration: —
+- Total execution time: —
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
 
 ## Accumulated Context
 
 ### Known Issues
 
-- REQUEST_EXPIRATION_TIME set to 3600s for testnet (should be configurable per environment)
-- JPY/USD Pyth Lazer oracle data gap: "Best ask price is not present for the timestamp"
-- Shared wallet nonce conflict between keeper-service and order-execution-keeper — documented testnet risk
-- WETH/USD pool at 100% reserve capacity — blocks new position/liquidation testing
-- GOLD feed (346/XAUUSD) recording 0 prices in data-verification-service — needs investigation
+- InvalidOrderPrices (0x0481a15a) blocking all trigger order execution (limit, TP/SL)
+- WETH/USD pool at 100% reserve capacity — use BTC/EUR/etc. for liquidation testing
+- JPY/USD Pyth Lazer oracle data gap — testnet infrastructure, not code
+- Shared wallet nonce conflict between keeper-service and order-execution-keeper
 
 ### Server State
 
-- All 3 repos pushed to GitHub and pulled on DO server (142.93.203.222)
-- keeper-service: /opt/0xmarkets/keeper-service/ (ken/keeper-updates)
-- order-execution-keeper: /opt/0xmarkets/order-execution-keeper-service/ (ken/keeper-rebuild)
-- data-verification-service: deployed on same droplet, port 37019
+- All services deployed on DO droplet (142.93.203.222)
+- keeper-service: port 37017, order-execution-keeper: port 37018, data-verification: port 37019
 - All Docker containers running and healthy
-- Prisma migrations applied, price_candles 140k+ rows preserved
+- Existing E2E tests in e2e/ directory (test-deposits.ts, test-orders.ts, test-withdrawals.ts, test-trigger-orders.ts, test-liquidation.ts)
 
-### Data Verification Service State
+### Decisions
 
-- Market snapshotter: per-block multicall reads for 6 markets (working)
-- Price recorder: per-second Pyth Lazer WebSocket for 7 assets (working, GOLD issue)
-- Database: 2 Prisma tables (market_snapshots, price_ticks)
-- Event indexer: DEPLOYED AND VERIFIED on DO droplet
-- Event decoder uses viem decodeAbiParameters (ported from squid's ethers v6)
-- 52 event name constants, DecodedEventData type, helper getters all in src/events/
-- Event indexer loop: cursor recovery, 2000-block chunk replay, real-time WebSocket subscription
-- All 10 SQL migrations executed on droplet, 50 event tables across 9 PG schemas
-- Health endpoint at :37019/health reports all 3 collector metrics
-- WS_RPC_URL configured in parent docker-compose.yml on droplet
+See .planning/PROJECT.md key decisions table for full history.
 
 ### Pending Todos
 
@@ -69,37 +72,8 @@ None.
 
 None.
 
-### Decisions
-
-See .planning/PROJECT.md key decisions table for full history.
-
-- 31-01: Used NUMERIC(78,0) for all uint256/int256 to preserve full 78-digit precision
-- 31-01: Composite PK (block_number, log_index) for natural uniqueness from on-chain data
-- 31-01: ClaimableFundingUpdated uses nullable time_key/next_pool_value for two Solidity overloads
-- 31-01: Position fee tables have nullable referral/pro/liquidation columns matching conditional emit logic
-- 31-01: DistributionCreated skipped (no contract emit function exists)
-- 31-02: Used pg Client (not Prisma) for raw SQL execution since event tables use PG schema namespaces
-- 31-02: Migration runner aborts on error to prevent app starting with incomplete schema
-- 31-02: Resolve SQL directory via process.cwd() for dev/Docker compatibility
-- 32-01: Used viem decodeAbiParameters with named fields for structured decoding (no positional indexing)
-- 32-01: Normalize addresses/hex to lowercase at decode time for consistent downstream comparison
-- 32-01: 52 event constants (actual squid count) rather than plan's stated 50
-- [Phase 32]: Used viem decodeAbiParameters with named fields for structured event decoding
-- 32-02: 51 handlers (not 49/50) matching actual 52 event constants minus DistributionCreated
-- 32-02: All SQL column names double-quoted for reserved word safety (oracle.timestamp)
-- 32-02: Position fee column specs shared between FeesCollected and FeesInfo handlers
-- 33-01: Used viem WebSocket auto-reconnect (no custom reconnect logic)
-- 33-01: Block timestamps cached per-chunk to avoid redundant getBlock RPC calls
-- 33-01: First run sets cursor to current block (no historical replay on initial deploy)
-- 33-01: Per-event error handling: log and continue, single bad event does not crash indexer
-- [Phase 33-event-listener]: Used viem WebSocket auto-reconnect for real-time event subscription
-- 34-01: Used simple rolling average for eventsPerMinute (count/uptime, no windowed tracking)
-- 34-01: Docker build verification skipped (no local daemon) -- pnpm build sufficient
-- 34-02: Used scp file sync instead of git pull for deployment (local code is source of truth)
-- 34-02: Rebuilt container with --no-cache for clean image with all event indexer code
-
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Starting v1.10 milestone
-Next: Define requirements and create roadmap
+Stopped at: Roadmap created for v1.10
+Next: Plan Phase 35 (Trigger Order Fix)

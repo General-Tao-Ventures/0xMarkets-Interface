@@ -61,30 +61,30 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TRIG-01 | — | Pending |
-| TRIG-02 | — | Pending |
-| E2E-01 | — | Pending |
-| E2E-02 | — | Pending |
-| E2E-03 | — | Pending |
-| E2E-04 | — | Pending |
-| E2E-05 | — | Pending |
-| E2E-06 | — | Pending |
-| E2E-07 | — | Pending |
-| E2E-08 | — | Pending |
-| FE-01 | — | Pending |
-| FE-02 | — | Pending |
-| FE-03 | — | Pending |
-| FE-04 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| UI-04 | — | Pending |
+| TRIG-01 | Phase 35 | Pending |
+| TRIG-02 | Phase 35 | Pending |
+| E2E-01 | Phase 36 | Pending |
+| E2E-02 | Phase 36 | Pending |
+| E2E-03 | Phase 36 | Pending |
+| E2E-04 | Phase 36 | Pending |
+| E2E-05 | Phase 36 | Pending |
+| E2E-06 | Phase 36 | Pending |
+| E2E-07 | Phase 36 | Pending |
+| E2E-08 | Phase 36 | Pending |
+| FE-01 | Phase 37 | Pending |
+| FE-02 | Phase 37 | Pending |
+| FE-03 | Phase 37 | Pending |
+| FE-04 | Phase 37 | Pending |
+| UI-01 | Phase 37 | Pending |
+| UI-02 | Phase 37 | Pending |
+| UI-03 | Phase 37 | Pending |
+| UI-04 | Phase 37 | Pending |
 
 **Coverage:**
 - v1.10 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation*

@@ -15,69 +15,73 @@
 
 ---
 
-## v1.9 Event Indexer
+## v1.10 E2E Verification
 
-**Goal:** Build a full on-chain event indexer into the data-verification-service, recording all contract events into a 50-table PostgreSQL schema, and deploy to DigitalOcean.
+**Goal:** Fix trigger order execution, run a comprehensive E2E test suite covering all operation types against live testnet, and verify the frontend displays accurate on-chain state with working UI functionality.
 
-### Phase 31: Event Schema
-**Goal**: Create the 50-table PostgreSQL schema with proper namespaces, types, and indexes
-**Requirements**: SCHEMA-01, SCHEMA-02, SCHEMA-03, SCHEMA-04
-**Depends on**: None
-**Plans:** 2/2 plans complete
+## Phases
+
+- [ ] **Phase 35: Trigger Order Fix** - Diagnose and fix InvalidOrderPrices error blocking limit/TP/SL execution
+- [ ] **Phase 36: E2E Test Suite** - Run full E2E coverage across deposits, withdrawals, market orders, trigger orders, and liquidations
+- [ ] **Phase 37: Frontend Verification** - Verify on-chain state accuracy in UI and confirm all pages/forms function correctly
+
+## Phase Details
+
+### Phase 35: Trigger Order Fix
+**Goal**: Trigger orders (limit increase, stop-loss, take-profit) execute successfully on the live testnet
+**Depends on**: Nothing (first phase of v1.10)
+**Requirements**: TRIG-01, TRIG-02
+**Success Criteria** (what must be TRUE):
+  1. Root cause of InvalidOrderPrices (0x0481a15a) is identified and documented
+  2. A limit increase order executes on-chain without reverting when trigger price is reached
+  3. A stop-loss order executes on-chain without reverting when trigger price is reached
+  4. A take-profit order executes on-chain without reverting when trigger price is reached
+**Plans**: TBD
+
 Plans:
-- [x] 31-01-PLAN.md — Write all 10 SQL migration files (49 event tables + 1 cursor table across 9 PG schemas)
-- [x] 31-02-PLAN.md — Create Node.js migration runner and update Dockerfile CMD
-**Success criteria**:
-1. Raw SQL migration creates 9 schemas and 50 tables matching contract EventUtils exactly
-2. All NUMERIC(78,0) columns for uint256/int256, TEXT for addresses/bytes32, TEXT[] for address arrays
-3. Indexes exist on key, account, market, block_number for all relevant tables
-4. Migration is idempotent (IF NOT EXISTS) and runs in Docker CMD alongside Prisma migrations
-5. Cursor table exists to track last processed block per collector type
+- [ ] 35-01-PLAN.md — TBD
 
-### Phase 32: Event Decoder and Router
-**Goal**: Port the squid's event decoder and build insert handlers for all 50 event types
-**Requirements**: DEC-01, DEC-02, DEC-03, ROUTE-01, ROUTE-02, ROUTE-03, ROUTE-04
-**Depends on**: Phase 31
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 32-01-PLAN.md — Port event decoder from ethers to viem, create types and event key constants
-- [x] 32-02-PLAN.md — Create insert builder, all 49 event handlers, and event router
-**Success criteria**:
-1. EventLogData bytes decoded into typed Maps (address, uint, int, bool, bytes32, bytes, string items + array variants)
-2. Both EventLog1 and EventLog2 formats handled correctly
-3. Event router maps all 50 event names to correct table insert functions
-4. Conditional nullable fields (positions.fees referral/pro/liquidation) handled
-5. Unknown event names logged at warn level, not crash
-6. Raw SQL inserts via pg client (not Prisma) for event tables
+### Phase 36: E2E Test Suite
+**Goal**: A single test suite run proves every operation type works end-to-end against the live testnet
+**Depends on**: Phase 35 (trigger orders must execute for E2E-04/05/06 to pass)
+**Requirements**: E2E-01, E2E-02, E2E-03, E2E-04, E2E-05, E2E-06, E2E-07, E2E-08
+**Success Criteria** (what must be TRUE):
+  1. Deposit test creates a deposit and confirms GM tokens are minted in the user's wallet
+  2. Withdrawal test creates a withdrawal and confirms USDC is returned to the user's wallet
+  3. Market order test opens a long/short position and closes it, confirming collateral is returned
+  4. Limit order test places an order that executes when the trigger price condition is met
+  5. Stop-loss and take-profit tests confirm execution when trigger price conditions are met
+  6. Liquidation test creates an undercollateralized position on a market with available reserves (BTC, EUR, etc.) and confirms the keeper liquidates it
+  7. Running the full suite produces a pass/fail summary covering all operation types
+**Plans**: TBD
 
-### Phase 33: Event Listener with Crash Recovery
-**Goal**: WebSocket listener on EventEmitter with auto-reconnect and block cursor resumption
-**Requirements**: LIST-01, LIST-02, LIST-03, LIST-04
-**Depends on**: Phase 32
-**Plans:** 1/1 plans complete
 Plans:
-- [x] 33-01-PLAN.md — Create event indexer with cursor management, historical replay, WebSocket listener, and service wiring
-**Success criteria**:
-1. WebSocket subscription to EventEmitter EventLog1 + EventLog2 events
-2. Auto-reconnect on disconnection (viem WebSocket transport handles this)
-3. Block cursor persisted to DB after each batch of events
-4. On startup, getLogs replays from cursor to current head before switching to real-time
-5. No duplicate inserts (block_number + log_index unique constraint or skip logic)
+- [ ] 36-01-PLAN.md — TBD
 
-### Phase 34: Deploy and Verify
-**Goal**: Deploy updated data-verification-service to DO and verify all collectors working
-**Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04
-**Depends on**: Phase 33
-**Plans:** 2/2 plans complete
+### Phase 37: Frontend Verification
+**Goal**: The frontend at app.0xmarkets.io accurately reflects on-chain state and all pages/forms work without errors
+**Depends on**: Phase 36 (E2E tests create on-chain state to verify against)
+**Requirements**: FE-01, FE-02, FE-03, FE-04, UI-01, UI-02, UI-03, UI-04
+**Success Criteria** (what must be TRUE):
+  1. Pool balances shown in the Pools page match the on-chain GM token balances and pool value
+  2. Positions displayed on the Trade page (size, collateral, PnL) match on-chain position data
+  3. Order statuses (pending, executed, cancelled) in the UI match on-chain order state
+  4. Wallet token balances (USDC, ETH) displayed in the UI match on-chain balances
+  5. All pages (Trade, Pools, Dashboard, Earn) load without console errors, forms submit correctly, and toast notifications resolve from Pending to Executed
+**Plans**: TBD
+
 Plans:
-- [x] 34-01-PLAN.md — Prepare deployment config (WS_RPC_URL in docker-compose, health endpoint rate metric, verify Docker build)
-- [x] 34-02-PLAN.md — Deploy to DO droplet and verify all collectors working (human action + verification)
-**Success criteria**:
-1. Docker image builds with new dependencies (pg client for raw SQL)
-2. Container startup runs both Prisma migrations and raw SQL schema migration
-3. Health endpoint reports event indexer status (last indexed block, events count)
-4. Market snapshotter and price recorder continue working unchanged
-5. Events appearing in DB tables within seconds of on-chain emission
+- [ ] 37-01-PLAN.md — TBD
+
+## Progress
+
+**Execution Order:** 35 -> 36 -> 37
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 35. Trigger Order Fix | 0/? | Not started | - |
+| 36. E2E Test Suite | 0/? | Not started | - |
+| 37. Frontend Verification | 0/? | Not started | - |
 
 ---
-*Created: 2026-03-03*
+*Created: 2026-03-04*
