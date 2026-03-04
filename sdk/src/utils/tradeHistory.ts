@@ -188,14 +188,13 @@ export function createRawTradeActionTransformer(
 }
 
 export function bigNumberify(n?: bigint | string | null | undefined) {
-  try {
-    if (n === undefined) throw new Error("n is undefined");
-    if (n === null) throw new Error("n is null");
+  if (n === undefined || n === null) {
+    return undefined;
+  }
 
+  try {
     return BigInt(n);
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error("bigNumberify error", e);
     return undefined;
   }
 }
