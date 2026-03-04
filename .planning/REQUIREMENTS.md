@@ -7,8 +7,8 @@
 
 ### Trigger Order Fix
 
-- [ ] **TRIG-01**: Diagnose root cause of InvalidOrderPrices (0x0481a15a) error on trigger order execution
-- [ ] **TRIG-02**: Fix trigger order execution so limit increase, stop-loss, and take-profit orders execute successfully on-chain
+- [x] **TRIG-01**: Diagnose root cause of InvalidOrderPrices (0x0481a15a) error on trigger order execution
+- [x] **TRIG-02**: Fix trigger order execution so limit increase, stop-loss, and take-profit orders execute successfully on-chain
 
 ### E2E Test Suite
 
@@ -61,8 +61,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TRIG-01 | Phase 35 | Pending |
-| TRIG-02 | Phase 35 | Pending |
+| TRIG-01 | Phase 35 | Complete |
+| TRIG-02 | Phase 35 | Complete |
 | E2E-01 | Phase 36 | Pending |
 | E2E-02 | Phase 36 | Pending |
 | E2E-03 | Phase 36 | Pending |

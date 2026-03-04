@@ -21,7 +21,7 @@
 
 ## Phases
 
-- [ ] **Phase 35: Trigger Order Fix** - Diagnose and fix InvalidOrderPrices error blocking limit/TP/SL execution
+- [x] **Phase 35: Trigger Order Fix** - Diagnose and fix InvalidOrderPrices error blocking limit/TP/SL execution
 - [ ] **Phase 36: E2E Test Suite** - Run full E2E coverage across deposits, withdrawals, market orders, trigger orders, and liquidations
 - [ ] **Phase 37: Frontend Verification** - Verify on-chain state accuracy in UI and confirm all pages/forms function correctly
 
@@ -39,7 +39,7 @@
 **Plans**: 1 plan
 
 Plans:
-- [ ] 35-01-PLAN.md — Diagnose deployed keeper health and verify trigger order E2E execution
+- [x] 35-01-PLAN.md — Diagnose deployed keeper health and verify trigger order E2E execution
 
 ### Phase 36: E2E Test Suite
 **Goal**: A single test suite run proves every operation type works end-to-end against the live testnet
@@ -79,7 +79,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 35. Trigger Order Fix | 0/1 | Planned | - |
+| 35. Trigger Order Fix | 1/1 | Complete | 2026-03-04 |
 | 36. E2E Test Suite | 0/? | Not started | - |
 | 37. Frontend Verification | 0/? | Not started | - |
 
