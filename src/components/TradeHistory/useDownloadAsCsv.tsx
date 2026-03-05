@@ -17,7 +17,7 @@ import {
 import { downloadAsCsv } from "lib/csv";
 import { definedOrThrow } from "lib/guards";
 import { helperToast } from "lib/helperToast";
-import { getSyntheticsGraphClient } from "lib/subgraph/clients";
+import { getSubsquidGraphClient } from "lib/subgraph/clients";
 
 import { ToastifyDebug } from "components/ToastifyDebug/ToastifyDebug";
 
@@ -62,7 +62,7 @@ export function useDownloadAsCsv({
     try {
       setIsLoading(true);
 
-      const client = getSyntheticsGraphClient(chainId);
+      const client = getSubsquidGraphClient(chainId);
       definedOrThrow(client);
 
       const tradeActions = await fetchTradeActions({

@@ -31,6 +31,13 @@ const ICONS: Record<number | "common", ChainIcons> = {
     esgmx: esGMXIcon,
     gm: gmIcon,
   },
+  [LOCALHOST]: {
+    network: base,
+    gmx: gmxIcon,
+    glp: glpIcon,
+    esgmx: esGMXIcon,
+    gm: gmIcon,
+  },
   common: {
     gmx: gmxIcon,
     gmxOutline: gmxOutlineIcon,
