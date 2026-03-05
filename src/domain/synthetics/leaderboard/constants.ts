@@ -13,7 +13,7 @@ export const LEADERBOARD_PAGES: Record<LeaderboardPageKey, LeaderboardPageConfig
     isCompetition: false,
     timeframe: {
       from: 0,
-      to: undefined,
+      to: 0,
     },
   },
 };
