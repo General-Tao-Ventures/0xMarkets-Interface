@@ -26,6 +26,7 @@ import { SideOrderEntries } from "../components/SideOrderEntries";
 function SideOrders({ type }: { type: "stopLoss" | "takeProfit" | "limit" }) {
   const { stopLoss, takeProfit, limit } = useSidecarOrders();
   const visualMultiplier = useSelector(selectSelectedMarketVisualMultiplier);
+  const { isLong } = useSelector(selectTradeboxTradeFlags);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isStopLoss = type === "stopLoss";
@@ -94,7 +95,11 @@ function SideOrders({ type }: { type: "stopLoss" | "takeProfit" | "limit" }) {
               entriesInfo={entriesInfo}
               displayMode={type === "limit" ? "sizeUsd" : "percentage"}
               priceShortcuts={
-                type === "stopLoss" ? [-10, -5] : type === "takeProfit" ? [5, 10] : undefined
+                type === "stopLoss"
+                  ? isLong ? [-10, -5] : [5, 10]
+                  : type === "takeProfit"
+                    ? isLong ? [5, 10] : [-10, -5]
+                    : undefined
               }
             />
           </div>
