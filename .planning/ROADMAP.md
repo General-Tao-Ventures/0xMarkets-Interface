@@ -27,7 +27,7 @@
   - Redeploy squid with --hard-reset and verify indexed data via GraphQL
 
   Plans:
-  - [ ] 38-01-PLAN.md — Fix pnlUsd + fee extraction, deploy squid, verify data
+  - [x] 38-01-PLAN.md — Fix pnlUsd + fee extraction, deploy squid, verify data
 
 - [ ] Phase 39: Frontend Verification & Fixes (TH-03, LB-03)
   - Verify trade history renders market order executions with rPnL
@@ -47,7 +47,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 38. Squid Fixes & Redeployment | v1.11 | 0/1 | Pending | — |
+| 38. Squid Fixes & Redeployment | v1.11 | 1/1 | Complete | 2026-03-05 |
 | 39. Frontend Verification & Fixes | v1.11 | 0/1 | Pending | — |
 | 35. Trigger Order Fix | v1.10 | 1/1 | Complete | 2026-03-04 |
 | 36. E2E Test Suite | v1.10 | 1/1 | Complete | 2026-03-04 |

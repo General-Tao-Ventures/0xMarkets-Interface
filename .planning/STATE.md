@@ -1,31 +1,37 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: idle
-stopped_at: v1.10 milestone completed and archived
+milestone: v1.11
+milestone_name: Trade History & Leaderboard Fix
+status: executing
+stopped_at: "Completed 38-01-PLAN.md"
 last_updated: "2026-03-05"
-last_activity: 2026-03-05 — Completed and archived v1.10 E2E Verification milestone
+last_activity: 2026-03-05 — Completed Phase 38 Plan 01 (squid pnlUsd + fee fixes + redeployment)
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 2
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 1
+  percent: 50
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-05)
+See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** Planning next milestone
+**Current focus:** v1.11 Trade History Fix — make successfully opened/closed positions appear in trade history with rPnL
 
 ## Current Position
 
-No active milestone. v1.10 E2E Verification shipped 2026-03-05.
+Phase 38 complete. Phase 39 (Frontend Verification & Fixes) next.
+
+### Completed
+- Squid pnlUsd enrichment fixed (pnlUsd = basePnlUsd on position events)
+- Fee extraction from PositionFeesCollected events (not PositionIncrease/Decrease)
+- collateralDeltaAmount int256/uint256 type mismatch fixed (maxCapital was always 0)
+- Squid redeployed with --hard-reset, all data verified via GraphQL
 
 ## Accumulated Context
 
@@ -34,18 +40,13 @@ No active milestone. v1.10 E2E Verification shipped 2026-03-05.
 - WETH/USD pool at 100% reserve capacity — blocks new position creation on that market
 - JPY/USD Pyth Lazer oracle data gap — testnet infrastructure, not code
 - Shared wallet nonce conflict between keeper-service and order-execution-keeper
-- abis.ts has incorrect getAccountOrders ABI (uint256 enums, phantom updatedAtBlock) — workaround in verify-frontend-data.ts
+- abis.ts has incorrect getAccountOrders ABI (uint256 enums, phantom updatedAtBlock)
 
 ### Server State
 
 - All services deployed on DO droplet (142.93.203.222)
 - keeper-service: port 37017, order-execution-keeper: port 37018, data-verification: port 37019
-- All Docker containers running and healthy
-- E2E tests in e2e/ directory with unified runner (run-all.ts)
-
-### Decisions
-
-See .planning/PROJECT.md key decisions table for full history.
+- Squid redeployed 2026-03-05 with pnlUsd + fee + maxCapital fixes, fully re-indexed
 
 ### Pending Todos
 
@@ -55,8 +56,14 @@ None.
 
 None.
 
+## Decisions
+
+- pnlUsd = basePnlUsd for trade history display (matches GMX v2 subgraph approach)
+- Fee data sourced from PositionFeesCollected events, not PositionIncrease/Decrease
+- collateralDeltaAmount type-aware extraction (int256 for increase, uint256 for decrease)
+
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: v1.10 milestone completed and archived
-Next: Start next milestone with /gsd:new-milestone
+Stopped at: Completed 38-01-PLAN.md
+Next: /gsd:plan-phase 39 or /gsd:execute-phase 39

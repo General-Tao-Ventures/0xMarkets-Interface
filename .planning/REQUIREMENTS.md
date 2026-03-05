@@ -1,90 +1,51 @@
-# Requirements: 0xMarkets E2E Verification
+# Requirements: v1.11 Trade History & Leaderboard Fix
 
-**Defined:** 2026-03-04
-**Core Value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets
+## Problem Statement
 
-## v1.10 Requirements
+Two related issues reported by Erkin (2026-03-04):
 
-### Trigger Order Fix
+**Trade History:** Successfully opened and closed market positions don't appear. Only cancels, liquidations, trigger order creations (TP/SL), and failed orders show. Realized PnL (rPnL) is also missing.
 
-- [x] **TRIG-01**: Diagnose root cause of InvalidOrderPrices (0x0481a15a) error on trigger order execution
-- [x] **TRIG-02**: Fix trigger order execution so limit increase, stop-loss, and take-profit orders execute successfully on-chain
+**Leaderboard/Account Stats:** Squid account stats have `maxCapital = 0` and `realizedFees = 0` for all accounts. Frontend leaderboard query may also pass wrong period params.
 
-### E2E Test Suite
+## Requirements
 
-- [x] **E2E-01**: Deposits execute end-to-end against live testnet (createDeposit → keeper executes → GM minted)
-- [x] **E2E-02**: Withdrawals execute end-to-end (createWithdrawal → keeper executes → USDC returned)
-- [x] **E2E-03**: Market orders execute end-to-end (MarketIncrease open, MarketDecrease close)
-- [x] **E2E-04**: Limit orders execute when trigger price conditions are met
-- [x] **E2E-05**: Stop-loss orders execute when trigger price conditions are met
-- [x] **E2E-06**: Take-profit orders execute when trigger price conditions are met
-- [x] **E2E-07**: Liquidation flow executes on a market with available reserves (BTC, EUR, etc.)
-- [x] **E2E-08**: All E2E tests run as a single suite with pass/fail summary
+### Trade History
 
-### Frontend Accuracy
+#### TH-01: Market order executions appear in trade history [COMPLETE]
+- [x] When a user opens a position (MarketIncrease + OrderExecuted), it shows in trade history
+- [x] When a user closes a position (MarketDecrease + OrderExecuted), it shows in trade history
+- [x] Existing entries (cancels, liquidations, TP/SL creates, failed orders) continue to work
 
-- [x] **FE-01**: Pool balances displayed in UI match on-chain contract state
-- [x] **FE-02**: Position size, collateral, PnL in UI match on-chain position data
-- [x] **FE-03**: Order status (pending/executed/cancelled) in UI matches on-chain state
-- [x] **FE-04**: Token balances (USDC, ETH) in wallet display match on-chain balances
+#### TH-02: Realized PnL displays for closed positions [COMPLETE]
+- [x] MarketDecrease OrderExecuted events show pnlUsd in the rPnL column
+- [x] Trigger order decreases (limit close, SL, TP) also show pnlUsd when available
 
-### Frontend Functionality
+#### TH-03: Verified against live data
+- Trade history for Erkin's account shows his actual executed positions
+- At least one open + close cycle is visible with correct rPnL
 
-- [x] **UI-01**: All pages load without console errors (Trade, Pools, Dashboard, Earn)
-- [x] **UI-02**: Trade form submits orders correctly (market, limit, TP/SL)
-- [x] **UI-03**: Deposit and withdrawal forms submit correctly
-- [x] **UI-04**: Toast notifications appear and resolve (Pending → Executed)
+### Leaderboard / Account Stats
 
-## Future Requirements
+#### LB-01: maxCapital is non-zero for accounts with positions [COMPLETE]
+- [x] Fix: collateralDeltaAmount was read from wrong type map (int256 vs uint256)
+- [x] Redeploy squid with `--hard-reset`
 
-### Error UX
+#### LB-02: realizedFees is non-zero for accounts that paid fees [COMPLETE]
+- [x] Fees are in `PositionFeesCollected` event (not PositionIncrease/Decrease)
+- [x] Added PositionFeesCollected handler with cross-event enrichment
+- [x] Wire correct fee data into accountStats handler
 
-- **ERR-01**: Decode reasonBytes from cancelled events and show human-readable error messages
-- **ERR-02**: Surface revert reasons for failed deposits/orders in the UI
+#### LB-03: Frontend leaderboard queries with correct period params
+- All-time period should pass `periodStart: 0, periodEnd: 0`
+- Verify leaderboard query in `src/domain/synthetics/leaderboard/index.ts`
 
-### Advanced Testing
+## Scope
 
-- **TEST-01**: Multi-market parallel E2E suite (all 6 markets in single run)
-- **TEST-02**: Automated regression suite on CI (GitHub Actions)
+**In:** Squid event processing fixes (trade actions + account stats), frontend rendering fixes, squid redeployment, data verification
+**Out:** New trade history features, UI redesign, new leaderboard features
 
-## Out of Scope
+## Success Criteria
 
-| Feature | Reason |
-|---------|--------|
-| CI/CD integration | Manual test runs sufficient for v1.10, automate later |
-| Multi-chain testing | Base Sepolia only |
-| Performance benchmarking | Focus on correctness, not speed |
-| Mobile UI testing | Web-first |
-| Mainnet deployment | Testnet verification milestone |
-
-## Traceability
-
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| TRIG-01 | Phase 35 | Complete |
-| TRIG-02 | Phase 35 | Complete |
-| E2E-01 | Phase 36 | Complete |
-| E2E-02 | Phase 36 | Complete |
-| E2E-03 | Phase 36 | Complete |
-| E2E-04 | Phase 36 | Complete |
-| E2E-05 | Phase 36 | Complete |
-| E2E-06 | Phase 36 | Complete |
-| E2E-07 | Phase 36 | Complete |
-| E2E-08 | Phase 36 | Complete |
-| FE-01 | Phase 37 | Complete |
-| FE-02 | Phase 37 | Complete |
-| FE-03 | Phase 37 | Complete |
-| FE-04 | Phase 37 | Complete |
-| UI-01 | Phase 37 | Complete |
-| UI-02 | Phase 37 | Complete |
-| UI-03 | Phase 37 | Complete |
-| UI-04 | Phase 37 | Complete |
-
-**Coverage:**
-- v1.10 requirements: 18 total
-- Mapped to phases: 18
-- Unmapped: 0
-
----
-*Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after roadmap creation*
+1. A user who opens a market position and closes it sees both events in trade history, with rPnL on the close
+2. Leaderboard shows all traders with correct maxCapital and realizedFees
