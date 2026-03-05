@@ -23,7 +23,6 @@ import {
 import { useDisabledCancelMarketOrderMessage } from "domain/synthetics/orders/useDisabledCancelMarketOrderMessage";
 import {
   PositionInfo,
-  formatEstimatedLiquidationTime,
   formatLeverage,
   formatLiquidationPrice,
   getEstimatedLiquidationTimeInHours,
@@ -375,14 +374,6 @@ export function PositionItem(p: Props) {
                 reducing the position's collateral over time.
               </Trans>
             )}
-            <br />
-            <br />
-            <StatsTooltipRow
-              label={"Estimated Time to Liquidation"}
-              value={formatEstimatedLiquidationTime(estimatedLiquidationHours)}
-              valueClassName="numbers"
-              showDollar={false}
-            />
           </div>
         ) : (
           ""
