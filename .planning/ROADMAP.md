@@ -30,9 +30,13 @@
   - [x] 38-01-PLAN.md — Fix pnlUsd + fee extraction, deploy squid, verify data
 
 - [ ] Phase 39: Frontend Verification & Fixes (TH-03, LB-03)
+  - **Plans:** 1 plan
+  - Fix leaderboard all-time period query params (periodEnd: 0 instead of undefined)
   - Verify trade history renders market order executions with rPnL
-  - Fix frontend leaderboard period query params if needed
-  - Validate against Erkin's live account data
+  - Validate leaderboard data against live squid
+
+  Plans:
+  - [ ] 39-01-PLAN.md — Fix leaderboard period params, verify trade history + leaderboard data
 
 <details>
 <summary>✅ v1.10 E2E Verification (Phases 35-37) — SHIPPED 2026-03-05</summary>
@@ -55,4 +59,4 @@
 
 ---
 *Created: 2026-03-04*
-*Updated: 2026-03-04 — Phase 38 planned (1 plan)*
+*Updated: 2026-03-05 — Phase 39 planned (1 plan)*
