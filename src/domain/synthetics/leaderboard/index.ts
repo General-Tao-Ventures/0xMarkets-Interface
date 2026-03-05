@@ -164,7 +164,7 @@ const fetchAccounts = async (
 
   const allAccounts = await client.query<LeaderboardAccountsJson>({
     query: gql`
-      query PeriodAccountStats($requiredMaxCapital: String, $from: Int, $to: Int, $account: String) {
+      query PeriodAccountStats($requiredMaxCapital: BigInt, $from: Int, $to: Int, $account: String) {
         all: periodAccountStats(limit: 100000, where: { maxCapital_gte: $requiredMaxCapital, periodStart_eq: $from, periodEnd_eq: $to }) {
           id
           closedCount
