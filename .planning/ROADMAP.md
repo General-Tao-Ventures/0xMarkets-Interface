@@ -13,8 +13,26 @@
 - ✅ **v1.8 Deployment** — Phases 28-30
 - ✅ **v1.9 Event Indexer** — Phases 31-34
 - ✅ **v1.10 E2E Verification** — Phases 35-37 ([shipped 2026-03-05](milestones/v1.10-ROADMAP.md))
+- **v1.11 Trade History & Leaderboard Fix** — Phases 38-39
 
 ## Phases
+
+### v1.11 Trade History & Leaderboard Fix
+
+- [ ] Phase 38: Squid Fixes & Redeployment (TH-01, TH-02, LB-01, LB-02)
+  - **Plans:** 1 plan
+  - Diagnose why MarketIncrease/MarketDecrease OrderExecuted events are missing from trade history
+  - Fix squid event processing for trade actions and pnlUsd enrichment
+  - Fix accountStats: maxCapital precision, realizedFees field sourcing
+  - Redeploy squid with --hard-reset and verify indexed data via GraphQL
+
+  Plans:
+  - [ ] 38-01-PLAN.md — Fix pnlUsd + fee extraction, deploy squid, verify data
+
+- [ ] Phase 39: Frontend Verification & Fixes (TH-03, LB-03)
+  - Verify trade history renders market order executions with rPnL
+  - Fix frontend leaderboard period query params if needed
+  - Validate against Erkin's live account data
 
 <details>
 <summary>✅ v1.10 E2E Verification (Phases 35-37) — SHIPPED 2026-03-05</summary>
@@ -29,10 +47,12 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
+| 38. Squid Fixes & Redeployment | v1.11 | 0/1 | Pending | — |
+| 39. Frontend Verification & Fixes | v1.11 | 0/1 | Pending | — |
 | 35. Trigger Order Fix | v1.10 | 1/1 | Complete | 2026-03-04 |
 | 36. E2E Test Suite | v1.10 | 1/1 | Complete | 2026-03-04 |
 | 37. Frontend Verification | v1.10 | 2/2 | Complete | 2026-03-05 |
 
 ---
 *Created: 2026-03-04*
-*Updated: 2026-03-05 — v1.10 archived*
+*Updated: 2026-03-04 — Phase 38 planned (1 plan)*
