@@ -213,6 +213,50 @@ export function useChartHeaderFormattedValues() {
     );
   }, [info]);
 
+  const fundingRateLong = useMemo(() => {
+    const rate = info?.fundingRateLong;
+    if (rate === undefined) return "...";
+    return (
+      <span className={cx("flex flex-row items-center gap-4 numbers")}>
+        <LongIcon width={12} className="relative top-1" />
+        {formatRatePercentage(rate)}
+      </span>
+    );
+  }, [info]);
+
+  const fundingRateShort = useMemo(() => {
+    const rate = info?.fundingRateShort;
+    if (rate === undefined) return "...";
+    return (
+      <span className={cx("flex flex-row items-center gap-4 numbers")}>
+        <ShortIcon width={12} />
+        {formatRatePercentage(rate)}
+      </span>
+    );
+  }, [info]);
+
+  const borrowRateLong = useMemo(() => {
+    const rate = info?.borrowingRateLong;
+    if (rate === undefined) return "...";
+    return (
+      <span className={cx("flex flex-row items-center gap-4 numbers")}>
+        <LongIcon width={12} className="relative top-1" />
+        {formatRatePercentage(rate)}
+      </span>
+    );
+  }, [info]);
+
+  const borrowRateShort = useMemo(() => {
+    const rate = info?.borrowingRateShort;
+    if (rate === undefined) return "...";
+    return (
+      <span className={cx("flex flex-row items-center gap-4 numbers")}>
+        <ShortIcon width={12} />
+        {formatRatePercentage(rate)}
+      </span>
+    );
+  }, [info]);
+
   const dailyVolume = useMemo(() => {
     return dailyVolumesValue !== undefined ? (
       <span className="numbers">{formatAmountHuman(dailyVolumesValue, USD_DECIMALS, true)}</span>
@@ -233,6 +277,10 @@ export function useChartHeaderFormattedValues() {
     liquidityShort,
     netRateLong,
     netRateShort,
+    fundingRateLong,
+    fundingRateShort,
+    borrowRateLong,
+    borrowRateShort,
     dailyVolume,
     dayPriceDelta,
     info,
