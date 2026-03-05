@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Trade History & Leaderboard Fix
 status: unknown
-stopped_at: Completed 38-01-PLAN.md
-last_updated: "2026-03-05T01:56:52.207Z"
+stopped_at: Completed 39-01-PLAN.md
+last_updated: "2026-03-05T02:21:23.899Z"
 progress:
-  total_phases: 24
-  completed_phases: 23
-  total_plans: 47
-  completed_plans: 47
+  total_phases: 25
+  completed_phases: 24
+  total_plans: 48
+  completed_plans: 48
 ---
 
 # Project State
@@ -59,9 +59,10 @@ None.
 - pnlUsd = basePnlUsd for trade history display (matches GMX v2 subgraph approach)
 - Fee data sourced from PositionFeesCollected events, not PositionIncrease/Decrease
 - collateralDeltaAmount type-aware extraction (int256 for increase, uint256 for decrease)
+- [Phase 39]: Keep LeaderboardTimeframe.to as number|undefined -- all-time uses 0, period uses undefined
 
 ## Session Continuity
 
-Last session: 2026-03-05
-Stopped at: Completed 38-01-PLAN.md
+Last session: 2026-03-05T02:21:23.896Z
+Stopped at: Completed 39-01-PLAN.md
 Next: /gsd:plan-phase 39 or /gsd:execute-phase 39

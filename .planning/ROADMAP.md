@@ -29,7 +29,7 @@
   Plans:
   - [x] 38-01-PLAN.md — Fix pnlUsd + fee extraction, deploy squid, verify data
 
-- [ ] Phase 39: Frontend Verification & Fixes (TH-03, LB-03)
+- [x] Phase 39: Frontend Verification & Fixes (TH-03, LB-03) (completed 2026-03-05)
   - **Plans:** 1 plan
   - Fix leaderboard all-time period query params (periodEnd: 0 instead of undefined)
   - Verify trade history renders market order executions with rPnL
@@ -52,7 +52,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 38. Squid Fixes & Redeployment | v1.11 | Complete    | 2026-03-05 | 2026-03-05 |
-| 39. Frontend Verification & Fixes | v1.11 | 0/1 | Pending | — |
+| 39. Frontend Verification & Fixes | 1/1 | Complete   | 2026-03-05 | — |
 | 35. Trigger Order Fix | v1.10 | 1/1 | Complete | 2026-03-04 |
 | 36. E2E Test Suite | v1.10 | 1/1 | Complete | 2026-03-04 |
 | 37. Frontend Verification | v1.10 | 2/2 | Complete | 2026-03-05 |
