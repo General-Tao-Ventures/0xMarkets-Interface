@@ -30,10 +30,10 @@
 
 ### Frontend Functionality
 
-- [ ] **UI-01**: All pages load without console errors (Trade, Pools, Dashboard, Earn)
-- [ ] **UI-02**: Trade form submits orders correctly (market, limit, TP/SL)
-- [ ] **UI-03**: Deposit and withdrawal forms submit correctly
-- [ ] **UI-04**: Toast notifications appear and resolve (Pending → Executed)
+- [x] **UI-01**: All pages load without console errors (Trade, Pools, Dashboard, Earn)
+- [x] **UI-02**: Trade form submits orders correctly (market, limit, TP/SL)
+- [x] **UI-03**: Deposit and withdrawal forms submit correctly
+- [x] **UI-04**: Toast notifications appear and resolve (Pending → Executed)
 
 ## Future Requirements
 
@@ -75,10 +75,10 @@
 | FE-02 | Phase 37 | Complete |
 | FE-03 | Phase 37 | Complete |
 | FE-04 | Phase 37 | Complete |
-| UI-01 | Phase 37 | Pending |
-| UI-02 | Phase 37 | Pending |
-| UI-03 | Phase 37 | Pending |
-| UI-04 | Phase 37 | Pending |
+| UI-01 | Phase 37 | Complete |
+| UI-02 | Phase 37 | Complete |
+| UI-03 | Phase 37 | Complete |
+| UI-04 | Phase 37 | Complete |
 
 **Coverage:**
 - v1.10 requirements: 18 total
