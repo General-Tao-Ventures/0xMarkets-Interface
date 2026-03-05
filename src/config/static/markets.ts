@@ -10,6 +10,7 @@ import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
 
 type MarketUiConfig = {
   enabled: boolean;
+  comingSoon?: boolean;
 };
 
 /*
@@ -33,6 +34,11 @@ const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig
     // USD/JPY [USDC-USDC]
     "0xF28b8572AD4c0BfF5EdfB6579b1Fa6fF0A9Eef5A": {
       enabled: true,
+    },
+    // WTI/USD [USDC-USDC]
+    "0x86607dB26c36df5c31AcdB1C1A58AC113535F89E": {
+      enabled: true,
+      comingSoon: true,
     },
     // WBTC/USD [USDC-USDC]
     "0x3c3D358701B4df855b3B88D4c840f694c9db8324": {

@@ -28,6 +28,10 @@ export function getMarketUiConfig(chainId: number, marketAddress: string) {
   return MARKETS[chainId]?.[marketAddress];
 }
 
+export function isMarketComingSoon(chainId: number, marketAddress: string) {
+  return MARKETS[chainId]?.[marketAddress]?.comingSoon ?? false;
+}
+
 const SETTLEMENT_CHAIN_TRADABLE_ASSETS_MAP: Record<SettlementChainId, string[]> = {} as any;
 
 for (const chainId of SETTLEMENT_CHAINS) {
