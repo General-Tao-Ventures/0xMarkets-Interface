@@ -7,7 +7,7 @@ import { MarketInfo, useMarketsInfoRequest } from "domain/synthetics/markets";
 import { TokenData, useTokensDataRequest } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
 import { getByKey } from "lib/objects";
-import { getSyntheticsGraphClient } from "lib/subgraph";
+import { getSubsquidGraphClient } from "lib/subgraph";
 
 type RawRebateGroup = {
   id: string;
@@ -67,7 +67,8 @@ export const usePriceImpactRebateGroups = (
     setLoadedPageIndex(-1);
   }, [inclReviewed]);
 
-  const client = getSyntheticsGraphClient(chainId);
+  // Note: claimableCollateralGroups entity doesn't exist in subsquid yet — this page won't show data
+  const client = getSubsquidGraphClient(chainId);
 
   useEffect(() => {
     if (!marketsReady) return;

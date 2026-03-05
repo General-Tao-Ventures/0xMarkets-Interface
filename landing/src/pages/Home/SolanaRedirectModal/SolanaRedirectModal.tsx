@@ -12,13 +12,13 @@ export function SolanaRedirectModal({ onClose, onConfirm }: SolanaRedirectModalP
   return (
     <Modal onClose={onClose}>
       <ModalHeader onClose={onClose}>
-        <Trans>GMX Solana</Trans>
+        <Trans>0xMarkets Solana</Trans>
       </ModalHeader>
 
       <ModalBody>
         <p>
           <Trans>
-            You're about to navigate to GMX Solana, which is operated by a separate team, so the experience may vary
+            You're about to navigate to 0xMarkets Solana, which is operated by a separate team, so the experience may vary
             slightly.
           </Trans>
         </p>
@@ -27,7 +27,7 @@ export function SolanaRedirectModal({ onClose, onConfirm }: SolanaRedirectModalP
           className="btn-landing w-full rounded-8 py-18 text-center text-16 tracking-[-0.192px]"
           onClick={onConfirm}
         >
-          <Trans>Open GMX Solana</Trans>
+          <Trans>Open 0xMarkets Solana</Trans>
         </button>
       </ModalBody>
     </Modal>

@@ -93,19 +93,11 @@ function useHeaderLinks() {
     return [
       {
         label: t`Protocol`,
-        href: "https://github.com/gmx-io",
-      },
-      {
-        label: t`Governance`,
-        href: "https://gov.gmx.io/",
-      },
-      {
-        label: t`Voting`,
-        href: "https://snapshot.org/#/gmx.eth",
+        href: "https://github.com/0xMarkets",
       },
       {
         label: t`Docs`,
-        href: "https://docs.gmx.io/",
+        href: "https://docs.0xmarkets.io/",
       },
     ];
   }, []);

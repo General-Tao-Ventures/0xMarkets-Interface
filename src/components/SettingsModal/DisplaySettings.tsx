@@ -7,7 +7,6 @@ import ToggleSwitch from "components/ToggleSwitch/ToggleSwitch";
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 
 import { SettingsSection } from "./shared";
-import { ThemeSelector } from "./ThemeSelector";
 
 export function DisplaySettings() {
   const settings = useSettings();
@@ -55,9 +54,7 @@ export function DisplaySettings() {
           </ToggleSwitch>
         </div>
       </SettingsSection>
-      <SettingsSection>
-        <ThemeSelector />
-      </SettingsSection>
+      {/* Theme selector hidden — light mode not yet polished */}
     </div>
   );
 }

@@ -24,9 +24,7 @@ export function HeroSection() {
   const openInterest = poolsData?.openInterest ? shortFormatUsd(poolsData.openInterest) : "-";
   const { data: totalVolume } = useTotalVolume();
   const totalVolumeText = totalVolume ? shortFormatUsd(totalVolume) : "-";
-  const onTotalVolumeClick = () => {
-    window.open("https://dune.com/gmx-io/gmx-analytics", "_blank");
-  };
+  const onTotalVolumeClick = undefined;
 
   return (
     <section className="overflow-hidden bg-slate-900 px-16 sm:px-40">

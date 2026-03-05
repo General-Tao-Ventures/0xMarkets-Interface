@@ -12,10 +12,6 @@ export const chainlinkClient: GraphClient | null = null;
 
 export const REFERRAL_SUPPORTED_CHAIN_IDS: number[] = [];
 
-export function getSyntheticsGraphClient(_chainId: number): GraphClient | null {
-  return null;
-}
-
 export function getSubsquidGraphClient(chainId: number): GraphClient | null {
   if (chainId === BASE_SEPOLIA) {
     return baseSepoliaSubsquidClient;

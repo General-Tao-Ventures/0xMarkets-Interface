@@ -1,13 +1,13 @@
 import { gql } from "@apollo/client";
 import useSWR from "swr";
 
-import { getSyntheticsGraphClient } from "lib/subgraph";
+import { getSubsquidGraphClient } from "lib/subgraph";
 import { BASE_SEPOLIA } from "sdk/configs/chainIds";
 
 const query = {
   query: gql`
     query VolumeInfos {
-      volumeInfos(where: { period: "total" }) {
+      volumeInfos(where: { period_eq: "total" }) {
         volumeUsd
       }
     }
@@ -15,7 +15,7 @@ const query = {
 };
 
 export function useTotalVolume() {
-  const client = getSyntheticsGraphClient(BASE_SEPOLIA);
+  const client = getSubsquidGraphClient(BASE_SEPOLIA);
   return useSWR(["volumeInfos"], async () => {
     if (!client) return 0n;
     try {

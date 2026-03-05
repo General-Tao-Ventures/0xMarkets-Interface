@@ -10,7 +10,7 @@ export function FaqSection() {
           <Trans>FAQ</Trans>
         </h2>
         <div className="flex w-full flex-col gap-12 sm:w-[800px]">
-          <FaqItem title="What makes GMX one of the best places to earn yield on my crypto?">
+          <FaqItem title="What makes 0xMarkets one of the best places to earn yield on my crypto?">
             <Trans>
               <p>
                 Liquidity providers receive 63% of all trading and liquidation fees. By depositing WBTC, ETH, USDC, or
@@ -25,7 +25,7 @@ export function FaqSection() {
               </p>
             </Trans>
           </FaqItem>
-          <FaqItem title={t`How do I get started on GMX?`}>
+          <FaqItem title={t`How do I get started on 0xMarkets?`}>
             <Trans>
               <p>
                 No KYC, no lengthy onboarding, and no depositing is required. All you need is a self-custody wallet:
@@ -39,36 +39,36 @@ export function FaqSection() {
                 <li>Start trading</li>
               </ul>
               <p>
-                You can trade directly using funds on Arbitrum, Avalanche, Solana, or Botanix, or deposit to your GMX
+                You can trade directly using funds on Arbitrum, Avalanche, Solana, or Botanix, or deposit to your 0xMarkets
                 Account to trade from any supported Multichain network.
               </p>
             </Trans>
           </FaqItem>
-          <FaqItem title={t`What makes GMX more cost-efficient than other perpetual platforms?`}>
+          <FaqItem title={t`What makes 0xMarkets more cost-efficient than other perpetual platforms?`}>
             <Trans>
               <p>
-                GMX executes trades against a dynamically balanced liquidity pool, unlike traditional order books. This
+                0xMarkets executes trades against a dynamically balanced liquidity pool, unlike traditional order books. This
                 model supports deep liquidity, allowing for opening positions of over $50m with reduced price impact,
                 even when compared to the biggest order books in the space. In some cases, you may even get paid when
                 executing an order due to a positive price impact.
               </p>
 
               <p>
-                GMX prevents unfair liquidations by using decentralized oracles from Chainlink and Chaos Labs, which
+                0xMarkets prevents unfair liquidations by using decentralized oracles from Chainlink and Chaos Labs, which
                 aggregate prices from multiple trusted sources to avoid manipulation.
               </p>
             </Trans>
           </FaqItem>
-          <FaqItem title={t`Can I build on top of GMX or integrate it into my DeFi app?`}>
+          <FaqItem title={t`Can I build on top of 0xMarkets or integrate it into my DeFi app?`}>
             <Trans>
               <p>
-                Yes, we encourage you to build on top of GMX or integrate it into your DeFi app. GMX is fully composable
+                Yes, we encourage you to build on top of 0xMarkets or integrate it into your DeFi app. 0xMarkets is fully composable
                 and already integrated with hundreds of protocols across the ecosystem, including notable names like
                 Pendle, Dolomite, Radiant, Silo Finance, Venus Protocol, Abracadabra, Compound, and Beefy. You can
-                interact directly with GMX smart contracts or use available APIs and SDKs to plug into trading,
+                interact directly with 0xMarkets smart contracts or use available APIs and SDKs to plug into trading,
                 liquidity, or data flows. Check out the{" "}
-                <a href="https://docs.gmx.io/docs/category/api/" className="cursor-pointer text-blue-400">
-                  GMX Developer Docs
+                <a href="https://docs.0xmarkets.io/docs/category/api/" className="cursor-pointer text-blue-400">
+                  0xMarkets Developer Docs
                 </a>{" "}
                 to get started.
               </p>

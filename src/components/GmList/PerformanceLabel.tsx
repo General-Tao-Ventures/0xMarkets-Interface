@@ -27,10 +27,6 @@ export function PerformanceLabel({
           <br />
           <br />
           Annualized figures based on short periods may be distorted by short-term volatility.
-          <br />
-          <br />
-          For detailed stats and comparisons, see the{" "}
-          <ExternalLink href="https://dune.com/gmx-io/v2-lp-dashboard">0xMarkets LP Dashboard</ExternalLink>.
         </Trans>
       }
     />

@@ -9,7 +9,7 @@ export function Quareters() {
         <Trans>
           <p>Solana Support</p>
           <p>Botanix Support</p>
-          <p>GMX Express</p>
+          <p>0xMarkets Express</p>
         </Trans>
       </Quarter>
       <Quarter>

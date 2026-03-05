@@ -29,7 +29,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const prefersDarkMode = useMedia("(prefers-color-scheme: dark)");
   const systemTheme: ResolvedTheme = prefersDarkMode ? "dark" : "light";
 
-  const theme = themeMode === "system" ? systemTheme : themeMode || DEFAULT_THEME_MODE;
+  // Force dark mode — light mode is not yet polished
+  const theme: ResolvedTheme = "dark";
 
   useEffect(() => {
     const root = document.documentElement;

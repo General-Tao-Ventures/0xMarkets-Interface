@@ -412,7 +412,7 @@ function usePnlHistoricalData(chainId: number, account: Address, fromTimestamp: 
       fetcher: async () => {
         const res = await client!.query({
           query: TRADE_ACTIONS_QUERY,
-          variables: { account: account.toLowerCase(), from: fromTimestamp },
+          variables: { account, from: fromTimestamp },
           fetchPolicy: "no-cache",
         });
 

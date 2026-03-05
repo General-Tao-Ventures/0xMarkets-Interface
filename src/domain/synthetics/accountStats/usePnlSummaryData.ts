@@ -190,7 +190,7 @@ export function usePnlSummaryData(chainId: number, account: Address) {
       fetcher: async () => {
         const res = await client!.query({
           query: TRADE_ACTIONS_QUERY,
-          variables: { account: account.toLowerCase() },
+          variables: { account },
           fetchPolicy: "no-cache",
         });
 
