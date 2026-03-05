@@ -21,7 +21,7 @@ export default function useIsFirstOrder(chainId: number, p: { account?: string }
             }
           }
         `,
-        variables: { account: account?.toLowerCase() },
+        variables: { account },
         fetchPolicy: "no-cache",
       });
 

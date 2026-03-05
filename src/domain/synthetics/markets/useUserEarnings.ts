@@ -130,7 +130,7 @@ export const useUserEarnings = (chainId: ContractsChainId, srcChainId: SourceCha
           subgraphUrl!,
           queryBody,
           {
-            account: account.toLowerCase(),
+            account,
             startOfPeriod,
           }
         );
