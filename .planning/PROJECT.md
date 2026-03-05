@@ -10,9 +10,9 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.10 E2E Verification (2026-03-05)
+**Shipped:** v1.11 Trade History & Leaderboard Fix (2026-03-05)
 
-Fixed trigger order execution (oracle staleness root cause), built comprehensive E2E test suite covering all operation types, and human-verified frontend accuracy against on-chain state. All 18 requirements passed.
+Fixed squid indexer to populate pnlUsd on trade actions, extract fees from PositionFeesCollected events, and resolve int256/uint256 type mismatch for maxCapital. Fixed frontend leaderboard query params. Trade history and leaderboard now display accurate data.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
@@ -25,6 +25,7 @@ Fixed trigger order execution (oracle staleness root cause), built comprehensive
 - v1.7 Liquidation Readiness (2026-02-28) — contract fix, liquidation pipeline verification, hardening, performance
 - v1.8 Deployment (2026-03-01) — production deployment
 - v1.9 Event Indexer (2026-03-03) — on-chain event indexer with PostgreSQL schema
+- v1.10 E2E Verification (2026-03-05) — trigger order fix, E2E test suite, frontend verification
 
 ## Requirements
 
@@ -83,6 +84,9 @@ Fixed trigger order execution (oracle staleness root cause), built comprehensive
 - ✓ Frontend order status matches on-chain state — v1.10
 - ✓ Frontend token balances match on-chain balances — v1.10
 - ✓ All pages load without errors, forms submit correctly, toasts resolve — v1.10
+- ✓ Market order executions (open/close) appear in trade history with realized PnL — v1.11
+- ✓ Leaderboard shows traders with correct maxCapital and realizedFees — v1.11
+- ✓ Squid indexer correctly extracts fees from PositionFeesCollected events — v1.11
 
 ### Active
 
@@ -107,8 +111,8 @@ Fixed trigger order execution (oracle staleness root cause), built comprehensive
 
 - **Chain:** Base Sepolia (84532)
 - **Deployed:** app.0xmarkets.io (Vercel)
-- **Shipped:** v1.0-v1.10 across 11 milestones (2026-02-21 → 2026-03-05)
-- **Codebase:** 37 phases, 68+ plans across 11 milestones
+- **Shipped:** v1.0-v1.11 across 12 milestones (2026-02-21 → 2026-03-05)
+- **Codebase:** 39 phases, 70+ plans across 12 milestones
 - **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222) with pino JSON logging, real health endpoints, and BetterStack uptime monitoring
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
@@ -159,6 +163,9 @@ Fixed trigger order execution (oracle staleness root cause), built comprehensive
 | 5% trigger price margins for E2E tests | Accounts for oracle staleness between order creation and keeper execution | ✓ Good — all trigger orders pass |
 | Inline ABI for getAccountOrders | abis.ts has incorrect uint256 enums and phantom field; inline matches SDK | ✓ Good — workaround, abis.ts fix deferred |
 | Unified E2E test runner with per-suite timeouts | Liquidation needs 10min, others need 5min | ✓ Good — flexible |
+| pnlUsd = basePnlUsd for trade history | Matches GMX v2 subgraph approach | ✓ Good — consistent |
+| Fee data from PositionFeesCollected events | Contract emits fees separately from position events | ✓ Good — correct source |
+| Type-aware collateralDeltaAmount extraction | int256 for increase, uint256 for decrease | ✓ Good — fixed maxCapital |
 
 ---
-*Last updated: 2026-03-05 after v1.10 milestone*
+*Last updated: 2026-03-05 after v1.11 milestone*

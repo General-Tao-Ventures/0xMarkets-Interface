@@ -1,35 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.11
-milestone_name: Trade History & Leaderboard Fix
-status: unknown
-stopped_at: Completed 39-01-PLAN.md
-last_updated: "2026-03-05T02:23:33.079Z"
+milestone: null
+milestone_name: null
+status: idle
+stopped_at: null
+last_updated: "2026-03-05"
 progress:
-  total_phases: 25
-  completed_phases: 24
-  total_plans: 48
-  completed_plans: 48
+  total_phases: 39
+  completed_phases: 39
+  total_plans: 70
+  completed_plans: 70
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-04)
+See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.11 Trade History Fix — make successfully opened/closed positions appear in trade history with rPnL
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase 38 complete. Phase 39 (Frontend Verification & Fixes) next.
+v1.11 Trade History & Leaderboard Fix shipped. No active milestone.
 
-### Completed
-- Squid pnlUsd enrichment fixed (pnlUsd = basePnlUsd on position events)
-- Fee extraction from PositionFeesCollected events (not PositionIncrease/Decrease)
-- collateralDeltaAmount int256/uint256 type mismatch fixed (maxCapital was always 0)
-- Squid redeployed with --hard-reset, all data verified via GraphQL
+### Last Shipped
+- v1.11: Fixed squid pnlUsd enrichment, fee extraction, maxCapital calculation, and leaderboard query params
+- Trade history and leaderboard now display accurate data against live squid
 
 ## Accumulated Context
 
@@ -56,13 +54,10 @@ None.
 
 ## Decisions
 
-- pnlUsd = basePnlUsd for trade history display (matches GMX v2 subgraph approach)
-- Fee data sourced from PositionFeesCollected events, not PositionIncrease/Decrease
-- collateralDeltaAmount type-aware extraction (int256 for increase, uint256 for decrease)
-- [Phase 39]: Keep LeaderboardTimeframe.to as number|undefined -- all-time uses 0, period uses undefined
+(Cleared — see PROJECT.md Key Decisions table for full history)
 
 ## Session Continuity
 
-Last session: 2026-03-05T02:21:23.896Z
-Stopped at: Completed 39-01-PLAN.md
-Next: /gsd:plan-phase 39 or /gsd:execute-phase 39
+Last session: 2026-03-05
+Stopped at: v1.11 milestone completed
+Next: /gsd:new-milestone

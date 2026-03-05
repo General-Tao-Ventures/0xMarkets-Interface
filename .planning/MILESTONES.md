@@ -1,5 +1,20 @@
 # Milestones
 
+## v1.11 Trade History & Leaderboard Fix (Shipped: 2026-03-05)
+
+**Phases completed:** 2 phases (38-39), 2 plans, 4 tasks
+**Timeline:** 2026-03-04 → 2026-03-05 (~30 minutes active)
+**Files changed:** 7 (6 squid + 1 frontend)
+
+**Key accomplishments:**
+- Fixed pnlUsd enrichment on OrderExecuted trade actions — trade history now shows realized PnL for closed positions
+- Added PositionFeesCollected handler with cross-event fee data enrichment (fees emitted separately from position events)
+- Fixed collateralDeltaAmount int256/uint256 type mismatch — maxCapital was always 0 for all accounts
+- Fixed leaderboard all-time query: `periodEnd: 0` instead of `undefined` (Apollo omits undefined variables)
+- Squid redeployed with --hard-reset, all trade history and leaderboard data verified via GraphQL
+
+---
+
 ## v1.10 E2E Verification (Shipped: 2026-03-05)
 
 **Phases completed:** 3 phases (35-37), 4 plans
