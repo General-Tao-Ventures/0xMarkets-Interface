@@ -144,15 +144,129 @@ async function testOrder(
       console.log(
         `  EXECUTED at block ${executionResult.blockNumber} (tx: ${executionResult.txHash})`
       );
-      console.log(`  Result: PASS`);
-      return {
-        market: name,
-        status: "PASS",
-        txHash,
-        executionTxHash: executionResult.txHash,
-        operationKey,
-        duration: Date.now() - startTime,
+      console.log(`  Position opened. Waiting 3s for state to settle...`);
+      await sleep(3000);
+
+      // ── MarketDecrease: close the position ──────────────────────
+      console.log(`  Submitting MarketDecrease to close position...`);
+
+      const closeOrderParams = {
+        addresses: {
+          receiver: walletAddress,
+          cancellationReceiver: zeroAddress,
+          callbackContract: zeroAddress,
+          uiFeeReceiver: zeroAddress,
+          market: marketAddress,
+          initialCollateralToken: USDC_ADDRESS,
+          swapPath: [] as Address[],
+        },
+        numbers: {
+          sizeDeltaUsd,
+          initialCollateralDeltaAmount: collateralAmount, // withdraw all collateral
+          triggerPrice: 0n,
+          acceptablePrice: 0n, // accept any price downward for long decrease
+          executionFee: EXECUTION_FEE,
+          callbackGasLimit: 0n,
+          minOutputAmount: 0n,
+          validFromTime: 0n,
+        },
+        orderType: 4,               // MarketDecrease
+        isLong: true,
+        shouldUnwrapNativeToken: false,
+        decreasePositionSwapType: 0, // no swap needed (collateral is USDC)
+        autoCancel: false,
+        referralCode: zeroHash,
       };
+
+      // For decrease orders: only send execution fee, NOT collateral tokens
+      const closeMulticallData = [
+        encodeFunctionData({
+          abi: exchangeRouterAbi,
+          functionName: "sendWnt",
+          args: [CONTRACTS.OrderVault, EXECUTION_FEE],
+        }),
+        encodeFunctionData({
+          abi: exchangeRouterAbi,
+          functionName: "createOrder",
+          args: [closeOrderParams],
+        }),
+      ];
+
+      const closeTxHash = await walletClient.writeContract({
+        address: CONTRACTS.ExchangeRouter,
+        abi: exchangeRouterAbi,
+        functionName: "multicall",
+        args: [closeMulticallData],
+        value: EXECUTION_FEE,
+        gas: 2_500_000n,
+      });
+
+      console.log(`  Close TX submitted: ${closeTxHash}`);
+
+      const closeReceipt = await publicClient.waitForTransactionReceipt({ hash: closeTxHash });
+      console.log(`  Close TX mined: block ${closeReceipt.blockNumber}`);
+
+      if (closeReceipt.status === "reverted") {
+        return {
+          market: name,
+          status: "FAIL",
+          txHash,
+          error: "Position opened but close TX reverted",
+          duration: Date.now() - startTime,
+        };
+      }
+
+      const closeKey = extractOperationKey(closeReceipt, CONTRACTS.EventEmitter, "Order");
+      if (!closeKey) {
+        return {
+          market: name,
+          status: "FAIL",
+          txHash,
+          error: "Position opened but could not extract close operation key",
+          duration: Date.now() - startTime,
+        };
+      }
+
+      console.log(`  Close operation key: ${closeKey}`);
+      console.log(`  Waiting for keeper to execute close order...`);
+
+      const closeResult = await waitForExecution(
+        publicClient,
+        CONTRACTS.EventEmitter,
+        closeKey,
+        "Order",
+        60_000
+      );
+
+      if (closeResult.status === "executed") {
+        console.log(`  Position closed at block ${closeResult.blockNumber} (tx: ${closeResult.txHash})`);
+        console.log(`  Result: PASS`);
+        return {
+          market: name,
+          status: "PASS",
+          txHash,
+          executionTxHash: closeResult.txHash,
+          operationKey: closeKey,
+          duration: Date.now() - startTime,
+        };
+      } else if (closeResult.status === "cancelled") {
+        return {
+          market: name,
+          status: "FAIL",
+          txHash,
+          executionTxHash: closeResult.txHash,
+          error: "Position opened but close was cancelled by keeper",
+          duration: Date.now() - startTime,
+        };
+      } else {
+        return {
+          market: name,
+          status: "FAIL",
+          txHash,
+          error: "Position opened but close timed out (60s)",
+          duration: Date.now() - startTime,
+        };
+      }
     } else if (executionResult.status === "cancelled") {
       console.log(
         `  CANCELLED at block ${executionResult.blockNumber} (tx: ${executionResult.txHash})`
@@ -262,6 +376,17 @@ async function main() {
       await sleep(3000);
     }
   }
+
+  // Check final USDC balance and log difference
+  const usdcBalanceAfter = await publicClient.readContract({
+    address: USDC_ADDRESS,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [config.walletAddress as Address],
+  });
+  const balanceDiff = Number(usdcBalanceAfter) - Number(usdcBalance);
+  console.log(`\nUSDC balance after: ${formatUnits(usdcBalanceAfter, 6)}`);
+  console.log(`USDC balance change: ${balanceDiff >= 0 ? "+" : ""}${formatUnits(BigInt(balanceDiff), 6)} USDC`);
 
   // Print summary
   formatResults(results);

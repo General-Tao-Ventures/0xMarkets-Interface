@@ -279,11 +279,12 @@ async function testLimitIncreaseLong(): Promise<TestResult> {
 
   try {
     const price = await getCurrentPrice(WETH_MARKET.indexToken);
-    console.log(`  Current WETH price: $${formatUnits(price.max, 30)}`);
+    console.log(`  Current WETH price: $${formatUnits(price.max, 12)}`);
 
-    // triggerPrice slightly above current → condition price.max <= triggerPrice is met
-    const triggerPrice = (price.max * 101n) / 100n;
-    console.log(`  Trigger price: $${formatUnits(triggerPrice, 30)} (1% above current)`);
+    // triggerPrice above current → condition price.max <= triggerPrice is met
+    // Use 5% margin to account for getStoredPrice staleness vs live Pyth data
+    const triggerPrice = (price.max * 105n) / 100n;
+    console.log(`  Trigger price: $${formatUnits(triggerPrice, 12)} (5% above current)`);
 
     const { orderKey, txHash } = await submitTriggerOrder({
       marketAddress: WETH_MARKET.market,
@@ -345,11 +346,12 @@ async function testStopLossDecreaseLong(): Promise<TestResult> {
 
     // Step 2: Read current price
     const price = await getCurrentPrice(WETH_MARKET.indexToken);
-    console.log(`  Current WETH price: $${formatUnits(price.min, 30)}`);
+    console.log(`  Current WETH price: $${formatUnits(price.min, 12)}`);
 
     // triggerPrice above current → condition price.min <= triggerPrice is met immediately
-    const triggerPrice = (price.max * 102n) / 100n;
-    console.log(`  Trigger price: $${formatUnits(triggerPrice, 30)} (2% above current)`);
+    // Use 5% margin to account for getStoredPrice staleness vs live Pyth data
+    const triggerPrice = (price.max * 105n) / 100n;
+    console.log(`  Trigger price: $${formatUnits(triggerPrice, 12)} (5% above current)`);
 
     // Step 3: Submit stop-loss decrease
     const { orderKey, txHash } = await submitTriggerOrder({
@@ -413,11 +415,12 @@ async function testLimitDecreaseLong(): Promise<TestResult> {
 
     // Step 2: Read current price
     const price = await getCurrentPrice(WETH_MARKET.indexToken);
-    console.log(`  Current WETH price: $${formatUnits(price.min, 30)}`);
+    console.log(`  Current WETH price: $${formatUnits(price.min, 12)}`);
 
     // triggerPrice below current → condition price.min >= triggerPrice is met immediately
-    const triggerPrice = (price.min * 98n) / 100n;
-    console.log(`  Trigger price: $${formatUnits(triggerPrice, 30)} (2% below current)`);
+    // Use 5% margin to account for getStoredPrice staleness vs live Pyth data
+    const triggerPrice = (price.min * 95n) / 100n;
+    console.log(`  Trigger price: $${formatUnits(triggerPrice, 12)} (5% below current)`);
 
     // Step 3: Submit limit decrease (take-profit)
     const { orderKey, txHash } = await submitTriggerOrder({
@@ -473,11 +476,11 @@ async function testPendingOrderStaysPending(): Promise<TestResult> {
 
   try {
     const price = await getCurrentPrice(WETH_MARKET.indexToken);
-    console.log(`  Current WETH price: $${formatUnits(price.max, 30)}`);
+    console.log(`  Current WETH price: $${formatUnits(price.max, 12)}`);
 
     // triggerPrice at 50% of current → condition price.max <= triggerPrice is NOT met
     const triggerPrice = price.max / 2n;
-    console.log(`  Trigger price: $${formatUnits(triggerPrice, 30)} (50% of current — should NOT trigger)`);
+    console.log(`  Trigger price: $${formatUnits(triggerPrice, 12)} (50% of current — should NOT trigger)`);
 
     const { orderKey, txHash } = await submitTriggerOrder({
       marketAddress: WETH_MARKET.market,
@@ -557,7 +560,7 @@ async function main() {
 
   // Read oracle price to confirm it's working
   const price = await getCurrentPrice(WETH_MARKET.indexToken);
-  console.log(`\nOracle WETH price: $${formatUnits(price.min, 30)} - $${formatUnits(price.max, 30)}`);
+  console.log(`\nOracle WETH price: $${formatUnits(price.min, 12)} - $${formatUnits(price.max, 12)}`);
 
   // Run which tests based on TEST env var
   const testFilter = process.env.TEST;

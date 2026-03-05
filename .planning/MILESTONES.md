@@ -1,5 +1,36 @@
 # Milestones
 
+## v1.11 Trade History & Leaderboard Fix (Shipped: 2026-03-05)
+
+**Phases completed:** 2 phases (38-39), 2 plans, 4 tasks
+**Timeline:** 2026-03-04 → 2026-03-05 (~30 minutes active)
+**Files changed:** 7 (6 squid + 1 frontend)
+
+**Key accomplishments:**
+- Fixed pnlUsd enrichment on OrderExecuted trade actions — trade history now shows realized PnL for closed positions
+- Added PositionFeesCollected handler with cross-event fee data enrichment (fees emitted separately from position events)
+- Fixed collateralDeltaAmount int256/uint256 type mismatch — maxCapital was always 0 for all accounts
+- Fixed leaderboard all-time query: `periodEnd: 0` instead of `undefined` (Apollo omits undefined variables)
+- Squid redeployed with --hard-reset, all trade history and leaderboard data verified via GraphQL
+
+---
+
+## v1.10 E2E Verification (Shipped: 2026-03-05)
+
+**Phases completed:** 3 phases (35-37), 4 plans
+**Timeline:** 2026-03-04 (single day, ~2.5 hours)
+**Files changed:** 12 files
+
+**Key accomplishments:**
+- Fixed trigger order execution — root cause was oracle price staleness exceeding 300s MAX_ORACLE_PRICE_AGE, widened trigger margins to 5%
+- Built comprehensive E2E test suite covering deposits, withdrawals, market orders, trigger orders (limit/SL/TP), and liquidation
+- Created unified test runner (run-all.ts) with per-suite timeouts and --skip/--only flags for selective execution
+- Built on-chain state verification script (verify-frontend-data.ts) reading pools, positions, orders, and balances via multicall
+- Human-verified frontend accuracy — 6 positions, 51 orders, pool balances all match on-chain state at app.0xmarkets.io
+- All 18 requirements verified: TRIG-01/02, E2E-01..08, FE-01..04, UI-01..04
+
+---
+
 ## v1.7 Liquidation Readiness (Shipped: 2026-02-28)
 
 **Phases completed:** 4 phases (24-27), 9 plans
