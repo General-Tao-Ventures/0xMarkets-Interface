@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: E2E Verification
-status: completed
-stopped_at: Completed 36-01-PLAN.md
-last_updated: "2026-03-04T23:08:38.289Z"
-last_activity: 2026-03-04 — Completed Phase 36 Plan 01 (E2E Test Suite)
+status: in-progress
+stopped_at: Completed 37-01-PLAN.md
+last_updated: "2026-03-05T00:01:16.000Z"
+last_activity: 2026-03-04 — Completed Phase 37 Plan 01 (Frontend Data Verification)
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 67
+  total_plans: 4
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** Phase 36 — E2E Test Suite
+**Current focus:** Phase 37 — Frontend Verification
 
 ## Current Position
 
-Phase: 36 of 37 (E2E Test Suite) -- COMPLETE
-Plan: 1 of 1 -- COMPLETE
-Status: Phase 36 complete, ready for Phase 37
-Last activity: 2026-03-04 — Completed Phase 36 Plan 01 (E2E Test Suite)
+Phase: 37 of 37 (Frontend Verification)
+Plan: 1 of 2 -- COMPLETE
+Status: Plan 01 complete, Plan 02 (human checkpoint) remaining
+Last activity: 2026-03-04 — Completed Phase 37 Plan 01 (Frontend Data Verification)
 
-Progress: [██████░░░░] 67%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2 (v1.10)
-- Average duration: 15min
-- Total execution time: 30min
+- Total plans completed: 3 (v1.10)
+- Average duration: 12min
+- Total execution time: 36min
 
 **By Phase:**
 
@@ -45,7 +45,7 @@ Progress: [██████░░░░] 67%
 |-------|-------|-------|----------|
 | 35-trigger-order-fix | 1/1 | 8min | 8min |
 | 36-e2e-test-suite | 1/1 | 22min | 22min |
-| Phase 36 P01 | 22min | 3 tasks | 3 files |
+| 37-frontend-verification | 1/2 | 6min | 6min |
 
 ## Accumulated Context
 
@@ -75,6 +75,8 @@ See .planning/PROJECT.md key decisions table for full history.
 - [Phase 36]: MarketDecrease uses orderType 4 with acceptablePrice 0n for long decrease
 - [Phase 36]: Liquidation test targets WBTC/USD (not WETH/USD at 100% capacity); timeout=PASS with note
 - [Phase 36]: Unified runner uses per-suite timeout (600s liquidation, 300s default)
+- [37-01] Used inline ABI for getAccountOrders matching SDK (uint8 enums, no updatedAtBlock) instead of incorrect abis.ts definition
+- [37-01] GM token totalSupply read directly from market address (market contract IS the GM token ERC20)
 
 ### Pending Todos
 
@@ -86,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T23:05:29.612Z
-Stopped at: Completed 36-01-PLAN.md
-Next: Plan Phase 37 (if applicable)
+Last session: 2026-03-05T00:01:16Z
+Stopped at: Completed 37-01-PLAN.md
+Next: Execute 37-02-PLAN.md (human checkpoint for frontend UI verification)

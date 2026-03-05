@@ -23,10 +23,10 @@
 
 ### Frontend Accuracy
 
-- [ ] **FE-01**: Pool balances displayed in UI match on-chain contract state
-- [ ] **FE-02**: Position size, collateral, PnL in UI match on-chain position data
-- [ ] **FE-03**: Order status (pending/executed/cancelled) in UI matches on-chain state
-- [ ] **FE-04**: Token balances (USDC, ETH) in wallet display match on-chain balances
+- [x] **FE-01**: Pool balances displayed in UI match on-chain contract state
+- [x] **FE-02**: Position size, collateral, PnL in UI match on-chain position data
+- [x] **FE-03**: Order status (pending/executed/cancelled) in UI matches on-chain state
+- [x] **FE-04**: Token balances (USDC, ETH) in wallet display match on-chain balances
 
 ### Frontend Functionality
 
@@ -71,10 +71,10 @@
 | E2E-06 | Phase 36 | Complete |
 | E2E-07 | Phase 36 | Complete |
 | E2E-08 | Phase 36 | Complete |
-| FE-01 | Phase 37 | Pending |
-| FE-02 | Phase 37 | Pending |
-| FE-03 | Phase 37 | Pending |
-| FE-04 | Phase 37 | Pending |
+| FE-01 | Phase 37 | Complete |
+| FE-02 | Phase 37 | Complete |
+| FE-03 | Phase 37 | Complete |
+| FE-04 | Phase 37 | Complete |
 | UI-01 | Phase 37 | Pending |
 | UI-02 | Phase 37 | Pending |
 | UI-03 | Phase 37 | Pending |
