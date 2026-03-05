@@ -10,9 +10,9 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 ## Current State
 
-**Shipped:** v1.9 Event Indexer (2026-03-03)
+**Shipped:** v1.10 E2E Verification (2026-03-05)
 
-Built full on-chain event indexer into data-verification-service with 50-table PostgreSQL schema, viem-based event decoder, WebSocket listener with crash recovery, and cursor-based resumption. Deployed to DO droplet alongside existing keepers.
+Fixed trigger order execution (oracle staleness root cause), built comprehensive E2E test suite covering all operation types, and human-verified frontend accuracy against on-chain state. All 18 requirements passed.
 
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
@@ -23,6 +23,8 @@ Built full on-chain event indexer into data-verification-service with 50-table P
 - v1.5 Minimal Keeper Rewrite (2026-02-26) — clean 300-line keeper, Lazer oracle cache, deployed and verified
 - v1.6 E2E Reliability (2026-02-27) — contract audit, toast lifecycle, auto-refresh, E2E test suite
 - v1.7 Liquidation Readiness (2026-02-28) — contract fix, liquidation pipeline verification, hardening, performance
+- v1.8 Deployment (2026-03-01) — production deployment
+- v1.9 Event Indexer (2026-03-03) — on-chain event indexer with PostgreSQL schema
 
 ## Requirements
 
@@ -74,19 +76,20 @@ Built full on-chain event indexer into data-verification-service with 50-table P
 - ✓ Per-stage timing instrumentation for scanner, executor, confirmator — v1.7
 - ✓ Position discovery uses multicall batching — v1.7
 - ✓ Executor reuses position data from scanner — v1.7
+- ✓ Trigger order execution (limit, stop-loss, take-profit) works end-to-end — v1.10
+- ✓ E2E test suite covers deposits, withdrawals, market orders, trigger orders, liquidation — v1.10
+- ✓ Frontend pool balances match on-chain contract state — v1.10
+- ✓ Frontend positions (size, collateral, PnL) match on-chain data — v1.10
+- ✓ Frontend order status matches on-chain state — v1.10
+- ✓ Frontend token balances match on-chain balances — v1.10
+- ✓ All pages load without errors, forms submit correctly, toasts resolve — v1.10
 
 ### Active
 
-## Current Milestone: v1.10 E2E Verification
-
-**Goal:** Fix trigger order execution, run a comprehensive E2E test suite covering all operation types against live testnet, and verify the frontend is correctly configured (on-chain state accuracy + UI functionality).
-
-**Target features:**
-- Fix InvalidOrderPrices (0x0481a15a) error blocking trigger order execution (limit, TP/SL)
-- E2E test suite: deposits, withdrawals, market orders, limit orders, TP/SL, liquidations
-- Liquidation testing on markets with available reserves (BTC, EUR, etc.)
-- Frontend verification: on-chain state matches UI (balances, positions, order status)
-- Frontend verification: UI functionality (pages load, forms work, no errors, correct routing)
+- [ ] Decode reasonBytes from cancelled events and show human-readable error messages (ERR-01)
+- [ ] Surface revert reasons for failed deposits/orders in the UI (ERR-02)
+- [ ] Multi-market parallel E2E suite (TEST-01)
+- [ ] Automated regression suite on CI/GitHub Actions (TEST-02)
 
 ### Out of Scope
 
@@ -104,8 +107,8 @@ Built full on-chain event indexer into data-verification-service with 50-table P
 
 - **Chain:** Base Sepolia (84532)
 - **Deployed:** app.0xmarkets.io (Vercel)
-- **Shipped:** v1.0-v1.7 across 8 milestones in 8 days (2026-02-21 → 2026-02-28)
-- **Codebase:** 27 phases, 58 plans across 8 milestones
+- **Shipped:** v1.0-v1.10 across 11 milestones (2026-02-21 → 2026-03-05)
+- **Codebase:** 37 phases, 68+ plans across 11 milestones
 - **Keeper infrastructure:** Two services on DigitalOcean (142.93.203.222) with pino JSON logging, real health endpoints, and BetterStack uptime monitoring
   - keeper-service (port 37017): price feeds, liquidation scanning, candle data
   - order-execution-keeper-service (port 37018): executes deposits, withdrawals, orders
@@ -153,6 +156,9 @@ Built full on-chain event indexer into data-verification-service with 50-table P
 | Dedup guard separate from cooldown | 60s submission TTL vs 5min gas-estimation failure | ✓ Good — different purposes |
 | Multicall batching with allowFailure | Individual failures don't break batch | ✓ Good — robust discovery |
 | Accept pipeline verification via gas-estimation | Pool reserves prevent final TX but code paths proven | ✓ Good — operational, not code issue |
+| 5% trigger price margins for E2E tests | Accounts for oracle staleness between order creation and keeper execution | ✓ Good — all trigger orders pass |
+| Inline ABI for getAccountOrders | abis.ts has incorrect uint256 enums and phantom field; inline matches SDK | ✓ Good — workaround, abis.ts fix deferred |
+| Unified E2E test runner with per-suite timeouts | Liquidation needs 10min, others need 5min | ✓ Good — flexible |
 
 ---
-*Last updated: 2026-03-04 after v1.10 milestone start*
+*Last updated: 2026-03-05 after v1.10 milestone*
