@@ -58,9 +58,7 @@ export function LeaveHomepageRedirectModal({
           </p>
           <p>
             <Trans>
-              The website is a community deployed and maintained instance of the open source{" "}
-              <a href="https://github.com/0xMarkets/0xMarkets-Interface">0xMarkets front end</a>, hosted and served on the distributed,
-              peer-to-peer <a href="https://ipfs.io/">IPFS network</a>.
+              The website is a community deployed and maintained instance of the 0xMarkets front end.
             </Trans>
           </p>
           <p>

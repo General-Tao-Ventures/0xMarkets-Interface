@@ -92,10 +92,6 @@ function useHeaderLinks() {
   return useMemo(() => {
     return [
       {
-        label: t`Protocol`,
-        href: "https://github.com/0xMarkets",
-      },
-      {
         label: t`Docs`,
         href: "https://docs.0xmarkets.io/",
       },

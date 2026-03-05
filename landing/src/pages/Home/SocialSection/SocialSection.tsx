@@ -26,14 +26,6 @@ export function SocialSection() {
           </a>
         ),
       },
-      {
-        ...SOCIAL_MAP.Github,
-        value: (
-          <a href={SOCIAL_MAP.Github.link}>
-            <Trans>View</Trans>
-          </a>
-        ),
-      },
     ],
     []
   );
@@ -73,14 +65,6 @@ export function SocialSection() {
               className="duration-180 transition-colors hover:text-white active:text-white/80"
             >
               <Trans>Referral Terms</Trans>
-            </a>
-            <a
-              href="https://docs.0xmarkets.io/media-kit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="duration-180 transition-colors hover:text-white active:text-white/80"
-            >
-              <Trans>Media Kit</Trans>
             </a>
             <a className="inline sm:hidden" href="/#/terms-and-conditions" target="_blank" rel="noopener noreferrer">
               <Trans>Terms and Conditions</Trans>

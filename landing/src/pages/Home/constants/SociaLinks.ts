@@ -1,5 +1,4 @@
 import IconDiscord from "img/social/ic_discord_new.svg?react";
-import IconGithub from "img/social/ic_github_new.svg?react";
 import IconX from "img/social/ic_x_new.svg?react";
 
 export const SOCIAL_MAP = {
@@ -9,14 +8,6 @@ export const SOCIAL_MAP = {
     IconComponent: IconDiscord,
     onClick: () => {
       window.open("https://discord.gg/XtKESzrBvs", "_blank");
-    },
-  },
-  Github: {
-    link: "https://github.com/0xMarkets",
-    name: "Github",
-    IconComponent: IconGithub,
-    onClick: () => {
-      window.open("https://github.com/0xMarkets", "_blank");
     },
   },
   Twitter: {
