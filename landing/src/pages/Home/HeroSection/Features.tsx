@@ -53,7 +53,7 @@ export function Features({ goToTradeArbitrum }: Props) {
               </Trans>
             </p>
             <p className="text-description text-white">
-              Avoid price wicks with transparent, sub-second Chainlink price feeds tailor-made for GMX{" "}
+              Avoid price wicks with transparent, sub-second Chainlink price feeds tailor-made for 0xMarkets{" "}
             </p>
           </div>
         </div>
@@ -130,7 +130,7 @@ export function Features({ goToTradeArbitrum }: Props) {
               <Trans>Seamless Trading</Trans>
             </p>
             <p className="text-description">
-              Enjoy a frictionless trading experience and sidestep blockchain congestion with One-Click Trading and GMX
+              Enjoy a frictionless trading experience and sidestep blockchain congestion with One-Click Trading and 0xMarkets
               Express
             </p>
           </div>

@@ -10,24 +10,24 @@ export default function ReferralTerms() {
       <div className="bg-slate-800 p-16 sm:p-40">
         <div>
           <div className="text-center">
-            <div className="text-heading-3">GMX Referral Program</div>
+            <div className="text-heading-3">0xMarkets Referral Program</div>
             <div className="text-heading-4 my-24">Terms and Conditions</div>
             <div className="text-14">Last modified: August 1st, 2022</div>
           </div>
           <div className="mt-74 space-y-74">
             <div>
               <p className="text-terms-body mb-24">
-                Welcome to GMX.io ("we," "us," or "our"), the informational resource for GMX Protocol, as defined below.
+                Welcome to 0xMarkets.io ("we," "us," or "our"), the informational resource for 0xMarkets Protocol, as defined below.
               </p>
               <p className="text-terms-body mb-24">
-                GMX.io provides information and resources about the fundamentals of the decentralized non-custodial
-                protocol called the GMX Protocol (the "GMX Protocol," "Protocol," or "GMX DApp"). GMX.io is not an
-                available access point to the GMX Protocol.
+                0xMarkets.io provides information and resources about the fundamentals of the decentralized non-custodial
+                protocol called the 0xMarkets Protocol (the "0xMarkets Protocol," "Protocol," or "0xMarkets DApp"). 0xMarkets.io is not an
+                available access point to the 0xMarkets Protocol.
               </p>
               <p className="text-terms-body mb-24">
                 These Terms and Conditions and any other documents incorporated herein by reference (collectively, these
                 "Terms") to you or the company or other legal entity you represent ("you," "your," "the Referrer," "the
-                Affiliate"), explains the terms and conditions by which you may use the GMX Referral Program ("Referral
+                Affiliate"), explains the terms and conditions by which you may use the 0xMarkets Referral Program ("Referral
                 Program") as defined below.
               </p>
               <p className="text-terms-body mb-24">
@@ -38,14 +38,14 @@ export default function ReferralTerms() {
               <h3 className="text-terms-heading mb-24">1. USE OF THE REFERRAL PROGRAM</h3>
               <p className="text-terms-body mb-24">All this content is for informational purposes only.</p>
               <p className="text-terms-body mb-24">
-                The Referral Program allows you to advertise the GMX DApp, thereby driving traffic to it, whereby you
+                The Referral Program allows you to advertise the 0xMarkets DApp, thereby driving traffic to it, whereby you
                 may earn a portion of the fees generated ("Rebates") if a person that is not you ("Trader," "Referred
-                User") trades in the GMX DApp after being referred to it from a hyperlink ("Link") or manually input
+                User") trades in the 0xMarkets DApp after being referred to it from a hyperlink ("Link") or manually input
                 code ("Referral Code"). The Trader will benefit from a fee discount ("Discount") associated with the
                 Referrer's tier.
               </p>
               <p className="text-terms-body mb-24">
-                After being referred to the GMX DApp from a Link, the Trader's browser will save your Referral Code,
+                After being referred to the 0xMarkets DApp from a Link, the Trader's browser will save your Referral Code,
                 which will be assigned to the Trader on his first trade.
               </p>
               <p className="text-terms-body mb-24">
@@ -55,19 +55,19 @@ export default function ReferralTerms() {
             <div>
               <h3 className="text-terms-heading mb-24">2. OBLIGATIONS</h3>
               <p className="text-terms-body mb-24">
-                2.1 As an Affiliate, GMX DApp provides you with the Links and Referral Codes necessary to promote the
-                GMX Protocol. You acknowledge and agree it is your sole responsibility to indicate your correct Referral
-                Code. You may promote the GMX Protocol offers in any manner you choose unless it misleads someone about
-                the GMX Protocol.
+                2.1 As an Affiliate, 0xMarkets DApp provides you with the Links and Referral Codes necessary to promote the
+                0xMarkets Protocol. You acknowledge and agree it is your sole responsibility to indicate your correct Referral
+                Code. You may promote the 0xMarkets Protocol offers in any manner you choose unless it misleads someone about
+                the 0xMarkets Protocol.
               </p>
               <p className="text-terms-body mb-24">
-                2.2 GMX.io is not responsible for (i) lost sales or lost opportunity to earn Rebates due to any cause,
+                2.2 0xMarkets.io is not responsible for (i) lost sales or lost opportunity to earn Rebates due to any cause,
                 such as technical difficulties or over-capacity, including system overload in the Arbitrum or Avalanche
                 blockchains; (ii) tracking Rebates, Discounts, or any other data, as this is handled by independent,
                 smart contracts.
               </p>
               <p className="text-terms-body mb-24">
-                2.3 You will be excluded from the Referral Program, following the directives of the GMX tokenholders:
+                2.3 You will be excluded from the Referral Program, following the directives of the 0xMarkets tokenholders:
                 (i) if you use any language libelous, defamatory, profane, obscene, pornographic, sexually explicit,
                 indecent, lewd, vulgar, suggestive, harassing, stalking, hateful, threatening, offensive,
                 discriminatory, bigoted, abusive, inflammatory, fraudulent, deceptive, or otherwise objectionable or
@@ -82,19 +82,19 @@ export default function ReferralTerms() {
                 will never be retroactive.
               </p>
               <p className="text-terms-body mb-24">
-                GMX.io is under no obligation for Rebates or Discounts to any Referrer or Trader. Rebates and Discounts
-                are handled following the directives of the GMX tokenholders.
+                0xMarkets.io is under no obligation for Rebates or Discounts to any Referrer or Trader. Rebates and Discounts
+                are handled following the directives of the 0xMarkets tokenholders.
               </p>
               <p className="text-terms-body mb-24">
                 The Rebates and Discounts percentages for the default tier Tier 1, and instructions to upgrade to Tier 2
                 and Tier 3, are contained in{" "}
-                <a href="https://docs.gmx.io/docs/referrals">https://docs.gmx.io/docs/referrals.</a>
+                <a href="https://docs.0xmarkets.io/docs/referrals">https://docs.0xmarkets.io/docs/referrals.</a>
               </p>
             </div>
             <div>
               <h3 className="text-terms-heading mb-24">4. LIMITATION OF LIABILITY</h3>
               <p className="text-terms-body mb-24">
-                Under no circumstances shall GMX.io be liable for any direct, indirect, incidental, punitive, special,
+                Under no circumstances shall 0xMarkets.io be liable for any direct, indirect, incidental, punitive, special,
                 consequential damages, or similar damages or liabilities whatsoever for any reason whatsoever related to
                 these Terms, your use or inability to use our web site(s), or the materials and content of the web
                 site(s) or any other web sites linked to such web site(s) or your provision of any personally
@@ -104,18 +104,18 @@ export default function ReferralTerms() {
                 damages were reasonably foreseeable.
               </p>
               <p className="text-terms-body mb-24">
-                In no event shall GMX.io's aggregate liability arising out of or in connection with the Site exceed five
+                In no event shall 0xMarkets.io's aggregate liability arising out of or in connection with the Site exceed five
                 hundred Singapore Dollars (500 SGD).
               </p>
             </div>
             <div>
               <h3 className="text-terms-heading mb-24">5. INDEMNIFICATION</h3>
               <p className="text-terms-body mb-24">
-                You will defend, indemnify, and hold harmless GMX.io, its affiliates, members, member, managers,
+                You will defend, indemnify, and hold harmless 0xMarkets.io, its affiliates, members, member, managers,
                 employees, attorneys, representatives, suppliers, and contractors from any claim, demand, lawsuit,
                 action, proceeding, investigation, liability, damage, loss, cost or expense, including without
                 limitation reasonable attorneys' fees, arising out of or relating to arising under these Terms, the
-                service(s) provided by GMX.io, or your use of the service(s) provided by GMX.io, including, without
+                service(s) provided by 0xMarkets.io, or your use of the service(s) provided by 0xMarkets.io, including, without
                 limitation, an infringement by you, or by anyone else using such service(s) we provide to you, of any
                 intellectual property or other proprietary rights of any person or entity, or from the violation of any
                 of our operating rules or policies relating to the service(s) provided. When we may be involved in a
@@ -130,19 +130,19 @@ export default function ReferralTerms() {
             <div>
               <h3 className="text-terms-heading mb-24">6. MODIFICATION, SUSPENSION, AND TERMINATION</h3>
               <p className="text-terms-body mb-24">
-                The Referral Program runs independently from GMX.io, which the token holders of GMX determine. Due to
+                The Referral Program runs independently from 0xMarkets.io, which the token holders of 0xMarkets determine. Due to
                 this, from time to time and with or without prior notice to you, the Referral Program could be subject
                 to modifications, suspensions, or disabilities, in whole or in part, for any reason whatsoever.
               </p>
               <p className="text-terms-body mb-24">
-                GMX.io will not be liable for any losses suffered by you resulting from any modification to the Referral
+                0xMarkets.io will not be liable for any losses suffered by you resulting from any modification to the Referral
                 Program or from any modification, suspension, or termination, for any reason, of your access to all or
                 any portion of the Interface or the Protocol.
               </p>
               <p className="text-terms-body mb-24">
-                GMX.io may revise these Terms from time to time. We will notify you by updating the date at the top of
+                0xMarkets.io may revise these Terms from time to time. We will notify you by updating the date at the top of
                 the Terms and maintaining a current version. The most current version of the Terms will always be at
-                https://gmx.io/referral-terms. All modifications will be effective when they are posted. By using the
+                https://0xmarkets.io/referral-terms. All modifications will be effective when they are posted. By using the
                 Referral Program after those revisions become effective, you agree to be bound by the revised Terms.
               </p>
             </div>
@@ -158,7 +158,7 @@ export default function ReferralTerms() {
               <h3 className="text-terms-heading mb-24">8. GENERAL</h3>
               <p className="text-terms-body mb-24">
                 8.1 These Terms, including other policies or agreements incorporated herein, constitute the entire and
-                only agreement between you and GMX.io concerning the subject matter of these Terms and supersede all
+                only agreement between you and 0xMarkets.io concerning the subject matter of these Terms and supersede all
                 prior or contemporaneous agreements, representations, warranties, and understandings, written or oral,
                 concerning the subject matter of these Terms. Any failure by us to exercise or enforce any right or
                 provision of the Terms shall not constitute a waiver of such right or provision.
@@ -176,18 +176,18 @@ export default function ReferralTerms() {
               <p className="text-terms-body mb-24">
                 8.4 If any provision of these Terms shall be unenforceable or invalid under any applicable law or be
                 held by any applicable court decision, such unenforceability or invalidity shall not render these Terms
-                unenforceable or invalid as a whole. GMX.io will amend or replace such provision with one that is valid
+                unenforceable or invalid as a whole. 0xMarkets.io will amend or replace such provision with one that is valid
                 and enforceable and which achieves, to the extent possible, our original objectives and intent as
                 reflected in the original provision.
               </p>
               <p className="text-terms-body mb-24">
                 8.5 You may not assign or transfer any right to use the Referral Program, or any of your rights or
                 obligations under these Terms, without our express prior written consent, including by operation of law
-                or in connection with any change of control. GMX.io may assign or transfer any or all of our rights or
+                or in connection with any change of control. 0xMarkets.io may assign or transfer any or all of our rights or
                 obligations under these Terms, in whole or part, without notice or obtaining your consent or approval.
               </p>
               <p className="text-terms-body mb-24">
-                8.6 GMX.io will have no responsibility or liability for any failure or delay in performance of the Site,
+                8.6 0xMarkets.io will have no responsibility or liability for any failure or delay in performance of the Site,
                 or any loss or damage that you may incur, due to any circumstance or event beyond our control, including
                 without limitation any flood, extraordinary weather conditions, earthquake, or other act of God, fire,
                 war, insurrection, riot, labor dispute, accident, any law, order regulation, direction, action or
@@ -197,7 +197,7 @@ export default function ReferralTerms() {
             <div>
               <h3 className="text-terms-heading mb-24">9. CONTACT INFORMATION</h3>
               <p className="text-terms-body mb-24">
-                If you have any questions about these Terms, the Site, or the Interface, please get in touch with GMX.io
+                If you have any questions about these Terms, the Site, or the Interface, please get in touch with 0xMarkets.io
                 on any of our official channels.
               </p>
             </div>

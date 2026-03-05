@@ -11,7 +11,7 @@ export function RoadmapSection() {
             <Trans>Roadmap</Trans>
           </h2>
           <a
-            href="https://gmxio.substack.com/p/gmx-development-plan-for-2025"
+            href="https://docs.0xmarkets.io/roadmap"
             className="btn-landing hidden rounded-8 px-16 py-10 text-16 sm:inline-flex"
           >
             <Trans>Read more</Trans>
@@ -19,7 +19,7 @@ export function RoadmapSection() {
         </div>
         <Quareters />
         <a
-          href="https://gmxio.substack.com/p/gmx-development-plan-for-2025"
+          href="https://docs.0xmarkets.io/roadmap"
           className="btn-landing inline-flex items-center justify-center rounded-8 px-16 py-12 text-center text-16 sm:hidden"
         >
           <Trans>Read more</Trans>
