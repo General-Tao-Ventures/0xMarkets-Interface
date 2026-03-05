@@ -19,7 +19,7 @@
 
 ### v1.11 Trade History & Leaderboard Fix
 
-- [ ] Phase 38: Squid Fixes & Redeployment (TH-01, TH-02, LB-01, LB-02)
+- [x] Phase 38: Squid Fixes & Redeployment (TH-01, TH-02, LB-01, LB-02) (completed 2026-03-05)
   - **Plans:** 1 plan
   - Diagnose why MarketIncrease/MarketDecrease OrderExecuted events are missing from trade history
   - Fix squid event processing for trade actions and pnlUsd enrichment
@@ -47,7 +47,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 38. Squid Fixes & Redeployment | v1.11 | 1/1 | Complete | 2026-03-05 |
+| 38. Squid Fixes & Redeployment | v1.11 | Complete    | 2026-03-05 | 2026-03-05 |
 | 39. Frontend Verification & Fixes | v1.11 | 0/1 | Pending | — |
 | 35. Trigger Order Fix | v1.10 | 1/1 | Complete | 2026-03-04 |
 | 36. E2E Test Suite | v1.10 | 1/1 | Complete | 2026-03-04 |

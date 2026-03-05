@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Trade History & Leaderboard Fix
-status: executing
-stopped_at: "Completed 38-01-PLAN.md"
-last_updated: "2026-03-05"
-last_activity: 2026-03-05 — Completed Phase 38 Plan 01 (squid pnlUsd + fee fixes + redeployment)
+status: unknown
+stopped_at: Completed 38-01-PLAN.md
+last_updated: "2026-03-05T01:56:52.207Z"
 progress:
-  total_phases: 2
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 1
-  percent: 50
+  total_phases: 24
+  completed_phases: 23
+  total_plans: 47
+  completed_plans: 47
 ---
 
 # Project State
