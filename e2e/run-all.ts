@@ -32,6 +32,7 @@ const TEST_SUITES: TestDef[] = [
   { name: "Market Orders",  file: "test-orders.ts",         env: { MARKET: "WETH/USD" } },
   { name: "Trigger Orders", file: "test-trigger-orders.ts", env: {} },
   { name: "Liquidation",    file: "test-liquidation.ts",    env: {}, timeout: 600_000 },
+  { name: "Frontend Data", file: "verify-frontend-data.ts", env: {}, timeout: 60_000 },
 ];
 
 // ============================================================
