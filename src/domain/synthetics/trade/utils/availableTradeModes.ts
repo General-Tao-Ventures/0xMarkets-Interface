@@ -7,12 +7,12 @@ const AVAILABLE_TRADE_MODES = {
   [TradeType.Long]: [
     TradeMode.Market,
     TradeMode.Limit,
-    [TradeMode.StopMarket, TradeMode.Twap],
+    [TradeMode.Trigger, TradeMode.StopMarket, TradeMode.Twap],
   ] as const,
   [TradeType.Short]: [
     TradeMode.Market,
     TradeMode.Limit,
-    [TradeMode.StopMarket, TradeMode.Twap],
+    [TradeMode.Trigger, TradeMode.StopMarket, TradeMode.Twap],
   ] as const,
   [TradeType.Swap]: [TradeMode.Market, TradeMode.Limit, TradeMode.Twap] as const,
 };
