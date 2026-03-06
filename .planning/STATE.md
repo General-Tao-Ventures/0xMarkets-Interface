@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: "v1.12"
 milestone_name: "WebSocket Price Streaming"
-status: defining_requirements
-stopped_at: null
+status: ready_to_plan
+stopped_at: "Phase 40 ready to plan"
 last_updated: "2026-03-05"
 progress:
-  total_phases: 39
+  total_phases: 42
   completed_phases: 39
   total_plans: 70
   completed_plans: 70
@@ -19,14 +19,27 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.12 WebSocket Price Streaming
+**Current focus:** v1.12 Phase 40 — Infrastructure + Keeper Hermes SSE
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-05 — Milestone v1.12 started
+Phase: 40 of 42 (Infrastructure + Keeper Hermes SSE)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-03-05 — Roadmap created for v1.12 (3 phases, 16 requirements)
+
+Progress: [██████████████████░░] 93% (39/42 phases)
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 70
+- Total execution time: ~12 milestones across 13 days
+
+**Recent Trend:**
+- v1.11: 2 plans in ~30 min
+- v1.10: 4 plans in ~2.5 hours
+- Trend: Stable
 
 ## Accumulated Context
 
@@ -35,14 +48,13 @@ Last activity: 2026-03-05 — Milestone v1.12 started
 - WETH/USD pool at 100% reserve capacity — blocks new position creation on that market
 - JPY/USD Pyth Lazer oracle data gap — testnet infrastructure, not code
 - Shared wallet nonce conflict between keeper-service and order-execution-keeper
-- abis.ts has incorrect getAccountOrders ABI (uint256 enums, phantom updatedAtBlock)
-- Chart candle data lags mark price by 0-2s due to keeper's 2s Pyth HTTP polling interval
+- Chart candle data lags mark price by 0-2s due to keeper's 2s Pyth HTTP polling interval (target of this milestone)
 
 ### Server State
 
 - All services deployed on DO droplet (142.93.203.222)
 - keeper-service: port 37017, order-execution-keeper: port 37018, data-verification: port 37019
-- Squid redeployed 2026-03-05 with pnlUsd + fee + maxCapital fixes, fully re-indexed
+- TLS status on droplet: unknown — Phase 40 must audit before choosing TLS approach
 
 ### Pending Todos
 
@@ -50,7 +62,8 @@ None.
 
 ### Blockers/Concerns
 
-None.
+- DO droplet TLS status unknown — need to audit nginx/Caddy before Phase 40 planning
+- Pyth Pro API key concurrent connection support (Lazer WS + Hermes SSE) unverified
 
 ## Decisions
 
@@ -59,5 +72,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Defining v1.12 requirements
-Next: Define requirements → create roadmap
+Stopped at: Roadmap created for v1.12
+Next: `/gsd:plan-phase 40`

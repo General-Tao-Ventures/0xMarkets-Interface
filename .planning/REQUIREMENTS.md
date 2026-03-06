@@ -58,28 +58,28 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| KSTR-01 | — | Pending |
-| KSTR-02 | — | Pending |
-| KSTR-03 | — | Pending |
-| KWS-01 | — | Pending |
-| KWS-02 | — | Pending |
-| KWS-03 | — | Pending |
-| KWS-04 | — | Pending |
-| KWS-05 | — | Pending |
-| FWS-01 | — | Pending |
-| FWS-02 | — | Pending |
-| FWS-03 | — | Pending |
-| FWS-04 | — | Pending |
-| FWS-05 | — | Pending |
-| FWS-06 | — | Pending |
+| INFRA-01 | Phase 40 | Pending |
+| INFRA-02 | Phase 40 | Pending |
+| KSTR-01 | Phase 40 | Pending |
+| KSTR-02 | Phase 40 | Pending |
+| KSTR-03 | Phase 40 | Pending |
+| KWS-01 | Phase 41 | Pending |
+| KWS-02 | Phase 41 | Pending |
+| KWS-03 | Phase 41 | Pending |
+| KWS-04 | Phase 41 | Pending |
+| KWS-05 | Phase 41 | Pending |
+| FWS-01 | Phase 42 | Pending |
+| FWS-02 | Phase 42 | Pending |
+| FWS-03 | Phase 42 | Pending |
+| FWS-04 | Phase 42 | Pending |
+| FWS-05 | Phase 42 | Pending |
+| FWS-06 | Phase 42 | Pending |
 
 **Coverage:**
 - v1.12 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-05*
-*Last updated: 2026-03-05 after initial definition*
+*Last updated: 2026-03-05 — traceability updated with phase mappings*
