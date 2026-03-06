@@ -1,200 +1,127 @@
-# Domain Pitfalls
+# Domain Pitfalls: WebSocket Price Streaming
 
-**Domain:** Contract redeployment in multi-service ecosystem + liquidation keeper verification and optimization
-**Researched:** 2026-02-27
-**Confidence:** HIGH (based on direct codebase analysis of all five services and known production incidents)
+**Domain:** Adding WebSocket streaming to an existing DeFi trading interface
+**Researched:** 2026-03-05
+**Context:** Keeper on DigitalOcean (Express on port 37017), frontend on Vercel, currently HTTP polling at 1-2s intervals
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause reverts, stuck positions, or silent keeper failures.
+Mistakes that cause outages, data corruption, or require architectural rework.
 
 ---
 
-### Pitfall 1: ExchangeRouter Immutable Constructor — Redeploying OrderHandler Alone Silently Fails
+### Pitfall 1: Vercel Cannot Terminate WebSocket Connections
 
-**What goes wrong:**
-OrderHandler is fixed and redeployed. The fix works when called directly. But all user transactions flow through ExchangeRouter, which stores `orderHandler` as an `immutable` Solidity field set at construction time. The old ExchangeRouter still points to the old (buggy) OrderHandler address. Users submitting JPY orders continue to get division-by-zero reverts. The keeper executes deposits and withdrawals fine. Only orders fail. This looks like the fix didn't work.
+**What goes wrong:** You try to serve WebSocket connections from the keeper through Vercel's proxy/CDN layer. Vercel Serverless Functions do not support WebSocket connections. The frontend currently fetches prices via `oracleKeeperFetcher` which hits URLs configured in `sdk/configs/oracleKeeper.ts`. If that URL routes through Vercel, WebSocket upgrade requests will fail silently or return opaque 502 errors.
 
-**Why it happens:**
-The natural instinct is "I'm fixing OrderHandler, so I deploy OrderHandler." But ExchangeRouter's constructor takes `OrderHandler` as a direct address argument baked into bytecode (`immutable`). It cannot be updated post-deployment. This is confirmed by the deploy script at `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/deployExchangeRouter.ts` — `constructorContracts` explicitly includes `"OrderHandler"`.
+**Why it happens:** The existing HTTP polling works through Vercel's proxy because each request is stateless. WebSocket requires a persistent HTTP Upgrade handshake that Vercel's edge network does not support. Developers assume "if HTTP works through Vercel, WebSocket will too."
 
-**Consequences:**
-- JPY market orders continue to revert despite fix
-- Confusion about whether the fix was applied correctly
-- Developers spend hours re-verifying the Solidity fix when the real problem is stale wiring
+**Consequences:** WebSocket connections fail on the frontend. Users get no price updates. No error in keeper logs because the connection never reaches the keeper.
 
 **Prevention:**
-Always redeploy ExchangeRouter immediately after redeploying OrderHandler. Never test the fix through direct calls to OrderHandler — always test through ExchangeRouter to catch wiring issues.
+- Frontend WebSocket must connect DIRECTLY to the keeper's public endpoint, bypassing Vercel entirely.
+- Set up a separate DNS record (e.g., `ws.0xmarkets.io`) pointing to the DO droplet (142.93.203.222) for WebSocket traffic.
+- Keep the existing HTTP `/prices/tickers` endpoint alive as a fallback -- WebSocket is an enhancement, not a replacement.
+- If nginx is added on the DO droplet for TLS termination, configure `proxy_http_version 1.1`, `proxy_set_header Upgrade $http_upgrade`, `proxy_set_header Connection "upgrade"`, and `proxy_read_timeout 86400s`.
 
-**Verification:**
-After deployment, call `cast call <NEW_EXCHANGE_ROUTER> "orderHandler()(address)"` and confirm it returns the new OrderHandler address, not the old one (`0xCf752B72B74eE7b35a405c445E9843968f53A397`).
+**Detection:** WebSocket `onerror` fires immediately after `new WebSocket(url)`. Connection never reaches `onopen`. Browser DevTools Network tab shows the upgrade request failing with a non-101 status.
 
-**Phase to address:** Phase 24 (contract bug fixes) — must be a single atomic deployment step: fix → compile → deploy OrderHandler → deploy ExchangeRouter.
+**Warning signs:** Any WebSocket URL containing `vercel.app` or routed through a Vercel-hosted domain without explicit WebSocket support.
+
+**Phase:** Must be decided in Phase 1 (architecture/infrastructure). Wrong proxy path wastes all subsequent work.
 
 ---
 
-### Pitfall 2: CONTROLLER Role Not Granted to New Contracts — onlyController Reverts
+### Pitfall 2: Silent Connection Death Without Application-Level Heartbeat
 
-**What goes wrong:**
-New OrderHandler or ExchangeRouter is deployed. Transactions begin reverting with an access control error (not the original bug). The new contract was deployed but the `RoleStore.grantRole` transaction failed silently, was skipped, or the deployer lacked sufficient gas. The `onlyController` modifier on all handler functions checks `roleStore.hasRole(CONTROLLER, msg.sender)` — without the role, nothing executes.
+**What goes wrong:** The WebSocket connection drops silently -- no `close` event fires, no `error` event fires. The frontend shows stale prices for minutes without any indication. The keeper thinks the client is still connected and keeps buffering messages into the void.
 
-**Why it happens:**
-The `afterDeploy` hook in `deployOrderHandler.ts` calls `grantRoleIfNotGranted(deployedContract.address, "CONTROLLER")`. If this hook throws or is skipped (network hiccup, insufficient gas, deployer nonce conflict), the deployment artifact is written with the new address but the on-chain role was never granted. Hardhat does not fail the overall deployment in all cases when `afterDeploy` throws — it depends on the version and error type.
+**Why it happens:** TCP connections can die silently due to NAT timeout (commonly 60-300s on consumer routers), mobile network transitions, laptop sleep/wake, or intermediate load balancers dropping idle connections. The `ws` library in Node.js does NOT send ping frames automatically. The WebSocket protocol's ping/pong frames are not always forwarded by all intermediaries.
 
-**Consequences:**
-- All order execution reverts with access control error
-- Keeper logs show transaction reverted, no useful revert reason
-- The deployment artifact looks correct (new address) but the contract is non-functional
+**Consequences:** Users see frozen prices and think the platform is live. They make trading decisions on data that stopped updating minutes ago. On the server side, dead connections accumulate, consuming memory (compounding Pitfall 4).
 
 **Prevention:**
-After every deployment, explicitly verify roles using `cast`:
-```bash
-cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "CONTROLLER") <NEW_ORDER_HANDLER> --rpc-url https://sepolia.base.org
-cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "CONTROLLER") <NEW_EXCHANGE_ROUTER> --rpc-url https://sepolia.base.org
-cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "ROUTER_PLUGIN") <NEW_EXCHANGE_ROUTER> --rpc-url https://sepolia.base.org
-```
+- Implement server-side heartbeat: `ws.ping()` every 15-20 seconds. Track last pong timestamp per client. Terminate clients that miss 2 consecutive pongs (`ws.terminate()`, not `ws.close()`).
+- Implement client-side staleness detection: track `lastMessageTime`. If no message received for 10 seconds, assume dead connection and trigger reconnection. Display a "Reconnecting..." indicator in the UI.
+- Add a price staleness indicator: if the most recent price update's `publishTime` is older than 5 seconds, show a warning badge next to the price.
+- If nginx sits in front of the keeper, set `proxy_read_timeout 86400s` (default 60s silently kills idle WebSocket connections).
 
-All three must return `true`. If any returns `false`, manually call `grantRole` from the RoleStore admin account.
+**Detection:** Monitor connected client count over time on the keeper. A count that only grows (never decreases) indicates silent deaths accumulating. Check `healthState` for divergence between `wsConnected` and actual active client count.
 
-**Phase to address:** Phase 24 — add explicit role verification as a mandatory post-deployment step before marking the phase complete.
+**Warning signs:** Users reporting "prices froze" without seeing any error toast. Keeper memory slowly growing.
+
+**Phase:** Phase 1 (keeper WebSocket server) must include heartbeat from day one. Retrofitting heartbeat after deployment means a period of silent failures in production.
 
 ---
 
-### Pitfall 3: Stale Addresses Across Five Services After Redeployment
+### Pitfall 3: Dual-Source Race Condition During Migration
 
-**What goes wrong:**
-OrderHandler and ExchangeRouter are redeployed with new addresses. The Interface is updated. But keeper-service and order-execution-keeper-service still have the old ExchangeRouter address in their `.env` files. The keepers attempt to execute operations against the old contracts, which silently succeed (the transactions go through) but execute against a contract that is no longer the canonical entry point. Worse, if the old ExchangeRouter's roles were revoked as part of cleanup, all keeper transactions revert.
+**What goes wrong:** During the transition period, both HTTP polling and WebSocket are active. A stale HTTP response arrives AFTER a fresh WebSocket update, overwriting the latest price with an older one. Prices visibly jump backward.
 
-**Why it happens:**
-The address update guide in `.claude/contract-address-update-guide.md` lists the full checklist, but it is easy to miss individual service `.env` files — especially on the DigitalOcean droplet which has its own live `.env` files that differ from the local development copies.
+**Why it happens:** The frontend currently uses `useTokenRecentPricesRequest` with SWR `refreshInterval: 1000` (in `src/lib/timeConstants.ts`). This will keep firing even after a WebSocket connection is established. HTTP responses have variable latency (50-500ms). WebSocket messages arrive near-instantly. Without timestamp comparison, last-write-wins means a slow HTTP response can overwrite a faster WebSocket update.
 
-**The five services that must be updated:**
-1. Interface: `sdk/src/configs/contracts.ts`, `src/config/multichain.ts`
-2. keeper-service: `src/config.ts` (env vars) + DO droplet `.env`
-3. order-execution-keeper-service: `.env` + DO droplet `.env`
-4. 0xMarkets-squid: `src/processor.ts` (EventEmitter address only, unchanged here)
-5. 0xmarkets_contract: deployment artifacts (auto-updated by hardhat-deploy)
-
-**The DO droplet danger:** The deployed services on `142.93.203.222` have their own `.env` files that are NOT automatically updated when you update local files. After local `.env` changes are verified, the updated configs must be pushed to the droplet and both keeper services must be restarted.
+**Consequences:** Price jitter. Users see prices flip between two values. PnL calculations oscillate. Trading decisions made on incorrect prices. The UI feels broken even though both data sources are individually correct.
 
 **Prevention:**
-Run the on-chain DataStore verification script after every deployment. The pattern from Phase 20 (contract address audit) reads the DataStore's canonical addresses directly from the chain and compares them against each service's configured values. Discrepancies fail loudly.
+- Every price update (HTTP or WebSocket) must carry Pyth's `publish_time` timestamp (already present in both `pricesController.ts` ticker response and candle collector data).
+- Frontend state update logic: only accept a price if its `publishTime` >= the currently displayed price's `publishTime`.
+- When WebSocket connects successfully and receives its first price update, STOP the SWR polling interval (set `refreshInterval: 0` or conditionally disable the fetcher). Re-enable polling only on WebSocket disconnect after a grace period (5 seconds).
+- Never run both sources simultaneously for the same data in steady state.
 
-**Detection:** After redeployment, run a test deposit through the UI. If the keeper's transaction shows a revert reason related to "invalid handler" or "access denied," a service has a stale address.
+**Detection:** Add a counter for "rejected stale updates" in the frontend. If this counter is non-zero after WebSocket is stable, the race condition is active. Price values that oscillate between two distinct numbers at ~1Hz indicate the race.
 
-**Phase to address:** Phase 24 — the post-deployment checklist must include explicit address propagation to the DO droplet.
+**Warning signs:** After adding WebSocket, prices "flicker" or "jump" on the trade page. PnL values oscillate without trades happening.
 
----
-
-### Pitfall 4: Nonce Conflicts Between keeper-service and order-execution-keeper-service Sharing One Wallet
-
-**What goes wrong:**
-Both keepers run with the same `PRIVATE_KEY` environment variable, meaning they share the same Ethereum account and therefore share the same nonce sequence. The order-execution-keeper uses manual nonce management: `getTransactionCount({ blockTag: "latest" })` before each submission. If keeper-service's liquidation executor submits a transaction simultaneously, both keepers read the same "current" nonce, both try to submit with that nonce, and one wins while the other gets `replacement transaction underpriced`. The loser's error handling may then retry with the same stale nonce, compounding the problem.
-
-**The critical asymmetry:** The order-execution-keeper has a well-tested sequential executor with nonce error recovery (`extractExpectedNonce`). The keeper-service's liquidation executor (`/src/core/executor.ts`) does NOT use this pattern — it calls `estimateFeesPerGas()` and `writeContract()` without manual nonce management, relying on viem's default behavior.
-
-**Why it happens:**
-Using a single keeper wallet is documented as an intentional "simpler for testnet" decision (`PROJECT.md` Key Decisions). It was acceptable when keeper-service only did price feeds and candles (no transactions). Liquidation execution adds transaction submission to keeper-service, creating genuine concurrency.
-
-**Current mitigations present:**
-- order-execution-keeper has `extractExpectedNonce` and retries with corrected nonce on "nonce too low"
-- Sequential executor design means order-execution-keeper only has one in-flight TX at a time
-- keeper-service liquidation executor has no concurrency protection
-
-**Consequence:** Liquidation execution and order/deposit/withdrawal execution will collide under concurrent load. The liquidation TX or the deposit TX will revert. The deposit will be retried (it stays in the DataStore). The liquidation candidate will be marked `FAILED` in the keeper-service database and never retried.
-
-**Prevention options (in order of preference):**
-1. **Separate wallets (recommended for production):** Give keeper-service its own funded wallet with `LIQUIDATION_KEEPER` role. Completely eliminates the conflict. Zero code changes needed beyond a new `.env` var.
-2. **Transaction mutex shared across both keepers (testnet shortcut):** Not feasible — two separate processes, no shared memory.
-3. **Stagger execution windows:** Configure keeper-service to delay liquidation execution by 3 seconds after order-execution-keeper's last known submission time. Not reliable under load.
-4. **Accept conflicts as rare for testnet:** On testnet with low traffic, simultaneous liquidation + order execution is unlikely. The order-execution-keeper's `extractExpectedNonce` recovery handles most cases. Acceptable for v1.7 verification but must be fixed before production.
-
-**Detection:** Watch for `replacement transaction underpriced` or `nonce too low` errors in keeper-service logs at the same time that order-execution-keeper logs show normal execution. The timing correlation identifies a nonce conflict.
-
-**Phase to address:** Phase 24 or a dedicated wallet-split phase. For v1.7 (testnet verification), document this as a known risk. Mark it blocking for any production deployment.
+**Phase:** Phase 3 (frontend WebSocket integration). The frontend migration phase must handle this explicitly.
 
 ---
 
-### Pitfall 5: Liquidation Executor Uses `getStoredPrice` With 60-Second Staleness Check — Depends on order-execution-keeper Staying Alive
+### Pitfall 4: Keeper Memory Exhaustion from Slow/Dead Clients
 
-**What goes wrong:**
-The keeper-service liquidation executor's `getTokenPrice` method reads prices from `PythLazerFeedProvider.getStoredPrice()` on-chain, with a 60-second staleness guard (`nowSeconds - storedPrice.timestamp > 60n`). This design assumes the order-execution-keeper is continuously pushing fresh prices to the `PythLazerFeedProvider` contract. If the order-execution-keeper goes down (Docker restart, crash, temporary OOM), the stored prices go stale within 60 seconds. The liquidation keeper then returns `null` for all token prices, skips all markets with a "stored price too stale" warning, and silently misses every liquidation opportunity during the downtime window.
+**What goes wrong:** The keeper's `ws` server buffers outgoing messages for slow clients. With 7 price feeds being relayed to N browser clients, the send buffer grows unboundedly for any client that cannot keep up. The keeper process OOMs and crashes, killing ALL services: liquidation scanner, order execution candle collector, and price feeds.
 
-**Why this is dangerous for liquidations specifically:** A liquidation that was valid at the time of the scan may become invalid if prices move. But a position that should be liquidated immediately (e.g., price spiked sharply against the position) needs to be acted on within the same scan window. If prices go stale for even 60 seconds during volatile market conditions, legitimate liquidations are skipped.
+**Why it happens:** The `ws` library's `send()` enqueues data in the Node.js TCP send buffer when the receiver is slow. There is no built-in backpressure mechanism. A single browser tab on a slow 3G connection, or a tab that went to sleep without closing the WebSocket, accumulates megabytes of buffered price updates on the server side. The keeper runs ALL critical services in a single Node.js process on a single DO droplet -- there is no process isolation.
+
+**Consequences:** Keeper crashes from OOM. ALL keeper functions go down simultaneously: liquidations stop, order execution stops, candle collection stops, price feeds stop. Full platform outage caused by a WebSocket feature that was supposed to be an enhancement.
 
 **Prevention:**
-1. The liquidation keeper should have its OWN Pyth Lazer WebSocket connection and cache (independent of order-execution-keeper's on-chain price storage). The `PythLazerOracleService` already exists in keeper-service — it just needs to be started in `lazer` oracle mode and `getTokenPrice` should read from the local cache, not from on-chain stored prices.
-2. The current keeper-service `index.ts` already initializes `PythLazerOracleService` when `ORACLE_MODE=lazer` — but the `scanner.ts` `getTokenPrice` method ignores this and reads from the contract instead.
-3. Minimum fix: change `getTokenPrice` to try the local Lazer cache first, fall back to on-chain stored price if the cache miss.
+- Check `ws.bufferedAmount` before each `send()`. If buffered data exceeds 64KB, skip the update for that client. Price updates are ephemeral -- a dropped update is always superseded by the next one.
+- Set a maximum client count (e.g., 50 for testnet). Reject new connections with HTTP 503 when at capacity.
+- Combine with heartbeat-based dead connection cleanup (Pitfall 2).
+- Rate-limit the relay: Pyth Lazer streams at 200ms intervals, but the frontend only needs ~500ms-1s updates. Throttle the broadcast to one message per 500ms.
+- Monitor keeper memory: log `process.memoryUsage().rss` every 30 seconds. Alert if RSS exceeds 400MB (or 80% of available).
+- Consider running the WebSocket server in a separate Node.js process (e.g., separate Docker container) to isolate it from the critical keeper loop. If the WS server OOMs, the liquidation scanner and order executor survive.
 
-**Detection:** If order-execution-keeper has a brief restart and liquidation scanner logs show "stored price too stale" for all tokens during that window, this pitfall is manifesting.
+**Detection:** `process.memoryUsage().rss` trending upward over hours without corresponding increase in client count. `ws.bufferedAmount > 0` growing for specific clients in periodic health logs.
 
-**Phase to address:** Phase 25 (liquidation verification) — fixing this dependency is part of making the liquidation path reliable.
+**Warning signs:** Keeper restarts without clear cause. Docker OOM-kill events in `docker logs`.
+
+**Phase:** Phase 1 (keeper WebSocket server). Backpressure handling must be built into the broadcast loop from the start. Process isolation decision should be made during architecture.
 
 ---
 
-### Pitfall 6: `discoverAccountsWithPositions` Fetches Every Position Key Individually — O(N) RPC Calls Per Scan
+### Pitfall 5: Mixed Content Blocking -- HTTPS Frontend Cannot Connect to Plain WS
 
-**What goes wrong:**
-`positionFetcher.discoverAccountsWithPositions()` in keeper-service:
-1. Reads `getBytes32Count(POSITION_LIST_KEY)` to get total count
-2. Reads position keys in batches of 100 via `getBytes32ValuesAt`
-3. For EACH position key, makes an individual `getPosition(dataStore, key)` RPC call to extract the account address
+**What goes wrong:** Frontend at `https://app.0xmarkets.io` (HTTPS via Vercel) tries to open `ws://142.93.203.222:37017` (plain WebSocket). Browser blocks the connection due to mixed content policy: an HTTPS page cannot load insecure WebSocket resources.
 
-With 1000 open positions, this is 1000 serial RPC calls per scan cycle. At ~100ms per call on Base Sepolia, one scan cycle takes 100 seconds — longer than the 30-second scan interval. The `scanRunning` guard prevents overlapping scans, so every scan cycle is skipped until the previous one finishes. Effective scan frequency degrades to once every 100 seconds at 1000 positions.
+**Why it happens:** The keeper currently serves plain HTTP on port 37017 via Express (`httpServer.ts`). There is no TLS termination on the DO droplet. The existing HTTP polling works because the frontend proxies through Vercel's HTTPS edge (or the keeper URL is already HTTPS). WebSocket connections bypass Vercel (Pitfall 1) and go directly to the keeper, exposing the lack of TLS.
 
-**Why it happens:**
-The `POSITION_LIST` in the DataStore stores position keys (`bytes32`), not the full position structs. To find which accounts have positions, you must decode each key back to an account — but position keys are hashes, not reversible. The only way to get the account is to read the full position struct from the contract.
-
-**Note for v1.7 testnet context:** With very few test positions (likely 5-20), this is not a problem. The pitfall becomes relevant at scale or during load testing.
+**Consequences:** `new WebSocket("ws://...")` fails silently in the browser. No connection is established. No error event fires in some browsers. The WebSocket feature appears completely broken with no obvious cause.
 
 **Prevention:**
-For now, document the O(N) limitation. The correct optimization is to use event-based account discovery: watch `PositionIncrease` events from EventEmitter to build an account registry, then only fetch positions for known accounts. This eliminates the DataStore iteration entirely. The `confirmator.ts` already watches the EventEmitter — extend it to track accounts with active positions.
+- Set up TLS on the DO droplet before writing any frontend WebSocket code. Options:
+  1. **nginx + Let's Encrypt** as reverse proxy (proven, well-documented)
+  2. **Caddy** for automatic HTTPS (simpler, auto-renews)
+- Use a proper domain (`wss://ws.0xmarkets.io`) instead of raw IP. Let's Encrypt requires a domain for certificate issuance.
+- Test the WebSocket connection from the actual deployed frontend URL, not from localhost (localhost is exempt from mixed content policies).
 
-**Detection:** Scan cycle duration in logs exceeds 30 seconds (the scan interval). "previous scan still running, skipping" warnings appear regularly.
+**Detection:** Browser console shows "Mixed Content: The page at 'https://...' was loaded over HTTPS, but attempted to connect to the insecure WebSocket endpoint 'ws://...'."
 
-**Phase to address:** Phase 25 (liquidation optimization) — document as a known scale bottleneck. Implement event-based account discovery when testnet positions exceed 50.
+**Warning signs:** WebSocket works in local development (`http://localhost:3000` to `ws://localhost:37017`) but fails completely on the deployed site.
 
----
-
-### Pitfall 7: `collateralUsd` in PositionSnapshot Is Not USD — It Is Raw Token Amount
-
-**What goes wrong:**
-`positionFetcher.ts` sets `collateralUsd = pos.numbers.collateralAmount`. The comment says `// TODO: Convert using collateral token price`. But `collateralAmount` is the raw token amount (e.g., USDC with 6 decimals, so 1000 USDC = `1_000_000` wei). The `RiskEngine.checkLiquidation` uses this raw value as if it were a USD amount (`const collateral = position.collateralUsd`). All risk calculations are wrong by orders of magnitude.
-
-**However:** The scanner in `scanner.ts` does NOT use `RiskEngine.checkLiquidation`. It calls `Reader.isPositionLiquidatable()` directly on-chain, which computes everything correctly using the contract's internal pricing. The `RiskEngine` is only used to compute a `riskScore` for the database record, not to decide whether to liquidate.
-
-**The consequence:** Risk scores in the database are wrong (will show extreme values). But liquidation decisions are based on the on-chain Reader call, which is correct. The bug is a data quality issue in the audit trail, not a correctness issue in the execution path.
-
-**Prevention:** Fix the `collateralUsd` calculation before relying on risk scores for any alerting or dashboarding. For v1.7, note this as a known data quality issue in the audit trail but not a blocker for functional correctness.
-
-**Phase to address:** Phase 25 (liquidation optimization) — fix the calculation as part of the risk scoring improvements.
-
----
-
-### Pitfall 8: Executor Re-Fetches Position From Contract After It May Have Changed
-
-**What goes wrong:**
-The liquidation execution flow in `executor.ts`:
-1. Scanner identifies a liquidatable position and saves a snapshot
-2. Scanner calls `executor.execute(candidate, decision)` synchronously
-3. Executor re-fetches the position from the contract via `positionFetcher.fetchAccountPositions`
-4. If no matching position is found (size > 0), the execution fails with "Position not found"
-
-Between step 1 (scanner decision) and step 3 (executor re-fetch), the position state on-chain may have changed:
-- The user closed their position voluntarily between the scan and the execution
-- Another keeper instance liquidated it first (impossible with single keeper, but relevant if testing with multiple)
-- The user added collateral and the position is no longer liquidatable
-
-**The double-fetch pattern:** The executor re-fetches the position specifically to get `collateralToken` and `isLong`, which are needed for `executeLiquidation(account, market, collateralToken, isLong, oracleParams)`. These are stored in the position struct but not reliably in the scanner's snapshot.
-
-**Consequence for closed positions:** The executor calls `executeLiquidation` with parameters from the snapshot for a position that no longer exists. The LiquidationHandler will revert because there is no position to liquidate. The executor catches the error and marks the candidate `FAILED`. This is correct behavior — but the `FAILED` status in the DB looks concerning and may trigger false alerts.
-
-**Prevention:** Treat `FAILED` liquidation executions as potentially benign (position closed before execution). Log them as INFO not ERROR when the position no longer exists at execution time. Do not alert on `FAILED` candidates without first checking whether the position still exists.
-
-**Phase to address:** Phase 25 — improve executor error classification to distinguish "position no longer exists" from genuine execution failures.
+**Phase:** Phase 1 (infrastructure). TLS setup is a prerequisite for all frontend WebSocket work.
 
 ---
 
@@ -202,64 +129,81 @@ Between step 1 (scanner decision) and step 3 (executor re-fetch), the position s
 
 ---
 
-### Pitfall 9: SKIP_HANDLER_DEPLOYMENTS Environment Variable Silently Skips OrderHandler Redeploy
+### Pitfall 6: Express and WebSocket Server Port Conflict
 
-**What goes wrong:**
-`deployOrderHandler.ts` has `func.skip = async () => process.env.SKIP_HANDLER_DEPLOYMENTS ? true : false`. If this variable is set in the shell environment (perhaps from a previous partial deployment session or a different project's dotenv), `npx hardhat deploy --tags OrderHandler` runs, appears to succeed (Hardhat reports "nothing to deploy"), but deploys nothing. The old buggy OrderHandler remains at its old address.
+**What goes wrong:** You try to attach the `ws` WebSocketServer to the same HTTP server that Express uses (port 37017). Without careful handling of the `upgrade` event, the WebSocket server and Express compete for incoming connections. Existing HTTP endpoints (`/health`, `/prices/tickers`, `/prices/candles`, `/api/*`) start failing intermittently or the WebSocket upgrade never completes.
 
-**Prevention:** Before deployment, explicitly verify `SKIP_HANDLER_DEPLOYMENTS` is unset:
-```bash
-echo $SKIP_HANDLER_DEPLOYMENTS  # must be empty
-unset SKIP_HANDLER_DEPLOYMENTS
-```
+**Why it happens:** Both Express and `ws` need to handle HTTP requests on the same port. The `upgrade` event fires for all HTTP upgrade requests. Without explicit path-based routing, the WebSocket server may intercept health check requests, or Express may respond to WebSocket upgrade requests with a 404.
 
-**Phase to address:** Phase 24 — add this verification to the pre-deployment checklist.
+**Prevention:**
+- **Option A (recommended for simplicity):** Run the WebSocket server on a separate port (e.g., 37019). Opens a new port on the firewall but completely avoids conflicts. The data-verification-service already uses 37019 -- use 37020 or another available port.
+- **Option B (shared port):** Use `ws` with `noServer: true` and manually route the `upgrade` event:
+  ```typescript
+  const wss = new WebSocketServer({ noServer: true });
+  server.on('upgrade', (req, socket, head) => {
+    if (req.url === '/ws/prices') {
+      wss.handleUpgrade(req, socket, head, (ws) => wss.emit('connection', ws, req));
+    } else {
+      socket.destroy(); // reject non-WS upgrade requests
+    }
+  });
+  ```
+- After adding WebSocket, explicitly test ALL existing HTTP endpoints to verify they still work.
 
----
-
-### Pitfall 10: hardhat-deploy Skips Redeployment If Bytecode Matches Cached Deployment
-
-**What goes wrong:**
-`hardhat-deploy` compares the new contract's bytecode against the cached deployment in `deployments/baseSepolia/`. If the bytecode matches (e.g., you compiled the same contract twice without changes), it skips deployment and uses the cached address. After fixing `OrderHandler.sol`, the bytecode will differ, so this is not a concern — unless the fix was reverted accidentally or the compilation produced the same bytecode via a no-op change.
-
-**Detection:** After `npx hardhat deploy --tags OrderHandler`, verify the address in `deployments/baseSepolia/OrderHandler.json` differs from the old address (`0xCf752B72B74eE7b35a405c445E9843968f53A397`). If the address is unchanged, the deployment was skipped.
-
-**Prevention:** Force redeployment if needed with `--reset` flag. Do not use `--reset` blindly — it redeploys ALL contracts, not just the targeted ones.
-
-**Phase to address:** Phase 24 — explicit address comparison is part of the post-deployment verification.
+**Phase:** Phase 1 (keeper WebSocket server). Architecture decision needed before implementation.
 
 ---
 
-### Pitfall 11: `withOraclePrices` Modifier Staleness Check Uses On-Chain Block Timestamp, Not Keeper Clock
+### Pitfall 7: Pyth Hermes Streaming Has Different Semantics Than HTTP Polling
 
-**What goes wrong:**
-The `LiquidationHandler.executeLiquidation` uses `withOraclePrices(oracleParams)` which calls `Oracle.setPrices`. Inside `Oracle.setPrices`, each price's timestamp is validated against `block.timestamp` with `MAX_ORACLE_PRICE_AGE` (300 seconds). The keeper's executor in `buildOracleParams` passes `update?.rawUpdate ?? "0x"` — when `rawUpdate` is "0x" (no cached update), the contract reads from stored prices via `PythLazerFeedProvider.getOraclePrice`, which returns whatever price was last pushed on-chain.
+**What goes wrong:** The candle collector (`candleCollector.ts`) currently calls `client.getLatestPriceUpdates()` every 2 seconds via HTTP. Switching to Hermes SSE/WebSocket changes the data delivery pattern: updates arrive push-based at variable frequency (sub-second), not on a fixed 2-second cadence. The candle-building logic may produce subtly different OHLC data.
 
-**The trap:** On-chain stored prices are updated by the order-execution-keeper every ~5 seconds. But the `timestamp` field stored in the contract comes from the Pyth Lazer feed's original timestamp, not `block.timestamp`. If there is any clock drift between the Pyth feed timestamp and the chain's `block.timestamp`, the `MAX_ORACLE_PRICE_AGE` check can fail even with fresh prices.
+**Why it happens:** The current `tick()` function samples at fixed 2s intervals. With streaming, you get every price Pyth publishes. The `floorToMinute()` and in-memory candle logic still works correctly, but:
+- "Open" is now the first streamed price of the minute (more accurate) rather than the first polled price (which could arrive up to 2s after the minute started).
+- High/low coverage improves dramatically (catches spikes between polls).
+- Volume of price updates per minute increases from ~30 to potentially hundreds, increasing CPU usage for candle processing.
+- Hermes SSE connections auto-disconnect after 24 hours to prevent resource leaks.
 
-**Prevention:** Test liquidation execution end-to-end on testnet before assuming it works. The oracle timestamp handling for liquidations may differ from deposit/withdrawal execution in subtle ways. Verify by observing actual `executeLiquidation` transactions on Basescan.
+**Prevention:**
+- The candle-building logic is actually correct for both polling and streaming -- it's stateless per-update. No code changes needed for correctness.
+- Add reconnection logic for the 24-hour disconnect: detect stream close, reconnect immediately.
+- Debounce database writes: the current pattern (flush previous candle when minute changes) already handles this correctly. Do not change to flush on every update.
+- Validate candle accuracy: compare streaming candles against HTTP-polled candles for a few hours before cutting over.
 
-**Phase to address:** Phase 25 — requires live testnet testing, not just code review.
+**Phase:** Phase 1 (keeper Pyth streaming). Test candle accuracy against HTTP baseline before removing the HTTP polling code path.
 
 ---
 
-### Pitfall 12: `onlyLiquidationKeeper` Role — keeper-service Must Have This Role Granted
+### Pitfall 8: Reconnection Thundering Herd After Keeper Restart
 
-**What goes wrong:**
-`LiquidationHandler.executeLiquidation` has `onlyLiquidationKeeper` modifier (visible in `LiquidationHandler.sol` line 46). The keeper-service wallet must have the `LIQUIDATION_KEEPER` role in the RoleStore. If this role was not granted when the keeper was originally set up (it is separate from `ORDER_KEEPER` and `CONTROLLER`), all liquidation transactions will revert with an access control error.
+**What goes wrong:** The keeper restarts (deploy, crash, OOM). All connected frontend clients detect the disconnect simultaneously and reconnect at the same instant. The keeper gets slammed with N simultaneous WebSocket upgrade requests plus subscription messages, potentially overloading it during the fragile startup period.
 
-**Why likely not yet verified:** The liquidation keeper has never been run end-to-end (it is "pending verification" per `PROJECT.md`). The role may or may not have been granted when the contract was originally deployed.
+**Why it happens:** All clients use the same reconnection delay without randomization. Reconnection attempts synchronize, creating a burst.
 
-**Prevention:** Before running the liquidation keeper for the first time, verify the role:
-```bash
-cast call <ROLE_STORE> "hasRole(bytes32,address)(bool)" $(cast keccak "LIQUIDATION_KEEPER") <KEEPER_WALLET_ADDRESS> --rpc-url https://sepolia.base.org
-```
-If it returns `false`, grant it:
-```bash
-cast send <ROLE_STORE> "grantRole(bytes32,address)" $(cast keccak "LIQUIDATION_KEEPER") <KEEPER_WALLET_ADDRESS> --rpc-url https://sepolia.base.org --private-key <ADMIN_KEY>
-```
+**Prevention:**
+- Frontend reconnection must use exponential backoff with random jitter: `delay = min(1000 * 2^attempt, 30000) + random(0, 3000)`.
+- The keeper should not broadcast accumulated/buffered messages on new connections -- just start fresh from the next price update.
+- Set a connection rate limit on the keeper: accept at most 10 new connections per second during startup.
+- After reconnecting, the frontend should immediately request the latest price via HTTP fallback (Pitfall 10) to avoid showing stale data during the reconnection window.
 
-**Phase to address:** Phase 25 — this is the first thing to check before any liquidation testing.
+**Phase:** Phase 3 (frontend WebSocket client). Reconnection logic is a frontend concern.
+
+---
+
+### Pitfall 9: Pyth Lazer WebSocket Confusion -- Two Different Pyth Connections for Different Purposes
+
+**What goes wrong:** The keeper already has ONE Pyth Lazer WebSocket connection (`PythLazerOracleService` in `pythLazerOracle.ts`) for on-chain oracle signing. Adding a second Pyth connection (Hermes for price streaming to the frontend) creates confusion about which connection serves which purpose. Developers modify the wrong connection, or assume one connection can serve both needs.
+
+**Why it happens:** Both connections talk to Pyth infrastructure, both deliver price data, but they serve completely different purposes:
+- **Pyth Lazer** (existing): `@pythnetwork/pyth-lazer-sdk`, binary EVM format, used for `updatePrice()` on-chain transactions. Cannot be repurposed for frontend streaming.
+- **Pyth Hermes** (new): `@pythnetwork/hermes-client`, parsed JSON format, used for display prices. Does not provide EVM-encoded data for on-chain use.
+
+**Prevention:**
+- Name modules distinctly: `pythLazerOracle.ts` (existing, oracle signing) vs `priceStreamer.ts` or `hermesPriceStream.ts` (new, price streaming).
+- Verify the Pyth Pro API key (`QpxMy21OMvC7rap9hYxJ6GB0eb3PdOEs2WvmG0XN`) supports both Lazer and Hermes concurrent connections without rate limiting.
+- Document the two connections clearly in the keeper's README or config comments.
+
+**Phase:** Phase 1 (keeper). Naming and separation must be clear from the start.
 
 ---
 
@@ -267,27 +211,42 @@ cast send <ROLE_STORE> "grantRole(bytes32,address)" $(cast keccak "LIQUIDATION_K
 
 ---
 
-### Pitfall 13: Scan Interval (30 seconds) May Miss Immediate Liquidation After Sharp Price Move
+### Pitfall 10: No Graceful Degradation When WebSocket Fails
 
-**What goes wrong:**
-The keeper-service scan runs every 30 seconds (`SCAN_INTERVAL_SECONDS=30`). If a position becomes liquidatable due to a sudden price spike, it is not detected until the next scan cycle completes, which could be up to 29 seconds after the price move. On testnet with low latency, this is acceptable. On mainnet with competitive liquidators, this means losing every liquidation to bots scanning at 1-second intervals.
+**What goes wrong:** WebSocket is deployed as the primary price source. When it fails (keeper restart, network blip, client-side WebSocket unsupported), the frontend shows no prices at all. Users cannot trade.
 
-**Prevention for v1.7:** 30 seconds is acceptable for testnet verification. Document the limitation. For production, the scan interval should be reduced to 2-5 seconds, and the oracle pricing should be pulled directly from the Lazer WebSocket cache (not from on-chain stored prices) to eliminate the oracle-freshness dependency during scanning.
+**Prevention:**
+- Keep the HTTP `/prices/tickers` endpoint operational. It is already built and working in `pricesController.ts`.
+- Frontend should automatically fall back to HTTP polling (the current `useTokenRecentPricesRequest` with 1s SWR) when WebSocket is disconnected for more than 5 seconds.
+- Display connection status: "Live" (WebSocket active), "Delayed" (HTTP polling fallback), "Offline" (both failed).
+- The fallback must be tested: kill the WebSocket server while the frontend is running and verify prices continue updating via HTTP.
 
-**Phase to address:** Phase 25 (optimization) — scan interval tuning is a performance parameter, not a correctness issue.
+**Phase:** Phase 3 (frontend). Fallback logic is part of the frontend WebSocket integration.
 
 ---
 
-### Pitfall 14: PostgreSQL Database Must Be Migrated Before keeper-service Restart
+### Pitfall 11: Browser Tab Backgrounding Wastes Resources
 
-**What goes wrong:**
-The keeper-service uses Prisma with a PostgreSQL database. If the schema changes (new fields, renamed tables) between deployments without running `prisma migrate deploy`, the service crashes on startup with a Prisma schema mismatch error.
+**What goes wrong:** WebSocket messages keep arriving when the browser tab is in the background. Each message triggers React state updates via the price store, causing unnecessary renders and CPU usage. On mobile, this drains battery and may cause the OS to kill the tab.
 
-**For v1.7:** No schema changes are planned. The liquidation tables (`position_snapshots`, `liquidation_candidates`, `signed_decisions`, `liquidation_executions`) already exist from the initial keeper-service deployment.
+**Prevention:**
+- Use the Page Visibility API (`document.visibilityState`). When hidden for more than 30 seconds, stop processing incoming WebSocket messages (but keep connection alive to avoid reconnection cost). Resume processing when visible.
+- The current SWR polling uses `refreshWhenHidden: true`. Decide whether WebSocket should match this behavior or be smarter. For a trading app, keeping prices fresh in background tabs is reasonable -- but throttle to 5s updates instead of real-time.
 
-**Prevention:** If schema changes are ever made, always run `prisma migrate deploy` on the DO droplet before restarting the service. The database is on the same droplet; SSH in and run it manually.
+**Phase:** Phase 3 (frontend optimization). Not a launch blocker but improves mobile experience.
 
-**Phase to address:** Not a v1.7 concern unless schema changes are introduced.
+---
+
+### Pitfall 12: WebSocket Message Format Breaking Changes
+
+**What goes wrong:** The keeper broadcasts prices in a specific JSON format. Frontend parses this format. A keeper deploy changes the format (field renamed, new field added, precision changed). Frontend breaks until redeployed.
+
+**Prevention:**
+- Define a versioned message schema. Include a `version` field in every WebSocket message (e.g., `{ version: 1, type: "prices", data: [...] }`).
+- Frontend should validate incoming messages and gracefully ignore unknown versions (fall back to HTTP).
+- Deploy keeper changes before frontend changes. The keeper's HTTP `/prices/tickers` format is the contract -- the WebSocket format should match it exactly.
+
+**Phase:** Phase 1 (keeper). Define the message format specification before implementing either side.
 
 ---
 
@@ -295,48 +254,45 @@ The keeper-service uses Prisma with a PostgreSQL database. If the schema changes
 
 | Phase Topic | Likely Pitfall | Mitigation |
 |-------------|---------------|------------|
-| OrderHandler redeploy | ExchangeRouter immutable constructor not updated | Always deploy ExchangeRouter immediately after OrderHandler |
-| ExchangeRouter redeploy | CONTROLLER/ROUTER_PLUGIN roles not granted | Verify with `cast call` before any testing |
-| Address propagation to DO droplet | Stale addresses in live `.env` files | SSH to droplet, update `.env`, restart both keepers |
-| Liquidation first run | LIQUIDATION_KEEPER role not granted | Check role before first execution attempt |
-| Nonce management | Both keepers share wallet, concurrent TXs | Separate wallets or accept testnet race condition with documented risk |
-| Oracle for liquidations | Depends on order-execution-keeper's on-chain price store | Verify freshness window; use local Lazer cache for independence |
-| Account discovery | O(N) per-position RPC calls | Acceptable at testnet scale; document as scale blocker |
-| Risk score accuracy | collateralUsd is raw token amount, not USD | Non-blocking for v1.7; fix before using scores for alerts |
-| Skip flag on deployment | SKIP_HANDLER_DEPLOYMENTS env var skips redeploy silently | Unset before running hardhat deploy |
-| hardhat-deploy cache | Unchanged bytecode skips redeploy | Verify new address differs from old after deployment |
-| Oracle timestamp validation | On-chain timestamp vs block.timestamp drift | Verify with actual testnet liquidation execution |
-
----
-
-## Recovery Strategies
-
-| Pitfall | Recovery Steps |
-|---------|---------------|
-| ExchangeRouter still points to old OrderHandler | Redeploy ExchangeRouter immediately; update all service addresses |
-| CONTROLLER role missing | Call `grantRole(CONTROLLER, newAddress)` from RoleStore admin; no redeployment needed |
-| LIQUIDATION_KEEPER role missing | Call `grantRole(LIQUIDATION_KEEPER, keeperWallet)` from RoleStore admin |
-| Stale addresses on DO droplet | SSH to `142.93.203.222`, update `.env` for both keepers, `docker compose restart` both services |
-| Nonce conflict between keepers | Let it resolve naturally (order-execution-keeper has recovery); if stuck, restart both keepers and let them re-sync nonces from chain |
-| Liquidation executor marks candidates FAILED | Check whether position still exists on-chain; if position was closed legitimately, FAILED status is correct. Re-check logic if position still exists. |
-| SKIP_HANDLER_DEPLOYMENTS silently skipped deploy | Unset the var, run deployment again; hardhat-deploy will compare bytecode and redeploy correctly |
+| Infrastructure / TLS | Pitfall 5: mixed content blocking | Set up nginx + Let's Encrypt on DO droplet FIRST |
+| Infrastructure / DNS | Pitfall 1: Vercel cannot proxy WS | Create `ws.0xmarkets.io` DNS record pointing to DO |
+| Keeper WebSocket server | Pitfall 6: port conflict with Express | Use `noServer: true` or separate port |
+| Keeper WebSocket server | Pitfall 4: memory exhaustion from slow clients | Check `bufferedAmount`, set client cap, implement heartbeat |
+| Keeper WebSocket server | Pitfall 2: silent connection deaths | Server-side ping/pong every 15s, terminate after 2 missed pongs |
+| Keeper WebSocket server | Pitfall 12: format breaking changes | Define versioned message schema upfront |
+| Keeper Pyth streaming | Pitfall 7: candle semantics change | Validate candle accuracy against HTTP baseline |
+| Keeper Pyth streaming | Pitfall 9: Lazer/Hermes confusion | Name modules distinctly, separate concerns |
+| Frontend WebSocket client | Pitfall 3: race condition with HTTP polling | Timestamp-gated updates, disable polling when WS active |
+| Frontend WebSocket client | Pitfall 8: thundering herd on reconnect | Exponential backoff with random jitter |
+| Frontend fallback | Pitfall 10: no degradation path | Keep HTTP endpoint, auto-fallback after 5s disconnect |
+| Frontend optimization | Pitfall 11: background tab waste | Page Visibility API throttling |
 
 ---
 
 ## Sources
 
-### Primary (HIGH confidence — direct codebase analysis)
-- `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/deployOrderHandler.ts` — SKIP_HANDLER_DEPLOYMENTS skip logic, afterDeploy role grants
-- `/Users/ken/Projects/0xM/0xmarkets_contract/deploy/deployExchangeRouter.ts` — immutable OrderHandler constructor arg, afterDeploy role grants
-- `/Users/ken/Projects/0xM/0xmarkets_contract/contracts/exchange/LiquidationHandler.sol` — onlyLiquidationKeeper modifier, executeLiquidation signature
-- `/Users/ken/Projects/0xM/keeper-service/src/core/scanner.ts` — discoverAccountsWithPositions O(N) pattern, getStoredPrice 60s staleness check
-- `/Users/ken/Projects/0xM/keeper-service/src/core/executor.ts` — no nonce management, double-fetch pattern, gas estimation
-- `/Users/ken/Projects/0xM/keeper-service/src/core/positionFetcher.ts` — collateralUsd = collateralAmount bug
-- `/Users/ken/Projects/0xM/keeper-service/src/core/riskEngine.ts` — uses collateralUsd as USD value (incorrect)
-- `/Users/ken/Projects/0xM/order-execution-keeper-service/src/executor.ts` — extractExpectedNonce, sequential execution, nonce recovery
-- `/Users/ken/Projects/0xM/0xMarkets-Interface/.planning/PROJECT.md` — single wallet decision, liquidation keeper pending verification, nonce management notes
-- `/Users/ken/Projects/0xM/0xMarkets-Interface/.planning/phases/24-contract-bug-fixes/24-01-PLAN.md` — full contract redeploy context, interface listing, known addresses
+### Primary (HIGH confidence -- official documentation and verified issues)
+- [Vercel KB: Serverless Functions do not support WebSocket](https://vercel.com/kb/guide/do-vercel-serverless-functions-support-websocket-connections) -- Vercel's official statement
+- [Nginx WebSocket proxy documentation](https://nginx.org/en/docs/http/websocket.html) -- official proxy_read_timeout default of 60s
+- [ws library: memory leak in weak network environments](https://github.com/websockets/ws/issues/1830) -- confirmed bufferedAmount accumulation
+- [Node.js backpressure in streams](https://nodejs.org/en/learn/modules/backpressuring-in-streams) -- official Node.js documentation
+- [Pyth Hermes documentation](https://docs.pyth.network/price-feeds/core/how-pyth-works/hermes) -- SSE streaming, 24h auto-disconnect
+
+### Secondary (MEDIUM confidence -- well-sourced technical analysis)
+- [WebSocket backpressure analysis](https://skylinecodes.substack.com/p/backpressure-in-websocket-streams) -- buffering layer breakdown
+- [WebSocket heartbeat/ping-pong implementation](https://oneuptime.com/blog/post/2026-01-27-websocket-heartbeat/view) -- 20-30s interval recommendation
+- [WebSockets in production with Node.js](https://medium.com/voodoo-engineering/websockets-on-production-with-node-js-bdc82d07bb9f) -- silent disconnect patterns
+- [Wolt: From polling to WebSockets](https://careers.wolt.com/en/blog/engineering/from-polling-to-websockets-improving-order-tracking-user-experience) -- race condition during migration, timestamp-based ordering
+
+### Codebase Analysis (HIGH confidence -- direct reading)
+- `keeper-service/src/core/candleCollector.ts` -- 2s HTTP polling, in-memory candle building, floorToMinute logic
+- `keeper-service/src/server/controllers/pricesController.ts` -- HTTP ticker endpoint, normalizePythPrice, HermesClient usage
+- `keeper-service/src/core/pythLazerOracle.ts` -- existing Pyth Lazer WebSocket, binary EVM format, 200ms channel
+- `keeper-service/src/server/httpServer.ts` -- Express on port 37017, CORS middleware, health endpoint
+- `src/domain/synthetics/tokens/useTokenRecentPricesData.ts` -- SWR with 1s refreshInterval, publish_time available
+- `src/lib/timeConstants.ts` -- PRICES_UPDATE_INTERVAL = 1000ms
+- `src/lib/oracleKeeperFetcher/oracleKeeperFetcher.ts` -- URL routing, fallback logic
 
 ---
-*Pitfalls research for: v1.7 Liquidation Readiness (contract redeployment + liquidation keeper)*
-*Researched: 2026-02-27*
+*Pitfalls research for: v1.12 WebSocket Price Streaming*
+*Researched: 2026-03-05*

@@ -1,332 +1,272 @@
-# Technology Stack: v1.7 Liquidation Readiness
+# Technology Stack: v1.12 WebSocket Price Streaming
 
-**Project:** 0xMarkets keeper-service + 0xmarkets_contract
-**Researched:** 2026-02-27
+**Project:** 0xMarkets keeper-service + 0xMarkets-Interface
+**Researched:** 2026-03-05
 **Overall Confidence:** HIGH
 
 ## Context
 
-v1.7 is an additive milestone on top of a fully operational system. The contracts repo uses Hardhat + Foundry. The keeper-service uses TypeScript, Prisma, and PostgreSQL with a pipeline of scanner → riskEngine → executor. This document covers only NEW stack additions/changes needed for the three work streams:
+v1.12 replaces HTTP polling with WebSocket streaming at two boundaries:
 
-1. **Contract bug fix** — guard `triggerPrice=0` in OrderHandler for reversed markets, redeploy to Base Sepolia
-2. **Liquidation verification** — confirm the existing scanner → riskEngine → executor pipeline works on Base Sepolia
-3. **Liquidation performance** — optimize scanning (batched multicall), risk assessment, and execution latency
+1. **Pyth Hermes --> Keeper:** Replace 2s HTTP polling in `candleCollector.ts` with Hermes SSE streaming via `getPriceUpdatesStream()`
+2. **Keeper --> Frontend:** Replace 1s HTTP polling of `/prices/tickers` and `/prices/candles` with a WebSocket server on the keeper and WebSocket client on the frontend
+3. **TradingView integration:** Replace 1s `PauseableInterval` polling in `DataFeed.subscribeBars()` with real-time bar updates pushed via the keeper WebSocket
 
 ## Existing Stack (Do Not Re-research)
 
-Everything in the previous STACK.md (v1.5 Minimal Keeper Rewrite) applies to the order-execution-keeper-service and remains unchanged. The keeper-service (liquidation keeper, port 37017) uses:
-
-| Technology | Version | Role |
-|------------|---------|------|
-| TypeScript | ^5.9.3 | Language |
-| Node.js | 22 (Docker: node:22-slim) | Runtime |
-| viem | ^2.40.3 | Ethereum client |
-| @prisma/client | ^5.22.0 | Database ORM |
-| prisma | ^5.22.0 | Migrations + codegen |
-| @pythnetwork/pyth-lazer-sdk | ^5.2.0 | Oracle WebSocket |
-| @pythnetwork/hermes-client | ^2.1.0 | Oracle HTTP fallback |
-| express | ^5.1.0 | HTTP server |
-| pino | ^10.3.1 | Structured logging |
-| dotenv | ^17.2.3 | Env config |
-| vitest | ^4.0.16 | Test runner |
-| ts-node + nodemon | dev runners | Dev watch |
-
-The contracts repo uses Hardhat 2.x (^2.22.8) with hardhat-deploy, hardhat-foundry, Foundry forge, and Solidity 0.8.24.
+| Technology | Version | Service | Role |
+|------------|---------|---------|------|
+| Express | ^5.1.0 | keeper-service | HTTP server |
+| @pythnetwork/hermes-client | ^2.1.0 | keeper-service | Pyth price fetching (HTTP + SSE) |
+| @pythnetwork/pyth-lazer-sdk | ^5.2.0 | keeper-service | Oracle signing (WS, separate concern) |
+| Prisma | ^5.22.0 | keeper-service | Candle persistence |
+| pino | ^10.3.1 | keeper-service | Logging |
+| React 18 + Vite 5 | -- | frontend | UI framework |
+| SWR | 2.3.3 | frontend | Data fetching (current polling) |
+| TradingView charting_library | -- | frontend | Charts |
 
 ---
 
-## Work Stream 1: Contract Bug Fix and Redeploy
+## New Stack Additions
 
-### What Exists
+### Keeper-side: `ws` (WebSocket Server)
 
-The `0xmarkets_contract` repo already has a full Hardhat + Foundry dual-toolchain setup:
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| ws | ^8.19.0 | WebSocket server for broadcasting prices to frontend clients | Standard Node.js WebSocket library. Zero dependencies. Attaches to existing Express HTTP server (shares port 37017). No need for Socket.IO -- we need simple broadcast, not rooms/namespaces/fallback transports. |
+| @types/ws | ^8.5.14 | TypeScript types for ws | Required for TypeScript compilation. |
 
-- **Hardhat** `^2.22.8` with `hardhat-deploy ^0.11.25`, `@nomicfoundation/hardhat-foundry ^1.1.1`, `@nomicfoundation/hardhat-verify ^2.0.11`
-- **Foundry** (`forge`) via `lib/forge-std` 1.12.0 — available for fast local tests
-- **Solidity** 0.8.24 with optimizer enabled (runs: 10)
-- **Network config** for `baseSepolia` already present in `hardhat.config.ts`
-- **Deploy scripts** exist but are in `deploy/` directory (not found as TypeScript — likely JavaScript or a convention not committed)
+**Why `ws` and not alternatives:**
 
-### What Is Needed
+| Alternative | Why Not |
+|-------------|---------|
+| Socket.IO | Adds 300KB+ bundle, abstractions for rooms/namespaces/acknowledgements we don't need. We broadcast one-way price data to all connected clients -- raw WebSocket is sufficient. |
+| uWebSockets.js | Higher performance but C++ binding, harder to install in Docker, overkill for <100 concurrent connections on testnet. |
+| express-ws | Unmaintained (last publish 2020), wraps `ws` anyway. Better to use `ws` directly for control. |
+| SSE (Server-Sent Events) | One-directional like our use case, but browser EventSource API has no built-in reconnection backoff control, and we may want bidirectional later (subscribe to specific markets). WebSocket is more future-proof. |
 
-**Nothing new to install.** The fix is surgical Solidity editing inside the existing repo, then redeploying with the existing Hardhat pipeline.
-
-#### Solidity Fix Pattern
-
-The bug is a division-by-zero in `OrderHandler.sol` when `triggerPrice=0` for reversed markets (JPY/USD). The fix is a guard:
-
-```solidity
-// In OrderHandler._setExactOrderPrice() or equivalent:
-// BEFORE (causes division-by-zero):
-uint256 price = WeiPerUnit * WeiPerUnit / triggerPrice; // reversed market
-
-// AFTER (guard against zero):
-require(triggerPrice > 0, "OrderHandler: triggerPrice cannot be zero for reversed market");
-// OR return early / use a sentinel:
-if (triggerPrice == 0) revert Errors.EmptyTriggerPrice();
-```
-
-The exact location in OrderHandler.sol needs to be confirmed when editing. Search for `triggerPrice` and the reversal logic to find the division site.
-
-#### Redeploy Command (existing toolchain)
+**Installation (keeper-service):**
 
 ```bash
-# From 0xmarkets_contract/
-ACCOUNT_KEY=<deployer_pk> npx hardhat deploy --network baseSepolia --tags OrderHandler
-# Or if using specific deploy script:
-ACCOUNT_KEY=<deployer_pk> npx hardhat run scripts/deployOrderHandler.ts --network baseSepolia
+cd keeper-service
+pnpm add ws
+pnpm add -D @types/ws
 ```
 
-**After redeploy:** Update `ORDER_HANDLER_ADDRESS` in ALL services (order-execution-keeper-service, keeper-service, interface, squid). See `.claude/contract-address-update-guide.md`.
+### Keeper-side: Hermes SSE Streaming (Already Installed)
 
-#### Verification (existing toolchain)
+No new package needed. `@pythnetwork/hermes-client@2.1.0` already exposes `getPriceUpdatesStream()` which returns an `EventSource` (SSE client). The `eventsource@^3.0.5` package is a transitive dependency of hermes-client, already resolved in the lockfile.
 
-```bash
-# Verify on Basescan using already-configured hardhat-verify
-BASESCAN_API_KEY=<key> npx hardhat verify --network baseSepolia <NEW_ADDRESS> <constructor_args>
-```
-
-**Confidence: HIGH** — No new tooling needed. The existing Hardhat pipeline handles compile, deploy, and verify.
-
----
-
-## Work Stream 2: Liquidation Verification
-
-### What Exists
-
-The keeper-service has a full test infrastructure but most tests are stubs. The actual pipeline integration tests are in `src/test/testnet/integration.test.ts` (skipped unless `TEST_ENV=testnet`) and E2E tests in `src/test/e2e/` (use mock contracts, not real Base Sepolia).
-
-The existing scanner already does the critical work: auto-discovers accounts from DataStore POSITION_LIST, fetches positions, calls `Reader.isPositionLiquidatable()`, and triggers executor if liquidatable. The executor uses Lazer oracle cache (via `getPythLazerOracle()`) and calls `LiquidationHandler.executeLiquidation()`.
-
-**Critical observation:** The `riskEngine.ts` is NOT called by `scanner.ts`. The scanner calls `Reader.isPositionLiquidatable()` on-chain directly. The `riskEngine.ts` is a standalone module that computes risk off-chain using its own formula (collateral vs MMR). This is a structural inconsistency — the scanner bypasses the riskEngine entirely and delegates liquidatability determination to the contract.
-
-### What Is Needed for Verification
-
-**No new dependencies.** Verification is about running the existing pipeline against real Base Sepolia testnet data.
-
-#### Verification Test Pattern
-
-The `src/test/testnet/integration.test.ts` scaffolding exists but the test bodies are stub assertions. To verify end-to-end:
-
-1. Set `TEST_ENV=testnet` environment variable
-2. Provide `TEST_RPC_URL`, `TEST_PRIVATE_KEY`, real contract addresses
-3. Fill in the existing test stubs with actual assertions
-
-The test pattern already in place:
+**API (verified from hermes-client type declarations):**
 
 ```typescript
-// src/test/testnet/integration.test.ts
-// Already has describe.skipIf(!isTestnetMode())
-// Already imports getTestRPCClient(), getTestDatabase()
-// Just needs real assertions replacing the stub expects
-```
-
-**What to write (not new dependencies):**
-
-```typescript
-it('should fetch positions from real contracts', async () => {
-  const positionFetcher = new PositionFetcher(84532);
-  const positions = await positionFetcher.discoverAccountsWithPositions();
-  // verify it runs without throwing, returns array
-  expect(Array.isArray(positions)).toBe(true);
-});
-
-it('should complete scan cycle without throwing', async () => {
-  await scanner.scan(); // runs full pipeline
-  // verify health state updated
-  expect(healthState.lastScanAt).toBeTruthy();
-});
-```
-
-**Confidence: HIGH** — No new packages needed. Tests run with `vitest ^4.0.16` already installed.
-
----
-
-## Work Stream 3: Liquidation Performance Optimization
-
-### Performance Problem Analysis
-
-The current position discovery path (`discoverAccountsWithPositions()`) makes N+1 individual RPC calls:
-
-1. One call to get `totalCount` from DataStore
-2. One batch call to get position keys (100 at a time)
-3. One individual `getPosition()` call **per position key** to extract the account
-
-Then for each discovered account, `fetchAccountPositions()` loops with individual `getAccountPositions()` calls. For M accounts and P positions total, this is O(P) serial RPC calls, each costing ~100-300ms on Base Sepolia testnet.
-
-### New Tool: viem Multicall
-
-**Already available in viem `^2.40.3`.** No new installation required.
-
-`viem`'s `publicClient.multicall()` batches multiple `readContract` calls into a single RPC round-trip using the Multicall3 contract deployed on all major chains including Base Sepolia.
-
-```typescript
-// BEFORE: N serial calls
-for (const positionKey of positionKeys) {
-  const position = await publicClient.readContract({
-    address: READER_ADDRESS,
-    abi: READER_ABI,
-    functionName: "getPosition",
-    args: [DATA_STORE_ADDRESS, positionKey],
-  });
-}
-
-// AFTER: 1 multicall
-const results = await publicClient.multicall({
-  contracts: positionKeys.map(key => ({
-    address: READER_ADDRESS,
-    abi: READER_ABI,
-    functionName: "getPosition",
-    args: [DATA_STORE_ADDRESS, key],
-  })),
-  allowFailure: true, // don't abort if one position errors
-});
-// results is { status: 'success' | 'failure', result: PositionProps }[]
-```
-
-**Multicall3 address on Base Sepolia:** `0xcA11bde05977b3631167028862bE2a173976CA11` (same across all EVM chains — standard deployment). viem uses this automatically when chain config includes it, which Base Sepolia does.
-
-**Confidence: HIGH** — viem multicall is documented, stable since viem 1.x, and Base Sepolia has Multicall3 deployed.
-
-### Supporting: Parallel Account Fetching
-
-After account discovery, `fetchPositionsFromAccounts()` currently loops serially. Replace with `Promise.all()`:
-
-```typescript
-// BEFORE: serial per-account
-for (const account of accounts) {
-  const positions = await positionFetcher.fetchAccountPositions(account);
-}
-
-// AFTER: parallel fetch (all accounts simultaneously)
-const allResults = await Promise.all(
-  accounts.map(acc => positionFetcher.fetchAccountPositions(acc).catch(() => []))
+// Already available -- NO new install
+const hermesClient = new HermesClient("https://hermes.pyth.network");
+const eventSource: EventSource = await hermesClient.getPriceUpdatesStream(
+  Object.values(PYTH_PRICE_FEED_IDS), // string[] of hex feed IDs
+  { parsed: true }                      // get structured price data, not just binary
 );
-const allPositions = allResults.flat();
+
+eventSource.onmessage = (event) => {
+  const priceUpdate: PriceUpdate = JSON.parse(event.data);
+  // priceUpdate.parsed contains array of { id, price: { price, expo, ... }, ... }
+};
 ```
 
-No new dependencies — this is a code pattern change only.
+**Key behavior:** The Hermes SSE connection auto-closes after 24 hours. Must implement reconnection logic. This is NOT a limitation of the library -- it is Hermes server-side policy to prevent resource leaks.
 
-### Timing Instrumentation
+### Frontend: Native WebSocket (No New Package)
 
-The existing `pino ^10.3.1` logger supports high-resolution timestamps via `Date.now()` or `performance.now()`. No new tooling needed.
+The browser `WebSocket` API is sufficient. No library needed.
 
-Pattern already used in order-execution-keeper-service (and copied here):
+| Alternative | Why Not |
+|-------------|---------|
+| socket.io-client | Would require Socket.IO on server side. Adds bundle weight for features we don't use. |
+| reconnecting-websocket | Nice convenience, but trivial to implement reconnection in ~20 lines. Not worth a dependency. |
+| @tanstack/react-query ws adapter | Doesn't exist as a first-party adapter. SWR/react-query are for request-response, not streaming. |
+
+**Pattern for frontend:**
 
 ```typescript
-const t0 = performance.now();
-const positions = await discoverAccountsWithPositions();
-log.info({ durationMs: Math.round(performance.now() - t0), count: positions.length }, "discovery complete");
+// Custom hook: useWebSocketPrices()
+const ws = new WebSocket(`wss://${keeperHost}/ws/prices`);
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  // Update React state / SWR cache
+};
 ```
 
-`performance` is available in Node 22 without any import.
+---
+
+## Integration Architecture
+
+### 1. Hermes SSE --> Keeper (replaces candleCollector polling)
+
+**Current:** `candleCollector.ts` calls `hermesClient.getLatestPriceUpdates()` every 2s via `setInterval`.
+
+**New:** `candleCollector.ts` calls `hermesClient.getPriceUpdatesStream()` once at startup. Each SSE message triggers candle update logic (same `tick()` body, but event-driven instead of polled). Reconnection on close/error with exponential backoff.
+
+**Integration point:** The `currentCandles` Map and Prisma upsert logic stay identical. Only the trigger mechanism changes from `setInterval(tick, 2000)` to `eventSource.onmessage`.
+
+### 2. Keeper WebSocket Server --> Frontend (replaces /prices/tickers polling)
+
+**Current:** Frontend polls `GET /prices/tickers` every 1s via SWR. Keeper reads from Pyth Lazer cache + currentCandles map.
+
+**New:** Keeper creates a `WebSocketServer` attached to the existing Express HTTP server (sharing port 37017). On each Hermes SSE price update, keeper broadcasts a JSON message to all connected WebSocket clients containing ticker data in the same format as `/prices/tickers`.
+
+**ws attaches to Express HTTP server (shares port):**
+
+```typescript
+import { WebSocketServer } from "ws";
+import { createHttpServer } from "./httpServer.js";
+
+const server = createHttpServer(); // returns http.Server from app.listen()
+const wss = new WebSocketServer({ server, path: "/ws/prices" });
+
+wss.on("connection", (ws) => {
+  // Send initial snapshot
+  ws.send(JSON.stringify({ type: "tickers", data: getCurrentTickers() }));
+  ws.send(JSON.stringify({ type: "candles", data: getRecentCandles() }));
+});
+
+// On each Hermes SSE update:
+function broadcastTickers(tickers: TickerData[]) {
+  const msg = JSON.stringify({ type: "tickers", data: tickers });
+  for (const client of wss.clients) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(msg);
+    }
+  }
+}
+```
+
+**Key:** `createHttpServer()` currently returns the Express app's `server` from `app.listen()`. The `ws` library's `WebSocketServer` handles the HTTP Upgrade handshake when `{ server }` is passed. No additional Express middleware needed.
+
+### 3. TradingView Real-time Bars (replaces PauseableInterval polling)
+
+**Current:** `DataFeed.subscribeBars()` creates a `PauseableInterval` that calls `this.fetchCandles()` (HTTP to `/prices/candles`) every 1s.
+
+**New:** `DataFeed.subscribeBars()` listens to the WebSocket connection for candle updates. The keeper pushes candle bar data on each price update. The `onTick` callback fires immediately on receipt instead of after a 1s poll delay.
+
+**Integration point:** The existing `subscribeBars` callback signature (`onTick: SubscribeBarsCallback`) remains identical. Only the data source changes from HTTP poll to WebSocket message.
 
 ---
 
-## Complete Stack Delta for v1.7
+## Message Protocol (Keeper --> Frontend WebSocket)
 
-### keeper-service: No New Dependencies
+Use simple JSON messages with a `type` discriminator:
 
-| Package | Status | Reason |
-|---------|--------|--------|
-| viem multicall | Existing | Already in viem ^2.40.3 |
-| vitest | Existing | Already devDependency ^4.0.16 |
-| pino timing | Existing | Built-in with performance.now() |
+```typescript
+// Ticker update (replaces /prices/tickers polling)
+{
+  type: "tickers",
+  data: [
+    { tokenSymbol: "WETH", minPrice: "...", maxPrice: "...", oracleDecimals: 18, tokenAddress: "0x...", updatedAt: 1709654400 }
+  ]
+}
 
-**No `pnpm add` commands needed for keeper-service.**
+// Candle update (replaces /prices/candles polling)
+{
+  type: "candle",
+  data: {
+    tokenSymbol: "WETH",
+    time: 1709654400,
+    open: 3245.50,
+    high: 3246.20,
+    low: 3245.10,
+    close: 3245.80
+  }
+}
+```
 
-### 0xmarkets_contract: No New Dependencies
-
-| Package | Status | Reason |
-|---------|--------|--------|
-| hardhat ^2.22.8 | Existing | Already installed |
-| hardhat-deploy | Existing | Already installed |
-| @nomicfoundation/hardhat-verify | Existing | Already installed |
-| Foundry forge | Existing | Already available via foundry.toml |
-
-**No `yarn add` commands needed for contracts repo.**
-
----
-
-## Critical Integration Points
-
-### 1. Pyth Lazer Oracle Cache in Scanner
-
-The scanner calls `getStoredPrice()` from the `PythLazerFeedProvider` contract (on-chain stored prices) to get market prices for liquidatability checks. The order-execution-keeper pushes Lazer prices every ~5s. If the order-execution-keeper is down or stale, `getStoredPrice()` returns `ok: false` or a stale timestamp, and the scanner will skip all position checks.
-
-**Dependency:** Liquidation verification requires the order-execution-keeper to be running and pushing prices.
-
-### 2. Prisma Schema / Database
-
-The store uses Prisma 5.22.0 with PostgreSQL. Before running verification tests against testnet, the database must be migrated. The Docker Compose setup on DigitalOcean includes the postgres service and auto-runs `prisma migrate deploy` on startup.
-
-**For local verification:** `cd keeper-service && pnpm db:migrate` requires a local PostgreSQL or the DO database URL.
-
-### 3. Position Discovery Bottleneck in `discoverAccountsWithPositions()`
-
-The current implementation fetches individual positions to extract account addresses. This is the primary optimization target: replace with multicall to batch N positions into one RPC call. The positions stored in DataStore's POSITION_LIST are bytes32 keys — each key encodes `keccak256(abi.encode(account, market, collateralToken, isLong))`. The contract does NOT expose the account from a position key without reading the full position struct.
-
-Therefore: multicall on `getPosition()` for all keys is the correct batching approach (one RPC round-trip instead of N serial calls).
-
-### 4. Contract Addresses After Redeploy
-
-After OrderHandler redeploy, `keeper-service`'s `ORDER_HANDLER_ADDRESS` env var must be updated. Currently keeper-service only has `LIQUIDATION_HANDLER_ADDRESS` — it does not call OrderHandler directly. But the E2E test suite in `order-execution-keeper-service` does. Update checklist per `.claude/contract-address-update-guide.md`.
+**Why not Protocol Buffers / MessagePack:** JSON is fine at this scale (7 tokens, <1KB per message). The overhead of a binary protocol is not justified when messages are tiny and connection count is low. HTTP API responses are already JSON -- consistency reduces integration friction.
 
 ---
 
 ## What NOT to Add
 
-### Do NOT add a separate multicall library
+### Do NOT add Socket.IO
 
-`viem` already exposes `publicClient.multicall()` that uses Multicall3 under the hood. Do not add `ethers-multicall`, `multicall.js`, or similar. Zero value, adds dependency weight.
+Socket.IO adds ~300KB to the frontend bundle and requires `socket.io` on the server. It provides rooms, namespaces, acknowledgments, and HTTP long-polling fallback -- none of which we need. We broadcast price data one-way to all connected clients. Native WebSocket handles this.
 
-### Do NOT add a task queue (Bull, BullMQ, etc.)
+### Do NOT add a message queue (Redis Pub/Sub, NATS, etc.)
 
-The scanner already runs on a simple `setInterval` loop with an `scanRunning` guard to prevent overlap. Performance gains from multicall and parallel fetching will make each scan cycle faster — no queue needed at this scale.
+Single keeper server broadcasting to frontend clients. No multi-instance coordination needed. A message queue adds operational complexity (another service to run in Docker Compose) for zero benefit at this scale.
 
-### Do NOT add Foundry for testing keeper TypeScript
+### Do NOT add GraphQL Subscriptions
 
-Foundry is for Solidity contract testing, not keeper TypeScript. The existing vitest setup is correct for keeper unit/integration tests.
+The data model is simple: ticker prices and candle bars. GraphQL subscriptions would require Apollo Server, subscription transport, and schema definitions for what amounts to two message types. Massive overhead.
 
-### Do NOT add a profiling daemon (clinic.js, 0x flame)
+### Do NOT replace SWR entirely
 
-Performance gains here come from reducing RPC round-trips via multicall, not from CPU profiling. The bottleneck is network latency, measurable with `performance.now()` already available.
+SWR still handles non-streaming data (candle history, 24h prices, incentives, APY). Only the real-time ticker/candle feeds move to WebSocket. Keep SWR for request-response patterns; add WebSocket alongside it for streaming.
 
-### Do NOT upgrade Prisma from ^5.22.0 to ^7.x
+### Do NOT add reconnecting-websocket on frontend
 
-The order-execution-keeper-service removed Prisma. The keeper-service still uses it. Prisma 7.x has a new adapter-based API that would require schema and query changes. Prisma 5.22.0 is stable and handles all required queries. Upgrade is out of scope.
+Reconnection with exponential backoff is ~20 lines of code. Adding a dependency for this is unnecessary when the reconnection logic is trivial and we want full control over behavior (e.g., showing a "reconnecting" banner).
 
-### Do NOT add Hardhat Ignition for contract deployment
+### Do NOT upgrade @pythnetwork/hermes-client
 
-The contracts repo uses `hardhat-deploy`, not Hardhat Ignition. Ignition is the newer deployment framework (introduced in Hardhat 2.22+) but the existing `hardhat-deploy` scripts are proven and sufficient for a single-contract patch deploy. Switching deployment frameworks for a bug fix is unnecessary risk.
+Version 2.1.0 already has `getPriceUpdatesStream()` with full SSE support. No need to chase a newer version.
 
-### Do NOT upgrade hardhat to ^2.24 or ethers to v6
+### Do NOT use Pyth Lazer for candle data
 
-The contracts repo uses hardhat ^2.22.8 + ethers ^5.7.2. These are pinned and working. The Hardhat ecosystem has some breaking changes between ethers v5 and v6. Do not touch the contracts toolchain version for a Solidity fix.
+Pyth Lazer (via pyth-lazer-sdk) is for oracle price signing -- it delivers binary EVM payloads for on-chain use. Pyth Hermes provides parsed price data suitable for candle construction. These are different products with different purposes. Continue using Hermes for candles and Lazer for oracle signing.
 
 ---
 
-## Alternatives Considered
+## Complete Stack Delta for v1.12
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Batch RPC | viem multicall (built-in) | ethcall / multicall.js | Already in viem, zero extra dep |
-| Contract profiling | Hardhat gas reporter (already installed) | Tenderly DevNets, Foundry --gas-report | Already available, sufficient for testnet |
-| Position discovery | Multicall batch on getPosition() | Parse position keys off-chain | Keys are opaque hashes, cannot decode account without contract call |
-| Liquidation test | Vitest testnet mode (existing) | Hardhat fork of Base Sepolia | Fork adds complexity; real testnet is sufficient for verification |
-| Deploy verification | hardhat-verify (existing) | Manual Basescan upload | hardhat-verify already configured and working |
+### keeper-service: 1 New Dependency
+
+```bash
+cd keeper-service
+pnpm add ws
+pnpm add -D @types/ws
+```
+
+| Package | Version | Status | Purpose |
+|---------|---------|--------|---------|
+| ws | ^8.19.0 | NEW | WebSocket server for broadcasting prices to frontend |
+| @types/ws | ^8.5.14 | NEW (dev) | TypeScript types |
+| @pythnetwork/hermes-client | ^2.1.0 | EXISTING | Use `getPriceUpdatesStream()` instead of `getLatestPriceUpdates()` |
+
+### 0xMarkets-Interface (frontend): 0 New Dependencies
+
+| Technology | Status | Purpose |
+|------------|--------|---------|
+| Native WebSocket API | BUILT-IN | Connect to keeper WebSocket server |
+| SWR 2.3.3 | EXISTING | Continues handling non-streaming data |
+| TradingView charting_library | EXISTING | `subscribeBars` callback wired to WebSocket data |
+
+**No `yarn add` commands needed for the frontend.**
+
+---
+
+## Keeper HTTP Endpoints: Keep for Fallback
+
+Do NOT remove the existing HTTP endpoints (`/prices/tickers`, `/prices/candles`). Keep them as:
+
+1. **Fallback** when WebSocket connection fails (frontend can degrade to polling)
+2. **Health monitoring** (BetterStack pings HTTP endpoints)
+3. **Initial data load** (historical candles are request-response, not streaming)
+4. **Debugging** (curl-friendly for manual inspection)
+
+The WebSocket channel is an addition, not a replacement.
 
 ---
 
 ## Sources
 
-- Existing codebase: `keeper-service/package.json` — confirmed Prisma 5.22.0, vitest 4.0.16, viem 2.40.3
-- Existing codebase: `keeper-service/src/core/scanner.ts` — confirmed scanner calls Reader.isPositionLiquidatable() directly, bypasses riskEngine.ts
-- Existing codebase: `keeper-service/src/core/positionFetcher.ts` — confirmed N+1 serial RPC pattern in discoverAccountsWithPositions()
-- Existing codebase: `keeper-service/src/core/executor.ts` — confirmed Lazer oracle cache dependency via getPythLazerOracle()
-- Existing codebase: `0xmarkets_contract/package.json` — confirmed hardhat ^2.22.8, hardhat-deploy ^0.11.25, hardhat-verify ^2.0.11
-- Existing codebase: `0xmarkets_contract/hardhat.config.ts` — confirmed baseSepolia network config, Solidity 0.8.24
-- Existing codebase: `0xmarkets_contract/foundry.toml` — confirmed forge-std 1.12.0 available
-- Existing codebase: `keeper-service/src/test/testnet/integration.test.ts` — confirmed testnet test scaffolding exists with stub assertions
-- viem documentation: `publicClient.multicall()` stable API, Multicall3 auto-detected on Base Sepolia (chainId 84532)
-- Multicall3: deployed at `0xcA11bde05977b3631167028862bE2a173976CA11` on all major EVM chains including Base Sepolia (confidence: HIGH — standard deployment address)
+- Existing codebase: `keeper-service/package.json` -- confirmed @pythnetwork/hermes-client@^2.1.0, express@^5.1.0 (HIGH confidence)
+- Existing codebase: `keeper-service/node_modules/@pythnetwork/hermes-client/dist/esm/hermes-client.d.ts` -- confirmed `getPriceUpdatesStream()` returns `Promise<EventSource>` with parsed option (HIGH confidence)
+- Existing codebase: `keeper-service/node_modules/@pythnetwork/hermes-client/package.json` -- confirmed `eventsource@^3.0.5` transitive dependency (HIGH confidence)
+- Existing codebase: `keeper-service/src/core/candleCollector.ts` -- confirmed 2s polling via setInterval + getLatestPriceUpdates (HIGH confidence)
+- Existing codebase: `src/lib/oracleKeeperFetcher/oracleKeeperFetcher.ts` -- confirmed HTTP fetch to /prices/tickers and /prices/candles (HIGH confidence)
+- Existing codebase: `src/domain/tradingview/DataFeed.ts` -- confirmed PauseableInterval polling in subscribeBars at 1s (HIGH confidence)
+- Existing codebase: `src/domain/synthetics/tokens/useTokenRecentPricesData.ts` -- confirmed SWR polling at PRICES_UPDATE_INTERVAL (1000ms) (HIGH confidence)
+- [ws npm package](https://www.npmjs.com/package/ws) -- v8.19.0 latest, zero dependencies (HIGH confidence)
+- [ws GitHub releases](https://github.com/websockets/ws/releases) -- v8.19.0 released Jan 2025 (HIGH confidence)
+- [Pyth Hermes SSE documentation](https://docs.pyth.network/price-feeds/core/fetch-price-updates) -- /v2/updates/price/stream endpoint, 24h auto-close (MEDIUM confidence -- verified via docs)
+- [Pyth Hermes architecture](https://docs.pyth.network/price-feeds/core/how-pyth-works/hermes) -- SSE streaming overview (MEDIUM confidence)
+- [@pythnetwork/hermes-client GitHub](https://github.com/pyth-network/pyth-crosschain/tree/main/apps/hermes/client/js) -- getPriceUpdatesStream usage example (MEDIUM confidence)
