@@ -4,6 +4,8 @@ This guide configures Cloudflare to proxy HTTPS/WSS traffic to the keeper-servic
 
 **Result:** `https://keeper.0xmarkets.io` and `wss://keeper.0xmarkets.io` route securely to `142.93.203.222:37017`.
 
+> **Note:** The 0xmarkets.io domain was migrated from Vercel DNS to Cloudflare DNS as a prerequisite for this setup. Cloudflare now manages all DNS records for the domain, including the root and www records that previously pointed to Vercel.
+
 ---
 
 ## 1. DNS Record
