@@ -1,8 +1,8 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: idle
+milestone: "v1.12"
+milestone_name: "WebSocket Price Streaming"
+status: defining_requirements
 stopped_at: null
 last_updated: "2026-03-05"
 progress:
@@ -19,15 +19,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** Planning next milestone
+**Current focus:** v1.12 WebSocket Price Streaming
 
 ## Current Position
 
-v1.11 Trade History & Leaderboard Fix shipped. No active milestone.
-
-### Last Shipped
-- v1.11: Fixed squid pnlUsd enrichment, fee extraction, maxCapital calculation, and leaderboard query params
-- Trade history and leaderboard now display accurate data against live squid
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-05 — Milestone v1.12 started
 
 ## Accumulated Context
 
@@ -37,6 +36,7 @@ v1.11 Trade History & Leaderboard Fix shipped. No active milestone.
 - JPY/USD Pyth Lazer oracle data gap — testnet infrastructure, not code
 - Shared wallet nonce conflict between keeper-service and order-execution-keeper
 - abis.ts has incorrect getAccountOrders ABI (uint256 enums, phantom updatedAtBlock)
+- Chart candle data lags mark price by 0-2s due to keeper's 2s Pyth HTTP polling interval
 
 ### Server State
 
@@ -59,5 +59,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: v1.11 milestone completed
-Next: /gsd:new-milestone
+Stopped at: Defining v1.12 requirements
+Next: Define requirements → create roadmap

@@ -14,6 +14,15 @@ A user can open and close leveraged trading positions with clear feedback, relia
 
 Fixed squid indexer to populate pnlUsd on trade actions, extract fees from PositionFeesCollected events, and resolve int256/uint256 type mismatch for maxCapital. Fixed frontend leaderboard query params. Trade history and leaderboard now display accurate data.
 
+## Current Milestone: v1.12 WebSocket Price Streaming
+
+**Goal:** Replace HTTP polling with Pyth Hermes WebSocket for real-time price updates across keeper and frontend, fix chart staleness.
+
+**Target features:**
+- Keeper WebSocket streaming from Pyth (replace 2s HTTP polling in candleCollector)
+- Frontend WebSocket from keeper (replace 1s polling of /prices/tickers and /prices/candles)
+- TradingView real-time bar updates using mark price (fix chart staleness)
+
 **All prior milestones:**
 - v1.0 Fix Buy GM Flow (2026-02-21) — deposit execution pipeline
 - v1.1 Full Trading Experience (2026-02-22) — all 6 markets, positions, limit orders
@@ -168,4 +177,4 @@ Fixed squid indexer to populate pnlUsd on trade actions, extract fees from Posit
 | Type-aware collateralDeltaAmount extraction | int256 for increase, uint256 for decrease | ✓ Good — fixed maxCapital |
 
 ---
-*Last updated: 2026-03-05 after v1.11 milestone*
+*Last updated: 2026-03-05 after v1.12 milestone start*
