@@ -51,7 +51,7 @@ export function RedirectPopupModal({
       <br />
       <Trans>
         Alternative links can be found in the{" "}
-        <ExternalLink href="https://docs.0xmarkets.io/docs/community/frontends">docs</ExternalLink>.
+        <ExternalLink href="https://docs.0xmarkets.io">docs</ExternalLink>.
         <br />
         <br />
         By clicking Agree you accept the <ExternalLink href="https://0xmarkets.io/#/terms-and-conditions">

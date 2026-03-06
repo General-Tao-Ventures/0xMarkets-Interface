@@ -107,7 +107,7 @@ export default function BuyCards() {
               className="!text-typography-primary"
               newTab
               variant="secondary"
-              to="https://docs.0xmarkets.io/docs/category/tokenomics"
+              to="https://docs.0xmarkets.io/trading"
             >
               <Trans>Read more</Trans>
             </Button>
@@ -140,7 +140,7 @@ export default function BuyCards() {
               className="!text-typography-primary"
               newTab
               variant="secondary"
-              to="https://docs.0xmarkets.io/docs/providing-liquidity/v2/#glv-pools"
+              to="https://docs.0xmarkets.io/providing-liquidity#glv-pools"
             >
               <Trans>Read more</Trans>
             </Button>
@@ -172,7 +172,7 @@ export default function BuyCards() {
               className="!text-typography-primary"
               newTab
               variant="secondary"
-              to="https://docs.0xmarkets.io/docs/providing-liquidity/v2"
+              to="https://docs.0xmarkets.io/providing-liquidity#gm-pools"
             >
               <Trans>Read more</Trans>
             </Button>

@@ -145,7 +145,7 @@ function Referrals() {
                 Get fee discounts and earn rebates through the 0xMarkets referral program.
                 <br />
                 For more information, please read the{" "}
-                <ExternalLink href="https://docs.0xmarkets.io/docs/referrals">referral program details</ExternalLink>.
+                <ExternalLink href="https://docs.0xmarkets.io/referrals">referral program details</ExternalLink>.
               </Trans>
             }
             qa="referrals-page"

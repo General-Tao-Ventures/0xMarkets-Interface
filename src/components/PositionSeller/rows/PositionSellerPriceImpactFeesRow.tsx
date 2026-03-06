@@ -59,7 +59,7 @@ export function PositionSellerPriceImpactFeesRow() {
               <Trans>
                 Net price impact is the sum of the stored impact at increase and the impact at decrease, which is
                 settled on position decrease.{" "}
-                <ExternalLink href={"https://docs.0xmarkets.io/docs/trading/v2#price-impact"} newTab>
+                <ExternalLink href={"https://docs.0xmarkets.io/trading/fees#price-impact"} newTab>
                   Read more
                 </ExternalLink>
                 .

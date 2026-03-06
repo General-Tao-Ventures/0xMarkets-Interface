@@ -22,13 +22,12 @@ export function getLeaderboardLink(_chainId) {
 }
 
 export const DOCS_LINKS = {
-  multiplierPoints: "https://docs.0xmarkets.io/docs/tokenomics/rewards/#multiplier-points",
-  fundingFees: "https://docs.0xmarkets.io/docs/trading/v2/#funding-fees",
-  adaptiveFunding: "https://docs.0xmarkets.io/docs/trading/v2/#adaptive-funding",
-  borrowingFees: "https://docs.0xmarkets.io/docs/trading/v2/#borrowing-fees",
+  fundingFees: "https://docs.0xmarkets.io/trading/fees#funding-fees",
+  adaptiveFunding: "https://docs.0xmarkets.io/trading/fees#funding-fees",
+  borrowingFees: "https://docs.0xmarkets.io/trading/fees#borrowing-fees",
 };
 
-export const INCENTIVES_V2_URL = "https://docs.0xmarkets.io/incentives";
+export const INCENTIVES_V2_URL = "https://docs.0xmarkets.io/trading";
 
 export function getIncentivesV2Url(_chainId: number): string {
   return INCENTIVES_V2_URL;
