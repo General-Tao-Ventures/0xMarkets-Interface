@@ -35,7 +35,7 @@
 
 </details>
 
-### 🚧 v1.12 WebSocket Price Streaming (In Progress)
+### v1.12 WebSocket Price Streaming (In Progress)
 
 **Milestone Goal:** Replace HTTP polling with WebSocket streaming for real-time price updates across keeper and frontend
 
@@ -57,8 +57,8 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 40-01-PLAN.md — Cloudflare DNS/TLS proxy setup (human checkpoint)
-- [ ] 40-02-PLAN.md — Hermes SSE streaming + shared price cache
+- [x] 40-01-PLAN.md — Cloudflare DNS/TLS proxy setup (human checkpoint)
+- [x] 40-02-PLAN.md — Hermes SSE streaming + shared price cache
 
 ### Phase 41: Keeper WebSocket Server
 **Goal**: Connected clients receive real-time ticker and candle data pushed from the keeper over WebSocket
@@ -72,8 +72,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 41-01: TBD
-- [ ] 41-02: TBD
+- [ ] 41-01-PLAN.md — WebSocket broadcast module with tests + keeper wiring
+- [ ] 41-02-PLAN.md — Deploy to DO droplet and verify through Cloudflare
 
 ### Phase 42: Frontend WebSocket Integration
 **Goal**: Users see real-time mark prices and chart updates in the interface with sub-second latency, with transparent fallback to HTTP polling when WebSocket is unavailable
@@ -100,10 +100,10 @@ Phases execute in numeric order: 40 -> 41 -> 42
 |-------|-----------|----------------|--------|-----------|
 | 38. Squid Fixes & Redeployment | v1.11 | 1/1 | Complete | 2026-03-05 |
 | 39. Frontend Verification & Fixes | v1.11 | 1/1 | Complete | 2026-03-05 |
-| 40. Infrastructure + Keeper Hermes SSE | 2/2 | Complete    | 2026-03-06 | - |
-| 41. Keeper WebSocket Server | v1.12 | 0/TBD | Not started | - |
+| 40. Infrastructure + Keeper Hermes SSE | v1.12 | 2/2 | Complete | 2026-03-06 |
+| 41. Keeper WebSocket Server | v1.12 | 0/2 | Not started | - |
 | 42. Frontend WebSocket Integration | v1.12 | 0/TBD | Not started | - |
 
 ---
 *Created: 2026-03-04*
-*Updated: 2026-03-05 — v1.12 roadmap created*
+*Updated: 2026-03-06 — Phase 41 plans created*
