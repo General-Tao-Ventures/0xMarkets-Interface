@@ -18,11 +18,11 @@
 
 ### Keeper WebSocket Server
 
-- [ ] **KWS-01**: WebSocket server mounted on existing Express HTTP server (port 37017) using `ws` library
-- [ ] **KWS-02**: Ticker updates broadcast to all connected clients on each SSE price update
-- [ ] **KWS-03**: In-progress candle updates broadcast at ~200ms intervals with current OHLC state
-- [ ] **KWS-04**: Server-side heartbeat ping/pong detects and drops dead connections
-- [ ] **KWS-05**: Backpressure handling — skip or drop messages for slow clients to prevent memory exhaustion
+- [x] **KWS-01**: WebSocket server mounted on existing Express HTTP server (port 37017) using `ws` library
+- [x] **KWS-02**: Ticker updates broadcast to all connected clients on each SSE price update
+- [x] **KWS-03**: In-progress candle updates broadcast at ~200ms intervals with current OHLC state
+- [x] **KWS-04**: Server-side heartbeat ping/pong detects and drops dead connections
+- [x] **KWS-05**: Backpressure handling — skip or drop messages for slow clients to prevent memory exhaustion
 
 ### Frontend WebSocket Client
 
@@ -63,11 +63,11 @@
 | KSTR-01 | Phase 40 | Complete |
 | KSTR-02 | Phase 40 | Complete |
 | KSTR-03 | Phase 40 | Complete |
-| KWS-01 | Phase 41 | Pending |
-| KWS-02 | Phase 41 | Pending |
-| KWS-03 | Phase 41 | Pending |
-| KWS-04 | Phase 41 | Pending |
-| KWS-05 | Phase 41 | Pending |
+| KWS-01 | Phase 41 | Complete |
+| KWS-02 | Phase 41 | Complete |
+| KWS-03 | Phase 41 | Complete |
+| KWS-04 | Phase 41 | Complete |
+| KWS-05 | Phase 41 | Complete |
 | FWS-01 | Phase 42 | Pending |
 | FWS-02 | Phase 42 | Pending |
 | FWS-03 | Phase 42 | Pending |

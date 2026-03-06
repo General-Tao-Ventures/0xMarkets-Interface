@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: WebSocket Price Streaming
 status: executing
-stopped_at: Completed 40-01-PLAN.md (all Phase 40 plans complete)
-last_updated: "2026-03-06T02:59:46.804Z"
-last_activity: 2026-03-06 — Completed 40-02 (Keeper Hermes SSE + shared price cache)
+stopped_at: Completed 41-01-PLAN.md
+last_updated: "2026-03-06T03:16:17.000Z"
+last_activity: 2026-03-06 — Completed 41-01 (Keeper WebSocket Server)
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 93
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
+  percent: 95
 ---
 
 # Project State
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.12 Phase 40 — Infrastructure + Keeper Hermes SSE
+**Current focus:** v1.12 Phase 41 — Keeper WebSocket Server
 
 ## Current Position
 
-Phase: 40 of 42 (Infrastructure + Keeper Hermes SSE)
-Plan: 2 of 2 in current phase
+Phase: 41 of 42 (Keeper WebSocket Server)
+Plan: 1 of 1 in current phase
 Status: executing
-Last activity: 2026-03-06 — Completed 40-02 (Keeper Hermes SSE + shared price cache)
+Last activity: 2026-03-06 — Completed 41-01 (Keeper WebSocket Server)
 
-Progress: [██████████████████░░] 93% (39/42 phases)
+Progress: [███████████████████░] 95% (40/42 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 72
+- Total plans completed: 73
 - Total execution time: ~12 milestones across 13 days
 
 **Recent Trend:**
@@ -75,9 +75,11 @@ None.
 - [Phase 40]: Kept 2s candle collector interval sampling from cache rather than event-driven
 - [Phase 40]: Cloudflare Flexible SSL for TLS termination (no origin cert on testnet droplet)
 - [Phase 40]: DNS migrated from Vercel to Cloudflare for proxied subdomain support
+- [Phase 41]: Duplicated normalizePythPrice in wsBroadcast (small pure function, avoids pricesController refactor)
+- [Phase 41]: Used ws { server } constructor to share port 37017 with Express
 
 ## Session Continuity
 
-Last session: 2026-03-06T02:54:59.409Z
-Stopped at: Completed 40-01-PLAN.md (all Phase 40 plans complete)
-Next: `/gsd:plan-phase 41`
+Last session: 2026-03-06T03:16:17.000Z
+Stopped at: Completed 41-01-PLAN.md
+Next: `/gsd:plan-phase 42`
