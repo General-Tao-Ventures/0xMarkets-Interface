@@ -111,7 +111,7 @@ export function useTokenRecentPricesRequest(chainId: number): TokenPricesDataRes
         result[NATIVE_TOKEN_ADDRESS] = result[wrappedToken.address];
       }
 
-      mutate({ pricesData: result, updatedAt: Date.now() }, { revalidate: false });
+      mutate({ result: { pricesData: result, updatedAt: Date.now() }, start: Date.now() }, { revalidate: false });
     };
 
     manager.on("ticker", handler);
