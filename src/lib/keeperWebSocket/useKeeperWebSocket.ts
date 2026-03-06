@@ -5,7 +5,7 @@ import { KeeperWebSocketManager, getKeeperWebSocketUrl } from "./KeeperWebSocket
 let manager: KeeperWebSocketManager | null = null;
 let refCount = 0;
 
-function getManager(): KeeperWebSocketManager {
+export function getManager(): KeeperWebSocketManager {
   if (!manager) {
     manager = new KeeperWebSocketManager(getKeeperWebSocketUrl());
   }
