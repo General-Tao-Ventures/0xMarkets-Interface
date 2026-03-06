@@ -26,11 +26,11 @@
 
 ### Frontend WebSocket Client
 
-- [ ] **FWS-01**: Frontend establishes WebSocket connection to keeper with auto-reconnect and exponential backoff
+- [x] **FWS-01**: Frontend establishes WebSocket connection to keeper with auto-reconnect and exponential backoff
 - [ ] **FWS-02**: Mark prices update via WebSocket push, replacing 1s HTTP polling of /prices/tickers
 - [ ] **FWS-03**: TradingView chart receives real-time bar updates via WebSocket, replacing 1s HTTP polling of /prices/candles
-- [ ] **FWS-04**: HTTP polling remains as fallback when WebSocket is unavailable or disconnected
-- [ ] **FWS-05**: Timestamp gating prevents stale HTTP responses from overwriting fresher WebSocket data
+- [x] **FWS-04**: HTTP polling remains as fallback when WebSocket is unavailable or disconnected
+- [x] **FWS-05**: Timestamp gating prevents stale HTTP responses from overwriting fresher WebSocket data
 - [ ] **FWS-06**: Connection status indicator visible in UI (connected/reconnecting/stale)
 
 ## Future Requirements
@@ -68,11 +68,11 @@
 | KWS-03 | Phase 41 | Complete |
 | KWS-04 | Phase 41 | Complete |
 | KWS-05 | Phase 41 | Complete |
-| FWS-01 | Phase 42 | Pending |
+| FWS-01 | Phase 42 | Complete |
 | FWS-02 | Phase 42 | Pending |
 | FWS-03 | Phase 42 | Pending |
-| FWS-04 | Phase 42 | Pending |
-| FWS-05 | Phase 42 | Pending |
+| FWS-04 | Phase 42 | Complete |
+| FWS-05 | Phase 42 | Complete |
 | FWS-06 | Phase 42 | Pending |
 
 **Coverage:**

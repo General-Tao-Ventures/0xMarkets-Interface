@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: WebSocket Price Streaming
-status: completed
-stopped_at: Completed 41-02-PLAN.md
-last_updated: "2026-03-06T03:36:41.022Z"
-last_activity: 2026-03-06 — Completed 41-02 (Deploy and Verify WebSocket Server)
+status: in-progress
+stopped_at: Completed 42-01-PLAN.md
+last_updated: "2026-03-06T03:57:27.815Z"
+last_activity: 2026-03-06 — Completed 42-01 (WebSocket Client Infrastructure)
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
-  percent: 95
+  total_plans: 6
+  completed_plans: 5
+  percent: 98
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
-**Current focus:** v1.12 Phase 41 — Keeper WebSocket Server
+**Current focus:** v1.12 Phase 42 — Frontend WebSocket Integration
 
 ## Current Position
 
-Phase: 41 of 42 (Keeper WebSocket Server)
-Plan: 2 of 2 in current phase (COMPLETE)
-Status: phase-complete
-Last activity: 2026-03-06 — Completed 41-02 (Deploy and Verify WebSocket Server)
+Phase: 42 of 42 (Frontend WebSocket Integration)
+Plan: 1 of 2 in current phase
+Status: in-progress
+Last activity: 2026-03-06 — Completed 42-01 (WebSocket Client Infrastructure)
 
-Progress: [███████████████████░] 95% (40/42 phases)
+Progress: [██████████] 98% (41/42 phases)
 
 ## Performance Metrics
 
@@ -80,9 +80,10 @@ None.
 - [Phase 41]: Used ws { server } constructor to share port 37017 with Express
 - [Phase 41]: Used rsync for deployment (GitHub remote inaccessible from local)
 - [Phase 41]: Fixed pythLazerOracle onError type to `unknown` to unblock build
+- [Phase 42]: Used manual WebSocket mock in tests instead of happy-dom WebSocket
 
 ## Session Continuity
 
-Last session: 2026-03-06T03:31:10.000Z
-Stopped at: Completed 41-02-PLAN.md
+Last session: 2026-03-06T03:57:27.813Z
+Stopped at: Completed 42-01-PLAN.md
 Next: `/gsd:plan-phase 42`
