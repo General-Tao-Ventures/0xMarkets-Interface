@@ -88,8 +88,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 42-01: TBD
-- [ ] 42-02: TBD
+- [ ] 42-01-PLAN.md — WebSocket client manager, types, React hooks, and unit tests
+- [ ] 42-02-PLAN.md — Wire WS into price pipeline, TradingView chart, and status indicator
 
 ## Progress
 
