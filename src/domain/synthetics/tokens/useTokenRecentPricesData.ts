@@ -86,19 +86,39 @@ export function useTokenRecentPricesRequest(chainId: number): TokenPricesDataRes
     }
   );
 
-  // Subscribe to WS ticker events and trigger SWR re-evaluation
+  // Subscribe to WS ticker events and update SWR cache directly (no refetch)
   useEffect(() => {
     const handler = (tickers: TickerData[]) => {
       const maxUpdatedAt = Math.max(...tickers.map((t) => t.updatedAt));
       wsLatestRef.current = { data: tickers, maxUpdatedAt };
-      mutate();
+
+      const result: TokenPricesData = {};
+      for (const priceItem of tickers) {
+        let tokenConfig: Token;
+        try {
+          tokenConfig = getToken(chainId, priceItem.tokenAddress);
+        } catch {
+          continue;
+        }
+        result[tokenConfig.address] = {
+          minPrice: parseContractPrice(BigInt(priceItem.minPrice), tokenConfig.decimals),
+          maxPrice: parseContractPrice(BigInt(priceItem.maxPrice), tokenConfig.decimals),
+        };
+      }
+
+      const wrappedToken = getWrappedToken(chainId);
+      if (result[wrappedToken.address] && !result[NATIVE_TOKEN_ADDRESS]) {
+        result[NATIVE_TOKEN_ADDRESS] = result[wrappedToken.address];
+      }
+
+      mutate({ pricesData: result, updatedAt: Date.now() }, { revalidate: false });
     };
 
     manager.on("ticker", handler);
     return () => {
       manager.off("ticker", handler);
     };
-  }, [manager, mutate]);
+  }, [chainId, manager, mutate]);
 
   return {
     pricesData: data?.pricesData,

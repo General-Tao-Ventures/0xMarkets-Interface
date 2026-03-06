@@ -1,46 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ConnectionState } from "./types";
 import { KeeperWebSocketManager, getKeeperWebSocketUrl } from "./KeeperWebSocketManager";
 
-let manager: KeeperWebSocketManager | null = null;
-let refCount = 0;
+const manager = new KeeperWebSocketManager(getKeeperWebSocketUrl());
+manager.connect();
 
 export function getManager(): KeeperWebSocketManager {
-  if (!manager) {
-    manager = new KeeperWebSocketManager(getKeeperWebSocketUrl());
-  }
   return manager;
 }
 
 /**
  * Hook that provides access to the singleton KeeperWebSocketManager.
- * Manages connection lifecycle with ref-counting -- connects on first mount,
- * disconnects only when all consumers unmount.
+ * The manager connects eagerly at module load and stays connected for the app lifetime.
  */
 export function useKeeperWebSocket(): { manager: KeeperWebSocketManager } {
-  const mgr = getManager();
-  const mountedRef = useRef(false);
-
-  useEffect(() => {
-    if (mountedRef.current) return;
-    mountedRef.current = true;
-
-    refCount++;
-    if (refCount === 1) {
-      mgr.connect();
-    }
-
-    return () => {
-      mountedRef.current = false;
-      refCount--;
-      if (refCount === 0) {
-        mgr.disconnect();
-        manager = null;
-      }
-    };
-  }, [mgr]);
-
-  return { manager: mgr };
+  return { manager };
 }
 
 /**

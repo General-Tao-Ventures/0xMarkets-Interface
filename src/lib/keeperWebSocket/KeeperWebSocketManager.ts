@@ -1,4 +1,3 @@
-import { isLocal } from "config/env";
 import type { ConnectionState, KeeperWsMessage } from "./types";
 
 type EventType = "ticker" | "candle" | "stateChange";
@@ -8,9 +7,6 @@ const MAX_RECONNECT_DELAY = 30_000;
 const BASE_RECONNECT_DELAY = 1_000;
 
 export function getKeeperWebSocketUrl(): string {
-  if (isLocal()) {
-    return "ws://142.93.203.222:37017";
-  }
   return "wss://keeper.0xmarkets.io";
 }
 
