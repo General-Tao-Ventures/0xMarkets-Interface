@@ -7,8 +7,8 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: TLS termination configured on DO droplet for secure WebSocket connections (wss://)
-- [ ] **INFRA-02**: DNS subdomain (e.g., keeper.0xmarkets.io) pointing to DO droplet for direct WS access
+- [x] **INFRA-01**: TLS termination configured on DO droplet for secure WebSocket connections (wss://)
+- [x] **INFRA-02**: DNS subdomain (e.g., keeper.0xmarkets.io) pointing to DO droplet for direct WS access
 
 ### Keeper Streaming
 
@@ -58,8 +58,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 40 | Pending |
-| INFRA-02 | Phase 40 | Pending |
+| INFRA-01 | Phase 40 | Complete |
+| INFRA-02 | Phase 40 | Complete |
 | KSTR-01 | Phase 40 | Complete |
 | KSTR-02 | Phase 40 | Complete |
 | KSTR-03 | Phase 40 | Complete |

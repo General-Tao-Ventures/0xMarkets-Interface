@@ -39,7 +39,7 @@
 
 **Milestone Goal:** Replace HTTP polling with WebSocket streaming for real-time price updates across keeper and frontend
 
-- [ ] **Phase 40: Infrastructure + Keeper Hermes SSE** — TLS endpoint on DO droplet and streaming price source replacing HTTP polling
+- [x] **Phase 40: Infrastructure + Keeper Hermes SSE** — TLS endpoint on DO droplet and streaming price source replacing HTTP polling (completed 2026-03-06)
 - [ ] **Phase 41: Keeper WebSocket Server** — Broadcast ticker and candle updates to connected frontends over WebSocket
 - [ ] **Phase 42: Frontend WebSocket Integration** — Real-time mark prices and chart bars via WebSocket with HTTP fallback
 
@@ -100,7 +100,7 @@ Phases execute in numeric order: 40 -> 41 -> 42
 |-------|-----------|----------------|--------|-----------|
 | 38. Squid Fixes & Redeployment | v1.11 | 1/1 | Complete | 2026-03-05 |
 | 39. Frontend Verification & Fixes | v1.11 | 1/1 | Complete | 2026-03-05 |
-| 40. Infrastructure + Keeper Hermes SSE | 1/2 | In Progress|  | - |
+| 40. Infrastructure + Keeper Hermes SSE | 2/2 | Complete   | 2026-03-06 | - |
 | 41. Keeper WebSocket Server | v1.12 | 0/TBD | Not started | - |
 | 42. Frontend WebSocket Integration | v1.12 | 0/TBD | Not started | - |
 
