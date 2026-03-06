@@ -76,7 +76,7 @@ function PositionShare({
   useEffect(() => {
     (async function () {
       const element = cardRef.current;
-      if (element && userAffiliateCode.success && sharePositionBgImg) {
+      if (element && sharePositionBgImg) {
         // We have to call the toJpeg function multiple times to make sure the canvas renders all the elements like background image
         // @refer https://github.com/tsayen/dom-to-image/issues/343#issuecomment-652831863
         const image = await toPng(element, config)
@@ -91,7 +91,7 @@ function PositionShare({
         }
       }
     })();
-  }, [userAffiliateCode, sharePositionBgImg, cardRef]);
+  }, [sharePositionBgImg]);
 
   async function handleDownload() {
     const element = cardRef.current;

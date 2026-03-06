@@ -1238,8 +1238,7 @@ export function getProcessedData(
 }
 
 export function getPageTitle(data) {
-  const title = t`Decentralized Perpetual Exchange | GMX`;
-  return `${data} | ${title}`;
+  return `${data} | 0xMarkets`;
 }
 
 export function isHashZero(value) {
@@ -1270,7 +1269,7 @@ export function getRootShareApiUrl() {
     return "";
   }
 
-  return "";
+  return PRODUCTION_HOST;
 }
 
 export function getTradePageUrl() {
