@@ -91,7 +91,7 @@ export function createRawTradeActionTransformer(
         swapPath,
         initialCollateralAddress: initialCollateralTokenAddress,
         wrappedNativeTokenAddress: wrappedToken.address,
-        shouldUnwrapNativeToken: rawAction.shouldUnwrapNativeToken!,
+        shouldUnwrapNativeToken: rawAction.shouldUnwrapNativeToken ?? false,
         isIncrease: isIncreaseOrderType(rawAction.orderType),
       });
       const initialCollateralToken = getByKey(tokensData, initialCollateralTokenAddress);
@@ -103,15 +103,12 @@ export function createRawTradeActionTransformer(
 
       const initialCollateralDeltaAmount = bigNumberify(rawAction.initialCollateralDeltaAmount);
       const sizeDeltaUsd = bigNumberify(rawAction.sizeDeltaUsd);
-      const acceptablePrice = bigNumberify(rawAction.acceptablePrice);
-      const minOutputAmount = bigNumberify(rawAction.minOutputAmount);
+      // OrderExecuted events don't include acceptablePrice/minOutputAmount (they're creation-time params).
+      // Default to 0n — the UI already treats 0n acceptablePrice as "N/A".
+      const acceptablePrice = bigNumberify(rawAction.acceptablePrice) ?? 0n;
+      const minOutputAmount = bigNumberify(rawAction.minOutputAmount) ?? 0n;
 
-      if (
-        initialCollateralDeltaAmount === undefined ||
-        sizeDeltaUsd === undefined ||
-        acceptablePrice === undefined ||
-        minOutputAmount === undefined
-      ) {
+      if (initialCollateralDeltaAmount === undefined || sizeDeltaUsd === undefined) {
         return undefined;
       }
 
@@ -172,7 +169,7 @@ export function createRawTradeActionTransformer(
 
         transaction: rawAction.transaction,
         timestamp: rawAction.timestamp,
-        shouldUnwrapNativeToken: rawAction.shouldUnwrapNativeToken!,
+        shouldUnwrapNativeToken: rawAction.shouldUnwrapNativeToken ?? false,
         twapParams:
           rawAction.twapGroupId && rawAction.numberOfParts
             ? {

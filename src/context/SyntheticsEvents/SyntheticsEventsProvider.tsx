@@ -203,6 +203,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
   const poolRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const positionsRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tradeHistoryRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Revalidates token balances (universal -- balances shown on both pages)
   const triggerBalanceRefresh = useCallback(() => {
@@ -243,11 +244,25 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
     }, 300);
   }, [globalMutate, pathname, triggerBalanceRefresh]);
 
+  // Trade history refresh -- delayed to allow subsquid indexing
+  const triggerTradeHistoryRefresh = useCallback(() => {
+    if (tradeHistoryRefreshTimerRef.current) return;
+    tradeHistoryRefreshTimerRef.current = setTimeout(() => {
+      tradeHistoryRefreshTimerRef.current = null;
+      globalMutate(
+        (key: unknown) => Array.isArray(key) && key[1] === "useTradeHistory",
+        undefined,
+        { revalidate: true }
+      );
+    }, 2000);
+  }, [globalMutate]);
+
   // Cleanup debounce timers on unmount
   useEffect(() => {
     return () => {
       if (poolRefreshTimerRef.current) clearTimeout(poolRefreshTimerRef.current);
       if (positionsRefreshTimerRef.current) clearTimeout(positionsRefreshTimerRef.current);
+      if (tradeHistoryRefreshTimerRef.current) clearTimeout(tradeHistoryRefreshTimerRef.current);
     };
   }, []);
 
@@ -375,6 +390,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       });
 
       triggerPositionsRefresh();
+      triggerTradeHistoryRefresh();
     },
 
     OrderCancelled: (eventData: EventLogData, txnParams: EventTxnParams) => {
