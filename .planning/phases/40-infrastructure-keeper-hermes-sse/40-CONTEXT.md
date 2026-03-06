@@ -16,12 +16,13 @@ TLS infrastructure on the DO droplet enabling secure WebSocket connections from 
 ### Stack constraints
 - Frontend hosted on Vercel — cannot proxy WebSocket (Vercel serverless limitation)
 - Keeper runs on DO droplet (142.93.203.222) via Docker Compose
-- TLS and reverse proxy tooling must work within this Vercel + DO setup
 - Direct wss:// from browser to DO droplet required (no Vercel middleman)
+- DNS managed via Cloudflare — user has full access and can create subdomains
+- User is not familiar with TLS or nginx — prefer Cloudflare-managed TLS (orange-cloud proxy) to avoid manual cert management on the droplet
+- Cloudflare proxy handles TLS termination + WebSocket proxying natively
 
 ### Claude's Discretion
-- TLS approach (Caddy vs nginx+certbot) — choose what's simplest for DO + Docker
-- Subdomain naming convention (keeper.0xmarkets.io or similar)
+- Subdomain naming convention (keeper.0xmarkets.io or similar) — user will create the DNS record
 - SSE vs WebSocket for Pyth Hermes connection — choose based on library support and reconnection behavior
 - Cache architecture — how SSE stream feeds into existing pricesController and candleCollector
 - Deployment/rollback strategy
