@@ -41,7 +41,7 @@
 
 - [x] **Phase 40: Infrastructure + Keeper Hermes SSE** — TLS endpoint on DO droplet and streaming price source replacing HTTP polling (completed 2026-03-06)
 - [x] **Phase 41: Keeper WebSocket Server** — Broadcast ticker and candle updates to connected frontends over WebSocket (completed 2026-03-06)
-- [ ] **Phase 42: Frontend WebSocket Integration** — Real-time mark prices and chart bars via WebSocket with HTTP fallback
+- [x] **Phase 42: Frontend WebSocket Integration** — Real-time mark prices and chart bars via WebSocket with HTTP fallback (completed 2026-03-06)
 
 ## Phase Details
 
@@ -102,7 +102,7 @@ Phases execute in numeric order: 40 -> 41 -> 42
 | 39. Frontend Verification & Fixes | v1.11 | 1/1 | Complete | 2026-03-05 |
 | 40. Infrastructure + Keeper Hermes SSE | v1.12 | 2/2 | Complete | 2026-03-06 |
 | 41. Keeper WebSocket Server | 2/2 | Complete    | 2026-03-06 | - |
-| 42. Frontend WebSocket Integration | 1/2 | In Progress|  | - |
+| 42. Frontend WebSocket Integration | 2/2 | Complete   | 2026-03-06 | - |
 
 ---
 *Created: 2026-03-04*

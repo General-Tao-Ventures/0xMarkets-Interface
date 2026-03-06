@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: WebSocket Price Streaming
-status: in-progress
-stopped_at: Completed 42-01-PLAN.md
-last_updated: "2026-03-06T03:57:27.815Z"
-last_activity: 2026-03-06 — Completed 42-01 (WebSocket Client Infrastructure)
+status: complete
+stopped_at: Completed 42-02-PLAN.md
+last_updated: "2026-03-06T04:44:45.185Z"
+last_activity: 2026-03-06 — Completed 42-02 (Frontend WebSocket Integration)
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
-  percent: 98
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-05)
 ## Current Position
 
 Phase: 42 of 42 (Frontend WebSocket Integration)
-Plan: 1 of 2 in current phase
-Status: in-progress
-Last activity: 2026-03-06 — Completed 42-01 (WebSocket Client Infrastructure)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: complete
+Last activity: 2026-03-06 — Completed 42-02 (Frontend WebSocket Integration)
 
-Progress: [██████████] 98% (41/42 phases)
+Progress: [██████████] 100% (42/42 phases)
 
 ## Performance Metrics
 
@@ -81,9 +81,12 @@ None.
 - [Phase 41]: Used rsync for deployment (GitHub remote inaccessible from local)
 - [Phase 41]: Fixed pythLazerOracle onError type to `unknown` to unblock build
 - [Phase 42]: Used manual WebSocket mock in tests instead of happy-dom WebSocket
+- [Phase 42]: Always use wss://keeper.0xmarkets.io (removed localhost/IP fallback)
+- [Phase 42]: Module-level eager WS connect to avoid React StrictMode double-mount race
+- [Phase 42]: SWR mutate with revalidate:false + {result,start} wrapper for useSequentialTimedSWR compatibility
 
 ## Session Continuity
 
-Last session: 2026-03-06T03:57:27.813Z
-Stopped at: Completed 42-01-PLAN.md
-Next: `/gsd:plan-phase 42`
+Last session: 2026-03-06T04:50:00.000Z
+Stopped at: Completed 42-02-PLAN.md (v1.12 milestone complete)
+Next: v1.12 milestone complete. All phases delivered.
