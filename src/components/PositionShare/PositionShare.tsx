@@ -26,7 +26,7 @@ import Modal from "../Modal/Modal";
 const ROOT_SHARE_URL = getRootShareApiUrl();
 const UPLOAD_URL = ROOT_SHARE_URL + "/api/upload";
 const UPLOAD_SHARE = ROOT_SHARE_URL + "/api/s";
-const config = { quality: 0.95, canvasWidth: 518, canvasHeight: 292, type: "image/jpeg" };
+const config = { quality: 0.95, canvasWidth: 533, canvasHeight: 300, type: "image/jpeg" };
 
 function getShareURL(imageInfo, ref) {
   if (!imageInfo) return;
@@ -170,7 +170,7 @@ function PositionShare({
           <TrackingLink onClick={trackShareTwitter}>
             <Button newTab variant="secondary" disabled={!uploadedImageInfo} className="mr-15" to={tweetLink}>
               <TwitterIcon className="icon" />
-              <Trans>Tweet</Trans>
+              <Trans>Share X</Trans>
             </Button>
           </TrackingLink>
         </div>

@@ -17,6 +17,14 @@
     "api/order-keeper.ts": {
       "memory": 128,
       "maxDuration": 10
+    },
+    "api/upload.ts": {
+      "memory": 256,
+      "maxDuration": 15
+    },
+    "api/s.ts": {
+      "memory": 128,
+      "maxDuration": 5
     }
   }
 }

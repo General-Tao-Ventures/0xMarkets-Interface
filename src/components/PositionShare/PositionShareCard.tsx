@@ -1,20 +1,17 @@
 import { Trans } from "@lingui/macro";
 import cx from "classnames";
-import { QRCodeSVG } from "qrcode.react";
 import { forwardRef, useMemo } from "react";
 
 import { Token } from "domain/tokens";
-import { getHomeUrl } from "lib/legacy";
+import { importImage } from "lib/legacy";
 import { calculateDisplayDecimals } from "lib/numbers";
 import { formatAmount, formatPercentage, formatUsd } from "lib/numbers";
-import { useBreakpoints } from "lib/useBreakpoints";
 import { getTokenVisualMultiplier } from "sdk/configs/tokens";
 
 import SpinningLoader from "components/Loader/SpinningLoader";
 import TokenIcon from "components/TokenIcon/TokenIcon";
 
-import coinImg from "img/coin.png";
-import VectorCircleIcon from "img/ic_vector_circle.svg?react";
+import LogoIcon from "img/logo-icon.svg?react";
 
 type Props = {
   entryPrice: bigint | undefined;
@@ -27,6 +24,10 @@ type Props = {
   sharePositionBgImg: string | null;
   userAffiliateCode: any;
 };
+
+function getTokenIconUrl(symbol: string) {
+  return importImage(`ic_${symbol.toLowerCase()}_40.svg`);
+}
 
 export const PositionShareCard = forwardRef<HTMLDivElement, Props>(
   (
@@ -43,9 +44,7 @@ export const PositionShareCard = forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
-    const { isMobile } = useBreakpoints();
     const { code, success } = userAffiliateCode;
-    const homeURL = getHomeUrl();
     const style = useMemo(() => ({ backgroundImage: `url(${sharePositionBgImg})` }), [sharePositionBgImg]);
 
     const priceDecimals = calculateDisplayDecimals(markPrice, undefined, indexToken.visualMultiplier);
@@ -54,69 +53,84 @@ export const PositionShareCard = forwardRef<HTMLDivElement, Props>(
       <div className="relative overflow-hidden rounded-9">
         <div
           ref={ref}
-          className="flex aspect-[460/240] w-[460px] justify-between rounded-9 bg-contain bg-no-repeat p-20 max-md:w-[360px] max-md:p-16 max-smallMobile:w-full"
-          style={style}
+          className="relative w-[533px] rounded-9 bg-cover bg-center bg-no-repeat p-32 max-md:w-[400px] max-md:p-24 max-smallMobile:w-full"
+          style={{ ...style, aspectRatio: "533 / 300" }}
         >
-          <img src={coinImg} alt="coin" className="z-1 absolute bottom-0 right-0 size-[100px] max-md:size-[70px]" />
-          <div className="z-3 relative flex flex-col justify-end gap-12 max-md:gap-4 max-smallMobile:gap-0">
-            <div className="flex gap-8">
-              <div
+          {/* Large watermark token icon */}
+          <img
+            src={getTokenIconUrl(indexToken.symbol)}
+            alt=""
+            className="pointer-events-none absolute right-[60px] top-[16px] size-[268px] opacity-20 max-md:right-[30px] max-md:size-[200px]"
+          />
+
+          {/* Glass circle behind token icon */}
+          <div className="pointer-events-none absolute right-[-5px] top-[5px] size-[372px] rounded-full bg-white/[0.01] max-md:right-[-20px] max-md:size-[280px]" />
+
+          {/* Content */}
+          <div className="relative z-[3] flex h-full flex-col justify-between">
+            {/* Top: Token pair + Long/Short badge */}
+            <div className="flex items-center gap-8">
+              <TokenIcon symbol={indexToken.symbol} displaySize={16} importSize={24} />
+              <span className="text-12 uppercase text-white">
+                {getTokenVisualMultiplier(indexToken)}
+                {indexToken.symbol}/USD
+              </span>
+              <span
                 className={cx(
-                  "inline-flex items-center gap-4 text-13 font-medium",
-                  isLong ? "text-green-500" : "text-red-500"
+                  "rounded-2 px-4 py-2 text-14 font-medium uppercase",
+                  isLong ? "bg-green-500 text-slate-900" : "bg-red-500 text-white"
                 )}
               >
-                <VectorCircleIcon className={cx("size-14", { "rotate-180": !isLong })} />
                 {isLong ? "LONG" : "SHORT"} {formatAmount(leverage, 4, 2, true)}x
-              </div>
-              <div className="flex items-center gap-4 font-medium">
-                <TokenIcon symbol={indexToken.symbol} displaySize={16} importSize={24} />
-                <span>
-                  {getTokenVisualMultiplier(indexToken)}
-                  {indexToken.symbol} / USD
-                </span>
-              </div>
+              </span>
             </div>
+
+            {/* PnL percentage */}
             <h3
               className={cx(
-                "text-[40px] font-medium max-md:text-[32px]",
+                "text-[56px] font-normal uppercase leading-none max-md:text-[44px]",
                 pnlAfterFeesPercentage < 0 ? "text-red-500" : "text-green-500"
               )}
             >
               {formatPercentage(pnlAfterFeesPercentage, { signed: true })}
             </h3>
-            <div className="flex gap-20 max-md:gap-10">
-              <div className="flex flex-col gap-4">
-                <p className="text-caption">Entry Price</p>
-                <p className="text-13 font-medium text-white">
-                  {formatUsd(entryPrice, {
-                    displayDecimals: priceDecimals,
-                    visualMultiplier: indexToken.visualMultiplier,
-                  })}
-                </p>
-              </div>
-              <div className="flex flex-col gap-4">
-                <p className="text-caption">Mark Price</p>
-                <p className="text-13 font-medium text-white">
-                  {formatUsd(markPrice, {
-                    displayDecimals: priceDecimals,
-                    visualMultiplier: indexToken.visualMultiplier,
-                  })}
-                </p>
+
+            {/* Prices */}
+            <div className="flex flex-col gap-12">
+              <div className="flex gap-24 text-12 max-md:gap-16">
+                <div className="flex flex-col gap-8">
+                  <p className="text-gray-400">Entry Price</p>
+                  <p className="text-white">
+                    {formatUsd(entryPrice, {
+                      displayDecimals: priceDecimals,
+                      visualMultiplier: indexToken.visualMultiplier,
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-8">
+                  <p className="text-gray-400">Mark Price</p>
+                  <p className="text-white">
+                    {formatUsd(markPrice, {
+                      displayDecimals: priceDecimals,
+                      visualMultiplier: indexToken.visualMultiplier,
+                    })}
+                  </p>
+                </div>
               </div>
 
               {success && code ? (
-                <div className="flex flex-col gap-4">
-                  <p className="text-caption">Referral Code:</p>
-                  <p className="text-13 font-medium text-white">{code}</p>
+                <div className="flex flex-col gap-8 text-12">
+                  <p className="text-gray-400">Referral Code:</p>
+                  <p className="text-white">0xMarkets.io/{code}</p>
                 </div>
               ) : null}
             </div>
           </div>
 
-          <div className="flex flex-col items-end justify-between">
-            <QRCodeSVG size={isMobile ? 24 : 32} value={success && code ? `${homeURL}/#/?ref=${code}` : `${homeURL}`} />
-            <div className="size-80 max-md:size-50"></div>
+          {/* 0xMarkets logo bottom-right */}
+          <div className="absolute bottom-16 right-16 z-[3] flex items-center gap-8">
+            <LogoIcon className="size-[30px]" />
+            <span className="text-14 font-medium text-white">0xMarkets</span>
           </div>
         </div>
         {loading && (

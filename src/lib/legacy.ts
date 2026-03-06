@@ -1267,10 +1267,10 @@ export function getAppBaseUrl() {
 
 export function getRootShareApiUrl() {
   if (isLocal()) {
-    return "https://gmxs.vercel.app";
+    return "";
   }
 
-  return "https://share.0xmarkets.io";
+  return "";
 }
 
 export function getTradePageUrl() {
