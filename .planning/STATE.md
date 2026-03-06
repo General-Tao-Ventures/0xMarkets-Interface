@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: WebSocket Price Streaming
 status: executing
-stopped_at: Completed 41-01-PLAN.md
-last_updated: "2026-03-06T03:16:17.000Z"
-last_activity: 2026-03-06 — Completed 41-01 (Keeper WebSocket Server)
+stopped_at: Completed 41-02-PLAN.md
+last_updated: "2026-03-06T03:31:10.000Z"
+last_activity: 2026-03-06 — Completed 41-02 (Deploy and Verify WebSocket Server)
 progress:
   total_phases: 3
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
-  percent: 95
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
@@ -26,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-03-05)
 ## Current Position
 
 Phase: 41 of 42 (Keeper WebSocket Server)
-Plan: 1 of 1 in current phase
-Status: executing
-Last activity: 2026-03-06 — Completed 41-01 (Keeper WebSocket Server)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: phase-complete
+Last activity: 2026-03-06 — Completed 41-02 (Deploy and Verify WebSocket Server)
 
 Progress: [███████████████████░] 95% (40/42 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 73
+- Total plans completed: 74
 - Total execution time: ~12 milestones across 13 days
 
 **Recent Trend:**
@@ -58,6 +58,7 @@ Progress: [███████████████████░] 95% (40
 - keeper-service: port 37017, order-execution-keeper: port 37018, data-verification: port 37019
 - TLS: Cloudflare proxy at keeper.0xmarkets.io handles TLS termination (Flexible SSL mode)
 - DNS: 0xmarkets.io migrated from Vercel DNS to Cloudflare
+- WebSocket: wss://keeper.0xmarkets.io live, broadcasting ticker and candle data
 
 ### Pending Todos
 
@@ -77,9 +78,11 @@ None.
 - [Phase 40]: DNS migrated from Vercel to Cloudflare for proxied subdomain support
 - [Phase 41]: Duplicated normalizePythPrice in wsBroadcast (small pure function, avoids pricesController refactor)
 - [Phase 41]: Used ws { server } constructor to share port 37017 with Express
+- [Phase 41]: Used rsync for deployment (GitHub remote inaccessible from local)
+- [Phase 41]: Fixed pythLazerOracle onError type to `unknown` to unblock build
 
 ## Session Continuity
 
-Last session: 2026-03-06T03:16:17.000Z
-Stopped at: Completed 41-01-PLAN.md
+Last session: 2026-03-06T03:31:10.000Z
+Stopped at: Completed 41-02-PLAN.md
 Next: `/gsd:plan-phase 42`
