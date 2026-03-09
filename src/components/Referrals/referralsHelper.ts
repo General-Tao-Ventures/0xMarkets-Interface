@@ -60,7 +60,9 @@ export async function getReferralCodeTakenStatus(
     //   !isAddressZero(ownerArbitrum) && (ownerArbitrum !== account || (ownerArbitrum === account && chainId === ARBITRUM));
     const owner = ownerMap[otherChainId];
     const takenOnOtherChain =
-      !isAddressZero(owner) && (owner !== account || (owner === account && chainId === otherChainId));
+      !isAddressZero(owner) &&
+      (owner?.toLowerCase() !== account?.toLowerCase() ||
+        (owner?.toLowerCase() === account?.toLowerCase() && chainId === otherChainId));
 
     takenMap[otherChainId] = takenOnOtherChain;
   }

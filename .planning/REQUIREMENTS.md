@@ -1,85 +1,71 @@
-# Requirements: 0xMarkets v1.12 WebSocket Price Streaming
+# Requirements: 0xMarkets v1.13 0xM Token Rebrand + Error UX
 
-**Defined:** 2026-03-05
-**Core Value:** Real-time price updates across the entire interface — mark prices, chart candles, and PnL — with sub-second latency via WebSocket streaming.
+**Defined:** 2026-03-09
+**Core Value:** A user can open and close leveraged trading positions with clear feedback, reliable execution, and access to all configured markets.
 
-## v1.12 Requirements
+## v1.13 Requirements
 
-### Infrastructure
+### Contract Rebranding
 
-- [x] **INFRA-01**: TLS termination configured on DO droplet for secure WebSocket connections (wss://)
-- [x] **INFRA-02**: DNS subdomain (e.g., keeper.0xmarkets.io) pointing to DO droplet for direct WS access
+- [ ] **REBRAND-01**: MarketToken contract deployed with "0xM" symbol and "0xMarkets Pool" name
+- [ ] **REBRAND-02**: 7 new markets created on-chain (ETH, BTC, EUR, GBP, GOLD, JPY, WTI) using new MarketToken
+- [ ] **REBRAND-03**: Market parameters configured on-chain (swapImpactFactor=0, pool caps, OI limits, reserve factors, leverage limits)
+- [ ] **REBRAND-04**: All 7 pools seeded with USDC deposits
 
-### Keeper Streaming
+### Service Config Updates
 
-- [x] **KSTR-01**: Keeper connects to Pyth Hermes SSE endpoint, replacing 2s HTTP polling in candleCollector
-- [x] **KSTR-02**: In-memory price cache updated by SSE stream, serving all /prices/* endpoints from cache instead of per-request Hermes calls
-- [x] **KSTR-03**: SSE connection auto-reconnects on disconnect (including Hermes 24h auto-close) with exponential backoff
+- [ ] **CFG-01**: Interface SDK configs updated with new market/token addresses (tokens.ts, markets.ts, contracts.ts, static/markets.ts, multichain.ts)
+- [ ] **CFG-02**: Keeper service config updated with new token addresses and restarted
+- [ ] **CFG-03**: Order execution keeper updated with new contract addresses and restarted
+- [ ] **CFG-04**: Squid processor updated with new EventEmitter address and start block, hard-reset redeployed
 
-### Keeper WebSocket Server
+### Error UX
 
-- [x] **KWS-01**: WebSocket server mounted on existing Express HTTP server (port 37017) using `ws` library
-- [x] **KWS-02**: Ticker updates broadcast to all connected clients on each SSE price update
-- [x] **KWS-03**: In-progress candle updates broadcast at ~200ms intervals with current OHLC state
-- [x] **KWS-04**: Server-side heartbeat ping/pong detects and drops dead connections
-- [x] **KWS-05**: Backpressure handling — skip or drop messages for slow clients to prevent memory exhaustion
+- [ ] **ERR-01**: Frontend decodes reasonBytes from cancelled deposit/withdrawal/order events into human-readable messages
+- [ ] **ERR-02**: Error messages displayed to user in toast notifications when operations fail
 
-### Frontend WebSocket Client
+### Verification
 
-- [x] **FWS-01**: Frontend establishes WebSocket connection to keeper with auto-reconnect and exponential backoff
-- [x] **FWS-02**: Mark prices update via WebSocket push, replacing 1s HTTP polling of /prices/tickers
-- [x] **FWS-03**: TradingView chart receives real-time bar updates via WebSocket, replacing 1s HTTP polling of /prices/candles
-- [x] **FWS-04**: HTTP polling remains as fallback when WebSocket is unavailable or disconnected
-- [x] **FWS-05**: Timestamp gating prevents stale HTTP responses from overwriting fresher WebSocket data
-- [x] **FWS-06**: Connection status indicator visible in UI (connected/reconnecting/stale)
+- [ ] **VER-01**: End-to-end deposit and withdrawal works with new 0xM token contracts
+- [ ] **VER-02**: End-to-end market order (open/close position) works with new contracts
+- [ ] **VER-03**: Trade history and leaderboard populate correctly from squid with new addresses
 
 ## Future Requirements
 
-### Performance
-
-- **PERF-01**: Process isolation — run WebSocket server in separate container from critical keeper loop
-- **PERF-02**: Sub-second PnL recalculation reactive to WebSocket price updates
-
-### Resilience
-
-- **RESL-01**: Client-side stale price detection with visual warning after N seconds without update
+- **TEST-01**: Multi-market parallel E2E suite
+- **TEST-02**: Automated regression suite on CI/GitHub Actions
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Direct browser-to-Hermes connection | Exposes Pyth API key to clients |
-| Order book WebSocket | Oracle-based pricing, no order book |
-| Client-side candle aggregation | Keeper is source of truth for candles |
-| Multi-tab coordination | Complexity not justified for testnet |
-| WebSocket authentication | Testnet — no sensitive data exposed |
+| Mainnet deployment | Testnet-first |
+| Liquidity migration from old pools | No migration path in GMX v2 contracts |
+| New market additions beyond existing 7 | Rebrand only, same market set |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 40 | Complete |
-| INFRA-02 | Phase 40 | Complete |
-| KSTR-01 | Phase 40 | Complete |
-| KSTR-02 | Phase 40 | Complete |
-| KSTR-03 | Phase 40 | Complete |
-| KWS-01 | Phase 41 | Complete |
-| KWS-02 | Phase 41 | Complete |
-| KWS-03 | Phase 41 | Complete |
-| KWS-04 | Phase 41 | Complete |
-| KWS-05 | Phase 41 | Complete |
-| FWS-01 | Phase 42 | Complete |
-| FWS-02 | Phase 42 | Complete |
-| FWS-03 | Phase 42 | Complete |
-| FWS-04 | Phase 42 | Complete |
-| FWS-05 | Phase 42 | Complete |
-| FWS-06 | Phase 42 | Complete |
+| REBRAND-01 | Phase 43 | Pending |
+| REBRAND-02 | Phase 43 | Pending |
+| REBRAND-03 | Phase 43 | Pending |
+| REBRAND-04 | Phase 44 | Pending |
+| CFG-01 | Phase 44 | Pending |
+| CFG-02 | Phase 44 | Pending |
+| CFG-03 | Phase 44 | Pending |
+| CFG-04 | Phase 44 | Pending |
+| ERR-01 | Phase 45 | Pending |
+| ERR-02 | Phase 45 | Pending |
+| VER-01 | Phase 46 | Pending |
+| VER-02 | Phase 46 | Pending |
+| VER-03 | Phase 46 | Pending |
 
 **Coverage:**
-- v1.12 requirements: 16 total
-- Mapped to phases: 16
+- v1.13 requirements: 13 total
+- Mapped to phases: 13
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-03-05*
-*Last updated: 2026-03-05 — traceability updated with phase mappings*
+*Requirements defined: 2026-03-09*
+*Last updated: 2026-03-09 — updated REBRAND-02/04 from 6 to 7 markets (includes WTI per CONTEXT.md decisions)*

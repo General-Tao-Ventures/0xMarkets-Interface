@@ -6,6 +6,7 @@ import { usePrevious } from "react-use";
 import type { Address } from "viem";
 
 import { USD_DECIMALS } from "config/factors";
+import { type ComingSoonMarket, getComingSoonMarkets } from "config/markets";
 import type { SortDirection } from "context/SorterContext/types";
 import { selectAvailableChartTokens } from "context/SyntheticsStateContext/selectors/chartSelectors";
 import { selectChainId, selectTokensData } from "context/SyntheticsStateContext/selectors/globalSelectors";
@@ -147,6 +148,8 @@ function MarketsList() {
   const tradeType = useSelector(selectTradeboxTradeType);
   const chooseSuitableMarket = useSelector(selectTradeboxChooseSuitableMarket);
   const tokensData = useSelector(selectTokensData);
+
+  const comingSoonMarkets = useMemo(() => getComingSoonMarkets(chainId), [chainId]);
 
   const { availableChartTokens: options, availableChartTokenAddresses } = useMemo(() => {
     const availableChartTokens = availableTokens?.filter((token) => isChartAvailableForToken(chainId, token.symbol));
@@ -391,6 +394,18 @@ function MarketsList() {
                 />
               )
             )}
+            {tab === "all" &&
+              !isSwap &&
+              comingSoonMarkets.map((market) => (
+                <ComingSoonRow
+                  key={market.marketTokenAddress}
+                  market={market}
+                  isMobile={isMobile}
+                  rowVerticalPadding={rowVerticalPadding}
+                  rowHorizontalPadding={rowHorizontalPadding}
+                  tdClassName={tdClassName}
+                />
+              ))}
           </tbody>
         </table>
         {options && options.length > 0 && !sortedTokens?.length && (
@@ -695,6 +710,41 @@ function MarketListItem({
           </td>
         </>
       ) : null}
+    </tr>
+  );
+}
+
+function ComingSoonRow({
+  market,
+  isMobile,
+  rowVerticalPadding,
+  rowHorizontalPadding,
+  tdClassName,
+}: {
+  market: ComingSoonMarket;
+  isMobile: boolean;
+  rowVerticalPadding: string;
+  rowHorizontalPadding: string;
+  tdClassName: string;
+}) {
+  return (
+    <tr className="opacity-50">
+      <td className={cx("px-12 text-center", rowVerticalPadding)} />
+      <td className={cx("pl-4 text-[13px]", rowVerticalPadding, isMobile ? "pr-2" : "pr-8")}>
+        <div className={cx("flex", isMobile ? "items-start" : "items-center")}>
+          <TokenIcon className="ChartToken-list-icon mr-6" symbol={market.tokenSymbol} displaySize={16} importSize={24} />
+          <span className="font-medium leading-1">
+            <span className="text-typography-secondary">
+              <span className="text-typography-primary">{market.tokenSymbol.toUpperCase()}</span>/USD
+            </span>
+          </span>
+        </div>
+      </td>
+      <td className={tdClassName} colSpan={isMobile ? 2 : 7}>
+        <span className="rounded-4 bg-cold-blue-900 px-8 py-2 text-12 text-cold-blue-500">
+          <Trans>Coming Soon</Trans>
+        </span>
+      </td>
     </tr>
   );
 }

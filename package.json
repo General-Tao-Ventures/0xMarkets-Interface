@@ -59,6 +59,7 @@
     "@types/react-router-dom": "5.3.3",
     "@uniswap/sdk-core": "3.0.1",
     "@uniswap/v3-sdk": "3.9.0",
+    "@vercel/blob": "2.3.1",
     "@wagmi/connectors": "5.3.7",
     "@wagmi/core": "2.14.4",
     "bigdecimal": "0.6.1",

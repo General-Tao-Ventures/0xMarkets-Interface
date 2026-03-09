@@ -2,7 +2,7 @@ import { Trans, t } from "@lingui/macro";
 import cx from "classnames";
 import { ReactNode, useCallback, useMemo, useState } from "react";
 
-import { isMarketComingSoon } from "config/markets";
+import { getComingSoonMarkets, isMarketComingSoon } from "config/markets";
 import { useTokensFavorites } from "context/TokensFavoritesContext/TokensFavoritesContextProvider";
 import { MarketInfo, getMarketIndexName } from "domain/synthetics/markets";
 import { TokenData, TokensData, convertToUsd } from "domain/synthetics/tokens";
@@ -75,6 +75,7 @@ export function MarketSelector({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const { tab, favoriteTokens, toggleFavoriteToken } = useTokensFavorites("market-selector");
+  const comingSoonMarkets = useMemo(() => getComingSoonMarkets(chainId), [chainId]);
 
   const marketsOptions: MarketOption[] = useMemo(() => {
     const optionsByIndexName: { [indexName: string]: MarketOption } = {};
@@ -205,6 +206,10 @@ export function MarketSelector({
               onFavoriteClick={toggleFavoriteToken}
             />
           ))}
+          {tab === "all" &&
+            comingSoonMarkets.map((market) => (
+              <ComingSoonListItem key={market.marketTokenAddress} market={market} />
+            ))}
         </div>
         {filteredOptions.length === 0 && (
           <div className="px-20 text-14 text-typography-secondary">
@@ -222,6 +227,24 @@ export function MarketSelector({
         {selectedMarketLabel ? selectedMarketLabel : marketInfo ? getMarketIndexName(marketInfo) : "..."}
         <ChevronDownIcon className="w-16 text-typography-secondary group-hover:text-blue-300" />
       </div>
+    </div>
+  );
+}
+
+function ComingSoonListItem({ market }: { market: { indexName: string; tokenSymbol: string } }) {
+  const assetImage = importImage(`ic_${market.tokenSymbol}_40.svg`);
+
+  return (
+    <div className="text-body-medium flex w-full cursor-default items-center justify-between p-8 px-20 opacity-50">
+      <div className="Token-info">
+        <img src={assetImage} alt={market.indexName} className="token-logo rounded-full" />
+        <div className="Token-symbol">
+          <div className="Token-text">{market.indexName}</div>
+        </div>
+      </div>
+      <span className="rounded-4 bg-cold-blue-900 px-8 py-2 text-12 text-cold-blue-500">
+        <Trans>Coming Soon</Trans>
+      </span>
     </div>
   );
 }

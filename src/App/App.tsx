@@ -62,6 +62,12 @@ function App() {
 
   let app = (
     <>
+      <div className="bg-yellow-500/20 text-center text-13 text-yellow-300 py-8 px-16">
+        You are using the testnet environment. Funds are not real.{" "}
+        <a href="https://faucet.0xMarkets.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+          Get testnet tokens
+        </a>
+      </div>
       <KeeperStatusBanner />
       <AppRoutes />
     </>

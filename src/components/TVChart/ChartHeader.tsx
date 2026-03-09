@@ -47,10 +47,6 @@ function ChartHeaderMobile() {
     low24,
     netRateLong,
     netRateShort,
-    fundingRateLong,
-    fundingRateShort,
-    borrowRateLong,
-    borrowRateShort,
     shortOIPercentage,
     shortOIValue,
   } = useChartHeaderFormattedValues();
@@ -143,25 +139,6 @@ function ChartHeaderMobile() {
           </TooltipWithPortal>
         </div>
 
-        <div>
-          <div className="mb-4 text-[11px] font-medium uppercase text-typography-secondary">
-            <Trans>Funding / 1h</Trans>
-          </div>
-          <div className="flex flex-row items-center gap-8">
-            <div className="numbers">{fundingRateLong}</div>
-            <div className="numbers">{fundingRateShort}</div>
-          </div>
-        </div>
-
-        <div>
-          <div className="mb-4 text-[11px] font-medium uppercase text-typography-secondary">
-            <Trans>Borrow Fee / 1h</Trans>
-          </div>
-          <div className="flex flex-row items-center gap-8">
-            <div className="numbers">{borrowRateLong}</div>
-            <div className="numbers">{borrowRateShort}</div>
-          </div>
-        </div>
       </div>
     );
   }, [
@@ -173,10 +150,6 @@ function ChartHeaderMobile() {
     longOIValue,
     netRateLong,
     netRateShort,
-    fundingRateLong,
-    fundingRateShort,
-    borrowRateLong,
-    borrowRateShort,
     shortOIPercentage,
     shortOIValue,
     detailsVisible,
@@ -279,10 +252,6 @@ function ChartHeaderDesktop() {
     low24,
     netRateLong,
     netRateShort,
-    fundingRateLong,
-    fundingRateShort,
-    borrowRateLong,
-    borrowRateShort,
     shortOIPercentage,
     shortOIValue,
     info,
@@ -358,27 +327,6 @@ function ChartHeaderDesktop() {
           }
         />
 
-        <ChartHeaderItem
-          label={<Trans>Funding / 1h</Trans>}
-          value={
-            <div className="flex items-center gap-4">
-              <div className="numbers">{fundingRateLong}</div>
-              <span className="text-typography-inactive">/</span>
-              <div className="numbers">{fundingRateShort}</div>
-            </div>
-          }
-        />
-
-        <ChartHeaderItem
-          label={<Trans>Borrow Fee / 1h</Trans>}
-          value={
-            <div className="flex items-center gap-4">
-              <div className="numbers">{borrowRateLong}</div>
-              <span className="text-typography-inactive">/</span>
-              <div className="numbers">{borrowRateShort}</div>
-            </div>
-          }
-        />
       </>
     );
   }, [
@@ -390,10 +338,6 @@ function ChartHeaderDesktop() {
     longOIValue,
     netRateLong,
     netRateShort,
-    fundingRateLong,
-    fundingRateShort,
-    borrowRateLong,
-    borrowRateShort,
     shortOIPercentage,
     shortOIValue,
     high24,
@@ -480,9 +424,9 @@ function ChartHeaderDesktop() {
             {scrollRight > 0 && <ChevronRightIcon className="size-16 text-typography-secondary" />}
           </div>
         </div>
-        <div className={cx("flex gap-20 overflow-x-auto scrollbar-hide")} ref={scrollableRef}>
+        <div className={cx("flex gap-28 overflow-x-auto scrollbar-hide")} ref={scrollableRef}>
           <div className="flex flex-col justify-center gap-2">
-            <div className="text-body-medium numbers">{avgPrice}</div>
+            <div className="text-[16px] font-medium leading-tight numbers">{avgPrice}</div>
             <div className="text-body-small numbers">{dayPriceDelta}</div>
           </div>
           {additionalInfo}

@@ -53,7 +53,7 @@ export const selectLeaderboardCurrentAccount = createSelector(function selectLea
   | undefined {
   const accounts = q(selectLeaderboardAccounts);
   const currentAccount = q(selectAccount);
-  const leaderboardAccount = accounts?.find((a) => a.account === currentAccount);
+  const leaderboardAccount = accounts?.find((a) => a.account.toLowerCase() === currentAccount?.toLowerCase());
   if (leaderboardAccount) return leaderboardAccount;
   if (!currentAccount) return undefined;
 
@@ -332,7 +332,7 @@ function applyFactor(value: bigint, factor: bigint) {
 function getLeverage(sizeInUsd: bigint, collateralUsd: bigint, unrealizedPnl: bigint, unrealizedFees: bigint) {
   const remainingCollateralUsd = collateralUsd + unrealizedPnl - unrealizedFees;
 
-  if (remainingCollateralUsd < 0n) {
+  if (remainingCollateralUsd <= 0n) {
     return 0n;
   }
 

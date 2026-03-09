@@ -46,7 +46,7 @@ export default function AddressView({
       trader = ensName || address;
     }
 
-    if (account === address) {
+    if (account?.toLowerCase() === address.toLowerCase()) {
       return (
         <span className="flex items-center gap-4">
           <Trans>You</Trans> <span className="text-typography-secondary">{trader}</span>
