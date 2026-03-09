@@ -217,7 +217,7 @@ export function useShiftSubmitState({
     }
 
     return {
-      text: t`Shift GM`,
+      text: t`Shift`,
       onSubmit,
       tokensToApprove,
     };

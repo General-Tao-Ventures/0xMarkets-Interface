@@ -1,8 +1,8 @@
 import { t } from "@lingui/macro";
 
 export const INCENTIVE_TYPE_MAP = {
-  1001: t`GM Airdrop`,
-  1002: t`GLP to GM Airdrop`,
+  1001: t`Pool Airdrop`,
+  1002: t`GLP to Pool Airdrop`,
   1003: t`TRADING Airdrop`,
   1004: t`STIP.b LP incentives`,
   1005: t`STIP.b Trading Incentives`,

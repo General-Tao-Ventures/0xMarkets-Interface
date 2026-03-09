@@ -81,7 +81,7 @@ function getActionableMessage(errorReason: string | null): string {
 }
 
 function getWithdrawalActionableMessage(errorReason: string | null): string {
-  if (!errorReason) return t`Your withdrawal was cancelled. Your GM tokens have been returned.`;
+  if (!errorReason) return t`Your withdrawal was cancelled. Your funds have been returned.`;
 
   const lower = errorReason.toLowerCase();
 
@@ -89,15 +89,15 @@ function getWithdrawalActionableMessage(errorReason: string | null): string {
     return t`Insufficient swap liquidity. Try a smaller amount.`;
   }
   if (lower.includes("oracletimestamps") || lower.includes("expired") || lower.includes("expiration")) {
-    return t`Withdrawal expired before the keeper could execute it. Your GM tokens have been returned. Try again.`;
+    return t`Withdrawal expired before the keeper could execute it. Your funds have been returned. Try again.`;
   }
   if (lower.includes("insufficientexecutionfee")) {
     return t`Execution fee was insufficient. Try again.`;
   }
   if (lower.includes("emptywithdrawal") || lower.includes("execution reverted")) {
-    return t`Withdrawal execution failed on-chain. Your GM tokens have been returned. Please try again.`;
+    return t`Withdrawal execution failed on-chain. Your funds have been returned. Please try again.`;
   }
-  return t`Your withdrawal was cancelled. Your GM tokens have been returned.`;
+  return t`Your withdrawal was cancelled. Your funds have been returned.`;
 }
 
 function getShiftActionableMessage(errorReason: string | null): string {
@@ -197,7 +197,7 @@ export function GmStatusNotification({
   const title = useMemo(() => {
     if (operation === "deposit") {
       if (!pendingDepositData) {
-        return t`Unknown buy GM order`;
+        return t`Unknown deposit order`;
       }
 
       let longToken: TokenData | undefined;
@@ -247,7 +247,6 @@ export function GmStatusNotification({
         if (gmMarket) {
           tokensText = (
             <>
-              GM:
               <span className="inline-flex whitespace-nowrap">
                 {" "}
                 {getMarketIndexName(gmMarket)}
@@ -262,7 +261,7 @@ export function GmStatusNotification({
         return (
           <Trans>
             <div className="inline-flex">
-              Buying {glvInfo ? getGlvDisplayName(glvInfo) : "GM:"}
+              Depositing to {glvInfo ? getGlvDisplayName(glvInfo) : ""}
               {indexName ? <span>&nbsp;{indexName}</span> : null}
               <PoolName>{poolName}</PoolName>
             </div>{" "}
@@ -271,7 +270,7 @@ export function GmStatusNotification({
         );
     } else if (operation === "withdrawal") {
       if (!pendingWithdrawalData) {
-        return t`Unknown sell GM order`;
+        return t`Unknown withdrawal order`;
       }
       const marketInfo = getByKey(marketsInfoData, pendingWithdrawalData.marketAddress);
       const isGlv = marketInfo && isGlvInfo(marketInfo);
@@ -281,7 +280,7 @@ export function GmStatusNotification({
       return (
         <Trans>
           <div className="inline-flex">
-            Selling {isGlv ? getGlvDisplayName(marketInfo) : "GM"}
+            Withdrawing from {isGlv ? getGlvDisplayName(marketInfo) : ""}
             {indexName && <span>:&nbsp;{indexName}</span>}
             <PoolName>{poolName}</PoolName>
           </div>
@@ -289,7 +288,7 @@ export function GmStatusNotification({
       );
     } else {
       if (!pendingShiftData) {
-        return t`Unknown shift GM order`;
+        return t`Unknown shift order`;
       }
 
       const fromMarketInfo = getByKey(marketsInfoData, pendingShiftData.fromMarket);
@@ -304,12 +303,12 @@ export function GmStatusNotification({
         <Trans>
           Shifting from{" "}
           <span className="inline-flex items-center">
-            <span>GM: {fromIndexName}</span>
+            <span>{fromIndexName}</span>
             <PoolName>{fromPoolName}</PoolName>
           </span>{" "}
           to{" "}
           <span className="inline-flex items-center">
-            <span>GM: {toIndexName}</span>
+            <span>{toIndexName}</span>
             <PoolName>{toPoolName}</PoolName>
           </span>
         </Trans>
@@ -323,18 +322,18 @@ export function GmStatusNotification({
     let createdTxnHash: string | undefined;
 
     if (operation === "deposit") {
-      text = t`Sending buy request.`;
+      text = t`Sending deposit request.`;
 
       if (depositStatus?.createdTxnHash) {
-        text = t`Buy request sent.`;
+        text = t`Deposit request sent.`;
         status = "success";
         createdTxnHash = depositStatus?.createdTxnHash;
       }
     } else if (operation === "withdrawal") {
-      text = t`Sending sell request.`;
+      text = t`Sending withdrawal request.`;
 
       if (withdrawalStatus?.createdTxnHash) {
-        text = t`Sell request sent.`;
+        text = t`Withdrawal request sent.`;
         status = "success";
         createdTxnHash = withdrawalStatus?.createdTxnHash;
       }
@@ -365,7 +364,7 @@ export function GmStatusNotification({
         status = "error";
         txnHash = depositStatus.cancelledTxnHash;
       } else if (depositStatus?.executedTxnHash) {
-        text = t`Buy order executed.`;
+        text = t`Deposit executed.`;
         status = "success";
         txnHash = depositStatus.executedTxnHash;
       } else if (depositStatus?.createdTxnHash) {
@@ -380,18 +379,18 @@ export function GmStatusNotification({
           text = t`Still waiting... (${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s)`;
         }
       } else {
-        text = t`Fulfilling buy request.`;
+        text = t`Fulfilling deposit request.`;
       }
     } else if (operation === "withdrawal") {
       if (withdrawalStatus?.cancelledTxnHash === EXECUTION_TIMEOUT_HASH) {
-        text = t`Withdrawal timed out. The keeper may be down. Try again or check your GM token balance.`;
+        text = t`Withdrawal timed out. The keeper may be down. Try again or check your pool balance.`;
         status = "error";
       } else if (withdrawalStatus?.cancelledTxnHash) {
         text = getWithdrawalActionableMessage(withdrawalStatus.cancelledReason ?? null);
         status = "error";
         txnHash = withdrawalStatus.cancelledTxnHash;
       } else if (withdrawalStatus?.executedTxnHash) {
-        text = t`Sell order executed.`;
+        text = t`Withdrawal executed.`;
         status = "success";
         txnHash = withdrawalStatus.executedTxnHash;
       } else if (withdrawalStatus?.createdTxnHash) {
@@ -406,7 +405,7 @@ export function GmStatusNotification({
           text = t`Still waiting... (${Math.floor(withdrawalElapsedSeconds / 60)}m ${withdrawalElapsedSeconds % 60}s)`;
         }
       } else {
-        text = t`Fulfilling sell request.`;
+        text = t`Fulfilling withdrawal request.`;
       }
     } else {
       text = t`Fulfilling shift request.`;
@@ -416,7 +415,7 @@ export function GmStatusNotification({
       }
 
       if (shiftStatus?.executedTxnHash) {
-        text = t`Shift order executed.`;
+        text = t`Shift executed.`;
         status = "success";
         txnHash = shiftStatus?.executedTxnHash;
       }

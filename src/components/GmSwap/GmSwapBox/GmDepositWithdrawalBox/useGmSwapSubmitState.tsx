@@ -53,9 +53,9 @@ interface Props {
 }
 
 const processingTextMap = {
-  [Operation.Deposit]: (symbol: string) => t`Buying ${symbol}...`,
-  [Operation.Withdrawal]: (symbol: string) => t`Selling ${symbol}...`,
-  [Operation.Shift]: (symbol: string) => t`Shifting ${symbol}...`,
+  [Operation.Deposit]: (_symbol: string) => t`Depositing...`,
+  [Operation.Withdrawal]: (_symbol: string) => t`Withdrawing...`,
+  [Operation.Shift]: (_symbol: string) => t`Shifting...`,
 };
 
 type SubmitButtonState = {
@@ -277,7 +277,7 @@ export const useGmSwapSubmitState = ({
       };
     }
 
-    const operationTokenSymbol = glvInfo ? "GLV" : "GM";
+    const operationTokenSymbol = glvInfo ? "GLV" : "";
 
     if (isSubmitting) {
       return {

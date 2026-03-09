@@ -510,7 +510,7 @@ export function TradeFeesRow(p: Props) {
     return (
       <>
         <br />
-        <Trans>This swap is routed through several GM pools for the lowest possible fees and price impact.</Trans>
+        <Trans>This swap is routed through several pools for the lowest possible fees and price impact.</Trans>
       </>
     );
   }, [p.swapFees]);

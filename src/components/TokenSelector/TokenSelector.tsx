@@ -118,7 +118,7 @@ export default function TokenSelector(props: Props) {
           if (item.isMarketToken) {
             const indexTokenAddress = getMarketUiConfig(props.chainId, item.address)?.indexTokenAddress;
             const indexToken = getToken(props.chainId, indexTokenAddress);
-            name = indexToken.name ? `GM ${indexToken.name}` : name;
+            name = indexToken.name ? `${indexToken.name}` : name;
           }
           return stripBlacklistedWords(name);
         },
@@ -267,7 +267,7 @@ export default function TokenSelector(props: Props) {
                   )}
                   <div className="items ml-16 flex gap-4">
                     <div>
-                      {token.isMarketToken && marketToken ? `GM: ${getMarketIndexName(marketToken)}` : token.symbol}
+                      {token.isMarketToken && marketToken ? getMarketIndexName(marketToken) : token.symbol}
                     </div>
                     {marketToken && <span className="text-accent">[{getMarketPoolName(marketToken)}]</span>}
                   </div>
