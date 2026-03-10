@@ -23,7 +23,7 @@ export type LandingPageProtocolTokenEvent = {
   data: {
     action: "ProtocolTokenAction";
     chain: ChainName | undefined;
-    type: "GMX" | "GM" | "GLV" | "GLP";
+    type: "GMX" | "0xM" | "GLV" | "GLP";
   };
 };
 
@@ -229,7 +229,7 @@ export type PoolsPageBuyConfirmEvent = {
   event: "PoolsPageAction";
   data: {
     action: "BuyConfirm";
-    type: "GM" | "GLV";
+    type: "0xM" | "GLV";
     poolName: string;
     glvAddress: string;
     amountUsd: number;
@@ -241,7 +241,7 @@ export type PoolsPageBuyResultEvent = {
   event: "PoolsPageAction";
   data: {
     action: "BuySuccess" | "BuyFail";
-    type: "GM" | "GLV";
+    type: "0xM" | "GLV";
     poolName: string;
     glvAddress: string;
     amountUsd: number;

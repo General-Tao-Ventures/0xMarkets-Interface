@@ -23,7 +23,7 @@ const getKeeperTokens = async (chainId: number): Promise<{ tokens: KeeperToken[]
   return data;
 };
 
-const IGNORED_TOKENS = ["ESGMX", "GLP", "GM", "GLV"];
+const IGNORED_TOKENS = ["ESGMX", "GLP", "0xM", "GLV"];
 
 const getIgnoredTokensByChain = (chainId: number) => {
   return IGNORED_TOKENS.concat(

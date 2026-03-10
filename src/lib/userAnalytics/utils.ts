@@ -216,7 +216,7 @@ export function sendUserAnalyticsOrderConfirmClickEvent(chainId: number, metricI
         event: "PoolsPageAction",
         data: {
           action: "BuyConfirm",
-          type: "GM",
+          type: "0xM",
           poolName: metricData.marketName || "",
           glvAddress: "",
           amountUsd: metricData.marketTokenUsd || 0,
@@ -359,7 +359,7 @@ export function sendUserAnalyticsOrderResultEvent(
         event: "PoolsPageAction",
         data: {
           action: isSuccess ? "BuySuccess" : "BuyFail",
-          type: "GM",
+          type: "0xM",
           poolName: metricData.marketName || "",
           glvAddress: "",
           amountUsd: metricData.marketTokenUsd || 0,

@@ -97,8 +97,8 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     },
     /** Placeholder tokens */
     {
-      name: "GMX Market tokens",
-      symbol: "GM",
+      name: "0xMarkets Market tokens",
+      symbol: "0xM",
       address: "<market-token-address>",
       decimals: 18,
       imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GM_LOGO.png",
@@ -148,8 +148,8 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     },
     /** Placeholder tokens */
     {
-      name: "GMX Market tokens",
-      symbol: "GM",
+      name: "0xMarkets Market tokens",
+      symbol: "0xM",
       address: "<market-token-address>",
       decimals: 18,
       imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GM_LOGO.png",

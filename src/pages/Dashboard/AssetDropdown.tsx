@@ -17,7 +17,7 @@ import useWallet from "lib/wallets/useWallet";
 import { getNormalizedTokenSymbol, getTokenBySymbol } from "sdk/configs/tokens";
 
 import ExternalLink from "components/ExternalLink/ExternalLink";
-import TokenIcon from "components/TokenIcon/TokenIcon";
+import { PoolTokenIcon } from "components/TokenIcon/PoolTokenIcon";
 
 import coingeckoIcon from "img/ic_coingecko_16.svg";
 import MenuDotsIcon from "img/ic_menu_dots.svg?react";
@@ -29,7 +29,7 @@ import "./AssetDropdown.scss";
 const PLATFORM_TOKEN_ROUTES = {
   GMX: "/buy_gmx",
   GLP: "/buy_glp",
-  GM: "/pools",
+  "0xM": "/pools",
 };
 
 type Props = {
@@ -200,7 +200,7 @@ const AssetDropdownMarketItem = ({ marketStat, chainId }: { marketStat: MarketSt
   return (
     <Link to={`/pools/?market=${marketStat.marketInfo.marketTokenAddress}&operation=buy`} className="asset-item">
       <div className="mr-12">
-        <TokenIcon symbol={tokenIconName} badge={tokenIconBadge} displaySize={32} />
+        <PoolTokenIcon symbol={tokenIconName} badge={tokenIconBadge} displaySize={32} />
       </div>
 
       <p>

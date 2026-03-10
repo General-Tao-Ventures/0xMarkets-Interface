@@ -231,7 +231,7 @@ export function GmShiftBox({
     if (isGlvInfo(glvOrMarketInfo)) {
       return {
         warning:
-          "Shifting From GM to GLV is similar to buying GLV with a GM token. You will be redirected to the buy GLV tab when selected.",
+          "Shifting From 0xM to GLV is similar to buying GLV with a 0xM token. You will be redirected to the buy GLV tab when selected.",
       };
     }
 

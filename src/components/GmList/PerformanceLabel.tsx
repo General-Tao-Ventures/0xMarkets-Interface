@@ -23,7 +23,7 @@ export function PerformanceLabel({
       content={
         <Trans>
           Annualized return of the pool or vault over the selected period, compared to a benchmark that follows Uniswap
-          V2–style rebalancing of the backing tokens in the same GM pool or GLV vault.
+          V2–style rebalancing of the backing tokens in the same 0xM pool or GLV vault.
           <br />
           <br />
           Annualized figures based on short periods may be distorted by short-term volatility.

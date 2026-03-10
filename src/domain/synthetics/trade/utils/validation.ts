@@ -814,7 +814,7 @@ export function getGmSwapError(p: {
       if (marketTokenUsd !== undefined && (mintableGmUsd < marketTokenUsd || maxMintableInMarketUsd < marketTokenUsd)) {
         return [
           t`Max pool amount reached`,
-          longToken?.symbol === "GM"
+          longToken?.symbol === "0xM"
             ? t`The deposit cap for pool ${marketInfo.name} in ${getGlvDisplayName(glvInfo)} [${getMarketPoolName(glvInfo)}] has been reached. Please reduce the deposit size, pick a different pool, or shift to a different pool and try again.`
             : t`The deposit cap for pool ${marketInfo.name} in ${getGlvDisplayName(glvInfo)} [${getMarketPoolName(glvInfo)}] has been reached. Please choose a different pool or reduce the deposit size.`,
         ];
