@@ -68,7 +68,7 @@ export type MultichainTokenId = {
 };
 
 const TOKEN_GROUPS: Partial<Record<string, Partial<Record<SourceChainId | SettlementChainId, MultichainTokenId>>>> = {
-  ["USDC"]: {
+  ["USD0"]: {
     [SOURCE_BASE_MAINNET]: {
       address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       decimals: 6,
@@ -228,7 +228,7 @@ export const ENDPOINT_ID_TO_CHAIN_ID: Partial<Record<LayerZeroEndpointId, Settle
   mapValues(invert(CHAIN_ID_TO_ENDPOINT_ID), (value) => parseInt(value));
 
 export const FAKE_INPUT_AMOUNT_MAP: Record<string, bigint> = {
-  USDC: numberToBigint(1, getTokenBySymbol(BASE_SEPOLIA, "USDC").decimals),
+  USD0: numberToBigint(1, getTokenBySymbol(BASE_SEPOLIA, "USD0").decimals),
   ETH: numberToBigint(0.0015, getTokenBySymbol(BASE_SEPOLIA, "ETH").decimals),
 };
 

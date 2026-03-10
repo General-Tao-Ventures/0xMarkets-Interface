@@ -35,7 +35,7 @@ const constants = {
   [BASE_SEPOLIA]: {
     nativeTokenSymbol: "ETH",
     wrappedTokenSymbol: "WETH",
-    defaultCollateralSymbol: "USDC",
+    defaultCollateralSymbol: "USD0",
     defaultFlagOrdersEnabled: true,
     positionReaderPropsLength: 9,
     v2: true,
@@ -48,7 +48,7 @@ const constants = {
   [LOCALHOST]: {
     nativeTokenSymbol: "ETH",
     wrappedTokenSymbol: "WETH",
-    defaultCollateralSymbol: "USDC",
+    defaultCollateralSymbol: "USD0",
     defaultFlagOrdersEnabled: true,
     positionReaderPropsLength: 9,
     v2: true,

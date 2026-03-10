@@ -33,13 +33,12 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
     },
     {
-      name: "USDC",
-      symbol: "USDC",
-      address: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+      name: "USD0",
+      symbol: "USD0",
+      address: "0x3ae4474579d24a743c9016F017e76185A834d837",
       decimals: 6,
       isStable: true,
       imageUrl: "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
-      coingeckoUrl: "https://www.coingecko.com/en/coins/usd-coin",
     },
     {
       name: "Euro",
@@ -138,13 +137,12 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
     },
     {
-      name: "USDC",
-      symbol: "USDC",
-      address: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+      name: "USD0",
+      symbol: "USD0",
+      address: "0x3ae4474579d24a743c9016F017e76185A834d837",
       decimals: 6,
       isStable: true,
       imageUrl: "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
-      coingeckoUrl: "https://www.coingecko.com/en/coins/usd-coin",
     },
     /** Placeholder tokens */
     {

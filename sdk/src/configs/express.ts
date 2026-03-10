@@ -21,8 +21,8 @@ export const MIN_RELAYER_FEE_USD = 5n ** BigInt(USD_DECIMALS - 1); // 0.5$
 export const EXPRESS_EXTRA_EXECUTION_FEE_BUFFER_BPS = 1000;
 
 const GAS_PAYMENT_TOKENS: Record<ContractsChainId, string[]> = {
-  [BASE_SEPOLIA]: [getTokenBySymbol(BASE_SEPOLIA, "USDC").address, getTokenBySymbol(BASE_SEPOLIA, "WETH").address],
-  [LOCALHOST]: [getTokenBySymbol(LOCALHOST, "USDC").address, getTokenBySymbol(LOCALHOST, "WETH").address],
+  [BASE_SEPOLIA]: [getTokenBySymbol(BASE_SEPOLIA, "USD0").address, getTokenBySymbol(BASE_SEPOLIA, "WETH").address],
+  [LOCALHOST]: [getTokenBySymbol(LOCALHOST, "USD0").address, getTokenBySymbol(LOCALHOST, "WETH").address],
 };
 
 export function getGasPaymentTokens(chainId: number): string[] {

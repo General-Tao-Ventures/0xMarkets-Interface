@@ -128,7 +128,7 @@ export function getMaxLeverageByMinCollateralFactor(minCollateralFactor: bigint 
 }
 
 export function getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor: bigint | undefined) {
-  return getMaxLeverageByMinCollateralFactor(minCollateralFactor) / 2;
+  return Math.floor(getMaxLeverageByMinCollateralFactor(minCollateralFactor) / 1.5);
 }
 
 export function getOppositeCollateral(marketInfo: MarketInfo, tokenAddress: string) {
