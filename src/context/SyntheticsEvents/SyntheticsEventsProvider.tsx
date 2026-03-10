@@ -62,6 +62,7 @@ import { getInsufficientExecutionFeeToastContent } from "components/Errors/error
 import { FeesSettlementStatusNotification } from "components/StatusNotification/FeesSettlementStatusNotification";
 import { GmStatusNotification } from "components/StatusNotification/GmStatusNotification";
 import { OrdersStatusNotificiation } from "components/StatusNotification/OrderStatusNotification";
+import { tryGetError } from "components/TradeHistory/TradeHistoryRow/utils/shared";
 
 import {
   ApprovalStatuses,
@@ -93,6 +94,24 @@ import {
 import { useExecutionPolling } from "./useExecutionPolling";
 import { useMultichainEvents } from "./useMultichainEvents";
 import { extractGelatoError, getGelatoTaskUrl, getPendingOrderKey } from "./utils";
+
+/**
+ * Extract a human-readable cancellation reason from event data.
+ * The contract emits both `reason` (string) and `reasonBytes` (encoded custom error).
+ * For custom errors like MinMarketTokens, `reason` is empty — we decode `reasonBytes` instead.
+ */
+function getCancelledReason(eventData: EventLogData): string | undefined {
+  const reason = eventData.stringItems.items.reason;
+  if (reason) return reason;
+
+  const reasonBytes = eventData.bytesItems?.items?.reasonBytes;
+  if (reasonBytes) {
+    const error = tryGetError(reasonBytes);
+    if (error) return error.name;
+  }
+
+  return undefined;
+}
 
 export const SyntheticsEventsContext = createContext({});
 
@@ -398,7 +417,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
       const key = eventData.bytes32Items.items.key;
       const account = eventData.addressItems.items.account;
-      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
+      const cancelledReason = getCancelledReason(eventData);
 
       if (account !== currentAccount) {
         return;
@@ -589,7 +608,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
-      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
+      const cancelledReason = getCancelledReason(eventData);
 
       if (depositStatuses[key]?.data) {
         const metricId = getGMSwapMetricId(depositStatuses[key].data!);
@@ -606,7 +625,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
-      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
+      const cancelledReason = getCancelledReason(eventData);
 
       if (depositStatuses[key]?.data) {
         const metricId = getGLVSwapMetricId(depositStatuses[key].data! as GLVDepositCreatedEventData);
@@ -737,7 +756,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
-      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
+      const cancelledReason = getCancelledReason(eventData);
 
       if (withdrawalStatuses[key]?.data) {
         const metricId = getGLVSwapMetricId({
@@ -756,7 +775,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
-      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
+      const cancelledReason = getCancelledReason(eventData);
 
       if (withdrawalStatuses[key]?.data) {
         const metricId = getGMSwapMetricId({
@@ -829,7 +848,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       updateNativeTokenBalance();
 
       const key = eventData.bytes32Items.items.key;
-      const cancelledReason = eventData.stringItems.items.reason ?? undefined;
+      const cancelledReason = getCancelledReason(eventData);
 
       if (shiftStatuses[key].data) {
         const metricId = getShiftGMMetricId({
