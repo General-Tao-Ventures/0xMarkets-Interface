@@ -66,37 +66,42 @@ export const CONTRACTS = {
 } as const;
 
 // Token addresses
-export const USDC_ADDRESS: Address = "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b";
+export const USD0_ADDRESS: Address = "0x3ae4474579d24a743c9016F017e76185A834d837";
+export const USDC_ADDRESS = USD0_ADDRESS; // legacy alias
 export const WETH_ADDRESS: Address = "0x4200000000000000000000000000000000000006";
 
 // Execution fee: 0.00005 ETH (MIN_EXECUTION_FEE on testnet is 0, so we minimize gas spend)
 // Base Sepolia gas is cheap (~5-6 gwei), so 0.00005 ETH is plenty for keeper execution
 export const EXECUTION_FEE = 50_000_000_000_000n; // 5e13 wei
 
-// Market definitions (from SDK markets.ts -- all use USDC as long and short token)
+// Market definitions (from SDK markets.ts -- all use USD0 as long and short token)
 export const MARKETS: Record<string, { market: Address; indexToken: Address }> = {
   "WETH/USD": {
-    market: "0x16d3d0c9f0B0C958b281Daa8Cc98cA95991AAFA3",
+    market: "0x23F40e3279685413b252A6944AF9a0641D3aa6ce",
     indexToken: "0x4200000000000000000000000000000000000006",
   },
   "WBTC/USD": {
-    market: "0x69C926BE8441174c58D93544fF9dEC7F38c7ce32",
+    market: "0x63D05Da932541380df8d9eE20D8FdB4B02849398",
     indexToken: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
   },
   "EUR/USD": {
-    market: "0xB6BfB9D1b8bF5d3603DA6A0C3452119f96500869",
+    market: "0x7054eb596aCF4fC1C0686C9B2cdAC4aE6c6D0F33",
     indexToken: "0x18909CC26672376e8FDF1fa54Fc5B892dd6E2b0C",
   },
   "GBP/USD": {
-    market: "0x8c1816E2c44ed62525e128b734FF36579BFdA040",
+    market: "0xa09b59adf15B4ED98a099441b84Ff1eABf71B548",
     indexToken: "0xf7255EAb2968Fb6B8b6226eB25c6EDC2F1CcE60a",
   },
   "GOLD/USD": {
-    market: "0x5C7309926a1C58cABB5b991867450894099d9A78",
+    market: "0x89c3B33bEE4b9cD1B246BE44aDcEd870F74637a3",
     indexToken: "0xf4ac308123764edFB7453a7446D01277D7DEa1A7",
   },
   "JPY/USD": {
-    market: "0x8C1bFbC4026dC63e2C04962264007b2c57e20314",
+    market: "0xD847a999faCe1f862120117C33ae8faBA768fD4b",
     indexToken: "0x7836DF766375f02D71fa3617F5F06a0712699A81",
+  },
+  "WTI/USD": {
+    market: "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF",
+    indexToken: "0x4B4A8E5a0deEC8611e647255425eC68A846046d4",
   },
 };
