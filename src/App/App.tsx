@@ -1,4 +1,5 @@
 import "@wagmi/connectors";
+import "lib/plausible";
 
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";

@@ -4511,6 +4511,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@plausible-analytics/tracker@npm:0.4.4":
+  version: 0.4.4
+  resolution: "@plausible-analytics/tracker@npm:0.4.4"
+  checksum: 387f4348452511dc1b6935609b75819f0b314f32ee3cbda2070fd5956fcb06a817abbabcd2128bc6faad470270aae71a06804aed681b03fc136c4778421873f5
+  languageName: node
+  linkType: hard
+
 "@rainbow-me/rainbowkit@npm:2.2.0":
   version: 2.2.0
   resolution: "@rainbow-me/rainbowkit@npm:2.2.0"
@@ -11223,6 +11230,7 @@ __metadata:
     "@lingui/macro": 4.11.3
     "@lingui/react": 4.10.0
     "@lingui/vite-plugin": 4.11.3
+    "@plausible-analytics/tracker": 0.4.4
     "@rainbow-me/rainbowkit": 2.2.0
     "@stargatefinance/stg-evm-sdk-v2": 1.1.12
     "@tanstack/react-query": 5.25.0

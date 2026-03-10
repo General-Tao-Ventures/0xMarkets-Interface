@@ -45,6 +45,7 @@
     "@lingui/core": "4.10.0",
     "@lingui/macro": "4.11.3",
     "@lingui/react": "4.10.0",
+    "@plausible-analytics/tracker": "0.4.4",
     "@rainbow-me/rainbowkit": "2.2.0",
     "@stargatefinance/stg-evm-sdk-v2": "1.1.12",
     "@tanstack/react-query": "5.25.0",

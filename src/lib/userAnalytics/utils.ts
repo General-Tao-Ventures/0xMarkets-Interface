@@ -24,6 +24,7 @@ import {
 } from "lib/metrics";
 import { OrderMetricData, OrderMetricId } from "lib/metrics/types";
 import { bigintToNumber, formatRatePercentage, roundToOrder } from "lib/numbers";
+import { trackEvent } from "lib/plausible";
 import { userAnalytics } from "lib/userAnalytics";
 import {
   AnalyticsOrderType,
@@ -45,6 +46,7 @@ export function getTradeInteractionKey(pair: string) {
 }
 
 export function sendUserAnalyticsConnectWalletClickEvent(position: ConnectWalletClickEvent["data"]["position"]) {
+  trackEvent("Connect Wallet", { position });
   userAnalytics.pushEvent<ConnectWalletClickEvent>({
     event: "ConnectWalletAction",
     data: {
@@ -120,6 +122,7 @@ export function sendUserAnalyticsOrderConfirmClickEvent(chainId: number, metricI
 
   switch (metricData.metricType) {
     case "increasePosition":
+      trackEvent("Trade Confirm", { type: metricData.isLong ? "Long" : "Short", pair: metricData.marketName || "" });
       userAnalytics.pushEvent<TradeBoxConfirmClickEvent>({
         event: "TradeBoxAction",
         data: {
@@ -154,6 +157,7 @@ export function sendUserAnalyticsOrderConfirmClickEvent(chainId: number, metricI
     case "decreasePosition":
     case "stopLossOrder":
     case "takeProfitOrder":
+      trackEvent("Trade Confirm", { type: "Close", pair: metricData.marketName || "" });
       userAnalytics.pushEvent<TradeBoxConfirmClickEvent>({
         event: "TradeBoxAction",
         data: {
@@ -183,6 +187,7 @@ export function sendUserAnalyticsOrderConfirmClickEvent(chainId: number, metricI
       });
       break;
     case "swap":
+      trackEvent("Trade Confirm", { type: "Swap", pair: `${metricData.initialCollateralSymbol}/${metricData.toTokenSymbol}` });
       userAnalytics.pushEvent<TradeBoxConfirmClickEvent>({
         event: "TradeBoxAction",
         data: {
@@ -212,6 +217,7 @@ export function sendUserAnalyticsOrderConfirmClickEvent(chainId: number, metricI
       });
       break;
     case "buyGM":
+      trackEvent("Pool Deposit", { pool: metricData.marketName || "" });
       userAnalytics.pushEvent<PoolsPageBuyConfirmEvent>({
         event: "PoolsPageAction",
         data: {
@@ -257,6 +263,10 @@ export function sendUserAnalyticsOrderResultEvent(
   }
 
   const isUserError = Boolean(parseError(error)?.isUserError);
+
+  if (isSuccess) {
+    trackEvent("Trade Success", { type: metricData.metricType, pair: "marketName" in metricData ? (metricData.marketName || "") : "" });
+  }
 
   switch (metricData.metricType) {
     case "increasePosition":

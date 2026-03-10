@@ -59,7 +59,7 @@ export function usePriceSnapshots({
           query: PRICES_QUERY,
           variables: {
             fromTimestamp: period.periodStart,
-            tokenAddresses,
+            tokenAddresses: tokenAddresses?.map((a) => a.toLowerCase()),
           },
           fetchPolicy: "no-cache",
         });

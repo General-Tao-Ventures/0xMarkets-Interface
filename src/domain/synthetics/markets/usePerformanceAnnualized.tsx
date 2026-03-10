@@ -36,7 +36,7 @@ export function usePerformanceAnnualized({
     return dataArray.reduce((acc, item) => {
       const performance = parseValue(item.uniswapV2Performance, PRECISION_DECIMALS);
       if (typeof performance === "undefined") return acc;
-      acc[item.address] = performance;
+      acc[item.address.toLowerCase()] = performance;
       return acc;
     }, {} as PerformanceData);
   }, [data]);

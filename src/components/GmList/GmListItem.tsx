@@ -168,8 +168,8 @@ export function GmListItem({
     onFavoriteClick?.(marketOrGlvTokenAddress);
   };
 
-  const marketPerformance = performance?.[token.address];
-  const marketPerformanceSnapshots = performanceSnapshots?.[token.address];
+  const marketPerformance = performance?.[token.address.toLowerCase()];
+  const marketPerformanceSnapshots = performanceSnapshots?.[token.address.toLowerCase()];
 
   // Utilization calculation
   const utilization = computeUtilization(marketOrGlv);

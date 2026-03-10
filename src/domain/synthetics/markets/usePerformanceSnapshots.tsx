@@ -40,7 +40,7 @@ export function usePerformanceSnapshots({
     const dataArray = Array.isArray(data) ? data : [];
 
     return dataArray.reduce((acc, item) => {
-      acc[item.address] = item.snapshots
+      acc[item.address.toLowerCase()] = item.snapshots
         .map((snapshot) => {
           const performance = parseValue(snapshot.uniswapV2Performance, PRECISION_DECIMALS);
           if (typeof performance === "undefined") return null;

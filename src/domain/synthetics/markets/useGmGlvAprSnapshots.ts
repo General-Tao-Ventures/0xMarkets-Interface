@@ -50,7 +50,7 @@ export function useAprSnapshots({
         const client = getSubsquidGraphClient(chainId);
         const res = await client?.query<AprSnapshotsQuery>({
           query: APR_SNAPSHOTS_QUERY,
-          variables: { fromTimestamp: period.periodStart, tokenAddresses },
+          variables: { fromTimestamp: period.periodStart, tokenAddresses: tokenAddresses?.map((a) => a.toLowerCase()) },
           fetchPolicy: "no-cache",
         });
 

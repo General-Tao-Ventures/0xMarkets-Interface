@@ -74,8 +74,8 @@ export function sortGmTokensByField({
 
   if (orderBy === "performance") {
     return gmTokens.sort((a, b) => {
-      const performanceA = performance?.[a.address] ?? 0n;
-      const performanceB = performance?.[b.address] ?? 0n;
+      const performanceA = performance?.[a.address.toLowerCase()] ?? 0n;
+      const performanceB = performance?.[b.address.toLowerCase()] ?? 0n;
 
       return performanceA > performanceB ? directionMultiplier : -directionMultiplier;
     });
