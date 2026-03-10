@@ -16,6 +16,7 @@ import { bigMath } from "sdk/utils/bigmath";
 import { SlideModal } from "components/Modal/SlideModal";
 import SearchInput from "components/SearchInput/SearchInput";
 import { VerticalScrollFadeContainer } from "components/TableScrollFade/VerticalScrollFade";
+import { PoolTokenIcon } from "components/TokenIcon/PoolTokenIcon";
 import TokenIcon from "components/TokenIcon/TokenIcon";
 
 import ChevronDownIcon from "img/ic_chevron_down.svg?react";
@@ -263,7 +264,7 @@ export default function TokenSelector(props: Props) {
                 )}
                 <div className="Token-info">
                   {showTokenImgInDropdown && (
-                    <TokenIcon symbol={token.symbol} displaySize={40} importSize={40} badge={tokenBadge} />
+                    <PoolTokenIcon symbol={token.symbol} displaySize={40} badge={tokenBadge} />
                   )}
                   <div className="items ml-16 flex gap-4">
                     <div>

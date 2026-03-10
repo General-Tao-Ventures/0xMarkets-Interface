@@ -37,10 +37,8 @@ import { AprInfo } from "components/AprInfo/AprInfo";
 import Button from "components/Button/Button";
 import FavoriteStar from "components/FavoriteStar/FavoriteStar";
 import { TableTdActionable, TableTrActionable } from "components/Table/Table";
-import TokenIcon from "components/TokenIcon/TokenIcon";
-
-
 import { GmTokensBalanceInfo } from "./GmTokensTotalBalanceInfo";
+import { PoolTokenIcon } from "components/TokenIcon/PoolTokenIcon";
 import GmAssetDropdown from "../GmAssetDropdown/GmAssetDropdown";
 import { SyntheticsInfoRow } from "../SyntheticsInfoRow";
 import { FeeApyLabel } from "./FeeApyLabel";
@@ -190,11 +188,10 @@ export function GmListItem({
       <div className="flex flex-col gap-4 rounded-8 bg-fill-surfaceElevated50 p-12">
         <div className="flex flex-wrap items-center pb-8" onClick={handleItemClick}>
           <div className="flex items-center">
-            <div className="mr-12 flex shrink-0 items-center">
-              <TokenIcon
+            <div className="mr-12 flex shrink-0 items-center ">
+              <PoolTokenIcon
                 symbol={tokenIconName}
                 displaySize={40}
-                importSize={40}
                 badge={tokenIconBadge}
                 className="min-h-40 min-w-40"
                 badgeClassName={isGlv ? "left-[50%] -translate-x-1/2 right-[unset] bottom-0" : undefined}
@@ -330,11 +327,10 @@ export function GmListItem({
             </Button>
           )}
 
-          <div className="mr-12 flex shrink-0 items-center">
-            <TokenIcon
+          <div className="mr-12 flex shrink-0 items-center ">
+            <PoolTokenIcon
               symbol={tokenIconName}
               displaySize={40}
-              importSize={40}
               badge={tokenIconBadge}
               className="min-h-40 min-w-40"
               badgeClassName={isGlv ? "left-[50%] -translate-x-1/2 right-[unset] bottom-0" : undefined}

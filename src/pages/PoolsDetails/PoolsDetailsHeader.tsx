@@ -20,7 +20,7 @@ import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
 import { getNormalizedTokenSymbol } from "sdk/configs/tokens";
 
 import Button from "components/Button/Button";
-import TokenIcon from "components/TokenIcon/TokenIcon";
+import { PoolTokenIcon } from "components/TokenIcon/PoolTokenIcon";
 
 import ChevronDownIcon from "img/ic_chevron_down.svg?react";
 
@@ -75,10 +75,9 @@ export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
           >
             <div className="flex items-center gap-20">
               {iconName ? (
-                <TokenIcon
+                <PoolTokenIcon
                   symbol={iconName}
                   displaySize={40}
-                  importSize={40}
                   badge={
                     isGlv
                       ? getGlvMarketShortening(chainId, getGlvOrMarketAddress(glvOrMarketInfo))

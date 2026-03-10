@@ -17,6 +17,7 @@ import { getNormalizedTokenSymbol } from "sdk/configs/tokens";
 
 import Button from "components/Button/Button";
 import FavoriteStar from "components/FavoriteStar/FavoriteStar";
+import { PoolTokenIcon } from "components/TokenIcon/PoolTokenIcon";
 import TokenIcon from "components/TokenIcon/TokenIcon";
 
 import { MarketOption, MarketState } from "./types";
@@ -107,7 +108,7 @@ export function PoolListItem(props: {
         <div className="Token-info">
           <div className="collaterals-logo">
             {showAllPools ? (
-              <TokenIcon symbol={indexTokenImage} displaySize={40} importSize={40} badge={tokenBadge} />
+              <PoolTokenIcon symbol={indexTokenImage} displaySize={40} badge={tokenBadge} />
             ) : (
               <>
                 <TokenIcon
