@@ -140,7 +140,7 @@ export default function BuyCards() {
               className="!text-typography-primary"
               newTab
               variant="secondary"
-              to="https://docs.0xmarkets.io/providing-liquidity#glv-pools"
+              to="https://docs.0xmarkets.io/providing-liquidity#0xm-vaults"
             >
               <Trans>Read more</Trans>
             </Button>
@@ -172,7 +172,7 @@ export default function BuyCards() {
               className="!text-typography-primary"
               newTab
               variant="secondary"
-              to="https://docs.0xmarkets.io/providing-liquidity#gm-pools"
+              to="https://docs.0xmarkets.io/providing-liquidity#0xm-pools"
             >
               <Trans>Read more</Trans>
             </Button>
