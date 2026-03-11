@@ -77,14 +77,6 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       coingeckoUrl: "https://www.coingecko.com/en/coins/jpy",
     },
     {
-      name: "WTI Crude Oil",
-      symbol: "WTI",
-      decimals: 6,
-      address: "0x4B4A8E5a0deEC8611e647255425eC68A846046d4",
-      isSynthetic: true,
-      imageUrl: "https://assets.coingecko.com/coins/images/30691/small/oil.png",
-    },
-    {
       name: "Wrapped BTC",
       symbol: "WBTC",
       baseSymbol: "BTC",

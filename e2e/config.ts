@@ -100,8 +100,4 @@ export const MARKETS: Record<string, { market: Address; indexToken: Address }> =
     market: "0xD847a999faCe1f862120117C33ae8faBA768fD4b",
     indexToken: "0x7836DF766375f02D71fa3617F5F06a0712699A81",
   },
-  "WTI/USD": {
-    market: "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF",
-    indexToken: "0x4B4A8E5a0deEC8611e647255425eC68A846046d4",
-  },
 };
