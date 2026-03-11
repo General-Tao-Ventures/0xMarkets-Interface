@@ -1,14 +1,14 @@
 {
   "rewrites": [
-    { "source": "/api/keeper/:path*", "destination": "/api/_keeper-proxy?_path=:path*" },
-    { "source": "/api/order-keeper/:path*", "destination": "/api/_order-keeper-proxy?_path=:path*" }
+    { "source": "/api/keeper/:path*", "destination": "/api/keeper-proxy?_path=:path*" },
+    { "source": "/api/order-keeper/:path*", "destination": "/api/order-keeper-proxy?_path=:path*" }
   ],
   "functions": {
-    "api/_keeper-proxy.ts": {
+    "api/keeper-proxy.ts": {
       "memory": 128,
       "maxDuration": 10
     },
-    "api/_order-keeper-proxy.ts": {
+    "api/order-keeper-proxy.ts": {
       "memory": 128,
       "maxDuration": 10
     },
