@@ -63,21 +63,14 @@ function App() {
 
   let app = (
     <>
-      <div className="bg-yellow-500/20 text-center text-16 font-normal text-yellow-300 py-12 px-16 flex items-center justify-center gap-12 flex-wrap">
-        <span>
-          You are using the testnet environment. Funds are not real. Please report any issues/bugs in{" "}
-          <a href="https://discord.gg/d87vC7uaNx" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-            Discord
-          </a>
-          .
-        </span>
-        <a
-          href="https://faucet.0xMarkets.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block px-8 py-2 text-lg font-medium text-white rounded-md bg-gradient-to-r from-[#023c68] via-[#05666f] to-[#09837b] shadow-md hover:opacity-90 transition-all duration-300 hover:translate-y-[-2px]"
-        >
-          Launch Testnet
+      <div className="bg-yellow-500/20 text-center text-16 font-normal text-yellow-300 py-12 px-16">
+        You are using the testnet environment. Funds are not real. Please report any issues/bugs in{" "}
+        <a href="https://discord.gg/d87vC7uaNx" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+          Discord
+        </a>
+        .{" "}
+        <a href="https://faucet.0xMarkets.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+          Get testnet tokens
         </a>
       </div>
       <KeeperStatusBanner />
