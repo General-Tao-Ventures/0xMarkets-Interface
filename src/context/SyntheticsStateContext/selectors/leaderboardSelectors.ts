@@ -120,6 +120,7 @@ const selectLeaderboardAccounts = createSelector(function selectLeaderboardAccou
   return baseAccounts.map((base) => {
     const account: LeaderboardAccount = {
       ...base,
+      sumMaxSize: 0n,
       totalCount: base.closedCount,
       totalPnl: base.realizedPnl,
       totalQualifyingPnl: 0n,
