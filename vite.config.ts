@@ -2,6 +2,7 @@
 
 import { lingui } from "@lingui/vite-plugin";
 import react from "@vitejs/plugin-react";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig, type PluginOption } from "vite";
@@ -40,6 +41,12 @@ export default defineConfig(({ mode }) => {
       lingui(),
       visualizer() as PluginOption,
       mode === "analyze" && analyzer(),
+      process.env.SENTRY_AUTH_TOKEN &&
+        sentryVitePlugin({
+          org: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+        }),
     ],
     resolve: {
       alias: {
