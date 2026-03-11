@@ -69,8 +69,8 @@ function App() {
           discord
         </a>
         .{" "}
-        <a href="https://faucet.0xMarkets.io" target="_blank" rel="noopener noreferrer" className="uppercase font-bold underline hover:text-white">
-          Get Testnet Tokens
+        <a href="https://faucet.0xMarkets.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+          Get testnet tokens
         </a>
       </div>
       <KeeperStatusBanner />
