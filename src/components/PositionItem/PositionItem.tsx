@@ -335,6 +335,15 @@ export function PositionItem(p: Props) {
     let liqPriceWarning: string | undefined;
     const estimatedLiquidationHours = getEstimatedLiquidationTimeInHours(p.position, minCollateralUsd);
 
+    // Price proximity warning: how close mark price is to liquidation price (as %)
+    let liqPriceProximityPercent: number | undefined;
+    if (p.position.liquidationPrice !== undefined && p.position.markPrice > 0n) {
+      const distance = p.position.markPrice > p.position.liquidationPrice
+        ? p.position.markPrice - p.position.liquidationPrice
+        : p.position.liquidationPrice - p.position.markPrice;
+      liqPriceProximityPercent = Number((distance * 10000n) / p.position.markPrice) / 100;
+    }
+
     if (p.position.liquidationPrice === undefined) {
       if (!p.position.isLong && p.position.collateralAmount >= p.position.sizeInTokens) {
         const symbol = p.position.collateralToken.symbol;
@@ -351,12 +360,22 @@ export function PositionItem(p: Props) {
       }
     }
 
+    const isProximitySoftWarning = liqPriceProximityPercent !== undefined && liqPriceProximityPercent < 5;
+    const isProximityHardWarning = liqPriceProximityPercent !== undefined && liqPriceProximityPercent < 2;
+
     const getLiqPriceTooltipContent = () => (
       <>
         {liqPriceWarning && <div>{liqPriceWarning}</div>}
+        {isProximitySoftWarning && liqPriceProximityPercent !== undefined && (
+          <div>
+            <Trans>
+              Mark price is {liqPriceProximityPercent.toFixed(2)}% away from liquidation price.
+            </Trans>
+          </div>
+        )}
         {estimatedLiquidationHours ? (
           <div>
-            {!liqPriceWarning && (
+            {!liqPriceWarning && !isProximitySoftWarning && (
               <>
                 <Trans>Liquidation price is influenced by fees and collateral value.</Trans>
                 <br />
@@ -381,7 +400,10 @@ export function PositionItem(p: Props) {
       </>
     );
 
-    if (liqPriceWarning || estimatedLiquidationHours) {
+    const hasTimeWarning = estimatedLiquidationHours && estimatedLiquidationHours < 24 * 7;
+    const hasAnyWarning = liqPriceWarning || hasTimeWarning || isProximitySoftWarning;
+
+    if (hasAnyWarning) {
       return (
         <TooltipWithPortal
           handle={
@@ -393,8 +415,12 @@ export function PositionItem(p: Props) {
               : "..."
           }
           handleClassName={cx("numbers", {
-            "LiqPrice-soft-warning": estimatedLiquidationHours && estimatedLiquidationHours < 24 * 7,
-            "LiqPrice-hard-warning": estimatedLiquidationHours && estimatedLiquidationHours < 24,
+            "LiqPrice-soft-warning":
+              (estimatedLiquidationHours && estimatedLiquidationHours < 24 * 7) ||
+              (isProximitySoftWarning && !isProximityHardWarning),
+            "LiqPrice-hard-warning":
+              (estimatedLiquidationHours && estimatedLiquidationHours < 24) ||
+              isProximityHardWarning,
           })}
           position="bottom-end"
           renderContent={getLiqPriceTooltipContent}
