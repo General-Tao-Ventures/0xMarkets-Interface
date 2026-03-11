@@ -581,7 +581,7 @@ export function useDetectAndSetAvailableMaxLeverage({
 
   const maxLeverage = useSelector(selectTradeboxMaxLeverage);
 
-  const maxAllowedLeverage = maxLeverage / 2;
+  const maxAllowedLeverage = maxLeverage;
 
   const findSwapPath = useSelector(selectTradeboxFindSwapPath);
   const uiFeeFactor = useUiFeeFactor();
