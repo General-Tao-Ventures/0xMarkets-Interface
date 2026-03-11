@@ -583,10 +583,11 @@ export const formatPositionMessage = (
     //#endregion StopLossDecrease
     //#region Liquidation
   } else if (ot === OrderType.Liquidation && ev === TradeActionType.OrderExecuted) {
+    const liqFactor = tradeAction.marketInfo.minCollateralFactorForLiquidation || tradeAction.marketInfo.minCollateralFactor;
     const maxLeverage =
-      tradeAction.marketInfo.minCollateralFactorForLiquidation === 0n
+      liqFactor === 0n
         ? 0n
-        : PRECISION / tradeAction.marketInfo.minCollateralFactorForLiquidation;
+        : PRECISION / liqFactor;
     const formattedMaxLeverage = Number(maxLeverage).toFixed(1) + "x";
 
     const initialCollateralUsd = convertToUsd(
@@ -635,7 +636,7 @@ export const formatPositionMessage = (
     );
     const formattedPositionFee = formatUsd(positionFeeUsd === undefined ? undefined : -positionFeeUsd);
 
-    let liquidationCollateralUsd = applyFactor(sizeDeltaUsd, tradeAction.marketInfo.minCollateralFactorForLiquidation);
+    let liquidationCollateralUsd = applyFactor(sizeDeltaUsd, tradeAction.marketInfo.minCollateralFactorForLiquidation || tradeAction.marketInfo.minCollateralFactor);
     if (liquidationCollateralUsd < minCollateralUsd) {
       liquidationCollateralUsd = minCollateralUsd;
     }
