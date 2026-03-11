@@ -19,6 +19,14 @@ import {
   UserFeedbackBody,
 } from "./types";
 
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, init);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 function parseOracleCandle(rawCandle: number[]): Bar {
   const [time, open, high, low, close] = rawCandle;
 
@@ -83,8 +91,7 @@ export class OracleKeeperFetcher implements OracleFetcher {
   }
 
   fetchTickers(): Promise<TickersResponse> {
-    return fetch(buildUrl(this.url!, "/prices/tickers"))
-      .then((res) => res.json())
+    return fetchJson<TickersResponse>(buildUrl(this.url!, "/prices/tickers"))
       .then((res) => {
         if (!res.length) {
           throw new Error("Invalid tickers response");
@@ -93,8 +100,6 @@ export class OracleKeeperFetcher implements OracleFetcher {
         return res;
       })
       .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
         this.handleFailure();
 
         throw e;
@@ -102,8 +107,7 @@ export class OracleKeeperFetcher implements OracleFetcher {
   }
 
   fetch24hPrices(): Promise<DayPriceCandle[]> {
-    return fetch(buildUrl(this.url!, "/prices/24h"))
-      .then((res) => res.json())
+    return fetchJson<DayPriceCandle[]>(buildUrl(this.url!, "/prices/24h"))
       .then((res) => {
         if (!res?.length) {
           throw new Error("Invalid 24h prices response");
@@ -112,8 +116,6 @@ export class OracleKeeperFetcher implements OracleFetcher {
         return res;
       })
       .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
         this.handleFailure();
         throw e;
       });
@@ -154,24 +156,15 @@ export class OracleKeeperFetcher implements OracleFetcher {
   }
 
   fetchApys(period: ApyPeriod): Promise<ApyInfo> {
-    return fetch(buildUrl(this.url!, "/apy", { period }), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
+    return fetchJson<ApyInfo>(buildUrl(this.url!, "/apy", { period }))
       .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
         this.handleFailure();
         throw e;
       });
   }
 
   async fetchOracleCandles(tokenSymbol: string, period: string, limit: number): Promise<FromNewToOldArray<Bar>> {
-    return fetch(buildUrl(this.url!, "/prices/candles", { tokenSymbol, period, limit }))
-      .then((res) => res.json())
+    return fetchJson<{ candles: number[][] }>(buildUrl(this.url!, "/prices/candles", { tokenSymbol, period, limit }))
       .then((res) => {
         if (!Array.isArray(res.candles) || (res.candles.length === 0 && limit > 0)) {
           throw new Error("Invalid candles response");
@@ -180,63 +173,43 @@ export class OracleKeeperFetcher implements OracleFetcher {
         return res.candles.map(parseOracleCandle);
       })
       .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
         this.handleFailure();
         throw e;
       });
   }
 
   async fetchIncentivesRewards(): Promise<RawIncentivesStats | null> {
-    return fetch(
+    return fetchJson<RawIncentivesStats>(
       buildUrl(this.url!, "/incentives", {
         ignoreStartDate: this.forceIncentivesActive ? "1" : undefined,
       })
-    )
-      .then((res) => res.json())
-      .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
-        this.handleFailure();
-        return null;
-      });
+    ).catch(() => {
+      this.handleFailure();
+      return null;
+    });
   }
 
   async fetchUiVersion(currentVersion: number, active: boolean): Promise<number> {
-    return fetch(buildUrl(this.url!, `/ui/min_version?client_version=${currentVersion}&active=${active}`))
-      .then((res) => res.json())
-      .then((res) => res.version);
+    return fetchJson<{ version: number }>(
+      buildUrl(this.url!, `/ui/min_version?client_version=${currentVersion}&active=${active}`)
+    ).then((res) => res.version);
   }
 
   fetchPerformanceAnnualized(period: PerformancePeriod, address?: string): Promise<PerformanceAnnualizedResponse> {
-    return fetch(buildUrl(this.url!, "/performance/annualized", { period, address }), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
-        this.handleFailure();
-        throw e;
-      });
+    return fetchJson<PerformanceAnnualizedResponse>(
+      buildUrl(this.url!, "/performance/annualized", { period, address })
+    ).catch((e) => {
+      this.handleFailure();
+      throw e;
+    });
   }
 
   fetchPerformanceSnapshots(period: PerformancePeriod, address?: string): Promise<PerformanceSnapshotsResponse> {
-    return fetch(buildUrl(this.url!, "/performance/snapshots", { period, address }), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
-        this.handleFailure();
-        throw e;
-      });
+    return fetchJson<PerformanceSnapshotsResponse>(
+      buildUrl(this.url!, "/performance/snapshots", { period, address })
+    ).catch((e) => {
+      this.handleFailure();
+      throw e;
+    });
   }
 }
