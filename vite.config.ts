@@ -82,6 +82,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      sourcemapIgnoreList: (sourcePath) => sourcePath.includes("node_modules"),
       proxy: {
         "/api/keeper": {
           target: "http://142.93.203.222:37017",
