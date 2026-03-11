@@ -120,7 +120,6 @@ const selectLeaderboardAccounts = createSelector(function selectLeaderboardAccou
   return baseAccounts.map((base) => {
     const account: LeaderboardAccount = {
       ...base,
-      sumMaxSize: 0n,
       totalCount: base.closedCount,
       totalPnl: base.realizedPnl,
       totalQualifyingPnl: 0n,
@@ -136,7 +135,6 @@ const selectLeaderboardAccounts = createSelector(function selectLeaderboardAccou
       const market = (marketsInfoData || {})[p.market];
       const unrealizedPnl = getPositionPnl(p, market);
       account.totalCount++;
-      account.sumMaxSize = account.sumMaxSize + p.maxSize;
       account.unrealizedFees = account.unrealizedFees + p.unrealizedFees;
       account.unrealizedPnl = account.unrealizedPnl + unrealizedPnl;
     }
