@@ -47,6 +47,13 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
       longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
       shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
+    // WTI/USD [USD0-USD0]
+    "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF": {
+      marketTokenAddress: "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF",
+      indexTokenAddress: "0x4B4A8E5a0deEC8611e647255425eC68A846046d4",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+    },
     // WBTC/USD [USD0-USD0]
     "0x63D05Da932541380df8d9eE20D8FdB4B02849398": {
       marketTokenAddress: "0x63D05Da932541380df8d9eE20D8FdB4B02849398",

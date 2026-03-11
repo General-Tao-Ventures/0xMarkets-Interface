@@ -36,6 +36,11 @@ const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig
       enabled: true,
       comingSoon: true,
     },
+    // WTI/USD [USD0-USD0]
+    "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF": {
+      enabled: true,
+      comingSoon: true,
+    },
     // WBTC/USD [USD0-USD0]
     "0x63D05Da932541380df8d9eE20D8FdB4B02849398": {
       enabled: true,
