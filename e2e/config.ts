@@ -54,49 +54,50 @@ export const config = {
 
 // Contract addresses (from SDK contracts.ts -- Base Sepolia)
 export const CONTRACTS = {
-  ExchangeRouter: "0xF98622Ff9Dfd6bC7877EB0653cbE1bA7dCC54321" as Address,
-  DepositVault: "0x4AFE24c4e2477F54aFa4bF30d6D7385e588dfeC4" as Address,
-  WithdrawalVault: "0x64D496E867000875Dd19C808592fAB6Fc99cBE7F" as Address,
-  OrderVault: "0x18916C70dFEb3fA3366089d35464aC40f5a1D903" as Address,
-  DataStore: "0x3B9d71B497aD2d3c32a7c24e96565f84a58089a7" as Address,
-  EventEmitter: "0xd5aAfa71f745645Db84cB4877873701ddAf2514c" as Address,
-  SyntheticsReader: "0x1e6Ca8042e7BC258BBbA35C5C86F013b4eceC03C" as Address,
-  SyntheticsRouter: "0x33153255bed0219b571483e6a0801Fa0B916f7D7" as Address,
+  ExchangeRouter: "0xB326e9903271766F2eb0CcCd7180c73985d373aA" as Address,
+  DepositVault: "0x590d1d8e50A3a3d9F3448657D1Cb64D486978781" as Address,
+  WithdrawalVault: "0xE47130E74CAEd3Cae1Bf2c7e1e0af0B592354b57" as Address,
+  OrderVault: "0x76DE02F06979a24A87F2cD743Ab533a44EdcFb08" as Address,
+  DataStore: "0x0cA7D71845cb485B7593bBdCbcac93d82d52d053" as Address,
+  EventEmitter: "0x68001935Ec7C2e3980f99435db3CabC89dea602B" as Address,
+  SyntheticsReader: "0x4debCC0Cf123529C2a42beC0F8027B03DB1a8b9e" as Address,
+  SyntheticsRouter: "0xE92B08345125dc77eB071d1a2D513751C4D22714" as Address,
   PythLazer: "0x8a3eb351aDb32A813FCb53C418E8E09dd39E2D05" as Address,
 } as const;
 
 // Token addresses
-export const USDC_ADDRESS: Address = "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b";
+export const USD0_ADDRESS: Address = "0x3ae4474579d24a743c9016F017e76185A834d837";
+export const USDC_ADDRESS = USD0_ADDRESS; // legacy alias
 export const WETH_ADDRESS: Address = "0x4200000000000000000000000000000000000006";
 
 // Execution fee: 0.00005 ETH (MIN_EXECUTION_FEE on testnet is 0, so we minimize gas spend)
 // Base Sepolia gas is cheap (~5-6 gwei), so 0.00005 ETH is plenty for keeper execution
 export const EXECUTION_FEE = 50_000_000_000_000n; // 5e13 wei
 
-// Market definitions (from SDK markets.ts -- all use USDC as long and short token)
+// Market definitions (from SDK markets.ts -- all use USD0 as long and short token)
 export const MARKETS: Record<string, { market: Address; indexToken: Address }> = {
   "WETH/USD": {
-    market: "0x41a281111Aa12a968564a33f9293D9B7b0dDFf19",
+    market: "0x23F40e3279685413b252A6944AF9a0641D3aa6ce",
     indexToken: "0x4200000000000000000000000000000000000006",
   },
   "WBTC/USD": {
-    market: "0x3c3D358701B4df855b3B88D4c840f694c9db8324",
+    market: "0x63D05Da932541380df8d9eE20D8FdB4B02849398",
     indexToken: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
   },
   "EUR/USD": {
-    market: "0xd3c882AbD5854267d509b944429faA82f3d36088",
-    indexToken: "0x86e6ab05217318Db4A63f0361BADBf5aF0c69270",
+    market: "0x7054eb596aCF4fC1C0686C9B2cdAC4aE6c6D0F33",
+    indexToken: "0x18909CC26672376e8FDF1fa54Fc5B892dd6E2b0C",
   },
   "GBP/USD": {
-    market: "0x981977239025C8F2E133f87b79bEcc587B0e7562",
-    indexToken: "0x29c46a7d11B6A3051f51a47eE93AAc03a907C81e",
+    market: "0xa09b59adf15B4ED98a099441b84Ff1eABf71B548",
+    indexToken: "0xf7255EAb2968Fb6B8b6226eB25c6EDC2F1CcE60a",
   },
   "GOLD/USD": {
-    market: "0xf008E4b0962Bf5907d7dB11e88C9EA423D4e2563",
-    indexToken: "0xC2E2d25b96976fC054A5A262e2bc6Fbe8d9bB1e4",
+    market: "0x89c3B33bEE4b9cD1B246BE44aDcEd870F74637a3",
+    indexToken: "0xf4ac308123764edFB7453a7446D01277D7DEa1A7",
   },
   "JPY/USD": {
-    market: "0xF28b8572AD4c0BfF5EdfB6579b1Fa6fF0A9Eef5A",
-    indexToken: "0x5E45Df87fC8f91D5Bc73B6e75D63742dbE01400A",
+    market: "0xD847a999faCe1f862120117C33ae8faBA768fD4b",
+    indexToken: "0x7836DF766375f02D71fa3617F5F06a0712699A81",
   },
 };

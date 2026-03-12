@@ -2,6 +2,7 @@ import { Trans, t } from "@lingui/macro";
 import cx from "classnames";
 import { ReactNode, useCallback, useMemo, useState } from "react";
 
+import { getComingSoonMarkets, isMarketComingSoon } from "config/markets";
 import { useTokensFavorites } from "context/TokensFavoritesContext/TokensFavoritesContextProvider";
 import { MarketInfo, getMarketIndexName } from "domain/synthetics/markets";
 import { TokenData, TokensData, convertToUsd } from "domain/synthetics/tokens";
@@ -74,6 +75,7 @@ export function MarketSelector({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const { tab, favoriteTokens, toggleFavoriteToken } = useTokensFavorites("market-selector");
+  const comingSoonMarkets = useMemo(() => getComingSoonMarkets(chainId), [chainId]);
 
   const marketsOptions: MarketOption[] = useMemo(() => {
     const optionsByIndexName: { [indexName: string]: MarketOption } = {};
@@ -195,6 +197,7 @@ export function MarketSelector({
             <MarketListItem
               key={option.marketInfo.marketTokenAddress}
               {...option}
+              chainId={chainId}
               showBalances={showBalances}
               marketToken={getByKey(marketTokensData, option.marketInfo.marketTokenAddress)}
               isFavorite={favoriteTokens?.includes(option.marketInfo.indexToken.address)}
@@ -203,6 +206,10 @@ export function MarketSelector({
               onFavoriteClick={toggleFavoriteToken}
             />
           ))}
+          {tab === "all" &&
+            comingSoonMarkets.map((market) => (
+              <ComingSoonListItem key={market.marketTokenAddress} market={market} />
+            ))}
         </div>
         {filteredOptions.length === 0 && (
           <div className="px-20 text-14 text-typography-secondary">
@@ -224,7 +231,26 @@ export function MarketSelector({
   );
 }
 
+function ComingSoonListItem({ market }: { market: { indexName: string; tokenSymbol: string } }) {
+  const assetImage = importImage(`ic_${market.tokenSymbol}_40.svg`);
+
+  return (
+    <div className="text-body-medium flex w-full cursor-default items-center justify-between p-8 px-20 opacity-50">
+      <div className="Token-info">
+        <img src={assetImage} alt={market.indexName} className="token-logo rounded-full" />
+        <div className="Token-symbol">
+          <div className="Token-text">{market.indexName}</div>
+        </div>
+      </div>
+      <span className="rounded-4 bg-cold-blue-900 px-8 py-2 text-12 text-cold-blue-500">
+        <Trans>Coming Soon</Trans>
+      </span>
+    </div>
+  );
+}
+
 function MarketListItem(props: {
+  chainId: number;
   marketInfo: MarketInfo;
   marketToken?: TokenData;
   balance: bigint;
@@ -238,6 +264,7 @@ function MarketListItem(props: {
   onSelectOption: (option: MarketOption) => void;
 }) {
   const {
+    chainId,
     marketInfo,
     balance,
     balanceUsd,
@@ -250,6 +277,7 @@ function MarketListItem(props: {
     onFavoriteClick,
     onSelectOption,
   } = props;
+  const comingSoon = isMarketComingSoon(chainId, marketInfo.marketTokenAddress);
   const assetImage = importImage(
     `ic_${marketInfo.isSpotOnly ? "swap" : marketInfo.indexToken.symbol.toLowerCase()}_40.svg`
   );
@@ -263,7 +291,7 @@ function MarketListItem(props: {
   );
 
   const handleClick = useCallback(() => {
-    if (state.disabled) {
+    if (state.disabled || comingSoon) {
       return;
     }
 
@@ -274,12 +302,13 @@ function MarketListItem(props: {
       balanceUsd,
       state,
     });
-  }, [balance, balanceUsd, indexName, marketInfo, onSelectOption, state]);
+  }, [balance, balanceUsd, comingSoon, indexName, marketInfo, onSelectOption, state]);
 
   return (
     <div
       className={cx(
-        "text-body-medium flex w-full cursor-pointer items-center justify-between p-8 px-20 hover:bg-fill-surfaceHover",
+        "text-body-medium flex w-full items-center justify-between p-8 px-20",
+        comingSoon ? "cursor-default opacity-50" : "cursor-pointer hover:bg-fill-surfaceHover",
         { disabled: state.disabled }
       )}
       onClick={handleClick}
@@ -302,23 +331,31 @@ function MarketListItem(props: {
           <div className="Token-text">{indexName}</div>
         </div>
       </div>
-      <div className="Token-balance">
-        {showBalances && balance !== undefined && (
-          <div className="Token-text">
-            {balance > 0
-              ? formatTokenAmount(balance, marketToken?.decimals, "", {
-                  useCommas: true,
-                })
-              : "-"}
-          </div>
-        )}
-        <span className="text-accent">
-          {(showBalances && balanceUsd !== undefined && balanceUsd > 0 && <div>{formatUsd(balanceUsd)}</div>) || null}
+      {comingSoon ? (
+        <span className="rounded-4 bg-cold-blue-900 px-8 py-2 text-12 text-cold-blue-500">
+          <Trans>Coming Soon</Trans>
         </span>
-      </div>
-      <Button variant="ghost" onClick={handleFavoriteClick}>
-        <FavoriteStar isFavorite={isFavorite} />
-      </Button>
+      ) : (
+        <div className="Token-balance">
+          {showBalances && balance !== undefined && (
+            <div className="Token-text">
+              {balance > 0
+                ? formatTokenAmount(balance, marketToken?.decimals, "", {
+                    useCommas: true,
+                  })
+                : "-"}
+            </div>
+          )}
+          <span className="text-accent">
+            {(showBalances && balanceUsd !== undefined && balanceUsd > 0 && <div>{formatUsd(balanceUsd)}</div>) || null}
+          </span>
+        </div>
+      )}
+      {!comingSoon && (
+        <Button variant="ghost" onClick={handleFavoriteClick}>
+          <FavoriteStar isFavorite={isFavorite} />
+        </Button>
+      )}
     </div>
   );
 }

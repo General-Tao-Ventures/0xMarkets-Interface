@@ -136,7 +136,7 @@ export function PriceImpactFeesRow() {
               <Trans>
                 Net price impact is the sum of the stored impact at increase and the impact at decrease action, which is
                 only settled on position decrease.{" "}
-                <ExternalLink href={"https://docs.0xmarkets.io/docs/trading/v2#price-impact"} newTab>
+                <ExternalLink href={"https://docs.0xmarkets.io/trading/fees#price-impact"} newTab>
                   Read more
                 </ExternalLink>
               </Trans>
@@ -203,7 +203,7 @@ export function PriceImpactFeesRow() {
               <Trans>
                 There is no price impact for increasing positions, and orders are filled at the mark price. Price impact
                 is applied during position decreases.
-                <ExternalLink href={"https://docs.0xmarkets.io/docs/trading/v2#price-impact"} newTab>
+                <ExternalLink href={"https://docs.0xmarkets.io/trading/fees#price-impact"} newTab>
                   Read more
                 </ExternalLink>
                 .

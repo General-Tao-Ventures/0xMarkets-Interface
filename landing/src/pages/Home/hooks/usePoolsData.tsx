@@ -58,7 +58,7 @@ export function usePoolsData(): Partial<PoolsData> {
     for (const perf of performance) {
       if (perf.entity === "Market") {
         const performanceApy = parseFloat(perf.uniswapV2Performance);
-        result[perf.address] = { ...perf, performanceApy };
+        result[perf.address.toLowerCase()] = { ...perf, performanceApy };
       }
     }
     return result;
@@ -70,7 +70,7 @@ export function usePoolsData(): Partial<PoolsData> {
       let gmApy = 0;
       for (const marketIndex in sortedAggregatedMarketInfos) {
         const market = sortedAggregatedMarketInfos[marketIndex];
-        const marketApy = performanceLookup[market.id]?.performanceApy ?? 0;
+        const marketApy = performanceLookup[market.id.toLowerCase()]?.performanceApy ?? 0;
         if (Number(marketIndex) < 20 && marketApy > gmApy) {
           gmApy = marketApy;
         }

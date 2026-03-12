@@ -19,47 +19,54 @@ export type MarketConfig = {
 */
 export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
   [BASE_SEPOLIA]: {
-    // EUR/USD [USDC-USDC]
-    "0xd3c882AbD5854267d509b944429faA82f3d36088": {
-      marketTokenAddress: "0xd3c882AbD5854267d509b944429faA82f3d36088",
-      indexTokenAddress: "0x86e6ab05217318Db4A63f0361BADBf5aF0c69270",
-      longTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
-      shortTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+    // EUR/USD [USD0-USD0]
+    "0x7054eb596aCF4fC1C0686C9B2cdAC4aE6c6D0F33": {
+      marketTokenAddress: "0x7054eb596aCF4fC1C0686C9B2cdAC4aE6c6D0F33",
+      indexTokenAddress: "0x18909CC26672376e8FDF1fa54Fc5B892dd6E2b0C",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // GBP/USD [USDC-USDC]
-    "0x981977239025C8F2E133f87b79bEcc587B0e7562": {
-      marketTokenAddress: "0x981977239025C8F2E133f87b79bEcc587B0e7562",
-      indexTokenAddress: "0x29c46a7d11B6A3051f51a47eE93AAc03a907C81e",
-      longTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
-      shortTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+    // GBP/USD [USD0-USD0]
+    "0xa09b59adf15B4ED98a099441b84Ff1eABf71B548": {
+      marketTokenAddress: "0xa09b59adf15B4ED98a099441b84Ff1eABf71B548",
+      indexTokenAddress: "0xf7255EAb2968Fb6B8b6226eB25c6EDC2F1CcE60a",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // GOLD/USD [USDC-USDC]
-    "0xf008E4b0962Bf5907d7dB11e88C9EA423D4e2563": {
-      marketTokenAddress: "0xf008E4b0962Bf5907d7dB11e88C9EA423D4e2563",
-      indexTokenAddress: "0xC2E2d25b96976fC054A5A262e2bc6Fbe8d9bB1e4",
-      longTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
-      shortTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+    // GOLD/USD [USD0-USD0]
+    "0x89c3B33bEE4b9cD1B246BE44aDcEd870F74637a3": {
+      marketTokenAddress: "0x89c3B33bEE4b9cD1B246BE44aDcEd870F74637a3",
+      indexTokenAddress: "0xf4ac308123764edFB7453a7446D01277D7DEa1A7",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // USD/JPY [USDC-USDC]
-    "0xF28b8572AD4c0BfF5EdfB6579b1Fa6fF0A9Eef5A": {
-      marketTokenAddress: "0xF28b8572AD4c0BfF5EdfB6579b1Fa6fF0A9Eef5A",
-      indexTokenAddress: "0x5E45Df87fC8f91D5Bc73B6e75D63742dbE01400A",
-      longTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
-      shortTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+    // USD/JPY [USD0-USD0] (reversed)
+    "0xD847a999faCe1f862120117C33ae8faBA768fD4b": {
+      marketTokenAddress: "0xD847a999faCe1f862120117C33ae8faBA768fD4b",
+      indexTokenAddress: "0x7836DF766375f02D71fa3617F5F06a0712699A81",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // WBTC/USD [USDC-USDC]
-    "0x3c3D358701B4df855b3B88D4c840f694c9db8324": {
-      marketTokenAddress: "0x3c3D358701B4df855b3B88D4c840f694c9db8324",
+    // WTI/USD [USD0-USD0]
+    "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF": {
+      marketTokenAddress: "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF",
+      indexTokenAddress: "0x4B4A8E5a0deEC8611e647255425eC68A846046d4",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+    },
+    // WBTC/USD [USD0-USD0]
+    "0x63D05Da932541380df8d9eE20D8FdB4B02849398": {
+      marketTokenAddress: "0x63D05Da932541380df8d9eE20D8FdB4B02849398",
       indexTokenAddress: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
-      longTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
-      shortTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // WETH/USD [USDC-USDC]
-    "0x41a281111Aa12a968564a33f9293D9B7b0dDFf19": {
-      marketTokenAddress: "0x41a281111Aa12a968564a33f9293D9B7b0dDFf19",
+    // WETH/USD [USD0-USD0]
+    "0x23F40e3279685413b252A6944AF9a0641D3aa6ce": {
+      marketTokenAddress: "0x23F40e3279685413b252A6944AF9a0641D3aa6ce",
       indexTokenAddress: "0x4200000000000000000000000000000000000006",
-      longTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
-      shortTokenAddress: "0xFDDFE40Ade3eE9aDE4A2e185C750cf28025BFd6b",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
   },
   [LOCALHOST]: {},

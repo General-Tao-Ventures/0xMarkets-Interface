@@ -216,7 +216,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
   const leverageSliderMarks = useSelector(selectTradeboxLeverageSliderMarks);
   const maxLeverage = useSelector(selectTradeboxMaxLeverage);
 
-  const maxAllowedLeverage = maxLeverage / 2;
+  const maxAllowedLeverage = maxLeverage;
 
   const decreaseOrdersThatWillBeExecuted = useDecreaseOrdersThatWillBeExecuted();
 

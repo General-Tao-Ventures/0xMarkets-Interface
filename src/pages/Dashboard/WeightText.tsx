@@ -90,7 +90,7 @@ export function WeightText({
           )}
           <br />
           <div>
-            <ExternalLink href="https://docs.0xmarkets.io/docs/providing-liquidity/v1">
+            <ExternalLink href="https://docs.0xmarkets.io/providing-liquidity">
               <Trans>Read more</Trans>
             </ExternalLink>
             .

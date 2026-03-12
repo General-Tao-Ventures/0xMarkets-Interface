@@ -27,7 +27,7 @@ export function DashboardPageTitle({ tradePageVersion }: { tradePageVersion: num
             </Trans>
             <br />
             <Trans>
-              GM is the liquidity provider token for 0xMarkets markets. Accrues 63% of the markets generated fees.
+              0xM is the liquidity provider token for 0xMarkets markets. Accrues 63% of the markets generated fees.
             </Trans>
           </>
         )

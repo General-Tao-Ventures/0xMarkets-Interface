@@ -2,9 +2,6 @@ import { t } from "@lingui/macro";
 import { ReactNode } from "react";
 
 import DiscordIcon from "img/ic_discord.svg?react";
-import GithubIcon from "img/ic_github.svg?react";
-import SubstackIcon from "img/ic_substack.svg?react";
-import TelegramIcon from "img/ic_telegram.svg?react";
 import XIcon from "img/ic_x.svg?react";
 
 type Link = {
@@ -25,21 +22,17 @@ export function getFooterLinks(isHome) {
     home: [
       { label: t`Terms and Conditions`, link: "/terms-and-conditions" },
       { label: t`Referral Terms`, link: "/referral-terms" },
-      { label: t`Media Kit`, link: "https://docs.0xmarkets.io/media-kit", external: true },
     ],
     app: [
       { label: t`Faucet`, link: "https://faucet.0xMarkets.io", external: true },
-      { label: t`Media Kit`, link: "https://docs.0xmarkets.io/media-kit", external: true },
       { label: t`Charts by TradingView`, link: "https://www.tradingview.com/", external: true },
     ],
   };
   return FOOTER_LINKS[isHome ? "home" : "app"];
 }
 
-// TODO: Update with 0xMarkets social links
 export const SOCIAL_LINKS: SocialLink[] = [
-  { link: "https://twitter.com/0xMarkets", name: "Twitter", icon: <XIcon className="size-16" /> },
-  { link: "https://github.com/0xMarkets", name: "Github", icon: <GithubIcon className="size-16" /> },
-  { link: "https://t.me/0xMarkets", name: "Telegram", icon: <TelegramIcon className="size-16" /> },
-  { link: "https://discord.gg/0xMarkets", name: "Discord", icon: <DiscordIcon className="size-16" /> },
+  { link: "https://x.com/0x_Markets", name: "Twitter", icon: <XIcon className="size-16" /> },
+
+  { link: "https://discord.gg/XtKESzrBvs", name: "Discord", icon: <DiscordIcon className="size-16" /> },
 ];

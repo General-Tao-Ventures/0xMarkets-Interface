@@ -86,7 +86,7 @@ function ChartHeaderMobile() {
     }
 
     return (
-      <div className="grid grid-cols-[1fr_1fr] grid-rows-2 gap-16">
+      <div className="grid grid-cols-[1fr_1fr] gap-16">
         <div>
           <div className="mb-4 text-[11px] font-medium uppercase text-typography-secondary">
             <Trans>24h Volume</Trans>
@@ -138,6 +138,7 @@ function ChartHeaderMobile() {
             <div className="numbers">{netRateShort}</div>
           </TooltipWithPortal>
         </div>
+
       </div>
     );
   }, [
@@ -325,6 +326,7 @@ function ChartHeaderDesktop() {
             </TooltipWithPortal>
           }
         />
+
       </>
     );
   }, [
@@ -398,7 +400,10 @@ function ChartHeaderDesktop() {
   const scrollToRight = useCallback(() => scrollTo(1), [scrollTo]);
 
   return (
-    <div className="flex justify-between overflow-hidden border border-slate-800 bg-slate-750 rounded-8">
+    <div className="flex overflow-hidden border border-slate-800 bg-slate-750 rounded-8">
+      <div className="flex shrink-0 items-center border-r border-slate-800 px-12 py-8">
+        <ChartTokenSelector selectedToken={selectedTokenOption} oneRowLabels={true} />
+      </div>
       <div className="relative flex flex-1 overflow-hidden px-12 py-8">
         <div className="pointer-events-none absolute z-40 flex h-full w-full flex-row justify-between">
           <div
@@ -422,16 +427,13 @@ function ChartHeaderDesktop() {
             {scrollRight > 0 && <ChevronRightIcon className="size-16 text-typography-secondary" />}
           </div>
         </div>
-        <div className={cx("flex gap-20 overflow-x-auto scrollbar-hide")} ref={scrollableRef}>
+        <div className={cx("flex gap-28 overflow-x-auto scrollbar-hide")} ref={scrollableRef}>
           <div className="flex flex-col justify-center gap-2">
-            <div className="text-body-medium numbers">{avgPrice}</div>
+            <div className="text-[20px] font-semibold leading-tight tracking-tight text-[#00D1CD] numbers">{avgPrice}</div>
             <div className="text-body-small numbers">{dayPriceDelta}</div>
           </div>
           {additionalInfo}
         </div>
-      </div>
-      <div className="flex w-[40rem] shrink-0 max-xl:w-[36rem] items-center justify-center">
-        <ChartTokenSelector selectedToken={selectedTokenOption} oneRowLabels={true} />
       </div>
     </div>
   );

@@ -228,7 +228,7 @@ function GmxAccountBalanceTooltipContent() {
     <Trans>
       Your 0xMarkets Account balance, usable for trading from any supported chain.
       <br />
-      <ExternalLink href="https://docs.0xmarkets.io/docs/trading/v2#multichain-trading">Read more</ExternalLink>.
+      <ExternalLink href="https://docs.0xmarkets.io/trading#multichain-trading">Read more</ExternalLink>.
     </Trans>
   );
 }

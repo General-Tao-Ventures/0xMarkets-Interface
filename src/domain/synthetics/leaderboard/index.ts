@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client";
 import useSWR from "swr";
+import { getAddress } from "viem";
 
 import { expandDecimals } from "lib/numbers";
 import { getSubsquidGraphClient } from "lib/subgraph";
@@ -164,7 +165,7 @@ const fetchAccounts = async (
 
   const allAccounts = await client.query<LeaderboardAccountsJson>({
     query: gql`
-      query PeriodAccountStats($requiredMaxCapital: String, $from: Int, $to: Int, $account: String) {
+      query PeriodAccountStats($requiredMaxCapital: BigInt, $from: Int, $to: Int, $account: String) {
         all: periodAccountStats(limit: 100000, where: { maxCapital_gte: $requiredMaxCapital, periodStart_eq: $from, periodEnd_eq: $to }) {
           id
           closedCount
@@ -212,15 +213,15 @@ const fetchAccounts = async (
     fetchPolicy: "no-cache",
   });
 
-  const allAccountsSet = new Set(allAccounts?.data.all.map((p) => p.id));
+  const allAccountsSet = new Set(allAccounts?.data.all.map((a) => a.id.toLowerCase()));
 
-  if (p.account && !allAccountsSet.has(p.account) && allAccounts?.data.account.length) {
+  if (p.account && !allAccountsSet.has(p.account.toLowerCase()) && allAccounts?.data.account.length) {
     allAccounts?.data.all.push({ ...allAccounts.data.account[0], hasRank: false });
   }
 
   return allAccounts?.data.all.map((p) => {
     return {
-      account: p.id,
+      account: getAddress(p.id),
       cumsumCollateral: BigInt(p.cumsumCollateral),
       cumsumSize: BigInt(p.cumsumSize),
       sumMaxSize: BigInt(p.sumMaxSize),
@@ -346,9 +347,9 @@ const fetchPositions = async (
   return response?.data.positions.map((p) => {
     return {
       key: p.id,
-      account: p.account,
-      market: p.market,
-      collateralToken: p.collateralToken,
+      account: getAddress(p.account),
+      market: getAddress(p.market),
+      collateralToken: getAddress(p.collateralToken),
       isLong: p.isLong,
       realizedPriceImpact: BigInt(p.realizedPriceImpact),
       realizedFees: BigInt(p.realizedFees),

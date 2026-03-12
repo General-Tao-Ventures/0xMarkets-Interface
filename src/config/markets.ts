@@ -2,6 +2,7 @@ import mapValues from "lodash/mapValues";
 
 import { isDevelopment } from "config/env";
 import { SETTLEMENT_CHAINS } from "config/multichain";
+import { getToken } from "sdk/configs/tokens";
 
 import { SettlementChainId } from "./chains";
 import { MARKETS } from "./static/markets";
@@ -26,6 +27,32 @@ export const GLV_MARKETS: {
 
 export function getMarketUiConfig(chainId: number, marketAddress: string) {
   return MARKETS[chainId]?.[marketAddress];
+}
+
+export function isMarketComingSoon(chainId: number, marketAddress: string) {
+  return MARKETS[chainId]?.[marketAddress]?.comingSoon ?? false;
+}
+
+export type ComingSoonMarket = {
+  marketTokenAddress: string;
+  indexName: string;
+  tokenSymbol: string;
+};
+
+export function getComingSoonMarkets(chainId: number): ComingSoonMarket[] {
+  const markets = MARKETS[chainId];
+  if (!markets) return [];
+
+  return Object.entries(markets)
+    .filter(([, config]) => config.comingSoon)
+    .map(([address, config]) => {
+      const token = getToken(chainId, config.indexTokenAddress);
+      return {
+        marketTokenAddress: address,
+        indexName: `${token.symbol}/USD`,
+        tokenSymbol: token.symbol.toLowerCase(),
+      };
+    });
 }
 
 const SETTLEMENT_CHAIN_TRADABLE_ASSETS_MAP: Record<SettlementChainId, string[]> = {} as any;

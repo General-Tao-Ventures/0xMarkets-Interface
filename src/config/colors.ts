@@ -65,7 +65,7 @@ export const colors: ColorTree = {
   button: {
     secondary: { light: "#E0E0E8", dark: "#383A59" },
     secondaryHover: { light: "#dadce8", dark: "#282d46" },
-    secondaryDisabled: { light: "#E0E0E8", dark: "#ff0000" },
+    secondaryDisabled: { light: "#E0E0E8", dark: "#2A2C45" },
     primaryHover: { light: "#293ce4", dark: "#2a3de5" },
     primaryActive: { light: "#2637ce", dark: "#00D1CD" },
   },

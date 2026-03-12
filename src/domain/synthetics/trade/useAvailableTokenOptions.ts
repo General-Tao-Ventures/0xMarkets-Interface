@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { LOCALHOST, BASE_SEPOLIA } from "config/chains";
 import { getSortedMarketsAddressesKey } from "config/localStorage";
+import { isMarketComingSoon } from "config/markets";
 import { SORTED_MARKETS } from "config/static/sortedMarkets";
 import { GlvAndGmMarketsInfoData, Market, MarketInfo, MarketsData, isMarketInfo } from "domain/synthetics/markets";
 import { InfoTokens, Token, getMidPrice } from "domain/tokens";
@@ -86,7 +87,7 @@ export function useAvailableTokenOptions(
 
   return useMemo(() => {
     const marketsInfo = Object.values(marketsInfoData || {})
-      .filter((market) => !market.isDisabled)
+      .filter((market) => !market.isDisabled && !isMarketComingSoon(chainId, market.marketTokenAddress))
       .sort((a, b) => {
         const tokenA = isGlvInfo(a) ? a.glvToken : a.indexToken;
         const tokenB = isGlvInfo(b) ? b.glvToken : b.indexToken;

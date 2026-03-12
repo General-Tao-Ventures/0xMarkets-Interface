@@ -17,12 +17,11 @@ import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 import { GeneralPerformanceDetailsDebugTooltip } from "./generalPerformanceDetailsDebug";
 
 const bucketLabelMap = {
-  today: msg`Today`,
-  yesterday: msg`Yesterday`,
-  week: msg`Last 7d`,
-  month: msg`Last 30d`,
-  year: msg`This Year`,
-  all: msg`All Time`,
+  "1d": msg`Last 1d`,
+  "7d": msg`Last 7d`,
+  "30d": msg`Last 30d`,
+  "90d": msg`Last 90d`,
+  All: msg`All Time`,
 };
 
 export function GeneralPerformanceDetails({ chainId, account }: { chainId: number; account: Address }) {

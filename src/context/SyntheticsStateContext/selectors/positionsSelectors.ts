@@ -12,7 +12,11 @@ export const selectPositionsInfoDataSortedByMarket = createSelector((q) => {
     const bMarketIdx = marketsSortMap[b.market.indexTokenAddress];
 
     if (aMarketIdx === bMarketIdx) {
-      return b.sizeInUsd - a.sizeInUsd > 0n ? 1 : -1;
+      if (b.sizeInUsd !== a.sizeInUsd) {
+        return b.sizeInUsd > a.sizeInUsd ? 1 : -1;
+      }
+      // Stable tiebreaker: sort by position key
+      return a.key < b.key ? -1 : 1;
     }
 
     return aMarketIdx - bMarketIdx;

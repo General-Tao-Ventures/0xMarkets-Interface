@@ -19,6 +19,9 @@
 
 /stats.html
 
+# planning
+.planning/
+
 # misc
 .DS_Store
 .env.local

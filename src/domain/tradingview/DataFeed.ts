@@ -20,6 +20,9 @@ import {
   multiplyBarValues,
   parseSymbolName,
 } from "domain/tradingview/utils";
+import { getKeeperWebSocketManager } from "lib/keeperWebSocket";
+import type { CandleData } from "lib/keeperWebSocket";
+import { KeeperWebSocketManager } from "lib/keeperWebSocket";
 import { parseError } from "lib/errors";
 import { getRequestId, LoadingFailedEvent, LoadingStartEvent, LoadingSuccessEvent, metrics } from "lib/metrics";
 import { OracleFetcher } from "lib/oracleKeeperFetcher/types";
@@ -53,9 +56,10 @@ const V2_UPDATE_INTERVAL = 1000;
 const PREFETCH_CANDLES_COUNT = 300;
 
 export class DataFeed extends EventTarget implements IBasicDataFeed {
-  private subscriptions: Record<string, PauseableInterval<Bar | undefined>> = {};
+  private subscriptions: Record<string, { destroy: () => void }> = {};
   private prefetchedBarsPromises: Record<string, Promise<FromOldToNewArray<Bar>>> = {};
   private visibilityHandler: () => void;
+  private wsManager: KeeperWebSocketManager;
 
   declare addEventListener: (event: "candlesDisplay.success", callback: EventListenerOrEventListenerObject) => void;
   declare removeEventListener: (event: "candlesDisplay.success", callback: EventListenerOrEventListenerObject) => void;
@@ -66,6 +70,8 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     private tradePageVersion = 2
   ) {
     super();
+
+    this.wsManager = getKeeperWebSocketManager();
 
     metrics.startTimer("candlesLoad");
     metrics.startTimer("candlesDisplay");
@@ -215,6 +221,35 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     const visualMultiplier = parseInt(symbolInfo.unit_id ?? "1");
 
+    // Use WebSocket candle listener for V2 non-stable tokens
+    if (this.tradePageVersion === 2 && !isStable) {
+      const symbol = symbolInfo.name;
+      let lastBarTime = 0;
+
+      const handler = (candles: CandleData[]) => {
+        const candle = candles.find((c) => c.tokenSymbol === symbol);
+        if (!candle) return;
+
+        const bar: Bar = {
+          time: candle.minuteTs,
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+        };
+
+        lastBarTime = candle.minuteTs;
+        onTick(multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier));
+      };
+
+      this.wsManager.on("candle", handler);
+      this.subscriptions[listenerGuid] = {
+        destroy: () => this.wsManager.off("candle", handler),
+      };
+      return;
+    }
+
+    // Fallback: PauseableInterval for V1 or stable tokens
     const interval = new PauseableInterval<Bar | undefined>(
       async ({ lastReturnedValue }) => {
         let candlesToFetch = 1;
@@ -317,11 +352,15 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
   }
 
   private pauseAll() {
-    Object.values(this.subscriptions).forEach((subscription) => subscription.pause());
+    Object.values(this.subscriptions).forEach((sub) => {
+      if ("pause" in sub) (sub as PauseableInterval<any>).pause();
+    });
   }
 
   private resumeAll() {
-    Object.values(this.subscriptions).forEach((subscription) => subscription.resume());
+    Object.values(this.subscriptions).forEach((sub) => {
+      if ("resume" in sub) (sub as PauseableInterval<any>).resume();
+    });
   }
 
   private async fetchCandles(

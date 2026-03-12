@@ -171,7 +171,7 @@ export function usePeriodAccountStats(
 
         const res = await client.query({
           query: TRADE_ACTIONS_QUERY,
-          variables: { account: account.toLowerCase(), from, to },
+          variables: { account, from, to },
           fetchPolicy: "no-cache",
         });
 

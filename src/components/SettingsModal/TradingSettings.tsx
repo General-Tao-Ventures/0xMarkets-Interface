@@ -236,12 +236,11 @@ export function TradingSettings({
               <div>
                 <Trans>
                   The max network fee is set to a higher value to handle potential increases in gas price during order
-                  execution. Any excess network fee will be refunded to your account when the order is executed. Only
-                  applicable to GMX V2.
+                  execution. Any excess network fee will be refunded to your account when the order is executed.
                 </Trans>
                 <br />
                 <br />
-                <ExternalLink href="https://docs.0xmarkets.io/docs/trading/v2/#network-fee-buffer">
+                <ExternalLink href="https://docs.0xmarkets.io/trading/fees#network-fee-buffer">
                   <Trans>Read more</Trans>
                 </ExternalLink>
               </div>
@@ -264,7 +263,7 @@ export function TradingSettings({
                 </Trans>
                 <br />
                 <br />
-                <ExternalLink href="https://docs.0xmarkets.io/docs/trading/v2/#auto-cancel-tp--sl">
+                <ExternalLink href="https://docs.0xmarkets.io/trading/order-types#auto-cancel-tp--sl">
                   <Trans>Read more</Trans>
                 </ExternalLink>
                 .

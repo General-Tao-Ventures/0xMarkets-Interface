@@ -60,7 +60,7 @@ const getGraphValue = ({
     ? getByKey(glvApyInfoData, glvOrMarketInfo.glvTokenAddress)
     : getByKey(marketsTokensApyData, glvOrMarketInfo.marketTokenAddress);
   const tokenPrice = marketTokensData?.[address]?.prices.minPrice;
-  const marketPerformance = performance[address];
+  const marketPerformance = performance[address.toLowerCase()];
   const valuesMap: Record<MarketGraphType, string | undefined> = {
     performance: marketPerformance
       ? formatPercentage(marketPerformance, { bps: false, signed: true, showPlus: false })
@@ -112,8 +112,8 @@ export function MarketGraphs({ glvOrMarketInfo }: { glvOrMarketInfo: GlvOrMarket
     tokenAddresses: [address],
   });
 
-  const aprSnapshotsByAddress = aprSnapshots?.[address] ?? EMPTY_ARRAY;
-  const priceSnapshotsByAddress = prices?.[address] ?? EMPTY_ARRAY;
+  const aprSnapshotsByAddress = aprSnapshots?.[address.toLowerCase()] ?? EMPTY_ARRAY;
+  const priceSnapshotsByAddress = prices?.[address.toLowerCase()] ?? EMPTY_ARRAY;
 
   const isMobile = usePoolsIsMobilePage();
 
@@ -175,13 +175,13 @@ export function MarketGraphs({ glvOrMarketInfo }: { glvOrMarketInfo: GlvOrMarket
               })}
               label={graphTitleLabelMap[marketGraphType]}
               valueClassName={cx("normal-nums", {
-                "text-green-300": marketGraphType === "performance" && performance[address] > 0n,
+                "text-green-300": marketGraphType === "performance" && performance[address.toLowerCase()] > 0n,
               })}
             />
             {!isMobile ? <div className="ml-auto">{poolsTabs}</div> : null}
           </div>
           <GraphChart
-            performanceSnapshots={performanceSnapshots[address] ?? EMPTY_ARRAY}
+            performanceSnapshots={performanceSnapshots[address.toLowerCase()] ?? EMPTY_ARRAY}
             priceSnapshots={priceSnapshotsByAddress}
             marketGraphType={marketGraphType}
             aprSnapshots={aprSnapshotsByAddress}

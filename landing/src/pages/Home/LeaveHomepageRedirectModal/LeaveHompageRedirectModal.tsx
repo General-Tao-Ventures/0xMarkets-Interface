@@ -54,20 +54,18 @@ export function LeaveHomepageRedirectModal({
       <ModalBody>
         <div className="flex flex-col gap-12">
           <p>
-            <Trans>You are leaving GMX.io and will be redirected to a third party, independent website.</Trans>
+            <Trans>You are leaving 0xMarkets and will be redirected to a third party, independent website.</Trans>
           </p>
           <p>
             <Trans>
-              The website is a community deployed and maintained instance of the open source{" "}
-              <a href="https://github.com/gmx-io/gmx-interface">GMX front end</a>, hosted and served on the distributed,
-              peer-to-peer <a href="https://ipfs.io/">IPFS network</a>.
+              The website is a community deployed and maintained instance of the 0xMarkets front end.
             </Trans>
           </p>
           <p>
             <Trans>
-              Alternative links can be found in the <a href="https://docs.gmx.io/docs/community/frontends">docs</a>. By
-              clicking Agree you accept the <a href="https://gmx.io/#/terms-and-conditions">T&Cs</a> and{" "}
-              <a href="https://gmx.io/#/referral-terms">Referral T&Cs</a>.
+              Alternative links can be found in the <a href="https://docs.0xmarkets.io/docs/community/frontends">docs</a>. By
+              clicking Agree you accept the <a href="https://0xmarkets.io/#/terms-and-conditions">T&Cs</a> and{" "}
+              <a href="https://0xmarkets.io/#/referral-terms">Referral T&Cs</a>.
             </Trans>
           </p>
         </div>

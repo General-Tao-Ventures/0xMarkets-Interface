@@ -21,7 +21,7 @@ export const useLeaderboardState = (account: string | undefined, enabled: boolea
   const { leaderboardPageKey: leaderboardPageKeyRaw } = useParams<{ leaderboardPageKey?: LeaderboardPageKey }>();
   const leaderboardPageKey = leaderboardPageKeyRaw ?? "leaderboard";
   const timeframe = useLeaderboardTimeframe(leaderboardTimeframeType, leaderboardPageKey, leaderboardDataType);
-  const isEndInFuture = timeframe.to === undefined || timeframe.to > Date.now() / 1000;
+  const isEndInFuture = !timeframe.to || timeframe.to > Date.now() / 1000;
   const isStartInFuture = timeframe.from > Date.now() / 1000;
   const positionsSnapshotTimestamp = isEndInFuture ? undefined : timeframe.to;
   const { chainId: activeChainId } = useChainId();

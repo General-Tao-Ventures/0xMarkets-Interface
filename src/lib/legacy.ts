@@ -1238,8 +1238,7 @@ export function getProcessedData(
 }
 
 export function getPageTitle(data) {
-  const title = t`Decentralized Perpetual Exchange | GMX`;
-  return `${data} | ${title}`;
+  return `${data} | 0xMarkets`;
 }
 
 export function isHashZero(value) {
@@ -1267,10 +1266,10 @@ export function getAppBaseUrl() {
 
 export function getRootShareApiUrl() {
   if (isLocal()) {
-    return "https://gmxs.vercel.app";
+    return "";
   }
 
-  return "https://share.0xmarkets.io";
+  return PRODUCTION_HOST;
 }
 
 export function getTradePageUrl() {

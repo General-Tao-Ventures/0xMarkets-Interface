@@ -60,7 +60,9 @@ export async function getReferralCodeTakenStatus(
     //   !isAddressZero(ownerArbitrum) && (ownerArbitrum !== account || (ownerArbitrum === account && chainId === ARBITRUM));
     const owner = ownerMap[otherChainId];
     const takenOnOtherChain =
-      !isAddressZero(owner) && (owner !== account || (owner === account && chainId === otherChainId));
+      !isAddressZero(owner) &&
+      (owner?.toLowerCase() !== account?.toLowerCase() ||
+        (owner?.toLowerCase() === account?.toLowerCase() && chainId === otherChainId));
 
     takenMap[otherChainId] = takenOnOtherChain;
   }
@@ -220,7 +222,7 @@ export function getReferralCodeTradeUrl(referralCode) {
 }
 
 export function getTwitterShareUrl(referralCode) {
-  const message = ["Trying out trading on @GMX_IO, up to 100x leverage on $BTC, $ETH 📈", "For fee discounts use:"];
+  const message = ["Trying out trading on @0x_Markets, up to 100x leverage on $BTC, $ETH 📈", "For fee discounts use:"];
   const shareURL = getReferralCodeTradeUrl(referralCode);
 
   return getTwitterIntentURL(message, shareURL);

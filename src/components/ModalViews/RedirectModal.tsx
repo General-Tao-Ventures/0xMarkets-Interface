@@ -44,14 +44,14 @@ export function RedirectPopupModal({
       <br />
       <Trans>
         The website is a community deployed and maintained instance of the open source{" "}
-        <ExternalLink href="https://github.com/gmx-io/gmx-interface">0xMarkets front end</ExternalLink>, hosted and
+        <ExternalLink href="https://github.com/0xMarkets/0xMarkets-Interface">0xMarkets front end</ExternalLink>, hosted and
         served on the distributed, peer-to-peer <ExternalLink href="https://ipfs.io/">IPFS network</ExternalLink>.
       </Trans>
       <br />
       <br />
       <Trans>
         Alternative links can be found in the{" "}
-        <ExternalLink href="https://docs.0xmarkets.io/docs/community/frontends">docs</ExternalLink>.
+        <ExternalLink href="https://docs.0xmarkets.io">docs</ExternalLink>.
         <br />
         <br />
         By clicking Agree you accept the <ExternalLink href="https://0xmarkets.io/#/terms-and-conditions">

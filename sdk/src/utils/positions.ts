@@ -223,7 +223,7 @@ export function getLiquidationPrice(p: {
     }
   }
 
-  let liquidationCollateralUsd = applyFactor(sizeInUsd, marketInfo.minCollateralFactorForLiquidation);
+  let liquidationCollateralUsd = applyFactor(sizeInUsd, marketInfo.minCollateralFactorForLiquidation || marketInfo.minCollateralFactor);
   if (liquidationCollateralUsd < minCollateralUsd) {
     liquidationCollateralUsd = minCollateralUsd;
   }

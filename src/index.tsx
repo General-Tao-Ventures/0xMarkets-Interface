@@ -3,21 +3,42 @@ import "lib/polyfills";
 import "styles/tailwind.css";
 import "lib/monkeyPatching";
 
+import * as Sentry from "@sentry/react";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
+import { createBrowserHistory } from "history";
 
 import WalletProvider from "lib/wallets/WalletProvider";
 
 import App from "./App/App";
 import reportWebVitals from "./reportWebVitals";
 
+const history = createBrowserHistory();
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  environment: import.meta.env.MODE,
+  release: import.meta.env.VITE_APP_VERSION,
+  sendDefaultPii: true,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.reactRouterV5BrowserTracingIntegration({ history }),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 0.2,
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 1.0,
+});
+
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Router>
-      <WalletProvider>
-        <App />
-      </WalletProvider>
+      <Sentry.ErrorBoundary fallback={<p>Something went wrong.</p>}>
+        <WalletProvider>
+          <App />
+        </WalletProvider>
+      </Sentry.ErrorBoundary>
     </Router>
   </React.StrictMode>
 );

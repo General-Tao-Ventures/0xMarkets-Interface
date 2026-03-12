@@ -70,7 +70,7 @@ export function getDepositAmounts(p: {
     values.shortTokenUsd = convertToUsd(shortTokenAmount, shortToken.decimals, shortTokenPrice)!;
 
     /**
-     * If it's GM -> GLV deposit, then don't apply any fees or price impact, just convert GM to GLV
+     * If it's 0xM -> GLV deposit, then don't apply any fees or price impact, just convert 0xM to GLV
      */
     if (isMarketTokenDeposit && glvInfo && marketToken && glvToken) {
       const marketTokenUsd = convertToUsd(marketTokenAmount, marketToken.decimals, marketToken.prices.minPrice)!;

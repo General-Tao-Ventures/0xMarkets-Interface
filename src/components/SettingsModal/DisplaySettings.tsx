@@ -7,7 +7,6 @@ import ToggleSwitch from "components/ToggleSwitch/ToggleSwitch";
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 
 import { SettingsSection } from "./shared";
-import { ThemeSelector } from "./ThemeSelector";
 
 export function DisplaySettings() {
   const settings = useSettings();
@@ -42,9 +41,10 @@ export function DisplaySettings() {
               renderContent={() => (
                 <div>
                   <Trans>
-                    The net price impact is broken down into stored impact and close price impact in the net value
-                    tooltip and execution details in the close modal. Display stored impact for increase actions.{" "}
-                    <ExternalLink href="https://docs.0xmarkets.io/docs/trading/v2#price-impact" newTab>
+                    When enabled, the net price impact is split into its components: stored impact from position
+                    increases and close impact from decreases. This breakdown appears in the net value tooltip and close
+                    modal.{" "}
+                    <ExternalLink href="https://docs.0xmarkets.io/trading/fees#price-impact" newTab>
                       Read more
                     </ExternalLink>
                     .
@@ -55,9 +55,7 @@ export function DisplaySettings() {
           </ToggleSwitch>
         </div>
       </SettingsSection>
-      <SettingsSection>
-        <ThemeSelector />
-      </SettingsSection>
+      {/* Theme selector hidden — light mode not yet polished */}
     </div>
   );
 }

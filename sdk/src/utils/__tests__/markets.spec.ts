@@ -187,8 +187,12 @@ describe("getMaxLeverageByMinCollateralFactor", () => {
 });
 
 describe("getMaxAllowedLeverageByMinCollateralFactor", () => {
-  it("returns half of max leverage", () => {
-    expect(getMaxAllowedLeverageByMinCollateralFactor(1000000000000000000n)).toBe(5000000000000000);
+  it("returns max leverage divided by 1.5, floored to whole multiplier", () => {
+    // 1e18 minCollateralFactor → 1e12 max leverage (1e30/1e18) → 1e12 * 10000 BPS = 1e16
+    // divided by 1.5 = 6666666666666666, floored to nearest 10000 = 6666666666660000
+    const raw = 10000000000000000 / 1.5;
+    const expected = Math.floor(raw / 10000) * 10000;
+    expect(getMaxAllowedLeverageByMinCollateralFactor(1000000000000000000n)).toBe(expected);
   });
 });
 

@@ -53,7 +53,7 @@ export const selectLeaderboardCurrentAccount = createSelector(function selectLea
   | undefined {
   const accounts = q(selectLeaderboardAccounts);
   const currentAccount = q(selectAccount);
-  const leaderboardAccount = accounts?.find((a) => a.account === currentAccount);
+  const leaderboardAccount = accounts?.find((a) => a.account.toLowerCase() === currentAccount?.toLowerCase());
   if (leaderboardAccount) return leaderboardAccount;
   if (!currentAccount) return undefined;
 
@@ -135,7 +135,6 @@ const selectLeaderboardAccounts = createSelector(function selectLeaderboardAccou
       const market = (marketsInfoData || {})[p.market];
       const unrealizedPnl = getPositionPnl(p, market);
       account.totalCount++;
-      account.sumMaxSize = account.sumMaxSize + p.maxSize;
       account.unrealizedFees = account.unrealizedFees + p.unrealizedFees;
       account.unrealizedPnl = account.unrealizedPnl + unrealizedPnl;
     }
@@ -332,7 +331,7 @@ function applyFactor(value: bigint, factor: bigint) {
 function getLeverage(sizeInUsd: bigint, collateralUsd: bigint, unrealizedPnl: bigint, unrealizedFees: bigint) {
   const remainingCollateralUsd = collateralUsd + unrealizedPnl - unrealizedFees;
 
-  if (remainingCollateralUsd < 0n) {
+  if (remainingCollateralUsd <= 0n) {
     return 0n;
   }
 
