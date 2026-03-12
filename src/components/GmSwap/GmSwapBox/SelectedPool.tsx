@@ -44,7 +44,7 @@ function SelectedPoolLabel({ glvOrMarketInfo }: { glvOrMarketInfo: GlvOrMarketIn
   if (isGlvInfo(glvOrMarketInfo)) {
     name = getGlvDisplayName(glvOrMarketInfo);
   } else {
-    name = `GM: ${getMarketIndexName(glvOrMarketInfo)}`;
+    name = `0xM: ${getMarketIndexName(glvOrMarketInfo)}`;
   }
 
   return <div>{name ? name : "..."}</div>;

@@ -699,7 +699,7 @@ export function getGmSwapError(p: {
     return [t`Loading...`];
   }
 
-  const glvTooltipMessage = t`The buyable cap for the pool GM: ${marketInfo.name} using the pay token selected is reached. Please choose a different pool, reduce the buy size, or pick a different composition of tokens.`;
+  const glvTooltipMessage = t`The buyable cap for the pool 0xM: ${marketInfo.name} using the pay token selected is reached. Please choose a different pool, reduce the buy size, or pick a different composition of tokens.`;
 
   if (isDeposit) {
     if (priceImpactUsd !== undefined && priceImpactUsd > 0) {
@@ -796,7 +796,7 @@ export function getGmSwapError(p: {
 
     if (glvInfo) {
       if (isMarketTokenDeposit && marketToken && (marketTokenAmount ?? 0n) > (marketToken?.balance ?? 0n)) {
-        return [t`Insufficient GM balance`];
+        return [t`Insufficient 0xM balance`];
       }
 
       const { mintableUsd: mintableGmUsd } = getMintableMarketTokens(marketInfo, marketToken);
@@ -814,9 +814,9 @@ export function getGmSwapError(p: {
       if (marketTokenUsd !== undefined && (mintableGmUsd < marketTokenUsd || maxMintableInMarketUsd < marketTokenUsd)) {
         return [
           t`Max pool amount reached`,
-          longToken?.symbol === "GM"
-            ? t`The buyable cap for the pool GM: ${marketInfo.name} in ${getGlvDisplayName(glvInfo)} [${getMarketPoolName(glvInfo)}] has been reached. Please reduce the buy size, pick a different GM token, or shift the GM tokens to a different pool and try again.`
-            : t`The buyable cap for the pool GM: ${marketInfo.name} in ${getGlvDisplayName(glvInfo)} [${getMarketPoolName(glvInfo)}] has been reached. Please choose a different pool or reduce the buy size.`,
+          longToken?.symbol === "GM" || longToken?.symbol === "0xM"
+            ? t`The buyable cap for the pool 0xM: ${marketInfo.name} in ${getGlvDisplayName(glvInfo)} [${getMarketPoolName(glvInfo)}] has been reached. Please reduce the buy size, pick a different 0xM token, or shift the 0xM tokens to a different pool and try again.`
+            : t`The buyable cap for the pool 0xM: ${marketInfo.name} in ${getGlvDisplayName(glvInfo)} [${getMarketPoolName(glvInfo)}] has been reached. Please choose a different pool or reduce the buy size.`,
         ];
       }
     }
@@ -837,7 +837,7 @@ export function getGmSwapError(p: {
       if ((glvTokenAmount ?? 0n) > (sellableGlvInMarket.sellableAmount ?? 0n)) {
         return [
           t`Insufficient GLV liquidity`,
-          t`There isn't enough GM: ${getMarketIndexName(marketInfo)} [${getMarketPoolName(marketInfo)}] liquidity in GLV to fulfill your sell request. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools.`,
+          t`There isn't enough 0xM: ${getMarketIndexName(marketInfo)} [${getMarketPoolName(marketInfo)}] liquidity in GLV to fulfill your sell request. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools.`,
         ];
       }
 
@@ -845,8 +845,8 @@ export function getGmSwapError(p: {
 
       if ((marketTokenUsd ?? 0n) > (sellableWithinMarket.totalUsd ?? 0n)) {
         return [
-          t`Insufficient liquidity in GM Pool`,
-          t`The sellable cap for the pool GM: ${getMarketIndexName(marketInfo)} [${getMarketPoolName(marketInfo)}]  has been reached, as the tokens are reserved by traders. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools.`,
+          t`Insufficient liquidity in 0xM Pool`,
+          t`The sellable cap for the pool 0xM: ${getMarketIndexName(marketInfo)} [${getMarketPoolName(marketInfo)}]  has been reached, as the tokens are reserved by traders. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools.`,
         ];
       }
     }

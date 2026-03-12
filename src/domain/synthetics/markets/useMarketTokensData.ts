@@ -142,7 +142,7 @@ export function useMarketTokensDataRequest(
           return marketTokensMap;
         }
 
-        const tokenConfig = getTokenBySymbol(chainId, "GM");
+        const tokenConfig = getTokenBySymbol(chainId, "0xM");
 
         const minPrice = BigInt(pricesData?.minPrice.returnValues[0]);
         const maxPrice = BigInt(pricesData?.maxPrice.returnValues[0]);

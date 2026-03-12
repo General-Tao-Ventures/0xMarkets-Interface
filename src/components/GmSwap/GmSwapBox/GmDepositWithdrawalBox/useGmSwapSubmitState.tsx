@@ -277,7 +277,7 @@ export const useGmSwapSubmitState = ({
       };
     }
 
-    const operationTokenSymbol = glvInfo ? "GLV" : "GM";
+    const operationTokenSymbol = glvInfo ? "GLV" : "0xM";
 
     if (isSubmitting) {
       return {

@@ -192,7 +192,7 @@ export function GmSwapBoxDepositWithdrawal(p: GmSwapBoxProps) {
     if (firstTokenAddress) {
       inputs.push({
         address: firstTokenAddress,
-        isMarketToken: firstToken?.symbol === "GM",
+        isMarketToken: firstToken?.symbol === "GM" || firstToken?.symbol === "0xM",
         value: firstTokenInputValue,
         setValue: setFirstTokenInputValue,
         amount: firstTokenAmount,
@@ -445,7 +445,7 @@ export function GmSwapBoxDepositWithdrawal(p: GmSwapBoxProps) {
 
   const { viewTokenInfo, showTokenName } = useMemo(() => {
     const selectedToken = firstTokenAddress ? marketTokensData?.[firstTokenAddress] : undefined;
-    const isGm = selectedToken?.symbol === "GM";
+    const isGm = selectedToken?.symbol === "GM" || selectedToken?.symbol === "0xM";
 
     const selectedMarket = selectedToken && marketsInfoData?.[selectedToken.address];
 
@@ -689,7 +689,7 @@ export function GmSwapBoxDepositWithdrawal(p: GmSwapBoxProps) {
    * until useUpdateTokens switch GM to long token
    */
   const firstTokenPlaceholder = useMemo(() => {
-    if (firstToken?.symbol === "GM") {
+    if (firstToken?.symbol === "GM" || firstToken?.symbol === "0xM") {
       return null;
     }
 

@@ -169,8 +169,8 @@ msgid "Show error"
 msgstr "Show error"
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
-msgid "{0} can be used to buy GM for this market up to the specified buying caps."
-msgstr "{0} can be used to buy GM for this market up to the specified buying caps."
+msgid "{0} can be used to buy 0xM for this market up to the specified buying caps."
+msgstr "{0} can be used to buy 0xM for this market up to the specified buying caps."
 
 #: src/components/TradeHistory/keys.ts
 msgid "Execute Market Swap"
@@ -251,8 +251,8 @@ msgid "0xMarkets executes transactions for you without individual signing, provi
 msgstr "0xMarkets executes transactions for you without individual signing, providing a seamless, CEX-like experience. Trades use 0xMarkets-sponsored premium RPCs for reliability, even during network congestion. Gas payments in {gasPaymentTokensText}."
 
 #: src/components/BuyCards/BuyCards.tsx
-msgid "GM"
-msgstr "GM"
+msgid "0xM"
+msgstr "0xM"
 
 #: src/domain/synthetics/orders/createWrapOrUnwrapTxn.ts
 #: src/domain/synthetics/orders/createWrapOrUnwrapTxn.ts
@@ -297,8 +297,8 @@ msgid "Click here to give us your feedback on 0xMarkets"
 msgstr "Click here to give us your feedback on 0xMarkets"
 
 #: src/domain/synthetics/trade/utils/validation.ts
-msgid "The sellable cap for the pool GM: {0} [{1}]  has been reached, as the tokens are reserved by traders. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
-msgstr "The sellable cap for the pool GM: {0} [{1}]  has been reached, as the tokens are reserved by traders. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
+msgid "The sellable cap for the pool 0xM: {0} [{1}]  has been reached, as the tokens are reserved by traders. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
+msgstr "The sellable cap for the pool 0xM: {0} [{1}]  has been reached, as the tokens are reserved by traders. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
 
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
 msgid "Swap TWAP: Swap tokens in evenly distributed parts over a specified time."
@@ -309,12 +309,12 @@ msgid "Max {0} short exceeded"
 msgstr "Max {0} short exceeded"
 
 #: src/domain/synthetics/trade/utils/validation.ts
-msgid "Insufficient GM balance"
-msgstr "Insufficient GM balance"
+msgid "Insufficient 0xM balance"
+msgstr "Insufficient 0xM balance"
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
-msgid "This token is a vault of automatically rebalanced GM tokens that accrue fees from leverage trading and swaps from the included markets. Backed by {0} and {1}."
-msgstr "This token is a vault of automatically rebalanced GM tokens that accrue fees from leverage trading and swaps from the included markets. Backed by {0} and {1}."
+msgid "This token is a vault of automatically rebalanced 0xM tokens that accrue fees from leverage trading and swaps from the included markets. Backed by {0} and {1}."
+msgstr "This token is a vault of automatically rebalanced 0xM tokens that accrue fees from leverage trading and swaps from the included markets. Backed by {0} and {1}."
 
 #: landing/src/pages/Home/SocialSection/SocialSection.tsx
 msgid "Join"
@@ -372,8 +372,8 @@ msgid "Referral code added!"
 msgstr "Referral code added!"
 
 #: landing/src/pages/Home/FaqSection/FaqSection.tsx
-msgid "<0>Liquidity providers receive 63% of all trading and liquidation fees. By depositing WBTC, ETH, USDC, or other supported assets, you can earn up to ~35% annualized yield on the largest pools.</0><1><2> GM Pools – choose single-market exposure for targeted returns</2><3> GLV Vaults – auto-diversify across markets for a hands-off strategy</3></1><4>Historically, both options have outperformed standard LP benchmarks. See live stats on the Pools page.</4>"
-msgstr "<0>Liquidity providers receive 63% of all trading and liquidation fees. By depositing WBTC, ETH, USDC, or other supported assets, you can earn up to ~35% annualized yield on the largest pools.</0><1><2> GM Pools – choose single-market exposure for targeted returns</2><3> GLV Vaults – auto-diversify across markets for a hands-off strategy</3></1><4>Historically, both options have outperformed standard LP benchmarks. See live stats on the Pools page.</4>"
+msgid "<0>Liquidity providers receive 63% of all trading and liquidation fees. By depositing WBTC, ETH, USDC, or other supported assets, you can earn up to ~35% annualized yield on the largest pools.</0><1><2> 0xM Pools – choose single-market exposure for targeted returns</2><3> GLV Vaults – auto-diversify across markets for a hands-off strategy</3></1><4>Historically, both options have outperformed standard LP benchmarks. See live stats on the Pools page.</4>"
+msgstr "<0>Liquidity providers receive 63% of all trading and liquidation fees. By depositing WBTC, ETH, USDC, or other supported assets, you can earn up to ~35% annualized yield on the largest pools.</0><1><2> 0xM Pools – choose single-market exposure for targeted returns</2><3> GLV Vaults – auto-diversify across markets for a hands-off strategy</3></1><4>Historically, both options have outperformed standard LP benchmarks. See live stats on the Pools page.</4>"
 
 #: src/components/GmxAccountModal/MainView.tsx
 msgid "Available to Trade"
@@ -575,8 +575,8 @@ msgid "Min. Required Collateral"
 msgstr "Min. Required Collateral"
 
 #: src/components/BuyCards/BuyCards.tsx
-msgid "GLV is the liquidity provider token for 0xMarkets vaults. Consist of several GM tokens and accrues fees generated by them."
-msgstr "GLV is the liquidity provider token for 0xMarkets vaults. Consist of several GM tokens and accrues fees generated by them."
+msgid "GLV is the liquidity provider token for 0xMarkets vaults. Consist of several 0xM tokens and accrues fees generated by them."
+msgstr "GLV is the liquidity provider token for 0xMarkets vaults. Consist of several 0xM tokens and accrues fees generated by them."
 
 #: src/pages/LeaderboardPage/components/LeaderboardAccountsTable.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardPositionsTable.tsx
@@ -782,8 +782,8 @@ msgid "Buy {operationTokenSymbol}"
 msgstr "Buy {operationTokenSymbol}"
 
 #: src/pages/Dashboard/AssetDropdown.tsx
-msgid "Buy GM: {0}"
-msgstr "Buy GM: {0}"
+msgid "Buy 0xM: {0}"
+msgstr "Buy 0xM: {0}"
 
 #: src/pages/Dashboard/GmCard.tsx
 msgid "Market Cap"
@@ -1116,8 +1116,8 @@ msgstr "Staking is only available on {chainNames}. Please switch to {chainNames}
 #: src/components/GmSwap/GmSwapBox/GmShiftBox/useShiftSubmitState.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
-msgid "Shift GM"
-msgstr "Shift GM"
+msgid "Shift 0xM"
+msgstr "Shift 0xM"
 
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 msgid "The amount you are trying to withdraw exceeds the limit. Please try an amount smaller than <0>{upperLimitFormatted}</0>."
@@ -1419,8 +1419,8 @@ msgstr "Accrued Negative Funding Fee"
 #: src/components/GmList/GmListItem.tsx
 #: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
-msgid "Buy GM"
-msgstr "Buy GM"
+msgid "Buy 0xM"
+msgstr "Buy 0xM"
 
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of close fee"
@@ -1508,8 +1508,8 @@ msgstr "Projects integrated with 0xMarkets."
 
 #: src/pages/Dashboard/OverviewCard.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
-msgid "GM Pools"
-msgstr "GM Pools"
+msgid "0xM Pools"
+msgstr "0xM Pools"
 
 #: src/components/TradeBox/TradeBoxRows/AvailableLiquidityRow.tsx
 msgid "The order will only execute if the price conditions are met and there is sufficient liquidity."
@@ -1612,8 +1612,8 @@ msgid "0xMarkets is the utility and governance token. V1 staking is not availabl
 msgstr "0xMarkets is the utility and governance token. V1 staking is not available on this network."
 
 #: src/domain/synthetics/trade/utils/validation.ts
-msgid "There isn't enough GM: {0} [{1}] liquidity in GLV to fulfill your sell request. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
-msgstr "There isn't enough GM: {0} [{1}] liquidity in GLV to fulfill your sell request. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
+msgid "There isn't enough 0xM: {0} [{1}] liquidity in GLV to fulfill your sell request. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
+msgstr "There isn't enough 0xM: {0} [{1}] liquidity in GLV to fulfill your sell request. Please choose a different pool, reduce the sell size, or split your withdrawal from multiple pools."
 
 #: src/context/SyntheticsEvents/SyntheticsEventsProvider.tsx
 msgid "Deposited {0} into {positionText}"
@@ -2169,8 +2169,8 @@ msgid "Fulfilling buy request."
 msgstr "Fulfilling buy request."
 
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
-msgid "This swap is routed through several GM pools for the lowest possible fees and price impact."
-msgstr "This swap is routed through several GM pools for the lowest possible fees and price impact."
+msgid "This swap is routed through several 0xM pools for the lowest possible fees and price impact."
+msgstr "This swap is routed through several 0xM pools for the lowest possible fees and price impact."
 
 #: src/components/OrderItem/TwapOrdersList/TwapOrdersList.tsx
 #: src/components/OrderItem/TwapOrdersList/TwapOrdersList.tsx
@@ -2493,8 +2493,8 @@ msgid "Direction"
 msgstr "Direction"
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
-msgid "GM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
-msgstr "GM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
+msgid "0xM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
+msgstr "0xM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
 
 #: src/components/GmList/GmList.tsx
 msgid "Graph showing performance vs benchmark over the selected period."
@@ -2673,8 +2673,8 @@ msgid "No tokens matched"
 msgstr "No tokens matched"
 
 #: src/domain/synthetics/trade/utils/validation.ts
-msgid "The buyable cap for the pool GM: {0} in {1} [{2}] has been reached. Please choose a different pool or reduce the buy size."
-msgstr "The buyable cap for the pool GM: {0} in {1} [{2}] has been reached. Please choose a different pool or reduce the buy size."
+msgid "The buyable cap for the pool 0xM: {0} in {1} [{2}] has been reached. Please choose a different pool or reduce the buy size."
+msgstr "The buyable cap for the pool 0xM: {0} in {1} [{2}] has been reached. Please choose a different pool or reduce the buy size."
 
 #: src/components/TradeHistory/TradeHistory.tsx
 msgid "No trades yet"
@@ -2972,8 +2972,8 @@ msgid "Last 180d"
 msgstr "Last 180d"
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
-msgid "Unknown buy GM order"
-msgstr "Unknown buy GM order"
+msgid "Unknown buy 0xM order"
+msgstr "Unknown buy 0xM order"
 
 #: src/components/Referrals/AffiliatesStats.tsx
 #: src/components/Referrals/TradersStats.tsx
@@ -3250,8 +3250,8 @@ msgid "Error preparing transaction. Provider is not defined"
 msgstr "Error preparing transaction. Provider is not defined"
 
 #: src/domain/synthetics/trade/utils/validation.ts
-msgid "Insufficient liquidity in GM Pool"
-msgstr "Insufficient liquidity in GM Pool"
+msgid "Insufficient liquidity in 0xM Pool"
+msgstr "Insufficient liquidity in 0xM Pool"
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "Failed to claim funds"
@@ -3282,8 +3282,8 @@ msgid "Longs"
 msgstr "Longs"
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
-msgid "Unknown sell GM order"
-msgstr "Unknown sell GM order"
+msgid "Unknown sell 0xM order"
+msgstr "Unknown sell 0xM order"
 
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
 msgid "{typeString} Long Limit: {0} a long position when the price is below the trigger price."
@@ -3459,8 +3459,8 @@ msgstr "Media Kit"
 
 #: src/components/BuyCards/BuyCards.tsx
 #: src/pages/Dashboard/DashboardPageTitle.tsx
-msgid "GM is the liquidity provider token for 0xMarkets markets. Accrues 63% of the markets generated fees."
-msgstr "GM is the liquidity provider token for 0xMarkets markets. Accrues 63% of the markets generated fees."
+msgid "0xM is the liquidity provider token for 0xMarkets markets. Accrues 63% of the markets generated fees."
+msgstr "0xM is the liquidity provider token for 0xMarkets markets. Accrues 63% of the markets generated fees."
 
 #: landing/src/pages/Home/HeroSection/Features.tsx
 msgid "Numerous Assets"
@@ -3644,8 +3644,8 @@ msgid "Settle request for {0, plural, one {# position} other {# positions}} sent
 msgstr "Settle request for {0, plural, one {# position} other {# positions}} sent"
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
-msgid "GM can be sold for {0} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
-msgstr "GM can be sold for {0} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
+msgid "0xM can be sold for {0} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
+msgstr "0xM can be sold for {0} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
 
 #: src/components/AccruedPositionPriceImpactRebateModal/AccruedPositionPriceImpactRebateModal.tsx
 #: src/components/ClaimablePositionPriceImpactRebateModal/ClaimablePositionPriceImpactRebateModal.tsx
@@ -4077,8 +4077,8 @@ msgid "0xMarkets Rebates are automatically applied as fee discounts on each trad
 msgstr "0xMarkets Rebates are automatically applied as fee discounts on each trade and are not displayed on this table."
 
 #: src/domain/synthetics/trade/utils/validation.ts
-msgid "The buyable cap for the pool GM: {0} in {1} [{2}] has been reached. Please reduce the buy size, pick a different GM token, or shift the GM tokens to a different pool and try again."
-msgstr "The buyable cap for the pool GM: {0} in {1} [{2}] has been reached. Please reduce the buy size, pick a different GM token, or shift the GM tokens to a different pool and try again."
+msgid "The buyable cap for the pool 0xM: {0} in {1} [{2}] has been reached. Please reduce the buy size, pick a different 0xM token, or shift the 0xM tokens to a different pool and try again."
+msgstr "The buyable cap for the pool 0xM: {0} in {1} [{2}] has been reached. Please reduce the buy size, pick a different 0xM token, or shift the 0xM tokens to a different pool and try again."
 
 #: src/components/TokenSelector/MultichainTokenSelector.tsx
 msgid "Available to Deposit"
@@ -4343,8 +4343,8 @@ msgid "Longs Net Rate / 1h"
 msgstr "Longs Net Rate / 1h"
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
-msgid "Withdrawal execution failed on-chain. Your GM tokens have been returned. Please try again."
-msgstr "Withdrawal execution failed on-chain. Your GM tokens have been returned. Please try again."
+msgid "Withdrawal execution failed on-chain. Your 0xM tokens have been returned. Please try again."
+msgstr "Withdrawal execution failed on-chain. Your 0xM tokens have been returned. Please try again."
 
 #: src/components/OrderItem/OrderItem.tsx
 msgid "Edit"
@@ -4626,8 +4626,8 @@ msgid "The current swap impact including fees is {0}. Consider adding a buffer o
 msgstr "The current swap impact including fees is {0}. Consider adding a buffer of 1% to it so the order is more likely to be processed"
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
-msgid "Withdrawal expired before the keeper could execute it. Your GM tokens have been returned. Try again."
-msgstr "Withdrawal expired before the keeper could execute it. Your GM tokens have been returned. Try again."
+msgid "Withdrawal expired before the keeper could execute it. Your 0xM tokens have been returned. Try again."
+msgstr "Withdrawal expired before the keeper could execute it. Your 0xM tokens have been returned. Try again."
 
 #: src/pages/AccountDashboard/GeneralPerformanceDetails.tsx
 msgid "Win / Loss"
@@ -4654,8 +4654,8 @@ msgid "Sell request sent."
 msgstr "Sell request sent."
 
 #: src/components/GmList/PerformanceLabel.tsx
-msgid "Annualized return of the pool or vault over the selected period, compared to a benchmark that follows Uniswap V2–style rebalancing of the backing tokens in the same GM pool or GLV vault.<0/><1/>Annualized figures based on short periods may be distorted by short-term volatility.<2/><3/>For detailed stats and comparisons, see the <4>0xMarkets LP Dashboard</4>."
-msgstr "Annualized return of the pool or vault over the selected period, compared to a benchmark that follows Uniswap V2–style rebalancing of the backing tokens in the same GM pool or GLV vault.<0/><1/>Annualized figures based on short periods may be distorted by short-term volatility.<2/><3/>For detailed stats and comparisons, see the <4>0xMarkets LP Dashboard</4>."
+msgid "Annualized return of the pool or vault over the selected period, compared to a benchmark that follows Uniswap V2–style rebalancing of the backing tokens in the same 0xM pool or GLV vault.<0/><1/>Annualized figures based on short periods may be distorted by short-term volatility.<2/><3/>For detailed stats and comparisons, see the <4>0xMarkets LP Dashboard</4>."
+msgstr "Annualized return of the pool or vault over the selected period, compared to a benchmark that follows Uniswap V2–style rebalancing of the backing tokens in the same 0xM pool or GLV vault.<0/><1/>Annualized figures based on short periods may be distorted by short-term volatility.<2/><3/>For detailed stats and comparisons, see the <4>0xMarkets LP Dashboard</4>."
 
 #: src/components/NotifyModal/NotifyModal.tsx
 msgid "Liquidation Confirmations"
@@ -4819,8 +4819,8 @@ msgid "Order execution price takes into account price impact."
 msgstr "Order execution price takes into account price impact."
 
 #: src/components/UserIncentiveDistributionList/AboutGlpIncident.tsx
-msgid "GLV earns from trading fees (open, close, borrow, liquidations, swaps) and trader losses across GM pools, with auto-compounding for seamless growth (20-30% historical average annualized performance). View real-time earnings, performance, and portfolio value on the <0>Pools page</0>."
-msgstr "GLV earns from trading fees (open, close, borrow, liquidations, swaps) and trader losses across GM pools, with auto-compounding for seamless growth (20-30% historical average annualized performance). View real-time earnings, performance, and portfolio value on the <0>Pools page</0>."
+msgid "GLV earns from trading fees (open, close, borrow, liquidations, swaps) and trader losses across 0xM pools, with auto-compounding for seamless growth (20-30% historical average annualized performance). View real-time earnings, performance, and portfolio value on the <0>Pools page</0>."
+msgstr "GLV earns from trading fees (open, close, borrow, liquidations, swaps) and trader losses across 0xM pools, with auto-compounding for seamless growth (20-30% historical average annualized performance). View real-time earnings, performance, and portfolio value on the <0>Pools page</0>."
 
 #: src/components/GmxAccountModal/DepositView.tsx
 #: src/components/GmxAccountModal/DepositView.tsx
@@ -4896,8 +4896,8 @@ msgid "Scan the QR code"
 msgstr "Scan the QR code"
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
-msgid "Unknown shift GM order"
-msgstr "Unknown shift GM order"
+msgid "Unknown shift 0xM order"
+msgstr "Unknown shift 0xM order"
 
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 msgid "Shifting {symbol}..."
@@ -4937,8 +4937,8 @@ msgid "Execution Details"
 msgstr "Execution Details"
 
 #: src/domain/synthetics/common/incentivesAirdropMessages.ts
-msgid "GM Airdrop"
-msgstr "GM Airdrop"
+msgid "0xM Airdrop"
+msgstr "0xM Airdrop"
 
 #: src/components/GmxAccountModal/TransferDetailsView.tsx
 msgid "{addressLabel} on {networkLabel}"
@@ -4999,8 +4999,8 @@ msgid "Open {0} in Explorer"
 msgstr "Open {0} in Explorer"
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
-msgid "{0} and {1} can be used to buy GM for this market up to the specified buying caps."
-msgstr "{0} and {1} can be used to buy GM for this market up to the specified buying caps."
+msgid "{0} and {1} can be used to buy 0xM for this market up to the specified buying caps."
+msgstr "{0} and {1} can be used to buy 0xM for this market up to the specified buying caps."
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
 #: src/components/StatusNotification/StakeNotification.tsx
@@ -5133,8 +5133,8 @@ msgid "Consider selecting only positions where the accrued funding fee exceeds t
 msgstr "Consider selecting only positions where the accrued funding fee exceeds the {0} gas cost to settle each position."
 
 #: src/domain/synthetics/trade/utils/validation.ts
-msgid "The buyable cap for the pool GM: {0} using the pay token selected is reached. Please choose a different pool, reduce the buy size, or pick a different composition of tokens."
-msgstr "The buyable cap for the pool GM: {0} using the pay token selected is reached. Please choose a different pool, reduce the buy size, or pick a different composition of tokens."
+msgid "The buyable cap for the pool 0xM: {0} using the pay token selected is reached. Please choose a different pool, reduce the buy size, or pick a different composition of tokens."
+msgstr "The buyable cap for the pool 0xM: {0} using the pay token selected is reached. Please choose a different pool, reduce the buy size, or pick a different composition of tokens."
 
 #: landing/src/pages/Home/HeroSection/AnimatedTitle.tsx
 msgid "deep liquid markets"
@@ -5539,8 +5539,8 @@ msgid "Express + One-Click"
 msgstr "Express + One-Click"
 
 #: src/domain/synthetics/common/incentivesAirdropMessages.ts
-msgid "GLP to GM Airdrop"
-msgstr "GLP to GM Airdrop"
+msgid "GLP to 0xM Airdrop"
+msgstr "GLP to 0xM Airdrop"
 
 #: src/components/Referrals/ReferralCodeWarnings.tsx
 msgid "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
@@ -5553,14 +5553,14 @@ msgid "Confirm Claim"
 msgstr "Confirm Claim"
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
-msgid "Withdrawal timed out. The keeper may be down. Try again or check your GM token balance."
-msgstr "Withdrawal timed out. The keeper may be down. Try again or check your GM token balance."
+msgid "Withdrawal timed out. The keeper may be down. Try again or check your 0xM token balance."
+msgstr "Withdrawal timed out. The keeper may be down. Try again or check your 0xM token balance."
 
 #: src/components/GmList/GmListItem.tsx
 #: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
-msgid "Sell GM"
-msgstr "Sell GM"
+msgid "Sell 0xM"
+msgstr "Sell 0xM"
 
 #: src/domain/synthetics/markets/createShiftTxn.ts
 msgid "Shift error."
@@ -6429,8 +6429,8 @@ msgstr "{count, plural, one {Order} other {# Orders}}"
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
 #: src/components/StatusNotification/GmStatusNotification.tsx
-msgid "Your withdrawal was cancelled. Your GM tokens have been returned."
-msgstr "Your withdrawal was cancelled. Your GM tokens have been returned."
+msgid "Your withdrawal was cancelled. Your 0xM tokens have been returned."
+msgstr "Your withdrawal was cancelled. Your 0xM tokens have been returned."
 
 #: src/components/Referrals/AffiliatesStats.tsx
 msgid "Volume on V1"

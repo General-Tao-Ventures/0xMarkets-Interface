@@ -12,7 +12,7 @@ export const getGmSwapBoxApproveTokenSymbol = (
   const marketTokenData = getByKey(glvOrMarketInfoData, address);
 
   if (marketTokenData) {
-    return isGlvInfo(marketTokenData) ? "GLV" : "GM: " + marketTokenData.name;
+    return isGlvInfo(marketTokenData) ? "GLV" : "0xM: " + marketTokenData.name;
   }
 
   return token.assetSymbol ?? token.symbol;

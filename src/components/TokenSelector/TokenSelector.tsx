@@ -267,7 +267,7 @@ export default function TokenSelector(props: Props) {
                   )}
                   <div className="items ml-16 flex gap-4">
                     <div>
-                      {token.isMarketToken && marketToken ? `GM: ${getMarketIndexName(marketToken)}` : token.symbol}
+                      {token.isMarketToken && marketToken ? `0xM: ${getMarketIndexName(marketToken)}` : token.symbol}
                     </div>
                     {marketToken && <span className="text-accent">[{getMarketPoolName(marketToken)}]</span>}
                   </div>

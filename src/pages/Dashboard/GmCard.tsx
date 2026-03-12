@@ -90,7 +90,7 @@ export function GmCard() {
               <div className="flex flex-wrap items-center justify-between gap-8">
                 <div className="flex items-center gap-8">
                   <div className="App-card-title-mark-icon">
-                    <img src={currentIcons.gm} width="40" alt="GM Icon" />
+                    <img src={currentIcons.gm} width="40" alt="0xM Icon" />
                   </div>
                   <div>
                     <div className="text-body-medium font-medium">0xMarkets</div>

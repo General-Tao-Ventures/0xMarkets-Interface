@@ -204,7 +204,7 @@ const AssetDropdownMarketItem = ({ marketStat, chainId }: { marketStat: MarketSt
       </div>
 
       <p>
-        <Trans>Buy GM: {marketStat.marketInfo.name}</Trans>
+        <Trans>Buy 0xM: {marketStat.marketInfo.name}</Trans>
       </p>
     </Link>
   );

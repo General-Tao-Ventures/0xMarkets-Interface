@@ -56,7 +56,7 @@ export function PoolsDetailsAbout({
       <div className="text-body-medium text-typography-secondary">
         {isGlv ? (
           <Trans>
-            This token is a vault of automatically rebalanced GM tokens that accrue fees from leverage trading and swaps
+            This token is a vault of automatically rebalanced 0xM tokens that accrue fees from leverage trading and swaps
             from the included markets. Backed by {glvOrMarketInfo?.longToken?.symbol} and{" "}
             {glvOrMarketInfo?.shortToken?.symbol}.
           </Trans>
@@ -145,12 +145,12 @@ const SellableTooltipContent = ({
     <div>
       {marketInfo?.isSameCollaterals ? (
         <Trans>
-          GM can be sold for {marketInfo?.longToken?.symbol} for this market up to the specified selling caps. The
+          0xM can be sold for {marketInfo?.longToken?.symbol} for this market up to the specified selling caps. The
           remaining tokens in the pool are reserved for currently open positions.
         </Trans>
       ) : (
         <Trans>
-          GM can be sold for {marketInfo?.longToken?.symbol} and {marketInfo?.shortToken?.symbol} for this market up to
+          0xM can be sold for {marketInfo?.longToken?.symbol} and {marketInfo?.shortToken?.symbol} for this market up to
           the specified selling caps. The remaining tokens in the pool are reserved for currently open positions.
         </Trans>
       )}
@@ -291,11 +291,11 @@ const BuyableTooltipContent = ({
       <p className="text-typography-primary">
         {marketInfo?.isSameCollaterals ? (
           <Trans>
-            {marketInfo?.longToken?.symbol} can be used to buy GM for this market up to the specified buying caps.
+            {marketInfo?.longToken?.symbol} can be used to buy 0xM for this market up to the specified buying caps.
           </Trans>
         ) : (
           <Trans>
-            {marketInfo?.longToken?.symbol} and {marketInfo?.shortToken?.symbol} can be used to buy GM for this market
+            {marketInfo?.longToken?.symbol} and {marketInfo?.shortToken?.symbol} can be used to buy 0xM for this market
             up to the specified buying caps.
           </Trans>
         )}

@@ -122,7 +122,7 @@ export function AboutGlpIncident() {
         >
           <div className="text-typography-secondary">
             <Trans>
-              GLV earns from trading fees (open, close, borrow, liquidations, swaps) and trader losses across GM pools,
+              GLV earns from trading fees (open, close, borrow, liquidations, swaps) and trader losses across 0xM pools,
               with auto-compounding for seamless growth (20-30% historical average annualized performance). View
               real-time earnings, performance, and portfolio value on the <Link to="/pools">Pools page</Link>.
             </Trans>

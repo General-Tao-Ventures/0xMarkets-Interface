@@ -48,7 +48,7 @@ function PoolLabel({
   if (isGlvInfo(marketInfo)) {
     name = getGlvDisplayName(marketInfo);
   } else {
-    name = showAllPools ? `GM: ${getMarketIndexName(marketInfo)}` : getMarketPoolName(marketInfo);
+    name = showAllPools ? `0xM: ${getMarketIndexName(marketInfo)}` : getMarketPoolName(marketInfo);
   }
 
   if (marketsOptions?.length > 1) {

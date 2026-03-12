@@ -113,7 +113,7 @@ export function OverviewCard() {
             </div>
             <div className="App-card-row">
               <div className="label">
-                <Trans>GM Pools</Trans>
+                <Trans>0xM Pools</Trans>
               </div>
               <div>
                 <span className="numbers">{formatAmountHuman(gmTvl, USD_DECIMALS, true, 2)}</span>

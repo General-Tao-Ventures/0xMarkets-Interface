@@ -81,7 +81,7 @@ function getActionableMessage(errorReason: string | null): string {
 }
 
 function getWithdrawalActionableMessage(errorReason: string | null): string {
-  if (!errorReason) return t`Your withdrawal was cancelled. Your GM tokens have been returned.`;
+  if (!errorReason) return t`Your withdrawal was cancelled. Your 0xM tokens have been returned.`;
 
   const lower = errorReason.toLowerCase();
 
@@ -89,15 +89,15 @@ function getWithdrawalActionableMessage(errorReason: string | null): string {
     return t`Insufficient swap liquidity. Try a smaller amount.`;
   }
   if (lower.includes("oracletimestamps") || lower.includes("expired") || lower.includes("expiration")) {
-    return t`Withdrawal expired before the keeper could execute it. Your GM tokens have been returned. Try again.`;
+    return t`Withdrawal expired before the keeper could execute it. Your 0xM tokens have been returned. Try again.`;
   }
   if (lower.includes("insufficientexecutionfee")) {
     return t`Execution fee was insufficient. Try again.`;
   }
   if (lower.includes("emptywithdrawal") || lower.includes("execution reverted")) {
-    return t`Withdrawal execution failed on-chain. Your GM tokens have been returned. Please try again.`;
+    return t`Withdrawal execution failed on-chain. Your 0xM tokens have been returned. Please try again.`;
   }
-  return t`Your withdrawal was cancelled. Your GM tokens have been returned.`;
+  return t`Your withdrawal was cancelled. Your 0xM tokens have been returned.`;
 }
 
 function getShiftActionableMessage(errorReason: string | null): string {
@@ -197,7 +197,7 @@ export function GmStatusNotification({
   const title = useMemo(() => {
     if (operation === "deposit") {
       if (!pendingDepositData) {
-        return t`Unknown buy GM order`;
+        return t`Unknown buy 0xM order`;
       }
 
       let longToken: TokenData | undefined;
@@ -247,7 +247,7 @@ export function GmStatusNotification({
         if (gmMarket) {
           tokensText = (
             <>
-              GM:
+              0xM:
               <span className="inline-flex whitespace-nowrap">
                 {" "}
                 {getMarketIndexName(gmMarket)}
@@ -262,7 +262,7 @@ export function GmStatusNotification({
         return (
           <Trans>
             <div className="inline-flex">
-              Buying {glvInfo ? getGlvDisplayName(glvInfo) : "GM:"}
+              Buying {glvInfo ? getGlvDisplayName(glvInfo) : "0xM:"}
               {indexName ? <span>&nbsp;{indexName}</span> : null}
               <PoolName>{poolName}</PoolName>
             </div>{" "}
@@ -271,7 +271,7 @@ export function GmStatusNotification({
         );
     } else if (operation === "withdrawal") {
       if (!pendingWithdrawalData) {
-        return t`Unknown sell GM order`;
+        return t`Unknown sell 0xM order`;
       }
       const marketInfo = getByKey(marketsInfoData, pendingWithdrawalData.marketAddress);
       const isGlv = marketInfo && isGlvInfo(marketInfo);
@@ -281,7 +281,7 @@ export function GmStatusNotification({
       return (
         <Trans>
           <div className="inline-flex">
-            Selling {isGlv ? getGlvDisplayName(marketInfo) : "GM"}
+            Selling {isGlv ? getGlvDisplayName(marketInfo) : "0xM"}
             {indexName && <span>:&nbsp;{indexName}</span>}
             <PoolName>{poolName}</PoolName>
           </div>
@@ -289,7 +289,7 @@ export function GmStatusNotification({
       );
     } else {
       if (!pendingShiftData) {
-        return t`Unknown shift GM order`;
+        return t`Unknown shift 0xM order`;
       }
 
       const fromMarketInfo = getByKey(marketsInfoData, pendingShiftData.fromMarket);
@@ -304,12 +304,12 @@ export function GmStatusNotification({
         <Trans>
           Shifting from{" "}
           <span className="inline-flex items-center">
-            <span>GM: {fromIndexName}</span>
+            <span>0xM: {fromIndexName}</span>
             <PoolName>{fromPoolName}</PoolName>
           </span>{" "}
           to{" "}
           <span className="inline-flex items-center">
-            <span>GM: {toIndexName}</span>
+            <span>0xM: {toIndexName}</span>
             <PoolName>{toPoolName}</PoolName>
           </span>
         </Trans>
@@ -384,7 +384,7 @@ export function GmStatusNotification({
       }
     } else if (operation === "withdrawal") {
       if (withdrawalStatus?.cancelledTxnHash === EXECUTION_TIMEOUT_HASH) {
-        text = t`Withdrawal timed out. The keeper may be down. Try again or check your GM token balance.`;
+        text = t`Withdrawal timed out. The keeper may be down. Try again or check your 0xM token balance.`;
         status = "error";
       } else if (withdrawalStatus?.cancelledTxnHash) {
         text = getWithdrawalActionableMessage(withdrawalStatus.cancelledReason ?? null);

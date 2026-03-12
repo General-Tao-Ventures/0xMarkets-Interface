@@ -87,7 +87,7 @@ export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
                 />
               ) : null}
               <div className={cx("flex flex-col gap-4 pr-20 font-medium")}>
-                <div className="text-body-large">{isGlv ? "GLV" : `GM: ${getMarketIndexName(glvOrMarketInfo)}`}</div>
+                <div className="text-body-large">{isGlv ? "GLV" : `0xM: ${getMarketIndexName(glvOrMarketInfo)}`}</div>
                 <div className="text-body-small text-typography-secondary">{`[${getMarketPoolName(glvOrMarketInfo)}]`}</div>
               </div>
             </div>
@@ -104,7 +104,7 @@ export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
                 value={formatAmountHuman(marketTotalSupplyUsd, USD_DECIMALS, true, 2)}
                 secondaryValue={
                   typeof marketTotalSupply === "bigint" && typeof marketToken?.decimals === "number"
-                    ? `${formatAmountHuman(marketTotalSupply, marketToken?.decimals, false, 2)} ${isGlv ? "GLV" : "GM"}`
+                    ? `${formatAmountHuman(marketTotalSupply, marketToken?.decimals, false, 2)} ${isGlv ? "GLV" : "0xM"}`
                     : undefined
                 }
               />
@@ -115,7 +115,7 @@ export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
                   value={formatUsd(marketBalanceUsd)}
                   secondaryValue={`${formatBalanceAmount(marketBalance, marketToken?.decimals, undefined, {
                     showZero: true,
-                  })} ${isGlv ? "GLV" : "GM"}`}
+                  })} ${isGlv ? "GLV" : "0xM"}`}
                 />
               ) : null}
 

@@ -304,7 +304,7 @@ export function GmListItem({
             className="flex-1"
             to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Deposit`}
           >
-            <Trans>Buy GM</Trans>
+            <Trans>Buy 0xM</Trans>
           </Button>
           <Button
             variant="secondary"
@@ -312,7 +312,7 @@ export function GmListItem({
             to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Withdrawal`}
           >
             <span className="text-red-400">
-              <Trans>Sell GM</Trans>
+              <Trans>Sell 0xM</Trans>
             </span>
           </Button>
         </div>
@@ -438,7 +438,7 @@ export function GmListItem({
             className="text-12 px-10 py-6"
             to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Deposit`}
           >
-            <Trans>Buy GM</Trans>
+            <Trans>Buy 0xM</Trans>
           </Button>
           <Button
             variant="secondary"
@@ -446,7 +446,7 @@ export function GmListItem({
             to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Withdrawal`}
           >
             <span className="text-red-400">
-              <Trans>Sell GM</Trans>
+              <Trans>Sell 0xM</Trans>
             </span>
           </Button>
         </div>

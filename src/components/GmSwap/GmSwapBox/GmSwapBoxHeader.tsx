@@ -14,15 +14,15 @@ import Tabs from "components/Tabs/Tabs";
 import { Operation } from "./types";
 
 const OPERATION_LABELS_GM = {
-  [Operation.Deposit]: msg`Buy GM`,
-  [Operation.Withdrawal]: msg`Sell GM`,
-  [Operation.Shift]: msg`Shift GM`,
+  [Operation.Deposit]: msg`Buy 0xM`,
+  [Operation.Withdrawal]: msg`Sell 0xM`,
+  [Operation.Shift]: msg`Shift 0xM`,
 };
 
 const OPERATION_LABELS_GLV = {
   [Operation.Deposit]: msg`Buy GLV`,
   [Operation.Withdrawal]: msg`Sell GLV`,
-  [Operation.Shift]: msg`Shift GM`,
+  [Operation.Shift]: msg`Shift 0xM`,
 };
 
 const OPERATIONS = [Operation.Deposit, Operation.Withdrawal, Operation.Shift];

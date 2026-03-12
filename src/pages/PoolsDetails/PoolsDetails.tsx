@@ -63,7 +63,7 @@ export function PoolsDetails() {
       </BreadcrumbItem>
 
       <BreadcrumbItem active>
-        {isGlvInfo(glvOrMarketInfo) ? <Trans>GLV Vaults</Trans> : <Trans>GM Pools</Trans>}
+        {isGlvInfo(glvOrMarketInfo) ? <Trans>GLV Vaults</Trans> : <Trans>0xM Pools</Trans>}
       </BreadcrumbItem>
     </Breadcrumbs>
   );
