@@ -42,6 +42,7 @@ export function useMarkets(chainId: number): MarketsResult {
           acc.marketsAddresses!.push(market.marketTokenAddress);
           acc.marketsData![market.marketTokenAddress] = {
             ...market,
+            reversed: market.reversed ?? false,
             isSameCollaterals,
             isSpotOnly,
             name,

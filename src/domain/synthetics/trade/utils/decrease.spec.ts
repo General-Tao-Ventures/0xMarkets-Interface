@@ -49,6 +49,7 @@ const marketInfo: MarketInfo = {
   indexTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
   longTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
   shortTokenAddress: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  reversed: false,
   isSameCollaterals: false,
   isSpotOnly: false,
   name: "ETH/USD [WETH-USDC]",

@@ -77,6 +77,7 @@ export const MARKETS = Object.keys(MARKETS_UI_CONFIGS).reduce(
         shortTokenAddress: string;
         indexTokenAddress: string;
         marketTokenAddress: string;
+        reversed?: boolean;
       }
     >
   >
