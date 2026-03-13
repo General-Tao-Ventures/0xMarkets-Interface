@@ -15,6 +15,7 @@ export type Market = {
   indexTokenAddress: string;
   longTokenAddress: string;
   shortTokenAddress: string;
+  reversed: boolean;
   isSameCollaterals: boolean;
   isSpotOnly: boolean;
   name: string;

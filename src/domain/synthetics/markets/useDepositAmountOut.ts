@@ -53,7 +53,7 @@ export function useDepositAmountOut(
         indexToken: marketInfo!.indexTokenAddress,
         longToken: marketInfo!.longTokenAddress,
         shortToken: marketInfo!.shortTokenAddress,
-        reversed: false,
+        reversed: marketInfo!.reversed,
       };
 
       return {

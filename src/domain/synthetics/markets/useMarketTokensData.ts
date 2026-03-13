@@ -74,7 +74,7 @@ export function useMarketTokensDataRequest(
             longToken: market.longTokenAddress,
             shortToken: market.shortTokenAddress,
             indexToken: market.indexTokenAddress,
-            reversed: false,
+            reversed: market.reversed,
           };
 
           const pnlFactorType = isDeposit ? MAX_PNL_FACTOR_FOR_DEPOSITS_KEY : MAX_PNL_FACTOR_FOR_WITHDRAWALS_KEY;

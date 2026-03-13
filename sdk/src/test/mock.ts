@@ -148,6 +148,7 @@ export function mockMarketsData(marketKeys: string[]): MarketsData {
       indexTokenAddress,
       longTokenAddress,
       shortTokenAddress,
+      reversed: false,
       isSameCollaterals: longTokenAddress === shortTokenAddress,
       isSpotOnly: indexTokenAddress === "SPOT",
       data: "",
@@ -179,6 +180,7 @@ export function mockMarketsInfoData(
       indexTokenAddress,
       longTokenAddress,
       shortTokenAddress,
+      reversed: false,
 
       isSameCollaterals: longTokenAddress === shortTokenAddress,
       isSpotOnly,

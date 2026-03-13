@@ -341,6 +341,7 @@ export class Markets extends Module {
               indexTokenAddress: market.indexToken,
               longTokenAddress: market.longToken,
               shortTokenAddress: market.shortToken,
+              reversed: market.reversed,
             };
           }
         );
@@ -356,6 +357,7 @@ export class Markets extends Module {
           indexTokenAddress: string;
           longTokenAddress: string;
           shortTokenAddress: string;
+          reversed: boolean;
         }
       ) => {
         try {
