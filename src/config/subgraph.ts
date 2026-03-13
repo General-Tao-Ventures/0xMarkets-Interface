@@ -4,7 +4,7 @@ import { getSubgraphUrlKey } from "./localStorage";
 
 const SUBGRAPH_URLS = {
   [BASE_SEPOLIA]: {
-    subsquid: "https://7e27672d-eadb-408b-b9b8-71f30d76effd.squids.live/0xmarkets-base-sepolia@v1/api/graphql",
+    subsquid: "https://zero-x-markets.squids.live/0xmarkets-base-sepolia@v1/api/graphql",
   },
 };
 
