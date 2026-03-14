@@ -21,7 +21,7 @@ import type { ContractsChainId } from "sdk/configs/chains";
 import { MARKETS } from "sdk/configs/markets";
 import { convertTokenAddress } from "sdk/configs/tokens";
 import { CustomErrorName, ErrorData, TxErrorType, extendError, isContractError, parseError } from "sdk/utils/errors";
-import { PRECISION } from "sdk/utils/numbers";
+import { expandDecimals } from "sdk/utils/numbers";
 import { CreateOrderTxnParams, ExternalCallsPayload } from "sdk/utils/orderTransactions";
 
 export type SimulateExecuteParams = {
@@ -258,8 +258,6 @@ function getReversedIndexTokens(chainId: number): Set<string> {
   return reversed;
 }
 
-const FLOAT_PRECISION_SQUARED = PRECISION * PRECISION;
-
 export function getSimulationPrices(chainId: number, tokensData: TokensData, overrides: PriceOverride[]) {
   const tokenAddresses = Object.keys(tokensData);
   const primaryTokens: string[] = [];
@@ -283,13 +281,15 @@ export function getSimulationPrices(chainId: number, tokensData: TokensData, ove
 
     // For reversed markets, the on-chain PythLazerFeedProvider inverts the oracle price.
     // Simulation bypasses the provider, so we must apply the same inversion here:
-    // newMin = FLOAT^2 / oldMax, newMax = FLOAT^2 / oldMin (swap + reciprocal).
+    // adjustedPrecision = 10^(30 - tokenDecimals), then newMin = adjusted^2 / oldMax (swap + reciprocal).
     if (reversedIndexTokens.has(address.toLowerCase())) {
+      const adjustedPrecision = expandDecimals(1, 30 - token.decimals);
+      const precisionSquared = adjustedPrecision * adjustedPrecision;
       const oldMin = currentPrice.min as bigint;
       const oldMax = currentPrice.max as bigint;
       currentPrice = {
-        min: (oldMax > 0n ? FLOAT_PRECISION_SQUARED / oldMax : 0n) as TokenPrices["minPrice"] & { __brand: "contractPrice" },
-        max: (oldMin > 0n ? FLOAT_PRECISION_SQUARED / oldMin : 0n) as TokenPrices["maxPrice"] & { __brand: "contractPrice" },
+        min: (oldMax > 0n ? precisionSquared / oldMax : 0n) as TokenPrices["minPrice"] & { __brand: "contractPrice" },
+        max: (oldMin > 0n ? precisionSquared / oldMin : 0n) as TokenPrices["maxPrice"] & { __brand: "contractPrice" },
       };
     }
 
