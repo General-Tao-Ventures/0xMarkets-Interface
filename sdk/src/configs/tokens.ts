@@ -68,6 +68,14 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       coingeckoUrl: "https://www.coingecko.com/en/coins/gold",
     },
     {
+      name: "Silver",
+      symbol: "XAG",
+      decimals: 6,
+      address: "0x25f79151C3E00ba7710EcF02192836994E36b440",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/1090/small/silver.png",
+    },
+    {
       name: "Japanese Yen",
       symbol: "JPY",
       decimals: 6,
