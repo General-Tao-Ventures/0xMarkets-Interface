@@ -34,7 +34,6 @@ const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig
     // USD/JPY [USD0-USD0]
     "0xD847a999faCe1f862120117C33ae8faBA768fD4b": {
       enabled: true,
-      comingSoon: true,
     },
     // WTI/USD [USD0-USD0]
     "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF": {
