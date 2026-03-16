@@ -95,6 +95,19 @@ export default function TVChartContainer({
     });
   }, [chainId, oracleKeeperFetcher, setIsCandlesLoaded, tradePageVersion]);
 
+  // Keep a ref to the latest oracle prices so the DataFeed can read them synchronously
+  const chartTokenRef = useRef(chartToken);
+  chartTokenRef.current = chartToken;
+
+  useEffect(() => {
+    if (!datafeed) return;
+    datafeed.setOraclePriceGetter((symbol) => {
+      const token = chartTokenRef.current;
+      if (!token.symbol || token.symbol !== symbol || !("minPrice" in token)) return undefined;
+      return Number((token.minPrice + token.maxPrice) / 2n) / 1e30;
+    });
+  }, [datafeed]);
+
   const isMobile = useMedia("(max-width: 550px)");
   const symbolRef = useRef(chartToken.symbol);
 
@@ -112,7 +125,7 @@ export default function TVChartContainer({
     const currentSymbolInfo = tvWidgetRef.current?.activeChart().symbolExt();
     const currentSymbolWithMultiplier = currentSymbolInfo
       ? getSymbolName(
-          currentSymbolInfo.name,
+          currentSymbolInfo.ticker ?? currentSymbolInfo.name,
           currentSymbolInfo.unit_id ? parseInt(currentSymbolInfo.unit_id) : undefined
         )
       : undefined;

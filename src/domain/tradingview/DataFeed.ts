@@ -60,6 +60,12 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
   private prefetchedBarsPromises: Record<string, Promise<FromOldToNewArray<Bar>>> = {};
   private visibilityHandler: () => void;
   private wsManager: KeeperWebSocketManager;
+  private activeSubscriptions: Record<
+    string,
+    { onTick: SubscribeBarsCallback; lastBar: Bar | null; visualMultiplier: number }
+  > = {};
+  private oraclePriceGetter: ((symbol: string) => number | undefined) | null = null;
+  private oraclePriceInterval: ReturnType<typeof setInterval> | null = null;
 
   declare addEventListener: (event: "candlesDisplay.success", callback: EventListenerOrEventListenerObject) => void;
   declare removeEventListener: (event: "candlesDisplay.success", callback: EventListenerOrEventListenerObject) => void;
@@ -106,9 +112,9 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     const symbolInfo: LibrarySymbolInfo = {
       unit_id: visualMultiplier.toString(),
-      name: symbolName,
+      name: `${prefix}${symbolName}-USD`,
       type: "crypto",
-      description: `${prefix}${symbolName}/USD`,
+      description: `${prefix}${symbolName}-USD`,
       ticker: symbolName,
       session: "24x7",
       minmov: 1,
@@ -148,13 +154,13 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       : // But for subsequent requests we aggressively fetch more candles so that user can scroll back in time faster
         Math.max(periodParams.countBack * 2, 500);
 
-    const token = getTokenBySymbol(this.chainId, symbolInfo.name);
+    const token = getTokenBySymbol(this.chainId, symbolInfo.ticker!);
     const isStable = token.isStable;
 
     let bars: FromOldToNewArray<Bar> = [];
     try {
       if (!isStable) {
-        bars = await this.fetchCandles(symbolInfo.name, resolution, countBack + offset);
+        bars = await this.fetchCandles(symbolInfo.ticker!, resolution, countBack + offset);
       } else {
         const currentCandleTime = getCurrentCandleTime(SUPPORTED_RESOLUTIONS_V2[resolution]);
         bars = this.getStableCandles(currentCandleTime, resolution, countBack + offset);
@@ -188,6 +194,12 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     onResult(barsToReturn, { noData: offset + countBack >= 10_000 || barsToReturn.length < countBack });
 
+    // Seed lastBar for the oracle price bridge so it can push ticks immediately
+    const symbol = symbolInfo.ticker!;
+    if (barsToReturn.length > 0 && this.activeSubscriptions[symbol] && !this.activeSubscriptions[symbol].lastBar) {
+      this.activeSubscriptions[symbol].lastBar = barsToReturn[barsToReturn.length - 1];
+    }
+
     if (metricsIsFirstDrawTime) {
       metrics.pushEvent<LoadingSuccessEvent>({
         event: "candlesDisplay.success",
@@ -216,35 +228,48 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     onTick: SubscribeBarsCallback,
     listenerGuid: string
   ): void {
-    const token = getTokenBySymbol(this.chainId, symbolInfo.name);
+    const token = getTokenBySymbol(this.chainId, symbolInfo.ticker!);
     const isStable = token.isStable;
 
     const visualMultiplier = parseInt(symbolInfo.unit_id ?? "1");
 
     // Use WebSocket candle listener for V2 non-stable tokens
     if (this.tradePageVersion === 2 && !isStable) {
-      const symbol = symbolInfo.name;
+      const symbol = symbolInfo.ticker!;
       let lastBarTime = 0;
+
+      this.activeSubscriptions[symbol] = { onTick, lastBar: null, visualMultiplier };
 
       const handler = (candles: CandleData[]) => {
         const candle = candles.find((c) => c.tokenSymbol === symbol);
         if (!candle) return;
 
+        // Use oracle price for close if available, so chart matches header
+        const oraclePrice = this.oraclePriceGetter?.(symbol);
+        const close = oraclePrice ?? candle.close;
+
         const bar: Bar = {
           time: candle.minuteTs,
           open: candle.open,
-          high: candle.high,
-          low: candle.low,
-          close: candle.close,
+          high: Math.max(candle.high, close),
+          low: Math.min(candle.low, close),
+          close,
         };
 
         lastBarTime = candle.minuteTs;
-        onTick(multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier));
+        const multipliedBar = multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier);
+        if (this.activeSubscriptions[symbol]) {
+          this.activeSubscriptions[symbol].lastBar = multipliedBar;
+        }
+        onTick(multipliedBar);
       };
 
       this.wsManager.on("candle", handler);
       this.subscriptions[listenerGuid] = {
-        destroy: () => this.wsManager.off("candle", handler),
+        destroy: () => {
+          this.wsManager.off("candle", handler);
+          delete this.activeSubscriptions[symbol];
+        },
       };
       return;
     }
@@ -269,7 +294,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
         try {
           prices = !isStable
-            ? await this.fetchCandles(symbolInfo.name, resolution, candlesToFetch)
+            ? await this.fetchCandles(symbolInfo.ticker!, resolution, candlesToFetch)
             : this.getStableCandles(currentCandleTime, resolution, candlesToFetch);
         } catch (e) {
           // eslint-disable-next-line no-console
@@ -470,9 +495,41 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     }));
   }
 
+  setOraclePriceGetter(getter: (symbol: string) => number | undefined) {
+    this.oraclePriceGetter = getter;
+
+    // Poll oracle prices and push to TradingView so chart stays in sync with header
+    if (this.oraclePriceInterval) {
+      clearInterval(this.oraclePriceInterval);
+    }
+    this.oraclePriceInterval = setInterval(() => {
+      for (const [symbol, sub] of Object.entries(this.activeSubscriptions)) {
+        if (!sub.lastBar) continue;
+        const price = this.oraclePriceGetter?.(symbol);
+        if (price === undefined) continue;
+
+        const displayPrice = price * sub.visualMultiplier;
+        if (displayPrice === sub.lastBar.close) continue;
+
+        const updatedBar: Bar = {
+          ...sub.lastBar,
+          close: displayPrice,
+          high: Math.max(sub.lastBar.high, displayPrice),
+          low: Math.min(sub.lastBar.low, displayPrice),
+        };
+
+        sub.lastBar = updatedBar;
+        sub.onTick(updatedBar);
+      }
+    }, 500);
+  }
+
   destroy() {
     Object.values(this.subscriptions).forEach((subscription) => subscription.destroy());
     document.removeEventListener("visibilitychange", this.visibilityHandler);
+    if (this.oraclePriceInterval) {
+      clearInterval(this.oraclePriceInterval);
+    }
   }
 }
 
