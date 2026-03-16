@@ -93,9 +93,8 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       imageUrl: "https://assets.coingecko.com/coins/images/1/small/oil.png",
     },
     {
-      name: "Wrapped BTC",
-      symbol: "WBTC",
-      baseSymbol: "BTC",
+      name: "Bitcoin",
+      symbol: "BTC",
       decimals: 8,
       address: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
       isSynthetic: false,

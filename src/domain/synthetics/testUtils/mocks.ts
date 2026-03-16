@@ -116,7 +116,7 @@ export const MOCK_TXN_DATA = {
 export function mockExternalSwapQuote(overrides: Partial<ExternalSwapQuote> = {}): ExternalSwapQuote {
   return {
     aggregator: ExternalSwapAggregator.OpenOcean,
-    inTokenAddress: getTokenBySymbol(BASE_SEPOLIA, "WBTC").address,
+    inTokenAddress: getTokenBySymbol(BASE_SEPOLIA, "BTC").address,
     outTokenAddress: getTokenBySymbol(BASE_SEPOLIA, "USDC").address,
     receiver: "0x1234567890123456789012345678901234567890",
     amountIn: 1000000n,
