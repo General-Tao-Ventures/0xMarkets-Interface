@@ -69,7 +69,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     },
     {
       name: "Silver",
-      symbol: "XAG",
+      symbol: "SILVER",
       decimals: 6,
       address: "0x25f79151C3E00ba7710EcF02192836994E36b440",
       isSynthetic: true,
