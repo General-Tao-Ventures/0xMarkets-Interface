@@ -74,7 +74,8 @@ export function LeaderboardNavigation() {
 
     let filteredItems = allItems;
     if (isCurrentPageConcluded) {
-      filteredItems = allItems.filter((item) => item.chip === "over");
+      // Keep "Global" (non-competition items) visible so users can navigate back
+      filteredItems = allItems.filter((item) => item.chip === "over" || !item.isCompetition);
     } else {
       const nonConcludedItems = allItems.filter((item) => item.chip !== "over");
       const concludedItems = allItems.filter((item) => item.chip === "over").toReversed();
