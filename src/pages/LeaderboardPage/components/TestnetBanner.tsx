@@ -28,7 +28,7 @@ export function TestnetBanner() {
   const hasEnded = !isEndInFuture && !isStartInFuture;
 
   return (
-    <div className="relative overflow-hidden rounded-8 border border-cold-blue-900 bg-gradient-to-br from-slate-900 via-cold-blue-900 to-slate-900">
+    <div className="relative overflow-hidden rounded-20 bg-slate-800">
       {/* Decorative glows */}
       <div className="pointer-events-none absolute -right-60 -top-80 h-[340px] w-[340px] rounded-full bg-blue-400 opacity-[0.07] blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-[120px] left-[15%] h-[300px] w-[300px] rounded-full bg-[#00D1CD] opacity-[0.04] blur-[100px]" />

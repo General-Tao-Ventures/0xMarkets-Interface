@@ -155,8 +155,8 @@ export function LeaderboardContainer() {
 
       {isTestnet && <TestnetBanner />}
 
-      <div className="overflow-hidden rounded-8 border border-slate-800 bg-slate-750">
-        <div className="flex items-center justify-between gap-16 border-b-1/2 border-slate-800 bg-slate-900 p-20 max-md:flex-col">
+      <div className="overflow-hidden rounded-20 bg-slate-800">
+        <div className="flex items-center justify-between gap-16 border-b border-slate-600/20 bg-slate-900/60 p-20 max-md:flex-col">
           {!isCompetition || isTestnet ? (
             <Tabs
               type="inline"
