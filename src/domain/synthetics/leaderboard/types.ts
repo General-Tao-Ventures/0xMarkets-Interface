@@ -33,13 +33,30 @@ export type LeaderboardPageConfig =
       key: LeaderboardPageKey;
       href: string;
       isCompetition: false;
+      isTestnet?: false;
       timeframe: LeaderboardTimeframe;
     }
   | {
       key: LeaderboardPageKey;
       href: string;
       isCompetition: true;
+      isTestnet?: false;
       chainId: ContractsChainId;
       enabled: boolean;
       timeframe: LeaderboardTimeframe;
+    }
+  | {
+      key: LeaderboardPageKey;
+      href: string;
+      isCompetition: true;
+      isTestnet: true;
+      chainId: ContractsChainId;
+      enabled: boolean;
+      timeframe: LeaderboardTimeframe;
+      title: string;
+      description: string;
+      prizePool: string;
+      network: string;
+      faucetUrl: string;
+      rulesUrl?: string;
     };
