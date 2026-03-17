@@ -82,10 +82,6 @@ msgstr "Agree"
 msgid "Approval signed"
 msgstr "Approval signed"
 
-#: src/components/Footer/Footer.tsx
-msgid "Leave Feedback"
-msgstr "Leave Feedback"
-
 #: src/pages/AccountDashboard/DailyAndCumulativePnL.tsx
 msgid "Daily Loss"
 msgstr "Daily Loss"
@@ -291,6 +287,10 @@ msgstr "Transaction failed due to execution fee validation. <0>View</0>.<1/><2/>
 #: src/components/InterviewToast/InterviewToast.tsx
 msgid "Click here to give us your feedback on 0xMarkets"
 msgstr "Click here to give us your feedback on 0xMarkets"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Testnet Competition"
+msgstr "Testnet Competition"
 
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
 msgid "Swap TWAP: Swap tokens in evenly distributed parts over a specified time."
@@ -1466,6 +1466,10 @@ msgstr "USD Value may not be accurate since the data does not contain prices for
 msgid "Cumulative PnL"
 msgstr "Cumulative PnL"
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Prize Pool"
+msgstr "Prize Pool"
+
 #: src/components/OrderList/OrderList.tsx
 #: src/pages/SyntheticsPage/SyntheticsPage.tsx
 msgid "{0, plural, one {Cancel order} other {Cancel # orders}}"
@@ -1504,6 +1508,10 @@ msgstr "The fees' USD value is calculated at the time they are earned and does n
 #: src/components/PositionSeller/PositionSeller.tsx
 msgid "Max"
 msgstr "Max"
+
+#: src/components/PositionItem/PositionItem.tsx
+msgid "Mark price is {0}% away from liquidation price."
+msgstr "Mark price is {0}% away from liquidation price."
 
 #: src/pages/Ecosystem/Ecosystem.tsx
 msgid "Projects integrated with 0xMarkets."
@@ -2329,6 +2337,10 @@ msgstr "The esGMX (IOU) token is transferrable. You can add the token to your wa
 msgid "Generating session..."
 msgstr "Generating session..."
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Get Testnet Tokens"
+msgstr "Get Testnet Tokens"
+
 #: src/components/GmxAccountModal/DepositView.tsx
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 #: src/components/NetworkFeeRow/NetworkFeeRow.tsx
@@ -2712,6 +2724,7 @@ msgid "Settled Funding Fees"
 msgstr "Settled Funding Fees"
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Ends in"
 msgstr "Ends in"
 
@@ -2749,6 +2762,7 @@ msgid "Debug Settings"
 msgstr "Debug Settings"
 
 #: src/components/NetworkDropdown/NetworkDropdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Network"
 msgstr "Network"
 
@@ -4095,6 +4109,10 @@ msgstr "Stop Loss Decrease"
 msgid "Trade with confidence"
 msgstr "Trade with confidence"
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Competition Ended"
+msgstr "Competition Ended"
+
 #: src/components/Claims/ClaimsHistory.tsx
 #: src/components/Claims/filters/ActionFilter.tsx
 #: src/components/TradeHistory/filters/ActionFilter.tsx
@@ -4197,6 +4215,10 @@ msgstr "Search Pool"
 #: src/domain/tokens/approveTokens.tsx
 msgid "Approval was cancelled."
 msgstr "Approval was cancelled."
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "View Rules"
+msgstr "View Rules"
 
 #: src/components/ChartTokenSelector/ChartTokenSelector.tsx
 #: src/components/ChartTokenSelector/ChartTokenSelector.tsx
@@ -4870,6 +4892,7 @@ msgid "Failed to sign approval"
 msgstr "Failed to sign approval"
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Starts in"
 msgstr "Starts in"
 
@@ -5212,6 +5235,7 @@ msgid "Error submitting order"
 msgstr "Error submitting order"
 
 #: src/components/TwapRows/TwapRows.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Duration"
 msgstr "Duration"
 
@@ -5540,6 +5564,10 @@ msgstr "<0>Yes, we encourage you to build on top of 0xMarkets or integrate it in
 msgid "Express + One-Click"
 msgstr "Express + One-Click"
 
+#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
+msgid "Testnet"
+msgstr "Testnet"
+
 #: src/components/Referrals/ReferralCodeWarnings.tsx
 msgid "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
 msgstr "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
@@ -5827,6 +5855,10 @@ msgstr "Failed Market Swap"
 msgid "Claim completed."
 msgstr "Claim completed."
 
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Testnet trading competition on 0xMarkets."
+msgstr "Testnet trading competition on 0xMarkets."
+
 #: src/components/UserIncentiveDistributionList/AboutGlpIncident.tsx
 msgid "dynamically allocates its liquidity to the highest-utilised markets, maximising capital efficiency and annualized performance"
 msgstr "dynamically allocates its liquidity to the highest-utilised markets, maximising capital efficiency and annualized performance"
@@ -5982,6 +6014,10 @@ msgstr "Long Liq."
 #: src/pages/ClaimEsGmx/ClaimEsGmx.jsx
 msgid "You have {0} esGMX (IOU) tokens."
 msgstr "You have {0} esGMX (IOU) tokens."
+
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Competition starts on {formatted}"
+msgstr "Competition starts on {formatted}"
 
 #: src/components/PositionDropdown/PositionDropdown.tsx
 msgid "Increase Size (Stop Market)"

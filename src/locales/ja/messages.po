@@ -82,10 +82,6 @@ msgstr "同意する"
 msgid "Approval signed"
 msgstr "承認署名完了"
 
-#: src/components/Footer/Footer.tsx
-msgid "Leave Feedback"
-msgstr ""
-
 #: src/pages/AccountDashboard/DailyAndCumulativePnL.tsx
 msgid "Daily Loss"
 msgstr "1日あたりの損失"
@@ -290,6 +286,10 @@ msgstr ""
 
 #: src/components/InterviewToast/InterviewToast.tsx
 msgid "Click here to give us your feedback on 0xMarkets"
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Testnet Competition"
 msgstr ""
 
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
@@ -1466,6 +1466,10 @@ msgstr "データに{0}の価格が含まれていないため、USD価値が正
 msgid "Cumulative PnL"
 msgstr "累積PnL"
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Prize Pool"
+msgstr ""
+
 #: src/components/OrderList/OrderList.tsx
 #: src/pages/SyntheticsPage/SyntheticsPage.tsx
 msgid "{0, plural, one {Cancel order} other {Cancel # orders}}"
@@ -1504,6 +1508,10 @@ msgstr "手数料のUSD価値は獲得時に計算され、インセンティブ
 #: src/components/PositionSeller/PositionSeller.tsx
 msgid "Max"
 msgstr "最大"
+
+#: src/components/PositionItem/PositionItem.tsx
+msgid "Mark price is {0}% away from liquidation price."
+msgstr ""
 
 #: src/pages/Ecosystem/Ecosystem.tsx
 msgid "Projects integrated with 0xMarkets."
@@ -2329,6 +2337,10 @@ msgstr "esGMX (IOU)は移転可能です。自分のウォレットに加えて�
 msgid "Generating session..."
 msgstr "セッション生成中..."
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Get Testnet Tokens"
+msgstr ""
+
 #: src/components/GmxAccountModal/DepositView.tsx
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 #: src/components/NetworkFeeRow/NetworkFeeRow.tsx
@@ -2712,6 +2724,7 @@ msgid "Settled Funding Fees"
 msgstr "決済されたファンディング手数料"
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Ends in"
 msgstr "終了まで"
 
@@ -2749,6 +2762,7 @@ msgid "Debug Settings"
 msgstr "デバッグ設定"
 
 #: src/components/NetworkDropdown/NetworkDropdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Network"
 msgstr "ネットワーク"
 
@@ -4095,6 +4109,10 @@ msgstr "ストップロス減少"
 msgid "Trade with confidence"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Competition Ended"
+msgstr ""
+
 #: src/components/Claims/ClaimsHistory.tsx
 #: src/components/Claims/filters/ActionFilter.tsx
 #: src/components/TradeHistory/filters/ActionFilter.tsx
@@ -4196,6 +4214,10 @@ msgstr "プールを検索"
 
 #: src/domain/tokens/approveTokens.tsx
 msgid "Approval was cancelled."
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "View Rules"
 msgstr ""
 
 #: src/components/ChartTokenSelector/ChartTokenSelector.tsx
@@ -4870,6 +4892,7 @@ msgid "Failed to sign approval"
 msgstr "承認署名に失敗"
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Starts in"
 msgstr "開始まで"
 
@@ -5212,6 +5235,7 @@ msgid "Error submitting order"
 msgstr "注文提出エラー"
 
 #: src/components/TwapRows/TwapRows.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Duration"
 msgstr "期間"
 
@@ -5540,6 +5564,10 @@ msgstr ""
 msgid "Express + One-Click"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
+msgid "Testnet"
+msgstr ""
+
 #: src/components/Referrals/ReferralCodeWarnings.tsx
 msgid "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
 msgstr "このコードは{takenNetworkNames}で他の誰かに取られています。{takenNetworkNames}でこのコードを使用しているトレーダーからリベートを受け取ることはできません。"
@@ -5827,6 +5855,10 @@ msgstr "マーケットスワップ失敗"
 msgid "Claim completed."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Testnet trading competition on 0xMarkets."
+msgstr ""
+
 #: src/components/UserIncentiveDistributionList/AboutGlpIncident.tsx
 msgid "dynamically allocates its liquidity to the highest-utilised markets, maximising capital efficiency and annualized performance"
 msgstr ""
@@ -5982,6 +6014,10 @@ msgstr "ロング清算"
 #: src/pages/ClaimEsGmx/ClaimEsGmx.jsx
 msgid "You have {0} esGMX (IOU) tokens."
 msgstr "あなたは{0} esGMX (IOU)トークンを持っています。"
+
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Competition starts on {formatted}"
+msgstr ""
 
 #: src/components/PositionDropdown/PositionDropdown.tsx
 msgid "Increase Size (Stop Market)"

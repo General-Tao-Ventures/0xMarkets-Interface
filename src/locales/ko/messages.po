@@ -82,10 +82,6 @@ msgstr "동의하기"
 msgid "Approval signed"
 msgstr "승인 서명 완료"
 
-#: src/components/Footer/Footer.tsx
-msgid "Leave Feedback"
-msgstr ""
-
 #: src/pages/AccountDashboard/DailyAndCumulativePnL.tsx
 msgid "Daily Loss"
 msgstr "일일 손실"
@@ -290,6 +286,10 @@ msgstr ""
 
 #: src/components/InterviewToast/InterviewToast.tsx
 msgid "Click here to give us your feedback on 0xMarkets"
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Testnet Competition"
 msgstr ""
 
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
@@ -1466,6 +1466,10 @@ msgstr "데이터에 {0} 가격이 포함되지 않아 USD 가치가 정확하�
 msgid "Cumulative PnL"
 msgstr "누적 PnL"
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Prize Pool"
+msgstr ""
+
 #: src/components/OrderList/OrderList.tsx
 #: src/pages/SyntheticsPage/SyntheticsPage.tsx
 msgid "{0, plural, one {Cancel order} other {Cancel # orders}}"
@@ -1504,6 +1508,10 @@ msgstr "수수료의 USD 가치는 적립 시 계산되며 인센티브를 포�
 #: src/components/PositionSeller/PositionSeller.tsx
 msgid "Max"
 msgstr "최대"
+
+#: src/components/PositionItem/PositionItem.tsx
+msgid "Mark price is {0}% away from liquidation price."
+msgstr ""
 
 #: src/pages/Ecosystem/Ecosystem.tsx
 msgid "Projects integrated with 0xMarkets."
@@ -2329,6 +2337,10 @@ msgstr "esGMX (IOU) 토큰은 양도 가능합니다. 지갑에 토큰을 추가
 msgid "Generating session..."
 msgstr "세션 생성 중..."
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Get Testnet Tokens"
+msgstr ""
+
 #: src/components/GmxAccountModal/DepositView.tsx
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 #: src/components/NetworkFeeRow/NetworkFeeRow.tsx
@@ -2712,6 +2724,7 @@ msgid "Settled Funding Fees"
 msgstr "정산된 자금 수수료"
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Ends in"
 msgstr "종료까지"
 
@@ -2749,6 +2762,7 @@ msgid "Debug Settings"
 msgstr "디버그 설정"
 
 #: src/components/NetworkDropdown/NetworkDropdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Network"
 msgstr "네트워크"
 
@@ -4095,6 +4109,10 @@ msgstr "손절 감소"
 msgid "Trade with confidence"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Competition Ended"
+msgstr ""
+
 #: src/components/Claims/ClaimsHistory.tsx
 #: src/components/Claims/filters/ActionFilter.tsx
 #: src/components/TradeHistory/filters/ActionFilter.tsx
@@ -4196,6 +4214,10 @@ msgstr "풀 검색"
 
 #: src/domain/tokens/approveTokens.tsx
 msgid "Approval was cancelled."
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "View Rules"
 msgstr ""
 
 #: src/components/ChartTokenSelector/ChartTokenSelector.tsx
@@ -4870,6 +4892,7 @@ msgid "Failed to sign approval"
 msgstr "승인 서명 실패"
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Starts in"
 msgstr "시작까지"
 
@@ -5212,6 +5235,7 @@ msgid "Error submitting order"
 msgstr "주문 제출 오류"
 
 #: src/components/TwapRows/TwapRows.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Duration"
 msgstr "기간"
 
@@ -5540,6 +5564,10 @@ msgstr ""
 msgid "Express + One-Click"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
+msgid "Testnet"
+msgstr ""
+
 #: src/components/Referrals/ReferralCodeWarnings.tsx
 msgid "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
 msgstr "이 코드는 {takenNetworkNames}에서 다른 사람이 사용 중입니다. {takenNetworkNames}에서 이 코드를 사용하는 트레이더로부터 리베이트를 받을 수 없습니다."
@@ -5827,6 +5855,10 @@ msgstr "시장 스왑 실패"
 msgid "Claim completed."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Testnet trading competition on 0xMarkets."
+msgstr ""
+
 #: src/components/UserIncentiveDistributionList/AboutGlpIncident.tsx
 msgid "dynamically allocates its liquidity to the highest-utilised markets, maximising capital efficiency and annualized performance"
 msgstr ""
@@ -5982,6 +6014,10 @@ msgstr "롱 청산"
 #: src/pages/ClaimEsGmx/ClaimEsGmx.jsx
 msgid "You have {0} esGMX (IOU) tokens."
 msgstr "{0} esGMX (IOU) 토큰 보유."
+
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Competition starts on {formatted}"
+msgstr ""
 
 #: src/components/PositionDropdown/PositionDropdown.tsx
 msgid "Increase Size (Stop Market)"

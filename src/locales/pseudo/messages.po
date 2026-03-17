@@ -82,10 +82,6 @@ msgstr ""
 msgid "Approval signed"
 msgstr ""
 
-#: src/components/Footer/Footer.tsx
-msgid "Leave Feedback"
-msgstr ""
-
 #: src/pages/AccountDashboard/DailyAndCumulativePnL.tsx
 msgid "Daily Loss"
 msgstr ""
@@ -290,6 +286,10 @@ msgstr ""
 
 #: src/components/InterviewToast/InterviewToast.tsx
 msgid "Click here to give us your feedback on 0xMarkets"
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Testnet Competition"
 msgstr ""
 
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
@@ -1466,6 +1466,10 @@ msgstr ""
 msgid "Cumulative PnL"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Prize Pool"
+msgstr ""
+
 #: src/components/OrderList/OrderList.tsx
 #: src/pages/SyntheticsPage/SyntheticsPage.tsx
 msgid "{0, plural, one {Cancel order} other {Cancel # orders}}"
@@ -1503,6 +1507,10 @@ msgstr ""
 #: src/components/PositionEditor/PositionEditor.tsx
 #: src/components/PositionSeller/PositionSeller.tsx
 msgid "Max"
+msgstr ""
+
+#: src/components/PositionItem/PositionItem.tsx
+msgid "Mark price is {0}% away from liquidation price."
 msgstr ""
 
 #: src/pages/Ecosystem/Ecosystem.tsx
@@ -2329,6 +2337,10 @@ msgstr ""
 msgid "Generating session..."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Get Testnet Tokens"
+msgstr ""
+
 #: src/components/GmxAccountModal/DepositView.tsx
 #: src/components/GmxAccountModal/WithdrawalView.tsx
 #: src/components/NetworkFeeRow/NetworkFeeRow.tsx
@@ -2712,6 +2724,7 @@ msgid "Settled Funding Fees"
 msgstr ""
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Ends in"
 msgstr ""
 
@@ -2749,6 +2762,7 @@ msgid "Debug Settings"
 msgstr ""
 
 #: src/components/NetworkDropdown/NetworkDropdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Network"
 msgstr ""
 
@@ -4095,6 +4109,10 @@ msgstr ""
 msgid "Trade with confidence"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Competition Ended"
+msgstr ""
+
 #: src/components/Claims/ClaimsHistory.tsx
 #: src/components/Claims/filters/ActionFilter.tsx
 #: src/components/TradeHistory/filters/ActionFilter.tsx
@@ -4196,6 +4214,10 @@ msgstr ""
 
 #: src/domain/tokens/approveTokens.tsx
 msgid "Approval was cancelled."
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "View Rules"
 msgstr ""
 
 #: src/components/ChartTokenSelector/ChartTokenSelector.tsx
@@ -4870,6 +4892,7 @@ msgid "Failed to sign approval"
 msgstr ""
 
 #: src/pages/LeaderboardPage/components/CompetitionCountdown.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Starts in"
 msgstr ""
 
@@ -5212,6 +5235,7 @@ msgid "Error submitting order"
 msgstr ""
 
 #: src/components/TwapRows/TwapRows.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Duration"
 msgstr ""
 
@@ -5540,6 +5564,10 @@ msgstr ""
 msgid "Express + One-Click"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
+msgid "Testnet"
+msgstr ""
+
 #: src/components/Referrals/ReferralCodeWarnings.tsx
 msgid "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
 msgstr ""
@@ -5827,6 +5855,10 @@ msgstr ""
 msgid "Claim completed."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Testnet trading competition on 0xMarkets."
+msgstr ""
+
 #: src/components/UserIncentiveDistributionList/AboutGlpIncident.tsx
 msgid "dynamically allocates its liquidity to the highest-utilised markets, maximising capital efficiency and annualized performance"
 msgstr ""
@@ -5981,6 +6013,10 @@ msgstr ""
 
 #: src/pages/ClaimEsGmx/ClaimEsGmx.jsx
 msgid "You have {0} esGMX (IOU) tokens."
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+msgid "Competition starts on {formatted}"
 msgstr ""
 
 #: src/components/PositionDropdown/PositionDropdown.tsx
