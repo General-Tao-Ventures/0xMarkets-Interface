@@ -1,10 +1,11 @@
+import { BASE_SEPOLIA } from "config/chains";
 import { expandDecimals } from "lib/numbers";
 
 import { LeaderboardPageConfig, LeaderboardPageKey } from "./types";
 
 export const MIN_COLLATERAL_USD_IN_LEADERBOARD = expandDecimals(500, 30);
 
-export const LEADERBOARD_PAGES_ORDER = ["leaderboard"] as const;
+export const LEADERBOARD_PAGES_ORDER = ["leaderboard", "testnet"] as const;
 
 export const LEADERBOARD_PAGES: Record<LeaderboardPageKey, LeaderboardPageConfig> = {
   leaderboard: {
@@ -15,5 +16,23 @@ export const LEADERBOARD_PAGES: Record<LeaderboardPageKey, LeaderboardPageConfig
       from: 0,
       to: 0,
     },
+  },
+  testnet: {
+    key: "testnet",
+    href: "/leaderboard/testnet",
+    isCompetition: true,
+    isTestnet: true,
+    chainId: BASE_SEPOLIA,
+    enabled: true,
+    timeframe: {
+      from: 1742688000,
+      to: 1743897600,
+    },
+    title: "0xMarkets Testnet Trading Competition",
+    description:
+      "Compete on Base Sepolia testnet for a share of the 22,000 Subnet 35 alpha pool on Bittensor. Trade with testnet tokens — no real funds required.",
+    prizePool: "22,000 SN35 α",
+    network: "Base Sepolia",
+    faucetUrl: "https://faucet.0xMarkets.io",
   },
 };
