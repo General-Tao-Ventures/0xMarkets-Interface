@@ -30,15 +30,24 @@ const sortingPoints: Record<LeaderboardNavigationItem["chip"], number> = {
   none: 0,
 };
 
-function getChip(_pageKey: LeaderboardPageKey): LeaderboardNavigationItem["chip"] {
-  return "none";
+function getChip(pageKey: LeaderboardPageKey): LeaderboardNavigationItem["chip"] {
+  const page = LEADERBOARD_PAGES[pageKey];
+  if (!page.isCompetition) return "none";
+
+  const now = Date.now() / 1000;
+  const { from, to } = page.timeframe;
+
+  if (from > now) return "soon";
+  if (to && to < now) return "over";
+  return "live";
 }
 
 function getLabel(pageKey: LeaderboardPageKey) {
   switch (pageKey) {
     case "leaderboard":
       return t`Global`;
-
+    case "testnet":
+      return t`Testnet`;
     default:
       throw mustNeverExist(pageKey);
   }
