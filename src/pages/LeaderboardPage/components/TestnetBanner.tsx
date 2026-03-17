@@ -4,6 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import { useLeaderboardPageKey, useLeaderboardTiming } from "context/SyntheticsStateContext/hooks/leaderboardHooks";
 import { LEADERBOARD_PAGES } from "domain/synthetics/leaderboard/constants";
 
+const PRIZES = [
+  { rank: "#1", amount: "12,500", pct: "56.8%" },
+  { rank: "#2", amount: "5,000", pct: "22.7%" },
+  { rank: "#3", amount: "2,500", pct: "11.4%" },
+  { rank: "#4", amount: "1,000", pct: "4.5%" },
+  { rank: "#5", amount: "500", pct: "2.3%" },
+  { rank: "#6–10", amount: "100 each", pct: "0.45% ea" },
+];
+
+const STEPS = [
+  { num: "1", label: "Get USD0 from faucet" },
+  { num: "2", label: "Trade on Base Sepolia" },
+  { num: "3", label: "Climb the leaderboard" },
+  { num: "4", label: "Claim your Alpha" },
+];
+
 export function TestnetBanner() {
   const pageKey = useLeaderboardPageKey();
   const page = LEADERBOARD_PAGES[pageKey];
@@ -24,82 +40,152 @@ export function TestnetBanner() {
 
   if (!page.isCompetition || !page.isTestnet) return null;
 
-  const { title, description, prizePool, network, faucetUrl, rulesUrl } = page;
+  const { title, description, prizePool, network, faucetUrl } = page;
   const hasEnded = !isEndInFuture && !isStartInFuture;
 
   return (
-    <div className="relative overflow-hidden rounded-20 bg-slate-800">
-      {/* Decorative glows */}
-      <div className="pointer-events-none absolute -right-60 -top-80 h-[340px] w-[340px] rounded-full bg-blue-400 opacity-[0.07] blur-[100px]" />
-      <div className="pointer-events-none absolute -bottom-[120px] left-[15%] h-[300px] w-[300px] rounded-full bg-[#00D1CD] opacity-[0.04] blur-[100px]" />
+    <div className="flex flex-col gap-16">
+      {/* Hero card */}
+      <div className="relative overflow-hidden rounded-20 bg-slate-800">
+        {/* Decorative glows */}
+        <div className="pointer-events-none absolute -right-60 -top-80 h-[340px] w-[340px] rounded-full bg-blue-400 opacity-[0.07] blur-[100px]" />
+        <div className="pointer-events-none absolute -bottom-[120px] left-[15%] h-[300px] w-[300px] rounded-full bg-[#00D1CD] opacity-[0.04] blur-[100px]" />
 
-      <div className="relative flex items-start justify-between gap-24 p-28 max-md:flex-col">
-        {/* Left */}
-        <div className="min-w-0 flex-1">
-          <div className="mb-12 inline-block rounded-4 border border-blue-400/20 bg-blue-400/10 px-10 py-3 text-caption font-medium uppercase tracking-wider text-blue-300">
-            <Trans>Testnet Competition</Trans>
+        <div className="relative flex items-start justify-between gap-24 p-28 max-md:flex-col">
+          {/* Left */}
+          <div className="min-w-0 flex-1">
+            <div className="mb-12 inline-block rounded-4 border border-blue-400/20 bg-blue-400/10 px-10 py-3 text-caption font-medium uppercase tracking-wider text-blue-300">
+              <Trans>Testnet Competition</Trans>
+            </div>
+
+            <h3 className="text-h3 mb-8 font-medium text-typography-primary">{title}</h3>
+            <p className="text-body-medium mb-18 max-w-[500px] leading-relaxed text-typography-secondary">
+              {description}
+            </p>
+
+            {/* Meta stats */}
+            <div className="mb-18 flex gap-28 max-md:flex-wrap max-md:gap-16">
+              <div>
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                  <Trans>Prize Pool</Trans>
+                </div>
+                <div className="mt-4 text-body-medium font-medium text-[#00D1CD]">{prizePool}</div>
+              </div>
+              <div>
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                  <Trans>Duration</Trans>
+                </div>
+                <div className="mt-4 text-body-medium font-medium text-typography-secondary">{durationLabel}</div>
+              </div>
+              <div>
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                  <Trans>Network</Trans>
+                </div>
+                <div className="mt-4 text-body-medium font-medium text-typography-secondary">{network}</div>
+              </div>
+              <div>
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                  <Trans>Ranking</Trans>
+                </div>
+                <div className="mt-4 text-body-medium font-medium text-typography-secondary">ROI %</div>
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex gap-10 max-md:w-full max-md:flex-col">
+              {!hasEnded && faucetUrl && (
+                <a
+                  href={faucetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-6 rounded-6 bg-blue-400 px-18 py-8 text-body-medium font-medium text-white transition-colors hover:bg-[#2a3de5]"
+                >
+                  <Trans>Get Testnet Tokens</Trans>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="opacity-70">
+                    <path
+                      d="M3.5 1.5H10.5V8.5M10.5 1.5L1.5 10.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </a>
+              )}
+            </div>
           </div>
 
-          <h3 className="text-h3 mb-8 font-medium text-typography-primary">{title}</h3>
-          <p className="text-body-medium mb-18 max-w-[500px] leading-relaxed text-typography-secondary">
-            {description}
-          </p>
-
-          {/* Meta stats */}
-          <div className="mb-18 flex gap-28 max-md:flex-wrap max-md:gap-16">
-            <div>
-              <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
-                <Trans>Prize Pool</Trans>
-              </div>
-              <div className="mt-4 text-body-medium font-medium text-[#00D1CD]">{prizePool}</div>
-            </div>
-            <div>
-              <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
-                <Trans>Duration</Trans>
-              </div>
-              <div className="mt-4 text-body-medium font-medium text-typography-secondary">{durationLabel}</div>
-            </div>
-            <div>
-              <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
-                <Trans>Network</Trans>
-              </div>
-              <div className="mt-4 text-body-medium font-medium text-typography-secondary">{network}</div>
-            </div>
+          {/* Right — Countdown */}
+          <div className="flex-shrink-0 text-right max-md:text-left">
+            <BannerCountdown
+              isStartInFuture={isStartInFuture}
+              isEndInFuture={isEndInFuture}
+              hasEnded={hasEnded}
+              timeframe={timeframe}
+            />
           </div>
+        </div>
+      </div>
 
-          {/* CTAs */}
-          <div className="flex gap-10 max-md:w-full max-md:flex-col">
-            {!hasEnded && (
-              <a
-                href={faucetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-6 rounded-6 bg-blue-400 px-18 py-8 text-body-medium font-medium text-white transition-colors hover:bg-[#2a3de5]"
+      {/* Prize schedule + How to participate */}
+      <div className="grid grid-cols-1 gap-16 md:grid-cols-2">
+        {/* Prize Schedule */}
+        <div className="rounded-20 bg-slate-800 p-24">
+          <h4 className="text-body-large mb-16 font-medium text-typography-primary">
+            <Trans>Prize Schedule</Trans>
+          </h4>
+          <div className="flex flex-col gap-2">
+            {PRIZES.map((p) => (
+              <div
+                key={p.rank}
+                className="flex items-center justify-between rounded-8 px-12 py-8 odd:bg-slate-900/40"
               >
-                <Trans>Get Testnet Tokens</Trans>
-              </a>
-            )}
-            {rulesUrl && (
-              <a
-                href={rulesUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-6 border border-slate-600 bg-transparent px-18 py-8 text-body-medium font-medium text-typography-secondary transition-colors hover:border-slate-500 hover:text-typography-primary"
-              >
-                <Trans>View Rules</Trans>
-              </a>
-            )}
+                <div className="flex items-center gap-12">
+                  <span className="w-[48px] text-body-medium font-medium text-typography-secondary">{p.rank}</span>
+                  <span className="text-body-medium font-medium text-[#00D1CD]">{p.amount} Alpha</span>
+                </div>
+                <span className="text-caption text-typography-inactive">{p.pct}</span>
+              </div>
+            ))}
+            <div className="mt-8 flex items-center justify-between border-t border-slate-700 px-12 pt-10">
+              <span className="text-body-medium font-medium text-typography-secondary">
+                <Trans>Total</Trans>
+              </span>
+              <span className="text-body-medium font-medium text-[#00D1CD]">22,000 Alpha</span>
+            </div>
           </div>
         </div>
 
-        {/* Right — Countdown */}
-        <div className="flex-shrink-0 text-right max-md:text-left">
-          <BannerCountdown
-            isStartInFuture={isStartInFuture}
-            isEndInFuture={isEndInFuture}
-            hasEnded={hasEnded}
-            timeframe={timeframe}
-          />
+        {/* How to Participate */}
+        <div className="rounded-20 bg-slate-800 p-24">
+          <h4 className="text-body-large mb-16 font-medium text-typography-primary">
+            <Trans>How to Participate</Trans>
+          </h4>
+          <div className="mb-20 flex flex-col gap-12">
+            {STEPS.map((s) => (
+              <div key={s.num} className="flex items-center gap-12">
+                <div className="flex size-28 shrink-0 items-center justify-center rounded-full bg-blue-400/10 text-caption font-medium text-blue-300">
+                  {s.num}
+                </div>
+                <span className="text-body-medium text-typography-secondary">{s.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-8 bg-slate-900/60 p-16">
+            <div className="mb-6 text-caption font-medium uppercase tracking-wider text-typography-inactive">
+              <Trans>Ranking Formula</Trans>
+            </div>
+            <code className="text-body-small font-medium text-typography-primary">
+              totalQualifyingPnl / maxCapital × 100
+            </code>
+            <p className="mt-8 text-caption leading-relaxed text-typography-inactive">
+              <Trans>
+                Qualifying PnL = realized PnL + unrealized PnL − fees + price impact. Ranked by PnL % relative to
+                peak collateral.
+              </Trans>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -169,8 +255,10 @@ function CountdownDigits({ target }: { target: number }) {
 
   return (
     <div>
-      <div className="mt-8 text-[3.6rem] font-medium leading-none tracking-wide text-typography-primary"
-           style={{ fontVariantNumeric: "tabular-nums" }}>
+      <div
+        className="mt-8 text-[3.6rem] font-medium leading-none tracking-wide text-typography-primary"
+        style={{ fontVariantNumeric: "tabular-nums" }}
+      >
         {pad(days)}
         <span className="text-slate-600">:</span>
         {pad(hours)}

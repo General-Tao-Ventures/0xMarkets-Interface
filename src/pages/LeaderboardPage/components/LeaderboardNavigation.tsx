@@ -141,7 +141,26 @@ function NavigationItem({ item }: { item: LeaderboardNavigationItem }) {
     >
       {item.label}
 
-      {timeframeLabel && (
+      {item.chip === "live" && (
+        <div className="inline-flex items-center gap-4 rounded-full bg-[#b42941] px-8 py-4 text-[1.1rem] font-medium uppercase leading-none text-white">
+          <span className="inline-block size-[6px] animate-pulse rounded-full bg-white" />
+          Live
+        </div>
+      )}
+
+      {item.chip === "soon" && (
+        <div className="inline-flex items-center rounded-full bg-blue-400/20 px-8 py-4 text-[1.1rem] font-medium uppercase leading-none text-blue-300">
+          Soon
+        </div>
+      )}
+
+      {item.chip === "over" && (
+        <div className="inline-flex items-center rounded-full bg-slate-700 px-8 py-4 text-[1.1rem] font-medium uppercase leading-none text-typography-inactive">
+          Ended
+        </div>
+      )}
+
+      {timeframeLabel && item.chip === "none" && (
         <div className="text-body-small inline-flex h-fit whitespace-nowrap rounded-full bg-slate-700 px-8 py-6 text-typography-secondary">
           {timeframeLabel}
         </div>
