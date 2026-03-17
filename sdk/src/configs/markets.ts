@@ -41,9 +41,9 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
       longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
       shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // XAG/USD [USD0-USD0]
-    "0xf95b646d40bb4bc5e1b7a60c3d79ff5aa41bf967": {
-      marketTokenAddress: "0xf95b646d40bb4bc5e1b7a60c3d79ff5aa41bf967",
+    // XAG/USD [USD0-USD0] (v2 — replaces old 0xF95b market)
+    "0x6D260c4229dBb55a0a91041b5c07b320fdD6303B": {
+      marketTokenAddress: "0x6D260c4229dBb55a0a91041b5c07b320fdD6303B",
       indexTokenAddress: "0x25f79151C3E00ba7710EcF02192836994E36b440",
       longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
       shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",

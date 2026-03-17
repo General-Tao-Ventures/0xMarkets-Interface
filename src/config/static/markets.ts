@@ -31,8 +31,8 @@ const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig
     "0x89c3B33bEE4b9cD1B246BE44aDcEd870F74637a3": {
       enabled: true,
     },
-    // XAG/USD [USD0-USD0]
-    "0xf95b646d40bb4bc5e1b7a60c3d79ff5aa41bf967": {
+    // XAG/USD [USD0-USD0] (v2)
+    "0x6D260c4229dBb55a0a91041b5c07b320fdD6303B": {
       enabled: true,
     },
     // USD/JPY [USD0-USD0]
