@@ -18,10 +18,8 @@ import { getTenderlyConfig, simulateTxWithTenderly } from "lib/tenderly";
 import { BlockTimestampData, adjustBlockTimestamp } from "lib/useBlockTimestampRequest";
 import { abis } from "sdk/abis";
 import type { ContractsChainId } from "sdk/configs/chains";
-import { MARKETS } from "sdk/configs/markets";
 import { convertTokenAddress } from "sdk/configs/tokens";
 import { CustomErrorName, ErrorData, TxErrorType, extendError, isContractError, parseError } from "sdk/utils/errors";
-import { expandDecimals } from "sdk/utils/numbers";
 import { CreateOrderTxnParams, ExternalCallsPayload } from "sdk/utils/orderTransactions";
 
 export type SimulateExecuteParams = {
@@ -239,30 +237,10 @@ export type SimulationPrices = ReturnType<typeof getSimulationPrices>;
 
 export type PriceOverride = { tokenAddress: string; contractPrices?: TokenPrices; prices?: TokenPrices };
 
-/**
- * Build the set of index token addresses that belong to reversed markets.
- * In production, PythLazerFeedProvider inverts prices for these tokens on-chain.
- * In simulation, oracle prices bypass the provider, so we must invert them here
- * to match what the contract expects.
- */
-function getReversedIndexTokens(chainId: number): Set<string> {
-  const reversed = new Set<string>();
-  const markets = MARKETS[chainId as keyof typeof MARKETS];
-  if (!markets) return reversed;
-
-  for (const market of Object.values(markets)) {
-    if ((market as { reversed?: boolean }).reversed) {
-      reversed.add((market as { indexTokenAddress: string }).indexTokenAddress.toLowerCase());
-    }
-  }
-  return reversed;
-}
-
 export function getSimulationPrices(chainId: number, tokensData: TokensData, overrides: PriceOverride[]) {
   const tokenAddresses = Object.keys(tokensData);
   const primaryTokens: string[] = [];
   const primaryPrices: { min: bigint; max: bigint }[] = [];
-  const reversedIndexTokens = getReversedIndexTokens(chainId);
 
   for (const address of tokenAddresses) {
     const token = getTokenData(tokensData, address);
@@ -274,24 +252,10 @@ export function getSimulationPrices(chainId: number, tokensData: TokensData, ove
 
     primaryTokens.push(convertedAddress);
 
-    let currentPrice = {
+    const currentPrice = {
       min: convertToContractPrice(token.prices.minPrice, token.decimals),
       max: convertToContractPrice(token.prices.maxPrice, token.decimals),
     };
-
-    // For reversed markets, the on-chain PythLazerFeedProvider inverts the oracle price.
-    // Simulation bypasses the provider, so we must apply the same inversion here:
-    // adjustedPrecision = 10^(30 - tokenDecimals), then newMin = adjusted^2 / oldMax (swap + reciprocal).
-    if (reversedIndexTokens.has(address.toLowerCase())) {
-      const adjustedPrecision = expandDecimals(1, 30 - token.decimals);
-      const precisionSquared = adjustedPrecision * adjustedPrecision;
-      const oldMin = currentPrice.min as bigint;
-      const oldMax = currentPrice.max as bigint;
-      currentPrice = {
-        min: (oldMax > 0n ? precisionSquared / oldMax : 0n) as TokenPrices["minPrice"] & { __brand: "contractPrice" },
-        max: (oldMin > 0n ? precisionSquared / oldMin : 0n) as TokenPrices["maxPrice"] & { __brand: "contractPrice" },
-      };
-    }
 
     const override = overrides.find((o) => o.tokenAddress === address);
     const primaryOverriddenPrice = override?.contractPrices ?? override?.prices;

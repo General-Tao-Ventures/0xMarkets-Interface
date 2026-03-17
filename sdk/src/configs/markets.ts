@@ -48,13 +48,12 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
       longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
       shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // USD/JPY [USD0-USD0] (reversed)
+    // USD/JPY [USD0-USD0]
     "0xD847a999faCe1f862120117C33ae8faBA768fD4b": {
       marketTokenAddress: "0xD847a999faCe1f862120117C33ae8faBA768fD4b",
       indexTokenAddress: "0x7836DF766375f02D71fa3617F5F06a0712699A81",
       longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
       shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
-      reversed: true,
     },
     // WTI/USD [USD0-USD0]
     "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF": {
