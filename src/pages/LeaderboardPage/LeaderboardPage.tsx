@@ -18,7 +18,12 @@ const LeaderboardBreadcrumbs = () => {
   const pageKey = useLeaderboardPageKey();
   const currentPage = LEADERBOARD_PAGES[pageKey];
   const isCompetition = currentPage.isCompetition;
+  const isTestnet = currentPage.isCompetition && currentPage.isTestnet === true;
   const isConcluded = currentPage.timeframe.to && currentPage.timeframe.to < Date.now() / 1000;
+
+  if (isTestnet) {
+    return null;
+  }
 
   if (!isCompetition && !isConcluded) {
     return null;
