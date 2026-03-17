@@ -9,10 +9,6 @@ export function TestnetBanner() {
   const page = LEADERBOARD_PAGES[pageKey];
   const { isEndInFuture, isStartInFuture, timeframe } = useLeaderboardTiming();
 
-  if (!page.isCompetition || !page.isTestnet) return null;
-
-  const { title, description, prizePool, network, faucetUrl, rulesUrl } = page;
-
   const durationLabel = useMemo(() => {
     const fmt = (ts: number) =>
       new Date(ts * 1000).toLocaleDateString("en-US", {
@@ -26,6 +22,9 @@ export function TestnetBanner() {
     return `${start} – ${end}`;
   }, [timeframe]);
 
+  if (!page.isCompetition || !page.isTestnet) return null;
+
+  const { title, description, prizePool, network, faucetUrl, rulesUrl } = page;
   const hasEnded = !isEndInFuture && !isStartInFuture;
 
   return (

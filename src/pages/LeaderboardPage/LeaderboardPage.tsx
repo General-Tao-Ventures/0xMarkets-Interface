@@ -64,7 +64,7 @@ export function CompetitionRedirect() {
 }
 
 function getClosestCompetition(chainId: number) {
-  const competitions = Object.values(LEADERBOARD_PAGES).filter((page) => page.isCompetition && page.enabled);
+  const competitions = Object.values(LEADERBOARD_PAGES).filter((page) => page.isCompetition && page.enabled && page.isTestnet !== true);
   const competitionsOnSameNetwork = competitions.filter((page) => page.isCompetition && page.chainId === chainId);
   const competitionsNotOver = competitions.filter((page) => page.timeframe.to && page.timeframe.to > Date.now() / 1000);
   const competitionsNotOverOnsameNetwork = competitionsNotOver.filter(
