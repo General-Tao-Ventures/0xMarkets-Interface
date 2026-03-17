@@ -4,12 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useLeaderboardDataTypeState,
   useLeaderboardIsCompetition,
+  useLeaderboardIsTestnet,
   useLeaderboardPageKey,
   useLeaderboardPositions,
   useLeaderboardRankedAccounts,
   useLeaderboardTimeframeTypeState,
   useLeaderboardTiming,
 } from "context/SyntheticsStateContext/hooks/leaderboardHooks";
+import { TestnetBanner } from "./TestnetBanner";
 import {
   selectLeaderboardIsLoading,
   selectLeaderboardSearchAddress,
@@ -35,6 +37,7 @@ const leaderboardDataTypeTabs = [0, 1];
 
 export function LeaderboardContainer() {
   const isCompetition = useLeaderboardIsCompetition();
+  const isTestnet = useLeaderboardIsTestnet();
 
   const [activeLeaderboardTimeframeIndex, setActiveLeaderboardTimeframeIndex] = useState(0);
   const [activeLeaderboardDataTypeIndex, setActiveLeaderboardDataTypeIndex] = useState(0);
@@ -101,7 +104,8 @@ export function LeaderboardContainer() {
     switch (leaderboardPageKey) {
       case "leaderboard":
         return t`Leaderboard for traders on 0xMarkets.`;
-
+      case "testnet":
+        return t`Testnet trading competition on 0xMarkets.`;
       default:
         throw mustNeverExist(leaderboardPageKey);
     }
@@ -149,9 +153,11 @@ export function LeaderboardContainer() {
         <div className="text-body-medium font-medium text-typography-secondary">{description}</div>
       </div>
 
+      {isTestnet && <TestnetBanner />}
+
       <div className="overflow-hidden rounded-8 border border-slate-800 bg-slate-750">
         <div className="flex items-center justify-between gap-16 border-b-1/2 border-slate-800 bg-slate-900 p-20 max-md:flex-col">
-          {!isCompetition ? (
+          {!isCompetition || isTestnet ? (
             <Tabs
               type="inline"
               selectedValue={activeLeaderboardDataTypeIndex}
@@ -191,7 +197,7 @@ export function LeaderboardContainer() {
           </div>
         </div>
 
-        {isCompetition && activeCompetition && (
+        {isCompetition && !isTestnet && activeCompetition && (
           <BodyScrollFadeContainer className="border-b-1/2 border-slate-600">
             <div className="min-w-[1000px]">
               <CompetitionPrizes leaderboardPageKey={leaderboardPageKey} competitionType={activeCompetition} />
@@ -206,16 +212,38 @@ export function LeaderboardContainer() {
 }
 
 function Table({ activeCompetition }: { activeCompetition: CompetitionType | undefined }) {
-  const { isStartInFuture } = useLeaderboardTiming();
+  const { isStartInFuture, timeframe } = useLeaderboardTiming();
   const leaderboardPageKey = useLeaderboardPageKey();
   const leaderboardDataType = useLeaderboardDataTypeState()[0];
-  if (isStartInFuture) return null;
+  const isTestnet = useLeaderboardIsTestnet();
+
+  if (isStartInFuture) {
+    if (isTestnet) {
+      const startDate = new Date(timeframe.from * 1000);
+      const formatted = startDate.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "UTC",
+        timeZoneName: "short",
+      });
+      return (
+        <div className="flex min-h-[300px] items-center justify-center text-body-medium text-typography-secondary">
+          <Trans>Competition starts on {formatted}</Trans>
+        </div>
+      );
+    }
+    return null;
+  }
 
   const table =
-    leaderboardPageKey === "leaderboard" && leaderboardDataType === "positions" ? (
+    (leaderboardPageKey === "leaderboard" || leaderboardPageKey === "testnet") &&
+    leaderboardDataType === "positions" ? (
       <PositionsTable />
     ) : (
-      <AccountsTable activeCompetition={activeCompetition} />
+      <AccountsTable activeCompetition={isTestnet ? undefined : activeCompetition} />
     );
 
   return <div>{table}</div>;
