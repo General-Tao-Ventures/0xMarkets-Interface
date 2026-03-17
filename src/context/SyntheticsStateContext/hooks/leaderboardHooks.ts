@@ -7,6 +7,7 @@ import {
   selectLeaderboardIsCompetition,
   selectLeaderboardIsEndInFuture,
   selectLeaderboardIsStartInFuture,
+  selectLeaderboardIsTestnet,
   selectLeaderboardPositions,
   selectLeaderboardRankedAccounts,
   selectLeaderboardSetDataType,
@@ -37,6 +38,8 @@ export const useLeaderboardTiming = () => {
 export const useLeaderboardPageKey = () => useSelector((s) => s.leaderboard.leaderboardPageKey);
 
 export const useLeaderboardIsCompetition = () => useSelector(selectLeaderboardIsCompetition);
+
+export const useLeaderboardIsTestnet = () => useSelector(selectLeaderboardIsTestnet);
 
 export const useLeaderboardChainId = () => useSelector((s) => s.leaderboard.chainId);
 

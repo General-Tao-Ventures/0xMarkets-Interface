@@ -37,6 +37,12 @@ export const selectLeaderboardIsCompetition = createSelector(function selectLead
   return LEADERBOARD_PAGES[pageKey].isCompetition;
 });
 
+export const selectLeaderboardIsTestnet = createSelector(function selectLeaderboardIsTestnet(q) {
+  const pageKey = q((s) => s.leaderboard.leaderboardPageKey);
+  const page = LEADERBOARD_PAGES[pageKey];
+  return page.isCompetition && page.isTestnet === true;
+});
+
 export const selectLeaderboardIsCompetitionOver = createSelector(function selectLeaderboardIsCompetitionOver(q) {
   const isEndInFuture = q(selectLeaderboardIsEndInFuture);
   if (isEndInFuture) return false;
