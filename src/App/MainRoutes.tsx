@@ -109,7 +109,7 @@ export function MainRoutes({ openSettings }: { openSettings: () => void }) {
         <Ecosystem />
       </Route>
 
-      <Route path="/leaderboard/">
+      <Route path="/leaderboard/:leaderboardPageKey?">
         <SyntheticsStateContextProvider skipLocalReferralCode pageType="leaderboard">
           <LeaderboardPage />
         </SyntheticsStateContextProvider>
