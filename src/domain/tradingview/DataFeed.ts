@@ -109,12 +109,16 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     const priceDecimals = token.priceDecimals ?? 2;
 
     const prefix = visualMultiplier !== 1 ? getTokenVisualMultiplier(token) : "";
+    const isReversedPair = symbolName === "JPY";
+    const pairName = isReversedPair
+      ? `USD-${prefix}${symbolName}`
+      : `${prefix}${symbolName}-USD`;
 
     const symbolInfo: LibrarySymbolInfo = {
       unit_id: visualMultiplier.toString(),
-      name: `${prefix}${symbolName}-USD`,
+      name: pairName,
       type: "crypto",
-      description: `${prefix}${symbolName}-USD`,
+      description: pairName,
       ticker: symbolName,
       session: "24x7",
       minmov: 1,

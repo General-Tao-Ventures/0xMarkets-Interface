@@ -105,7 +105,9 @@ export default function ChartTokenSelector(props: Props) {
                   >
                     <span className="text-start text-[13px] font-medium text-typography-primary">
                       {!isSwap && <>{getTokenVisualMultiplier(selectedToken)}</>}
-                      {selectedToken.symbol}-USD
+                      {REVERSED_PAIR_SYMBOLS.has(selectedToken.symbol)
+                        ? `USD-${selectedToken.symbol}`
+                        : `${selectedToken.symbol}-USD`}
                     </span>
 
                     {isSwap && !oneRowLabels ? (
@@ -507,11 +509,20 @@ function useFilterSortTokens({
   return sortedTokens;
 }
 
+const REVERSED_PAIR_SYMBOLS = new Set(["JPY"]);
+
 const MarketLabel = ({ token }: { token: Token }) => {
+  const baseName = getMarketBaseName({ indexToken: token, isSpotOnly: false });
+  if (REVERSED_PAIR_SYMBOLS.has(token.symbol)) {
+    return (
+      <span className="text-typography-secondary">
+        USD/<span className="text-typography-primary">{baseName}</span>
+      </span>
+    );
+  }
   return (
     <span className="text-typography-secondary">
-      <span className="text-typography-primary">{getMarketBaseName({ indexToken: token, isSpotOnly: false })}</span>
-      /USD
+      <span className="text-typography-primary">{baseName}</span>/USD
     </span>
   );
 };

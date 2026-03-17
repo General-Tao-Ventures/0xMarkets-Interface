@@ -73,7 +73,7 @@ export const PositionShareCard = forwardRef<HTMLDivElement, Props>(
               <TokenIcon symbol={indexToken.symbol} displaySize={16} importSize={24} />
               <span className="text-12 uppercase text-white">
                 {getTokenVisualMultiplier(indexToken)}
-                {indexToken.symbol}/USD
+                {indexToken.symbol === "JPY" ? `USD/${indexToken.symbol}` : `${indexToken.symbol}/USD`}
               </span>
               <span
                 className={cx(

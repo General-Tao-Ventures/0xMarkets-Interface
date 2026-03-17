@@ -758,12 +758,12 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
               <MarketSelector
                 chainId={chainId}
                 label={localizedTradeTypeLabels[tradeType!]}
-                selectedIndexName={toToken ? getMarketIndexName({ indexToken: toToken, isSpotOnly: false }) : undefined}
+                selectedIndexName={toToken ? getMarketIndexName({ indexToken: toToken, isSpotOnly: false, reversed: marketInfo?.reversed }) : undefined}
                 selectedMarketLabel={
                   toToken && (
                     <div className="flex items-center">
                       <TokenIcon className="mr-4" symbol={toToken.symbol} importSize={24} displaySize={20} />
-                      <span>{getMarketIndexName({ indexToken: toToken, isSpotOnly: false })}</span>
+                      <span>{getMarketIndexName({ indexToken: toToken, isSpotOnly: false, reversed: marketInfo?.reversed })}</span>
                     </div>
                   )
                 }
@@ -1047,7 +1047,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                             chainId={chainId}
                             label={t`Market`}
                             selectedIndexName={
-                              toToken ? getMarketIndexName({ indexToken: toToken, isSpotOnly: false }) : undefined
+                              toToken ? getMarketIndexName({ indexToken: toToken, isSpotOnly: false, reversed: marketInfo?.reversed }) : undefined
                             }
                             markets={sortedAllMarkets ?? EMPTY_ARRAY}
                             isSideMenu

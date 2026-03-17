@@ -7,18 +7,31 @@ import { applyFactor, PRECISION } from "./numbers";
 import { getByKey } from "./objects";
 import { convertToContractTokenPrices, convertToUsd, getMidPrice } from "./tokens";
 
-export function getMarketFullName(p: { longToken: Token; shortToken: Token; indexToken: Token; isSpotOnly: boolean }) {
-  const { indexToken, longToken, shortToken, isSpotOnly } = p;
+const REVERSED_PAIR_SYMBOLS = new Set(["JPY"]);
 
-  return `${getMarketIndexName({ indexToken, isSpotOnly })} [${getMarketPoolName({ longToken, shortToken })}]`;
+export function getMarketFullName(p: {
+  longToken: Token;
+  shortToken: Token;
+  indexToken: Token;
+  isSpotOnly: boolean;
+  reversed?: boolean;
+}) {
+  const { indexToken, longToken, shortToken, isSpotOnly, reversed } = p;
+
+  return `${getMarketIndexName({ indexToken, isSpotOnly, reversed })} [${getMarketPoolName({ longToken, shortToken })}]`;
 }
 
-export function getMarketIndexName(p: ({ indexToken: Token } | { glvToken: Token }) & { isSpotOnly: boolean }) {
+export function getMarketIndexName(
+  p: ({ indexToken: Token } | { glvToken: Token }) & { isSpotOnly: boolean; reversed?: boolean }
+) {
   if (p.isSpotOnly) {
     return `SWAP-ONLY`;
   }
 
-  return `${getMarketBaseName(p)}/USD`;
+  const baseName = getMarketBaseName(p);
+  const token = "indexToken" in p ? p.indexToken : p.glvToken;
+  const isReversed = p.reversed ?? REVERSED_PAIR_SYMBOLS.has(token.symbol);
+  return isReversed ? `USD/${baseName}` : `${baseName}/USD`;
 }
 
 export function getMarketBaseName(p: ({ indexToken: Token } | { glvToken: Token }) & { isSpotOnly: boolean }) {
