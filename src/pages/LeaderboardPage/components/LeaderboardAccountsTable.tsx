@@ -7,6 +7,7 @@ import {
   useLeaderboardAccountsRanks,
   useLeaderboardCurrentAccount,
   useLeaderboardIsCompetition,
+  useLeaderboardIsTestnet,
   useLeaderboardTimeframeTypeState,
 } from "context/SyntheticsStateContext/hooks/leaderboardHooks";
 import { CompetitionType, LeaderboardAccount, RemoteData } from "domain/synthetics/leaderboard";
@@ -26,6 +27,7 @@ import { TooltipPosition } from "components/Tooltip/Tooltip";
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 
 import { formatDelta, getSignedValueClassName } from "./shared";
+import { SharePnlCard } from "./SharePnlCard";
 
 function getCellClassname(rank: number | null, competition: CompetitionType | undefined, pinned: boolean) {
   if (pinned) return cx("LeaderboardRankCell-Pinned relative");
@@ -55,8 +57,10 @@ export function LeaderboardAccountsTable({
   searchAddress: string | undefined;
 }) {
   const currentAccount = useLeaderboardCurrentAccount();
+  const isTestnet = useLeaderboardIsTestnet();
   const { isLoading, data } = accounts;
   const [page, setPage] = useState(1);
+  const [shareAccount, setShareAccount] = useState<{ account: LeaderboardAccount; rank: number | null } | null>(null);
   const { orderBy, direction, getSorterProps, setDirection, setOrderBy } = useSorterHandlers<LeaderboardAccountField>(
     "leaderboard-accounts-table",
     {
@@ -102,7 +106,12 @@ export function LeaderboardAccountsTable({
       }
 
       if (typeof a[key] === "bigint" && typeof b[key] === "bigint") {
-        return directionMultiplier * ((a[key] as bigint) > (b[key] as bigint) ? -1 : 1);
+        const cmp = directionMultiplier * ((a[key] as bigint) > (b[key] as bigint) ? -1 : 1);
+        // Tiebreaker for pnlPercentage: higher realizedPnl wins
+        if (cmp === 0 && key === "pnlPercentage") {
+          return (a.realizedPnl as bigint) > (b.realizedPnl as bigint) ? -1 : 1;
+        }
+        return cmp;
       } else if (typeof a[key] === "number" && typeof b[key] === "number") {
         return directionMultiplier * (a[key] > b[key] ? -1 : 1);
       } else {
@@ -151,6 +160,8 @@ export function LeaderboardAccountsTable({
           pinned
           rank={pinnedRowData.rank}
           activeCompetition={activeCompetition}
+          isTestnet={isTestnet}
+          onShare={(account, rank) => setShareAccount({ account, rank })}
         />
       )}
       {rowsData.length ? (
@@ -163,6 +174,8 @@ export function LeaderboardAccountsTable({
               pinned={false}
               rank={rank}
               activeCompetition={activeCompetition}
+              isTestnet={isTestnet}
+              onShare={(account, rank) => setShareAccount({ account, rank })}
             />
           );
         })
@@ -226,17 +239,25 @@ export function LeaderboardAccountsTable({
               />
               <TableHeaderCell
                 title={t`Win/Loss`}
-                width={10}
+                width={isTestnet ? 8 : 10}
                 tooltip={t`Wins and losses for fully closed positions.`}
                 tooltipPosition="bottom-end"
                 {...getSorterProps("wins")}
               />
+              {isTestnet && <TableTh style={{ width: "4%" }} />}
             </TableTheadTr>
           </thead>
           <tbody>{content}</tbody>
         </table>
       </TableScrollFadeContainer>
       <BottomTablePagination page={page} pageCount={pageCount} onPageChange={setPage} />
+      {shareAccount && (
+        <SharePnlCard
+          account={shareAccount.account}
+          rank={shareAccount.rank}
+          onClose={() => setShareAccount(null)}
+        />
+      )}
     </div>
   );
 }
@@ -313,12 +334,16 @@ const TableRow = memo(
     rank,
     activeCompetition,
     index,
+    isTestnet,
+    onShare,
   }: {
     account: LeaderboardAccount;
     index: number;
     pinned: boolean;
     rank: number | null;
     activeCompetition: CompetitionType | undefined;
+    isTestnet?: boolean;
+    onShare?: (account: LeaderboardAccount, rank: number | null) => void;
   }) => {
     const renderWinsLossesTooltipContent = useCallback(() => {
       const winRate = `${((account.wins / (account.wins + account.losses)) * 100).toFixed(2)}%`;
@@ -412,6 +437,25 @@ const TableRow = memo(
             variant="underline"
           />
         </TableTd>
+        {isTestnet && (
+          <TableTd className="text-center">
+            <button
+              onClick={() => onShare?.(account, rank)}
+              className="inline-flex items-center justify-center rounded-6 border border-slate-600 bg-transparent p-6 text-typography-inactive transition-colors hover:border-slate-500 hover:text-typography-primary"
+              title={t`Share PnL Card`}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path
+                  d="M4.5 3.5L7 1M7 1L9.5 3.5M7 1V9M2.5 6.5V11.5C2.5 12.0523 2.94772 12.5 3.5 12.5H10.5C11.0523 12.5 11.5 12.0523 11.5 11.5V6.5"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </TableTd>
+        )}
       </TableTr>
     );
   }
@@ -420,7 +464,7 @@ const TableRow = memo(
 const EmptyRow = memo(() => {
   return (
     <TableTr className="h-47">
-      <TableTd colSpan={7} className="align-top text-typography-secondary">
+      <TableTd colSpan={8} className="align-top text-typography-secondary">
         <Trans>No results found</Trans>
       </TableTd>
     </TableTr>

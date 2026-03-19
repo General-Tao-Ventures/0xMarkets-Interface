@@ -181,7 +181,7 @@ export const selectLeaderboardRankedAccountsByPnlPercentage = createSelector(
   function selectLeaderboardRankedAccountsByPnlPercentage(q) {
     const accounts = q(selectLeaderboardRankedAccounts);
     if (!accounts) return undefined;
-    return [...accounts].sort((a, b) => (b.pnlPercentage - a.pnlPercentage > 0n ? 1 : -1));
+    return [...accounts].sort(compareByPnlPercentageThenRealizedPnl);
   }
 );
 
@@ -199,7 +199,7 @@ export const selectLeaderboardAccountsRanks = createSelector(function selectLead
     });
 
   accountsCopy
-    .sort((a, b) => (b.pnlPercentage - a.pnlPercentage > 0n ? 1 : -1))
+    .sort(compareByPnlPercentageThenRealizedPnl)
     .forEach((account, index) => {
       ranks.pnlPercentage.set(account.account, index + 1);
     });
@@ -275,6 +275,17 @@ export const selectLeaderboardPositions = createSelector(function selectLeaderbo
 
   return positions;
 });
+
+function compareByPnlPercentageThenRealizedPnl(a: LeaderboardAccount, b: LeaderboardAccount): number {
+  if (b.pnlPercentage !== a.pnlPercentage) {
+    return b.pnlPercentage > a.pnlPercentage ? 1 : -1;
+  }
+  // Tiebreaker: higher absolute realizedPnl wins
+  if (b.realizedPnl !== a.realizedPnl) {
+    return b.realizedPnl > a.realizedPnl ? 1 : -1;
+  }
+  return 0;
+}
 
 function getPositionPnl(position: LeaderboardPositionBase, market: MarketInfo) {
   if (position.isSnapshot) {
