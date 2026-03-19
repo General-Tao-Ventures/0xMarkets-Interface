@@ -221,6 +221,10 @@ msgstr "Nombre de parties TWAP"
 msgid "The mark price has changed, consider increasing your allowed slippage by clicking on the \"...\" icon next to your address."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Ranking"
+msgstr ""
+
 #: src/pages/NftWallet/NftWallet.jsx
 msgid "Enter NFT Address"
 msgstr "Saisir l'adresse NFT"
@@ -528,6 +532,10 @@ msgstr ""
 #: src/lib/wallets/connecters/binanceW3W/binanceWallet.ts
 msgid "Tap [Create Wallet] to start using your Web3 Wallet."
 msgstr "Appuyez sur [Créer un portefeuille] pour commencer à utiliser votre portefeuille Web3."
+
+#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
+msgid "4th Place"
+msgstr ""
 
 #: src/components/SettleAccruedFundingFeeModal/SettleAccruedFundingFeeModal.tsx
 msgid "Settling"
@@ -979,6 +987,7 @@ msgstr "Transfert en cours..."
 #: src/components/Referrals/TradersStats.tsx
 #: src/components/Referrals/TradersStats.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 #: src/pages/Pools/PoolsTimeRangeFilter.tsx
 msgid "Total"
 msgstr "Total"
@@ -1054,6 +1063,10 @@ msgstr "Impact de prix de swap"
 #: src/domain/synthetics/userFeedback/utils.ts
 msgid "What issues did you encounter that led to your rating?"
 msgstr "Quels problèmes avez-vous rencontrés qui ont conduit à votre note ?"
+
+#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
+msgid "5th Place"
+msgstr ""
 
 #: src/pages/NftWallet/NftWallet.jsx
 msgid "NFT Address"
@@ -1275,11 +1288,6 @@ msgstr "RPnL"
 #: src/components/TradeBox/TradeBoxRows/LimitAndTPSLRows.tsx
 msgid "Combined stop losses are at maximum (100%). Decrease existing values to add more orders."
 msgstr "Les stop losses combinés sont au maximum (100%). Diminuez les valeurs existantes pour ajouter plus d'ordres."
-
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
-msgid "4-18 Places"
-msgstr "4-18 Places"
 
 #: src/components/MarketsList/MarketsList.tsx
 msgid "MARKETS"
@@ -1567,6 +1575,10 @@ msgstr ""
 #: src/pages/LeaderboardPage/components/LeaderboardPositionsTable.tsx
 msgid "Size"
 msgstr "Taille"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Ranking Formula"
+msgstr ""
 
 #: src/components/InterviewToast/InterviewToast.tsx
 msgid "We value your experience and insights and invite you to participate in an anonymous one-on-one chat."
@@ -3185,6 +3197,10 @@ msgstr "PnL ($)"
 msgid "Claiming failed."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
+msgid "Copy to Clipboard"
+msgstr ""
+
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
 msgid "Stop Market price is above mark price"
 msgstr "Prix Stop Market supérieur au prix de référence"
@@ -3882,6 +3898,10 @@ msgstr "Aucun chemin de swap disponible."
 msgid "Telegram Groups"
 msgstr "Groupes Telegram"
 
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
+msgid "Download PNG"
+msgstr ""
+
 #: src/components/Claims/filters/ActionFilter.tsx
 #: src/components/TradeHistory/filters/ActionFilter.tsx
 msgid "Search Action"
@@ -4216,8 +4236,8 @@ msgstr "Rechercher un pool"
 msgid "Approval was cancelled."
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
-msgid "View Rules"
+#: src/pages/LeaderboardPage/components/LeaderboardAccountsTable.tsx
+msgid "Share PnL Card"
 msgstr ""
 
 #: src/components/ChartTokenSelector/ChartTokenSelector.tsx
@@ -4305,6 +4325,10 @@ msgstr ""
 msgid "Ann. Performance"
 msgstr "Performance annualisée"
 
+#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
+msgid "Competition"
+msgstr ""
+
 #: src/components/GmList/GmListItem.tsx
 msgid "PnL:"
 msgstr ""
@@ -4342,10 +4366,18 @@ msgstr "Ouvrir l'application Binance"
 msgid "Enter your answer here."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
+msgid "Exporting..."
+msgstr ""
+
 #: src/components/MarketsList/NetFeeTooltip.tsx
 #: src/components/MarketsList/NetFeeTooltip.tsx
 msgid "Longs Net Rate / 1h"
 msgstr "Taux nets longs / 1h"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Only realized (closed) PnL counts. Unrealized PnL is excluded. The trader with the highest total closed dollar PnL wins."
+msgstr ""
 
 #: src/components/OrderItem/OrderItem.tsx
 msgid "Edit"
@@ -4517,7 +4549,6 @@ msgstr "Impossible de trouver un chemin de swap avec suffisamment de liquidité"
 msgid "Time Limit"
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "3rd Place"
 msgstr "3e Place"
@@ -4875,7 +4906,6 @@ msgid "No assets are available for deposit"
 msgstr ""
 
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "1st Place"
 msgstr "1re Place"
 
@@ -5117,6 +5147,10 @@ msgstr "Prix acceptable"
 msgid "<0>Solana Support</0><1>Botanix Support</1><2>0xMarkets Express</2>"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "How to Participate"
+msgstr ""
+
 #: src/components/UserIncentiveDistributionList/UserIncentiveDistributionList.tsx
 msgid "Claimable Balance"
 msgstr ""
@@ -5338,6 +5372,10 @@ msgstr ""
 #: src/pages/AccountDashboard/GeneralPerformanceDetails.tsx
 msgid "Date"
 msgstr "Date"
+
+#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
+msgid "6-10 Places"
+msgstr ""
 
 #: src/domain/tokens/approveTokens.tsx
 msgid "Approval failed."
@@ -5564,10 +5602,6 @@ msgstr ""
 msgid "Express + One-Click"
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
-msgid "Testnet"
-msgstr ""
-
 #: src/components/Referrals/ReferralCodeWarnings.tsx
 msgid "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
 msgstr "Ce code a été pris par quelqu'un d'autre sur {takenNetworkNames}, vous ne recevrez pas de rabais des traders utilisant ce code sur {takenNetworkNames}."
@@ -5738,6 +5772,10 @@ msgstr "Augmenter"
 #: src/components/Referrals/AffiliatesStats.tsx
 #: src/components/Referrals/TradersStats.tsx
 msgid "V1 Rebates"
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Prize Schedule"
 msgstr ""
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
@@ -6119,7 +6157,6 @@ msgstr "Taux net"
 msgid "30s"
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "2nd Place"
 msgstr "2e Place"
@@ -6641,6 +6678,7 @@ msgstr ""
 #: src/components/PositionSeller/PositionSeller.tsx
 #: src/components/TradeBox/TradeBox.tsx
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
 msgid "Close"
 msgstr "Fermer"
 

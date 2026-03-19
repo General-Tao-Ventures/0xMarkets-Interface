@@ -221,6 +221,10 @@ msgstr "TWAP分割数"
 msgid "The mark price has changed, consider increasing your allowed slippage by clicking on the \"...\" icon next to your address."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Ranking"
+msgstr ""
+
 #: src/pages/NftWallet/NftWallet.jsx
 msgid "Enter NFT Address"
 msgstr "NFTアドレスを入力"
@@ -528,6 +532,10 @@ msgstr ""
 #: src/lib/wallets/connecters/binanceW3W/binanceWallet.ts
 msgid "Tap [Create Wallet] to start using your Web3 Wallet."
 msgstr "ウェブ3ウォレットを使用するには[ウォレットを作成]をタップしてください。"
+
+#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
+msgid "4th Place"
+msgstr ""
 
 #: src/components/SettleAccruedFundingFeeModal/SettleAccruedFundingFeeModal.tsx
 msgid "Settling"
@@ -979,6 +987,7 @@ msgstr "移転中..."
 #: src/components/Referrals/TradersStats.tsx
 #: src/components/Referrals/TradersStats.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 #: src/pages/Pools/PoolsTimeRangeFilter.tsx
 msgid "Total"
 msgstr "総計"
@@ -1054,6 +1063,10 @@ msgstr "スワップ価格影響"
 #: src/domain/synthetics/userFeedback/utils.ts
 msgid "What issues did you encounter that led to your rating?"
 msgstr "評価につながった問題は何ですか？"
+
+#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
+msgid "5th Place"
+msgstr ""
 
 #: src/pages/NftWallet/NftWallet.jsx
 msgid "NFT Address"
@@ -1275,11 +1288,6 @@ msgstr "RPnL"
 #: src/components/TradeBox/TradeBoxRows/LimitAndTPSLRows.tsx
 msgid "Combined stop losses are at maximum (100%). Decrease existing values to add more orders."
 msgstr "組み合わせストップロスが最大(100%)です。既存値を減少させて注文を追加してください。"
-
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
-msgid "4-18 Places"
-msgstr "4-18位"
 
 #: src/components/MarketsList/MarketsList.tsx
 msgid "MARKETS"
@@ -1567,6 +1575,10 @@ msgstr ""
 #: src/pages/LeaderboardPage/components/LeaderboardPositionsTable.tsx
 msgid "Size"
 msgstr "サイズ"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Ranking Formula"
+msgstr ""
 
 #: src/components/InterviewToast/InterviewToast.tsx
 msgid "We value your experience and insights and invite you to participate in an anonymous one-on-one chat."
@@ -3185,6 +3197,10 @@ msgstr "損益 ($)"
 msgid "Claiming failed."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
+msgid "Copy to Clipboard"
+msgstr ""
+
 #: src/domain/synthetics/orders/getPositionOrderError.tsx
 msgid "Stop Market price is above mark price"
 msgstr "ストップマーケット価格がマーク価格を上回っています"
@@ -3882,6 +3898,10 @@ msgstr "利用可能なスワップパスがありません。"
 msgid "Telegram Groups"
 msgstr "Telegramグループ"
 
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
+msgid "Download PNG"
+msgstr ""
+
 #: src/components/Claims/filters/ActionFilter.tsx
 #: src/components/TradeHistory/filters/ActionFilter.tsx
 msgid "Search Action"
@@ -4216,8 +4236,8 @@ msgstr "プールを検索"
 msgid "Approval was cancelled."
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
-msgid "View Rules"
+#: src/pages/LeaderboardPage/components/LeaderboardAccountsTable.tsx
+msgid "Share PnL Card"
 msgstr ""
 
 #: src/components/ChartTokenSelector/ChartTokenSelector.tsx
@@ -4305,6 +4325,10 @@ msgstr ""
 msgid "Ann. Performance"
 msgstr "年率パフォーマンス"
 
+#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
+msgid "Competition"
+msgstr ""
+
 #: src/components/GmList/GmListItem.tsx
 msgid "PnL:"
 msgstr ""
@@ -4342,10 +4366,18 @@ msgstr "Binanceアプリを開く"
 msgid "Enter your answer here."
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
+msgid "Exporting..."
+msgstr ""
+
 #: src/components/MarketsList/NetFeeTooltip.tsx
 #: src/components/MarketsList/NetFeeTooltip.tsx
 msgid "Longs Net Rate / 1h"
 msgstr "ロングネットレート / 1時間"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Only realized (closed) PnL counts. Unrealized PnL is excluded. The trader with the highest total closed dollar PnL wins."
+msgstr ""
 
 #: src/components/OrderItem/OrderItem.tsx
 msgid "Edit"
@@ -4517,7 +4549,6 @@ msgstr "十分な流動性を持つスワップパスが見つかりませんで
 msgid "Time Limit"
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "3rd Place"
 msgstr "3位"
@@ -4875,7 +4906,6 @@ msgid "No assets are available for deposit"
 msgstr ""
 
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "1st Place"
 msgstr "1位"
 
@@ -5117,6 +5147,10 @@ msgstr "許容価格"
 msgid "<0>Solana Support</0><1>Botanix Support</1><2>0xMarkets Express</2>"
 msgstr ""
 
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "How to Participate"
+msgstr ""
+
 #: src/components/UserIncentiveDistributionList/UserIncentiveDistributionList.tsx
 msgid "Claimable Balance"
 msgstr ""
@@ -5338,6 +5372,10 @@ msgstr ""
 #: src/pages/AccountDashboard/GeneralPerformanceDetails.tsx
 msgid "Date"
 msgstr "日付"
+
+#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
+msgid "6-10 Places"
+msgstr ""
 
 #: src/domain/tokens/approveTokens.tsx
 msgid "Approval failed."
@@ -5564,10 +5602,6 @@ msgstr ""
 msgid "Express + One-Click"
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/LeaderboardNavigation.tsx
-msgid "Testnet"
-msgstr ""
-
 #: src/components/Referrals/ReferralCodeWarnings.tsx
 msgid "This code has been taken by someone else on {takenNetworkNames}, you will not receive rebates from traders using this code on {takenNetworkNames}."
 msgstr "このコードは{takenNetworkNames}で他の誰かに取られています。{takenNetworkNames}でこのコードを使用しているトレーダーからリベートを受け取ることはできません。"
@@ -5738,6 +5772,10 @@ msgstr "増加"
 #: src/components/Referrals/AffiliatesStats.tsx
 #: src/components/Referrals/TradersStats.tsx
 msgid "V1 Rebates"
+msgstr ""
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "Prize Schedule"
 msgstr ""
 
 #: src/components/StatusNotification/GmStatusNotification.tsx
@@ -6119,7 +6157,6 @@ msgstr "ネットレート"
 msgid "30s"
 msgstr ""
 
-#: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "2nd Place"
 msgstr "2位"
@@ -6641,6 +6678,7 @@ msgstr ""
 #: src/components/PositionSeller/PositionSeller.tsx
 #: src/components/TradeBox/TradeBox.tsx
 #: src/components/TradeInfoIcon/TradeInfoIcon.tsx
+#: src/pages/LeaderboardPage/components/SharePnlCard.tsx
 msgid "Close"
 msgstr "クローズ"
 
