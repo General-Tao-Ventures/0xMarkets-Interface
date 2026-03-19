@@ -47,7 +47,7 @@ function getLabel(pageKey: LeaderboardPageKey) {
     case "leaderboard":
       return t`Global`;
     case "testnet":
-      return t`Testnet`;
+      return t`Competition`;
     default:
       throw mustNeverExist(pageKey);
   }
@@ -117,7 +117,7 @@ export function LeaderboardNavigation() {
   }, [pageKey]);
 
   return (
-    <BodyScrollFadeContainer className="flex gap-20">
+    <BodyScrollFadeContainer className="flex gap-24 border-b border-slate-700/40 pb-8">
       {navigationItems.map((item) => (
         <NavigationItem item={item} key={item.key} />
       ))}
@@ -128,28 +128,53 @@ export function LeaderboardNavigation() {
 function NavigationItem({ item }: { item: LeaderboardNavigationItem }) {
   const { i18n } = useLingui();
   const timeframeLabel = getTimeframeLabel(item.timeframe, i18n.locale);
+
+  const isCompetitionItem = item.isCompetition && item.chip !== "over";
+
   return (
     <Link
       to={item.href}
       className={cx(
-        "text-h1 inline-flex items-center gap-8 whitespace-nowrap leading-1 text-typography-secondary hover:text-typography-primary",
-        {
-          "!text-typography-primary": item.isSelected,
-          "border-l-1/2 border-l-slate-600 pl-18": item.key === "concluded",
-        }
+        "text-h1 group relative inline-flex cursor-pointer items-center gap-8 whitespace-nowrap leading-1 transition-all duration-200",
+        // Concluded separator
+        { "border-l-1/2 border-l-slate-600 pl-18": item.key === "concluded" },
+        // Selected state
+        item.isSelected
+          ? "text-typography-primary"
+          : "text-typography-secondary hover:text-typography-primary",
       )}
     >
+      {/* Active underline indicator */}
+      {item.isSelected && (
+        <span className="absolute -bottom-8 left-0 right-0 h-[2px] rounded-full bg-[#00D1CD]" />
+      )}
+
       {item.label}
 
       {item.chip === "live" && (
-        <div className="inline-flex items-center gap-4 rounded-full bg-[#b42941] px-8 py-4 text-[1.1rem] font-medium uppercase leading-none text-white">
-          <span className="inline-block size-[6px] animate-pulse rounded-full bg-white" />
+        <div
+          className={cx(
+            "inline-flex items-center gap-4 rounded-full px-8 py-4 text-[1.1rem] font-medium uppercase leading-none",
+            isCompetitionItem
+              ? "bg-[#00D1CD]/15 text-[#00D1CD]"
+              : "bg-[#b42941] text-white"
+          )}
+        >
+          <span
+            className={cx(
+              "inline-block size-[6px] rounded-full",
+              isCompetitionItem
+                ? "animate-pulse bg-[#00D1CD] shadow-[0_0_6px_rgba(0,209,205,0.6)]"
+                : "animate-pulse bg-white"
+            )}
+          />
           Live
         </div>
       )}
 
       {item.chip === "soon" && (
-        <div className="inline-flex items-center rounded-full bg-blue-400/20 px-8 py-4 text-[1.1rem] font-medium uppercase leading-none text-blue-300">
+        <div className="inline-flex items-center gap-4 rounded-full bg-[#00D1CD]/12 px-8 py-4 text-[1.1rem] font-medium uppercase leading-none text-[#00D1CD]">
+          <span className="inline-block size-[6px] animate-pulse rounded-full bg-[#00D1CD] shadow-[0_0_6px_rgba(0,209,205,0.6)]" />
           Soon
         </div>
       )}

@@ -1,11 +1,13 @@
 import { t } from "@lingui/macro";
 import cx from "classnames";
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { useLocalStorageSerializeKey } from "lib/localStorage";
 
 import ExternalLink from "components/ExternalLink/ExternalLink";
+
+import { LEADERBOARD_PAGES } from "domain/synthetics/leaderboard/constants";
 
 import CollapseIcon from "img/collapse.svg?react";
 import DashboardIcon from "img/dashboard.svg?react";
@@ -81,9 +83,10 @@ export interface NavItemProps {
   onClick?: () => void;
   to?: string;
   external?: boolean;
+  indicator?: ReactNode;
 }
 
-export function NavItem({ icon, label, isActive = false, isCollapsed = false, onClick, to, external }: NavItemProps) {
+export function NavItem({ icon, label, isActive = false, isCollapsed = false, onClick, to, external, indicator }: NavItemProps) {
   const button = (
     <button className={cx("group cursor-pointer select-none py-1", { "w-full": !isCollapsed })} onClick={onClick}>
       <div
@@ -99,6 +102,7 @@ export function NavItem({ icon, label, isActive = false, isCollapsed = false, on
       >
         <div className="flex size-24 shrink-0 items-center justify-center [&>svg]:w-full">{icon}</div>
         <span className={cx("text-body-medium font-medium tracking-[-1.2%]", { hidden: isCollapsed })}>{label}</span>
+        {indicator && !isCollapsed && indicator}
 
         <div
           className={cx(
@@ -110,6 +114,7 @@ export function NavItem({ icon, label, isActive = false, isCollapsed = false, on
           <div className="flex items-center gap-8 rounded-8 bg-blue-400/20 px-12 py-10 dark:bg-slate-700">
             <div className="flex size-24 shrink-0 items-center justify-center">{icon}</div>
             <span className={cx("text-body-medium font-medium tracking-[-1.2%]")}>{label}</span>
+            {indicator && indicator}
           </div>
         </div>
       </div>
@@ -131,6 +136,29 @@ export function NavItem({ icon, label, isActive = false, isCollapsed = false, on
   return <li className="p-0 first:-mt-4">{content}</li>;
 }
 
+function CompetitionDot() {
+  return (
+    <span
+      className="ml-auto inline-block size-[6px] shrink-0 animate-pulse rounded-full bg-[#00D1CD]"
+      style={{ boxShadow: "0 0 6px rgba(0, 209, 205, 0.6)" }}
+    />
+  );
+}
+
+function useCompetitionStatus(): "live" | "soon" | "over" | null {
+  return useMemo(() => {
+    const page = LEADERBOARD_PAGES.testnet;
+    if (!page.isCompetition || !page.enabled) return null;
+
+    const now = Date.now() / 1000;
+    const { from, to } = page.timeframe;
+
+    if (from > now) return "soon";
+    if (to && to < now) return "over";
+    return "live";
+  }, []);
+}
+
 export function MenuSection({
   isCollapsed,
   onMenuItemClick,
@@ -138,6 +166,9 @@ export function MenuSection({
   isCollapsed: boolean | undefined;
   onMenuItemClick?: () => void;
 }) {
+  const competitionStatus = useCompetitionStatus();
+  const showDot = competitionStatus === "live" || competitionStatus === "soon";
+
   const mainNavItems = [
     { icon: <TradeIcon />, label: t`Trade`, key: "trade", to: "/trade" },
     { icon: <DatabaseIcon />, label: t`Pools`, key: "pools", to: "/pools" },
@@ -160,6 +191,7 @@ export function MenuSection({
           isCollapsed={isCollapsed}
           to={item.to}
           onClick={onMenuItemClick}
+          indicator={item.key === "leaderboard" && showDot ? <CompetitionDot /> : undefined}
         />
       ))}
     </ul>

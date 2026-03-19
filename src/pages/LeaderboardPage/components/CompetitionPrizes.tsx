@@ -79,14 +79,14 @@ export function CompetitionPrizes({
         return [
           {
             title: t`1st Place`,
-            description: `50,000 ARB`,
+            description: `12,500 Alpha`,
             imgType: "gold",
             key: "1",
             winners: getWinner(1, accounts, hasEnded),
           },
           {
             title: t`2nd Place`,
-            description: `25,000 ARB`,
+            description: `5,000 Alpha`,
             imgType: "silver",
             key: "2",
             winners: getWinner(2, accounts, hasEnded),
@@ -94,49 +94,34 @@ export function CompetitionPrizes({
           {
             title: t`3rd Place`,
             imgType: "bronze",
-            description: `10,000 ARB`,
+            description: `2,500 Alpha`,
             key: "3",
             winners: getWinner(3, accounts, hasEnded),
           },
           {
-            title: t`4-18 Places`,
+            title: t`4th Place`,
             imgType: "other",
-            description: `1,000 ARB`,
-            key: "4-18",
-            winners: getWinners(4, 18, accounts, hasEnded),
+            description: `1,000 Alpha`,
+            key: "4",
+            winners: getWinner(4, accounts, hasEnded),
+          },
+          {
+            title: t`5th Place`,
+            imgType: "other",
+            description: `500 Alpha`,
+            key: "5",
+            winners: getWinner(5, accounts, hasEnded),
+          },
+          {
+            title: t`6-10 Places`,
+            imgType: "other",
+            description: `100 Alpha each`,
+            key: "6-10",
+            winners: getWinners(6, 10, accounts, hasEnded),
           },
         ];
       case "pnlPercentage":
-        return [
-          {
-            title: t`1st Place`,
-            description: `10,000 ARB`,
-            imgType: "gold",
-            key: "1",
-            winners: getWinner(1, accounts, hasEnded),
-          },
-          {
-            title: t`2nd Place`,
-            description: `7,000 ARB`,
-            imgType: "silver",
-            key: "2",
-            winners: getWinner(2, accounts, hasEnded),
-          },
-          {
-            title: t`3rd Place`,
-            imgType: "bronze",
-            description: `5,000 ARB`,
-            key: "3",
-            winners: getWinner(3, accounts, hasEnded),
-          },
-          {
-            title: t`4-18 Places`,
-            imgType: "other",
-            description: `1,200 ARB`,
-            key: "4-18",
-            winners: getWinners(4, 18, accounts, hasEnded),
-          },
-        ];
+        return [];
 
       default:
         throw mustNeverExist(competitionType);

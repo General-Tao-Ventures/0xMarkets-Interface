@@ -66,28 +66,28 @@ export function TestnetBanner() {
             {/* Meta stats */}
             <div className="mb-18 flex gap-28 max-md:flex-wrap max-md:gap-16">
               <div>
-                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-secondary">
                   <Trans>Prize Pool</Trans>
                 </div>
                 <div className="mt-4 text-body-medium font-medium text-[#00D1CD]">{prizePool}</div>
               </div>
               <div>
-                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-secondary">
                   <Trans>Duration</Trans>
                 </div>
                 <div className="mt-4 text-body-medium font-medium text-typography-secondary">{durationLabel}</div>
               </div>
               <div>
-                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-secondary">
                   <Trans>Network</Trans>
                 </div>
                 <div className="mt-4 text-body-medium font-medium text-typography-secondary">{network}</div>
               </div>
               <div>
-                <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-secondary">
                   <Trans>Ranking</Trans>
                 </div>
-                <div className="mt-4 text-body-medium font-medium text-typography-secondary">ROI %</div>
+                <div className="mt-4 text-body-medium font-medium text-typography-secondary">Total Closed PnL ($)</div>
               </div>
             </div>
 
@@ -144,7 +144,7 @@ export function TestnetBanner() {
                   <span className="w-[48px] text-body-medium font-medium text-typography-secondary">{p.rank}</span>
                   <span className="text-body-medium font-medium text-[#00D1CD]">{p.amount} Alpha</span>
                 </div>
-                <span className="text-caption text-typography-inactive">{p.pct}</span>
+                <span className="text-caption text-typography-secondary">{p.pct}</span>
               </div>
             ))}
             <div className="mt-8 flex items-center justify-between border-t border-slate-700 px-12 pt-10">
@@ -173,16 +173,16 @@ export function TestnetBanner() {
           </div>
 
           <div className="rounded-8 bg-slate-900/60 p-16">
-            <div className="mb-6 text-caption font-medium uppercase tracking-wider text-typography-inactive">
+            <div className="mb-6 text-caption font-medium uppercase tracking-wider text-typography-secondary">
               <Trans>Ranking Formula</Trans>
             </div>
             <code className="text-body-small font-medium text-typography-primary">
-              totalQualifyingPnl / maxCapital × 100
+              Total Closed PnL ($)
             </code>
-            <p className="mt-8 text-caption leading-relaxed text-typography-inactive">
+            <p className="mt-8 text-caption leading-relaxed text-typography-secondary">
               <Trans>
-                Qualifying PnL = realized PnL + unrealized PnL − fees + price impact. Ranked by PnL % relative to
-                peak collateral.
+                Only realized (closed) PnL counts. Unrealized PnL is excluded. The trader with the highest total
+                closed dollar PnL wins.
               </Trans>
             </p>
           </div>
@@ -214,7 +214,7 @@ function BannerCountdown({
       : "";
     return (
       <div>
-        <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">
+        <div className="text-caption font-medium uppercase tracking-wider text-typography-secondary">
           <Trans>Competition Ended</Trans>
         </div>
         {endDate && <div className="mt-4 text-body-medium text-typography-secondary">{endDate}</div>}
@@ -229,7 +229,7 @@ function BannerCountdown({
 
   return (
     <div>
-      <div className="text-caption font-medium uppercase tracking-wider text-typography-inactive">{label}</div>
+      <div className="text-caption font-medium uppercase tracking-wider text-typography-secondary">{label}</div>
       <CountdownDigits target={target} />
     </div>
   );
@@ -267,7 +267,7 @@ function CountdownDigits({ target }: { target: number }) {
         <span className="text-slate-600">:</span>
         {pad(seconds)}
       </div>
-      <div className="mt-6 flex justify-end gap-[22px] text-caption font-medium uppercase tracking-wider text-typography-inactive max-md:justify-start">
+      <div className="mt-6 flex justify-end gap-[22px] text-caption font-medium uppercase tracking-wider text-typography-secondary max-md:justify-start">
         <span>days</span>
         <span>hrs</span>
         <span>min</span>

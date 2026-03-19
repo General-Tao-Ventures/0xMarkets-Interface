@@ -31,7 +31,7 @@ export const LEADERBOARD_PAGES: Record<LeaderboardPageKey, LeaderboardPageConfig
     title: "0xMarkets Testnet Trading Competition",
     description:
       "Compete on Base Sepolia testnet for a share of the 22,000 Subnet 35 alpha pool on Bittensor. Trade with testnet tokens — no real funds required.",
-    prizePool: "22,000 SN35 α",
+    prizePool: "22,000 Alpha",
     network: "Base Sepolia",
     faucetUrl: "https://faucet.0xMarkets.io",
   },
