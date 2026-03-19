@@ -168,14 +168,14 @@ function NavigationItem({ item }: { item: LeaderboardNavigationItem }) {
                 : "animate-pulse bg-white"
             )}
           />
-          Live
+          Coming Soon
         </div>
       )}
 
       {item.chip === "soon" && (
         <div className="inline-flex items-center gap-4 rounded-full bg-[#00D1CD]/12 px-8 py-4 text-[1.1rem] font-medium uppercase leading-none text-[#00D1CD]">
           <span className="inline-block size-[6px] animate-pulse rounded-full bg-[#00D1CD] shadow-[0_0_6px_rgba(0,209,205,0.6)]" />
-          Soon
+          Coming Soon
         </div>
       )}
 
