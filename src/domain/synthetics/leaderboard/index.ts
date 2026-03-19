@@ -14,6 +14,7 @@ export * from "./types";
 type LeaderboardAccountsJson = {
   all: {
     id: string;
+    account?: string;
     cumsumCollateral: string;
     cumsumSize: string;
     sumMaxSize: string;
@@ -38,6 +39,7 @@ type LeaderboardAccountsJson = {
   }[];
   account: {
     id: string;
+    account?: string;
     cumsumCollateral: string;
     cumsumSize: string;
     sumMaxSize: string;
@@ -168,6 +170,7 @@ const fetchAccounts = async (
       query PeriodAccountStats($requiredMaxCapital: BigInt, $from: Int, $to: Int, $account: String) {
         all: periodAccountStats(limit: 100000, where: { maxCapital_gte: $requiredMaxCapital, periodStart_eq: $from, periodEnd_eq: $to }) {
           id
+          account
           closedCount
           cumsumCollateral
           cumsumSize
@@ -184,8 +187,9 @@ const fetchAccounts = async (
           startUnrealizedFees
           startUnrealizedPriceImpact
         }
-        account: periodAccountStats(limit: 1, where: { id_eq: $account, periodStart_eq: $from, periodEnd_eq: $to }) {
+        account: periodAccountStats(limit: 1, where: { account_eq: $account, periodStart_eq: $from, periodEnd_eq: $to }) {
           id
+          account
           closedCount
           cumsumCollateral
           cumsumSize
@@ -213,7 +217,7 @@ const fetchAccounts = async (
     fetchPolicy: "no-cache",
   });
 
-  const allAccountsSet = new Set(allAccounts?.data.all.map((a) => a.id.toLowerCase()));
+  const allAccountsSet = new Set(allAccounts?.data.all.map((a) => (a.account || a.id).toLowerCase()));
 
   if (p.account && !allAccountsSet.has(p.account.toLowerCase()) && allAccounts?.data.account.length) {
     allAccounts?.data.all.push({ ...allAccounts.data.account[0], hasRank: false });
@@ -221,7 +225,7 @@ const fetchAccounts = async (
 
   return allAccounts?.data.all.map((p) => {
     return {
-      account: getAddress(p.id),
+      account: getAddress(p.account || p.id),
       cumsumCollateral: BigInt(p.cumsumCollateral),
       cumsumSize: BigInt(p.cumsumSize),
       sumMaxSize: BigInt(p.sumMaxSize),
