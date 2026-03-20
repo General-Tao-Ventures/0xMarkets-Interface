@@ -3,7 +3,7 @@ import { expandDecimals } from "lib/numbers";
 
 import { LeaderboardPageConfig, LeaderboardPageKey } from "./types";
 
-export const MIN_COLLATERAL_USD_IN_LEADERBOARD = expandDecimals(500, 30);
+export const MIN_COLLATERAL_USD_IN_LEADERBOARD = 0n;
 
 export const LEADERBOARD_PAGES_ORDER = ["leaderboard", "testnet"] as const;
 
