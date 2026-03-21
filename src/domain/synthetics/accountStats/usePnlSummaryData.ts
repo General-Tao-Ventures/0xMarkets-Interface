@@ -142,7 +142,7 @@ function computePnlSummaryFromTrades(trades: RawTradeAction[], showDebugValues: 
         const collateral = BigInt(trade.initialCollateralDeltaAmount);
         const price = BigInt(trade.collateralTokenPriceMin);
         if (collateral > 0n) {
-          usedCapitalUsd += (collateral * price) / BigInt(1e30);
+          usedCapitalUsd += (collateral * price);
         }
       }
     }
