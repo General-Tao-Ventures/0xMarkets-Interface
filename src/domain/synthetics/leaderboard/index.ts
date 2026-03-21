@@ -250,10 +250,15 @@ const fetchAccounts = async (
   });
 };
 
+// Decrease order types: MarketDecrease=4, LimitDecrease=5, StopLossDecrease=6, Liquidation=7
+const DECREASE_ORDER_TYPES = new Set([4, 5, 6, 7]);
+
 /**
  * Rolling window queries (7d, 30d) can't use PeriodAccountStat because
  * the squid only stores all-time and fixed competition periods.
- * Instead, fetch TradeActions within the time window and aggregate per account.
+ * Instead, fetch executed OrderExecuted TradeActions within the time window
+ * and aggregate per account. PositionIncrease/Decrease events are merged
+ * into OrderExecuted records by the squid enrichment pipeline.
  */
 const fetchAccountsFromTrades = async (
   chainId: number,
@@ -265,7 +270,7 @@ const fetchAccountsFromTrades = async (
   const response = await client.query<{
     tradeActions: {
       account: string;
-      eventName: string;
+      orderType: number;
       sizeDeltaUsd: string | null;
       basePnlUsd: string | null;
       priceImpactUsd: string | null;
@@ -282,11 +287,12 @@ const fetchAccountsFromTrades = async (
           limit: 100000
           where: {
             timestamp_gte: $from
-            eventName_in: ["PositionIncrease", "PositionDecrease"]
+            eventName_eq: "OrderExecuted"
+            orderType_in: [2, 3, 4, 5, 6, 7, 8]
           }
         ) {
           account
-          eventName
+          orderType
           sizeDeltaUsd
           basePnlUsd
           priceImpactUsd
@@ -348,12 +354,14 @@ const fetchAccountsFromTrades = async (
     const collateralPrice = t.collateralTokenPriceMin ? BigInt(t.collateralTokenPriceMin) : 0n;
     const collateralDelta = BigInt(t.initialCollateralDeltaAmount);
     const collateralDeltaUsd = collateralDelta * collateralPrice;
+    const isDecrease = DECREASE_ORDER_TYPES.has(t.orderType);
 
-    if (t.eventName === "PositionIncrease") {
+    if (!isDecrease) {
+      // Increase order
       stat.cumsumCollateral += collateralDeltaUsd;
       stat.netCapital += collateralDeltaUsd;
     } else {
-      // PositionDecrease
+      // Decrease order (market decrease, limit decrease, stop loss, liquidation)
       const basePnlUsd = t.basePnlUsd ? BigInt(t.basePnlUsd) : 0n;
       const priceImpactUsd = t.priceImpactUsd ? BigInt(t.priceImpactUsd) : 0n;
 
