@@ -250,6 +250,193 @@ const fetchAccounts = async (
   });
 };
 
+/**
+ * Rolling window queries (7d, 30d) can't use PeriodAccountStat because
+ * the squid only stores all-time and fixed competition periods.
+ * Instead, fetch TradeActions within the time window and aggregate per account.
+ */
+const fetchAccountsFromTrades = async (
+  chainId: number,
+  p: { account?: string; from?: number }
+): Promise<LeaderboardAccountBase[] | undefined> => {
+  const client = getSubsquidGraphClient(chainId);
+  if (!client) return;
+
+  const response = await client.query<{
+    tradeActions: {
+      account: string;
+      eventName: string;
+      sizeDeltaUsd: string | null;
+      basePnlUsd: string | null;
+      priceImpactUsd: string | null;
+      positionFeeAmount: string | null;
+      borrowingFeeAmount: string | null;
+      fundingFeeAmount: string | null;
+      collateralTokenPriceMin: string | null;
+      initialCollateralDeltaAmount: string;
+    }[];
+  }>({
+    query: gql`
+      query RollingWindowTrades($from: Int!) {
+        tradeActions(
+          limit: 100000
+          where: {
+            timestamp_gte: $from
+            eventName_in: ["PositionIncrease", "PositionDecrease"]
+          }
+        ) {
+          account
+          eventName
+          sizeDeltaUsd
+          basePnlUsd
+          priceImpactUsd
+          positionFeeAmount
+          borrowingFeeAmount
+          fundingFeeAmount
+          collateralTokenPriceMin
+          initialCollateralDeltaAmount
+        }
+      }
+    `,
+    variables: { from: p.from },
+    fetchPolicy: "no-cache",
+  });
+
+  // Aggregate per account
+  const accountMap = new Map<
+    string,
+    {
+      volume: bigint;
+      cumsumSize: bigint;
+      cumsumCollateral: bigint;
+      netCapital: bigint;
+      maxCapital: bigint;
+      realizedPnl: bigint;
+      realizedFees: bigint;
+      realizedPriceImpact: bigint;
+      closedCount: number;
+      wins: number;
+      losses: number;
+    }
+  >();
+
+  for (const t of response.data.tradeActions) {
+    const account = t.account.toLowerCase();
+    let stat = accountMap.get(account);
+    if (!stat) {
+      stat = {
+        volume: 0n,
+        cumsumSize: 0n,
+        cumsumCollateral: 0n,
+        netCapital: 0n,
+        maxCapital: 0n,
+        realizedPnl: 0n,
+        realizedFees: 0n,
+        realizedPriceImpact: 0n,
+        closedCount: 0,
+        wins: 0,
+        losses: 0,
+      };
+      accountMap.set(account, stat);
+    }
+
+    const sizeDeltaUsd = t.sizeDeltaUsd ? BigInt(t.sizeDeltaUsd) : 0n;
+    const absSizeDelta = sizeDeltaUsd < 0n ? -sizeDeltaUsd : sizeDeltaUsd;
+    stat.volume += absSizeDelta;
+    stat.cumsumSize += absSizeDelta;
+
+    const collateralPrice = t.collateralTokenPriceMin ? BigInt(t.collateralTokenPriceMin) : 0n;
+    const collateralDelta = BigInt(t.initialCollateralDeltaAmount);
+    const collateralDeltaUsd = collateralDelta * collateralPrice;
+
+    if (t.eventName === "PositionIncrease") {
+      stat.cumsumCollateral += collateralDeltaUsd;
+      stat.netCapital += collateralDeltaUsd;
+    } else {
+      // PositionDecrease
+      const basePnlUsd = t.basePnlUsd ? BigInt(t.basePnlUsd) : 0n;
+      const priceImpactUsd = t.priceImpactUsd ? BigInt(t.priceImpactUsd) : 0n;
+
+      const positionFee = t.positionFeeAmount ? BigInt(t.positionFeeAmount) : 0n;
+      const borrowingFee = t.borrowingFeeAmount ? BigInt(t.borrowingFeeAmount) : 0n;
+      const fundingFee = t.fundingFeeAmount ? BigInt(t.fundingFeeAmount) : 0n;
+      const totalFeeUsd = (positionFee + borrowingFee + fundingFee) * collateralPrice;
+
+      stat.netCapital -= collateralDeltaUsd;
+      stat.realizedPnl += basePnlUsd;
+      stat.realizedFees += totalFeeUsd;
+      stat.realizedPriceImpact += priceImpactUsd;
+      stat.closedCount++;
+
+      if (basePnlUsd > 0n) stat.wins++;
+      else if (basePnlUsd < 0n) stat.losses++;
+    }
+
+    if (stat.netCapital > stat.maxCapital) {
+      stat.maxCapital = stat.netCapital;
+    }
+  }
+
+  const results: LeaderboardAccountBase[] = [];
+  for (const [account, stat] of accountMap) {
+    results.push({
+      account: getAddress(account),
+      cumsumCollateral: stat.cumsumCollateral,
+      cumsumSize: stat.cumsumSize,
+      sumMaxSize: 0n,
+      maxCapital: stat.maxCapital,
+      netCapital: stat.netCapital,
+      hasRank: true,
+      realizedPnl: stat.realizedPnl,
+      realizedFees: stat.realizedFees,
+      realizedPriceImpact: stat.realizedPriceImpact,
+      startUnrealizedPnl: 0n,
+      startUnrealizedFees: 0n,
+      startUnrealizedPriceImpact: 0n,
+      volume: stat.volume,
+      closedCount: stat.closedCount,
+      wins: stat.wins,
+      losses: stat.losses,
+    });
+  }
+
+  // If the user's account isn't in the results, add it with hasRank: false
+  if (p.account) {
+    const userLower = p.account.toLowerCase();
+    if (!accountMap.has(userLower)) {
+      results.push({
+        account: getAddress(userLower),
+        cumsumCollateral: 0n,
+        cumsumSize: 0n,
+        sumMaxSize: 0n,
+        maxCapital: 0n,
+        netCapital: 0n,
+        hasRank: false,
+        realizedPnl: 0n,
+        realizedFees: 0n,
+        realizedPriceImpact: 0n,
+        startUnrealizedPnl: 0n,
+        startUnrealizedFees: 0n,
+        startUnrealizedPriceImpact: 0n,
+        volume: 0n,
+        closedCount: 0,
+        wins: 0,
+        losses: 0,
+      });
+    }
+  }
+
+  return results;
+};
+
+/**
+ * Detect if a timeframe is a rolling window (not all-time and not a competition period).
+ * Rolling windows have a non-zero `from` and undefined `to`.
+ */
+function isRollingWindow(from: number, to: number | undefined): boolean {
+  return from > 0 && to === undefined;
+}
+
 export function useLeaderboardData(
   enabled: boolean,
   chainId: number,
@@ -274,8 +461,14 @@ export function useLeaderboardData(
         ]
       : null,
     async () => {
+      const useTradesQuery = isRollingWindow(p.from, p.to);
+
       const [accounts, positions] = await Promise.all([
-        p.leaderboardDataType === "positions" ? Promise.resolve([]) : fetchAccounts(chainId, p),
+        p.leaderboardDataType === "positions"
+          ? Promise.resolve([])
+          : useTradesQuery
+            ? fetchAccountsFromTrades(chainId, p)
+            : fetchAccounts(chainId, p),
         fetchPositions(chainId, p.positionsSnapshotTimestamp),
       ]);
 
