@@ -25,7 +25,7 @@ export const LEADERBOARD_PAGES: Record<LeaderboardPageKey, LeaderboardPageConfig
     chainId: BASE_SEPOLIA,
     enabled: true,
     timeframe: {
-      from: 1774224000, // March 23, 2026 00:00 UTC
+      from: 1774288800, // March 23, 2026 18:00 UTC
       to: 1776816000, // April 22, 2026 00:00 UTC
     },
     title: "0xMarkets Testnet Trading Competition",
