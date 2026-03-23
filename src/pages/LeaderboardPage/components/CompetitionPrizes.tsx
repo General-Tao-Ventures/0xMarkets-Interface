@@ -129,11 +129,18 @@ export function CompetitionPrizes({
   }, [accounts, competitionType, hasEnded, leaderboardPageKey]);
 
   return (
-    <BodyScrollFadeContainer className="flex border-b-1/2 border-slate-600">
-      {prizes.map((prize) => (
-        <CompetitionPrize prize={prize} key={prize.key} />
-      ))}
-    </BodyScrollFadeContainer>
+    <div className="border-b-1/2 border-slate-600">
+      <BodyScrollFadeContainer className="flex">
+        {prizes.map((prize) => (
+          <CompetitionPrize prize={prize} key={prize.key} />
+        ))}
+      </BodyScrollFadeContainer>
+      {prizes.length > 0 && (
+        <div className="px-20 py-12 text-body-small text-typography-secondary">
+          All accumulated USDC will be used to buyback additional Alpha and distributed in accordance with the schedule.
+        </div>
+      )}
+    </div>
   );
 }
 
