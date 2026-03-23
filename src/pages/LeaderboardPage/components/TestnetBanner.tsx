@@ -188,6 +188,10 @@ export function TestnetBanner() {
               </span>
               <span className="text-body-medium font-medium text-[#00D1CD]">22,000 Alpha</span>
             </div>
+            <p className="mt-12 px-12 text-caption leading-relaxed text-typography-secondary">
+              All accumulated USDC will be used to buyback additional Alpha and distributed in accordance with the
+              schedule.
+            </p>
           </div>
         </div>
 
