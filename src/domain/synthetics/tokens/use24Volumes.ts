@@ -13,8 +13,8 @@ type PositionVolumeInfosResponse = Record<Address, bigint>;
 
 const MARKET_VOLUMES_QUERY = gql`
   query MarketVolumesInfoResolver($timestamp: Int!) {
-    positionsVolumes(where: { timestamp_gte: $timestamp }) {
-      volume
+    volumeInfos(where: { timestamp_gte: $timestamp, period_eq: "1h" }, limit: 10000) {
+      volumeUsd
       market
     }
   }
@@ -40,15 +40,16 @@ export function use24hVolumes() {
         return;
       }
 
-      const response = await client.query<{ positionsVolumes: { volume: string; market: Address }[] }>({
+      const response = await client.query<{ volumeInfos: { volumeUsd: string; market: string }[] }>({
         query: MARKET_VOLUMES_QUERY,
         variables,
       });
 
-      return response.data?.positionsVolumes.reduce(
+      // Sum hourly buckets per market
+      return response.data?.volumeInfos.reduce(
         (acc, entry) => {
-          acc[entry.market] = BigInt(entry.volume);
-
+          const market = entry.market as Address;
+          acc[market] = (acc[market] ?? 0n) + BigInt(entry.volumeUsd);
           return acc;
         },
         {} as Record<Address, bigint>
