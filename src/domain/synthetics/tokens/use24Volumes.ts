@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 import { useMemo } from "react";
 import useSWR from "swr";
-import type { Address } from "viem";
+import { type Address, getAddress } from "viem";
 
 import { selectChainId, selectMarketsInfoData } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
@@ -45,10 +45,10 @@ export function use24hVolumes() {
         variables,
       });
 
-      // Sum hourly buckets per market
+      // Sum hourly buckets per market (checksum addresses to match marketsInfoData keys)
       return response.data?.volumeInfos.reduce(
         (acc, entry) => {
-          const market = entry.market as Address;
+          const market = getAddress(entry.market) as Address;
           acc[market] = (acc[market] ?? 0n) + BigInt(entry.volumeUsd);
           return acc;
         },
