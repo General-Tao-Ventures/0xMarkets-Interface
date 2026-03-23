@@ -168,7 +168,7 @@ function NavigationItem({ item }: { item: LeaderboardNavigationItem }) {
                 : "animate-pulse bg-white"
             )}
           />
-          Coming Soon
+          Live
         </div>
       )}
 
