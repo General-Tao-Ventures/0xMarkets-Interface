@@ -1,8 +1,33 @@
 import { Trans, t } from "@lingui/macro";
 import { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
+import { createPublicClient, http, formatUnits, parseAbi } from "viem";
+import { baseSepolia } from "viem/chains";
 
 import { useLeaderboardPageKey, useLeaderboardTiming } from "context/SyntheticsStateContext/hooks/leaderboardHooks";
 import { LEADERBOARD_PAGES } from "domain/synthetics/leaderboard/constants";
+
+const KEEPER_ADDRESS = "0x48Cb0d738C9B3F44F60f7338F788fa093FD25828" as const;
+const USD0_ADDRESS = "0x3ae4474579d24a743c9016F017e76185A834d837" as const;
+
+const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http(),
+});
+
+function useKeeperUsd0Balance() {
+  const { data } = useSWR("keeper-usd0-balance", async () => {
+    const balance = await publicClient.readContract({
+      address: USD0_ADDRESS,
+      abi: parseAbi(["function balanceOf(address) view returns (uint256)"]),
+      functionName: "balanceOf",
+      args: [KEEPER_ADDRESS],
+    });
+    return balance;
+  }, { refreshInterval: 30_000 });
+
+  return data;
+}
 
 const PRIZES = [
   { rank: "#1", amount: "12,500", pct: "56.8%" },
@@ -42,6 +67,10 @@ export function TestnetBanner() {
 
   const { title, description, prizePool, network, faucetUrl } = page;
   const hasEnded = !isEndInFuture && !isStartInFuture;
+  const keeperBalance = useKeeperUsd0Balance();
+  const formattedBalance = keeperBalance !== undefined
+    ? Number(formatUnits(keeperBalance, 18)).toLocaleString("en-US", { maximumFractionDigits: 0 })
+    : "…";
 
   return (
     <div className="flex flex-col gap-16">
@@ -88,6 +117,12 @@ export function TestnetBanner() {
                   <Trans>Ranking</Trans>
                 </div>
                 <div className="mt-4 text-body-medium font-medium text-typography-secondary">Total Closed PnL ($)</div>
+              </div>
+              <div>
+                <div className="text-caption font-medium uppercase tracking-wider text-typography-secondary">
+                  <Trans>USDC Accumulated</Trans>
+                </div>
+                <div className="mt-4 text-body-medium font-medium text-[#00D1CD]">{formattedBalance} USD0</div>
               </div>
             </div>
 
