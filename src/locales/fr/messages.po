@@ -201,7 +201,6 @@ msgstr ""
 #: src/components/PositionSeller/rows/PositionSellerPriceImpactFeesRow.tsx
 #: src/components/TradeBox/TradeBoxRows/PriceImpactFeesRow.tsx
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
-#: src/pages/Dashboard/StatsCard.tsx
 msgid "Fees"
 msgstr "FRAIS"
 
@@ -363,6 +362,10 @@ msgstr ""
 msgid "<0>Tried <1>@GMX_IO</1> for the first time. </0><2> Pretty impressive experience - no slippage, fast execution </2><3> Low size caps, but fun to do some degen gambling with </3>"
 msgstr ""
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Annualized (7d)"
+msgstr ""
+
 #: src/components/StatusNotification/GmStatusNotification.tsx
 msgid "Withdrawal executed."
 msgstr ""
@@ -437,6 +440,7 @@ msgid "Failed to claim price impact rebates."
 msgstr ""
 
 #: src/components/SideNav/SideNav.tsx
+#: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/StatsCard.tsx
 msgid "Stats"
@@ -615,6 +619,10 @@ msgstr "{typeString} Short Market : {0} une position short au prix actuel."
 msgid "Claim {totalUsd}"
 msgstr "Réclamer {totalUsd}"
 
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Position Fees:"
+msgstr ""
+
 #: src/components/AccruedPositionPriceImpactRebateModal/AccruedPositionPriceImpactRebateModal.tsx
 #: src/components/ClaimablePositionPriceImpactRebateModal/ClaimablePositionPriceImpactRebateModal.tsx
 #: src/components/ClaimModal/ClaimModal.tsx
@@ -709,6 +717,10 @@ msgstr "MAX"
 #: src/components/SettingsModal/SettingsModal.tsx
 msgid "Invalid slippage value"
 msgstr "Valeur de slippage invalide"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "USDC Accumulated"
+msgstr ""
 
 #: src/domain/synthetics/trade/utils/validation.ts
 msgid "Max {0} buyable amount exceeded"
@@ -986,6 +998,7 @@ msgstr "Transfert en cours..."
 #: src/components/Referrals/AffiliatesStats.tsx
 #: src/components/Referrals/TradersStats.tsx
 #: src/components/Referrals/TradersStats.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 #: src/pages/Pools/PoolsTimeRangeFilter.tsx
@@ -1131,6 +1144,10 @@ msgstr ""
 msgid "Express Trading was enabled to allow the use of collateral from your 0xMarkets Account balance. You can disable it in the <0>settings</0>."
 msgstr ""
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Borrowing Fees"
+msgstr ""
+
 #: src/pages/SyntheticsPage/SyntheticsPage.tsx
 msgid "Chart positions"
 msgstr "Positions sur graphiques"
@@ -1190,6 +1207,10 @@ msgstr "Vous serez long {indexSymbol} de votre position long, tout en étant lon
 #: src/domain/synthetics/orders/setAutoCancelOrdersTxn.ts
 msgid "Failed to update order(s)"
 msgstr "Échec de la mise à jour de l'ordre(s)"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Pools TVL"
+msgstr ""
 
 #: src/components/TradeHistory/keys.ts
 msgid "Failed Market Decrease"
@@ -1470,6 +1491,11 @@ msgstr "Acheter {0}"
 msgid "USD Value may not be accurate since the data does not contain prices for {0}"
 msgstr "La valeur USD peut ne pas être précise car les données ne contiennent pas de prix pour {0}"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Total Fees"
+msgstr ""
+
 #: src/pages/AccountDashboard/DailyAndCumulativePnL.tsx
 msgid "Cumulative PnL"
 msgstr "PnL cumulé"
@@ -1486,6 +1512,10 @@ msgstr "{0, plural, one {Annuler l'ordre} other {Annuler # ordres}}"
 #: src/components/SettingsModal/DisplaySettings.tsx
 msgid "Display PnL After Fees"
 msgstr "Afficher PnL après frais"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Platform Stats"
+msgstr ""
 
 #: src/components/Referrals/JoinReferralCode.tsx
 msgid "Referral code added."
@@ -1536,6 +1566,10 @@ msgstr "Affiliés"
 #: src/components/OneClickPromoBanner/OneClickPromoBanner.tsx
 msgid "Try Express"
 msgstr "Essayer Express"
+
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Liquidation Fees:"
+msgstr ""
 
 #: src/context/SubaccountContext/SubaccountContextProvider.tsx
 msgid "Failed to deactivate"
@@ -2207,6 +2241,10 @@ msgstr "{0}"
 #: src/pages/Dashboard/DashboardPageTitle.tsx
 #: src/pages/Dashboard/DashboardPageTitle.tsx
 msgid "0xMarkets is the utility and governance token. It also accrues 30% of the protocol fees via a buyback and distribution mechanism."
+msgstr ""
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Position Fees"
 msgstr ""
 
 #: src/components/SettingsModal/DebugSettings.tsx
@@ -2934,6 +2972,7 @@ msgstr ""
 #: landing/src/pages/Home/HeroSection/HeroSection.tsx
 #: src/components/TVChart/ChartHeader.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Open Interest"
 msgstr "Intérêt ouvert"
 
@@ -2996,6 +3035,7 @@ msgstr "Diminuez le levier pour correspondre au levier max autorisé."
 
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Shorts"
 msgstr "Shorts"
 
@@ -3235,6 +3275,10 @@ msgstr "Frais gagnés sur {daysConsidered}j"
 msgid "Fulfilling order request"
 msgstr "Remplir la demande d'ordre"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Liquidation Fees"
+msgstr ""
+
 #: src/components/GmList/GmList.tsx
 #: src/components/MarketsList/MarketsList.tsx
 msgid "0xMarkets Pools"
@@ -3290,6 +3334,7 @@ msgstr "Analyse PnL"
 
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Longs"
 msgstr "Longs"
 
@@ -4877,6 +4922,10 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Borrowing Fees:"
+msgstr ""
+
 #: src/components/BuyCards/BuyCards.tsx
 msgid "GLV vaults automatically balance liquidity across multiple 0xMarkets pools and accrue fees generated by them."
 msgstr ""
@@ -5207,6 +5256,7 @@ msgstr "Positions supérieures"
 
 #: src/components/BuyCards/BuyCards.tsx
 #: src/components/SideNav/SideNav.tsx
+#: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
@@ -5373,6 +5423,10 @@ msgstr ""
 msgid "Date"
 msgstr "Date"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Position Summary"
+msgstr ""
+
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "6-10 Places"
 msgstr ""
@@ -5495,6 +5549,10 @@ msgstr "Vester avec GLP sur Arbitrum"
 #: src/components/InterviewModal/InterviewModal.tsx
 msgid "Telegram account"
 msgstr "Compte Telegram"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Epoch Fees"
+msgstr ""
 
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 msgid "Sell {operationTokenSymbol}"
@@ -5920,6 +5978,7 @@ msgstr "Il n'y a pas assez de {0} dans votre compte sur {1} pour envoyer cette t
 
 #: landing/src/pages/Home/HeroSection/HeroSection.tsx
 #: src/components/Referrals/AffiliatesStats.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Total Volume"
 msgstr "Volume total"
 
@@ -6249,10 +6308,6 @@ msgstr "Frais de financement positifs accumulés dans les positions non encore r
 msgid "Fee values do not include incentives."
 msgstr "Les valeurs de frais n'incluent pas les incitations."
 
-#: src/pages/Dashboard/DashboardV2.tsx
-msgid "For detailed stats"
-msgstr ""
-
 #: src/components/Referrals/AddAffiliateCode.tsx
 msgid "Generate Referral Code"
 msgstr "Générer un code de parrainage"
@@ -6283,9 +6338,17 @@ msgstr "Ce code n'est pas encore enregistré sur {nonTakenNetworkNames}, vous ne
 msgid "Referral code does not exist"
 msgstr ""
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Fee Breakdown"
+msgstr ""
+
 #: src/components/SideNav/LanguageNavItem.tsx
 msgid "Language"
 msgstr "Langue"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Total Users"
+msgstr ""
 
 #: src/components/SettingsModal/TradingSettings.tsx
 msgid "The maximum allowed percentage difference between the mark price and the execution price for market orders."
@@ -6435,6 +6498,7 @@ msgstr "Ouvrir {marketName} dans l'explorateur"
 #: src/components/TVChart/ChartHeader.tsx
 #: src/components/TVChart/ChartHeader.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "24h Volume"
 msgstr "Volume sur 24h"
 
@@ -6443,10 +6507,6 @@ msgstr "Volume sur 24h"
 #: src/components/OldSubaccountWithdraw/OldSubaccountWithdraw.tsx
 msgid "Withdrawing from subaccount"
 msgstr ""
-
-#: src/pages/Dashboard/DashboardV2.tsx
-msgid "Total Stats"
-msgstr "Stats totales"
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "Claimed {0} successfully."

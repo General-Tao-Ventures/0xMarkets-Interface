@@ -201,7 +201,6 @@ msgstr "FAQ"
 #: src/components/PositionSeller/rows/PositionSellerPriceImpactFeesRow.tsx
 #: src/components/TradeBox/TradeBoxRows/PriceImpactFeesRow.tsx
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
-#: src/pages/Dashboard/StatsCard.tsx
 msgid "Fees"
 msgstr "Fees"
 
@@ -363,6 +362,10 @@ msgstr "Expand"
 msgid "<0>Tried <1>@GMX_IO</1> for the first time. </0><2> Pretty impressive experience - no slippage, fast execution </2><3> Low size caps, but fun to do some degen gambling with </3>"
 msgstr "<0>Tried <1>@GMX_IO</1> for the first time. </0><2> Pretty impressive experience - no slippage, fast execution </2><3> Low size caps, but fun to do some degen gambling with </3>"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Annualized (7d)"
+msgstr "Annualized (7d)"
+
 #: src/components/StatusNotification/GmStatusNotification.tsx
 msgid "Withdrawal executed."
 msgstr "Withdrawal executed."
@@ -437,6 +440,7 @@ msgid "Failed to claim price impact rebates."
 msgstr "Failed to claim price impact rebates."
 
 #: src/components/SideNav/SideNav.tsx
+#: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/StatsCard.tsx
 msgid "Stats"
@@ -615,6 +619,10 @@ msgstr "{typeString} Short Market: {0} a short position at the current price."
 msgid "Claim {totalUsd}"
 msgstr "Claim {totalUsd}"
 
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Position Fees:"
+msgstr "Position Fees:"
+
 #: src/components/AccruedPositionPriceImpactRebateModal/AccruedPositionPriceImpactRebateModal.tsx
 #: src/components/ClaimablePositionPriceImpactRebateModal/ClaimablePositionPriceImpactRebateModal.tsx
 #: src/components/ClaimModal/ClaimModal.tsx
@@ -709,6 +717,10 @@ msgstr "MAX"
 #: src/components/SettingsModal/SettingsModal.tsx
 msgid "Invalid slippage value"
 msgstr "Invalid slippage value"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "USDC Accumulated"
+msgstr "USDC Accumulated"
 
 #: src/domain/synthetics/trade/utils/validation.ts
 msgid "Max {0} buyable amount exceeded"
@@ -986,6 +998,7 @@ msgstr "Tranferring..."
 #: src/components/Referrals/AffiliatesStats.tsx
 #: src/components/Referrals/TradersStats.tsx
 #: src/components/Referrals/TradersStats.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 #: src/pages/Pools/PoolsTimeRangeFilter.tsx
@@ -1131,6 +1144,10 @@ msgstr "The amount you are trying to withdraw exceeds the limit. Please try an a
 msgid "Express Trading was enabled to allow the use of collateral from your 0xMarkets Account balance. You can disable it in the <0>settings</0>."
 msgstr "Express Trading was enabled to allow the use of collateral from your 0xMarkets Account balance. You can disable it in the <0>settings</0>."
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Borrowing Fees"
+msgstr "Borrowing Fees"
+
 #: src/pages/SyntheticsPage/SyntheticsPage.tsx
 msgid "Chart positions"
 msgstr "Chart positions"
@@ -1190,6 +1207,10 @@ msgstr "You will be long {indexSymbol} from your long position, while being long
 #: src/domain/synthetics/orders/setAutoCancelOrdersTxn.ts
 msgid "Failed to update order(s)"
 msgstr "Failed to update order(s)"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Pools TVL"
+msgstr "Pools TVL"
 
 #: src/components/TradeHistory/keys.ts
 msgid "Failed Market Decrease"
@@ -1470,6 +1491,11 @@ msgstr "Buy {0}"
 msgid "USD Value may not be accurate since the data does not contain prices for {0}"
 msgstr "USD Value may not be accurate since the data does not contain prices for {0}"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Total Fees"
+msgstr "Total Fees"
+
 #: src/pages/AccountDashboard/DailyAndCumulativePnL.tsx
 msgid "Cumulative PnL"
 msgstr "Cumulative PnL"
@@ -1486,6 +1512,10 @@ msgstr "{0, plural, one {Cancel order} other {Cancel # orders}}"
 #: src/components/SettingsModal/DisplaySettings.tsx
 msgid "Display PnL After Fees"
 msgstr "Display PnL After Fees"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Platform Stats"
+msgstr "Platform Stats"
 
 #: src/components/Referrals/JoinReferralCode.tsx
 msgid "Referral code added."
@@ -1536,6 +1566,10 @@ msgstr "Affiliates"
 #: src/components/OneClickPromoBanner/OneClickPromoBanner.tsx
 msgid "Try Express"
 msgstr "Try Express"
+
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Liquidation Fees:"
+msgstr "Liquidation Fees:"
 
 #: src/context/SubaccountContext/SubaccountContextProvider.tsx
 msgid "Failed to deactivate"
@@ -2208,6 +2242,10 @@ msgstr "{0}"
 #: src/pages/Dashboard/DashboardPageTitle.tsx
 msgid "0xMarkets is the utility and governance token. It also accrues 30% of the protocol fees via a buyback and distribution mechanism."
 msgstr "0xMarkets is the utility and governance token. It also accrues 30% of the protocol fees via a buyback and distribution mechanism."
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Position Fees"
+msgstr "Position Fees"
 
 #: src/components/SettingsModal/DebugSettings.tsx
 msgid "Show Debug Values"
@@ -2934,6 +2972,7 @@ msgstr "Approval failed"
 #: landing/src/pages/Home/HeroSection/HeroSection.tsx
 #: src/components/TVChart/ChartHeader.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Open Interest"
 msgstr "Open Interest"
 
@@ -2996,6 +3035,7 @@ msgstr "Decrease the leverage to match the max. allowed leverage."
 
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Shorts"
 msgstr "Shorts"
 
@@ -3235,6 +3275,10 @@ msgstr "{daysConsidered}d Earned Fees"
 msgid "Fulfilling order request"
 msgstr "Fulfilling order request"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Liquidation Fees"
+msgstr "Liquidation Fees"
+
 #: src/components/GmList/GmList.tsx
 #: src/components/MarketsList/MarketsList.tsx
 msgid "0xMarkets Pools"
@@ -3290,6 +3334,7 @@ msgstr "PnL Analysis"
 
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Longs"
 msgstr "Longs"
 
@@ -4877,6 +4922,10 @@ msgstr "Referral code created."
 msgid "Notifications"
 msgstr "Notifications"
 
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Borrowing Fees:"
+msgstr "Borrowing Fees:"
+
 #: src/components/BuyCards/BuyCards.tsx
 msgid "GLV vaults automatically balance liquidity across multiple 0xMarkets pools and accrue fees generated by them."
 msgstr "GLV vaults automatically balance liquidity across multiple 0xMarkets pools and accrue fees generated by them."
@@ -5207,6 +5256,7 @@ msgstr "Top Positions"
 
 #: src/components/BuyCards/BuyCards.tsx
 #: src/components/SideNav/SideNav.tsx
+#: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
@@ -5373,6 +5423,10 @@ msgstr "Failed to withdraw {balanceFormatted} to main account."
 msgid "Date"
 msgstr "Date"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Position Summary"
+msgstr "Position Summary"
+
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "6-10 Places"
 msgstr "6-10 Places"
@@ -5495,6 +5549,10 @@ msgstr "Vest with GLP on Arbitrum"
 #: src/components/InterviewModal/InterviewModal.tsx
 msgid "Telegram account"
 msgstr "Telegram account"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Epoch Fees"
+msgstr "Epoch Fees"
 
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 msgid "Sell {operationTokenSymbol}"
@@ -5920,6 +5978,7 @@ msgstr "There is not enough {0} in your account on {1} to send this transaction.
 
 #: landing/src/pages/Home/HeroSection/HeroSection.tsx
 #: src/components/Referrals/AffiliatesStats.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Total Volume"
 msgstr "Total Volume"
 
@@ -6249,10 +6308,6 @@ msgstr "Accrued positive funding fees in positions not yet claimable.<0/><1/>The
 msgid "Fee values do not include incentives."
 msgstr "Fee values do not include incentives."
 
-#: src/pages/Dashboard/DashboardV2.tsx
-msgid "For detailed stats"
-msgstr "For detailed stats"
-
 #: src/components/Referrals/AddAffiliateCode.tsx
 msgid "Generate Referral Code"
 msgstr "Generate Referral Code"
@@ -6283,9 +6338,17 @@ msgstr "This code is not yet registered on {nonTakenNetworkNames}, you will not 
 msgid "Referral code does not exist"
 msgstr "Referral code does not exist"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Fee Breakdown"
+msgstr "Fee Breakdown"
+
 #: src/components/SideNav/LanguageNavItem.tsx
 msgid "Language"
 msgstr "Language"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Total Users"
+msgstr "Total Users"
 
 #: src/components/SettingsModal/TradingSettings.tsx
 msgid "The maximum allowed percentage difference between the mark price and the execution price for market orders."
@@ -6435,6 +6498,7 @@ msgstr "Open {marketName} in Explorer"
 #: src/components/TVChart/ChartHeader.tsx
 #: src/components/TVChart/ChartHeader.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "24h Volume"
 msgstr "24h Volume"
 
@@ -6443,10 +6507,6 @@ msgstr "24h Volume"
 #: src/components/OldSubaccountWithdraw/OldSubaccountWithdraw.tsx
 msgid "Withdrawing from subaccount"
 msgstr "Withdrawing from subaccount"
-
-#: src/pages/Dashboard/DashboardV2.tsx
-msgid "Total Stats"
-msgstr "Total Stats"
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "Claimed {0} successfully."

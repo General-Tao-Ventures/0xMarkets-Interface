@@ -201,7 +201,6 @@ msgstr ""
 #: src/components/PositionSeller/rows/PositionSellerPriceImpactFeesRow.tsx
 #: src/components/TradeBox/TradeBoxRows/PriceImpactFeesRow.tsx
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
-#: src/pages/Dashboard/StatsCard.tsx
 msgid "Fees"
 msgstr "费用"
 
@@ -363,6 +362,10 @@ msgstr ""
 msgid "<0>Tried <1>@GMX_IO</1> for the first time. </0><2> Pretty impressive experience - no slippage, fast execution </2><3> Low size caps, but fun to do some degen gambling with </3>"
 msgstr ""
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Annualized (7d)"
+msgstr ""
+
 #: src/components/StatusNotification/GmStatusNotification.tsx
 msgid "Withdrawal executed."
 msgstr ""
@@ -437,6 +440,7 @@ msgid "Failed to claim price impact rebates."
 msgstr ""
 
 #: src/components/SideNav/SideNav.tsx
+#: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/StatsCard.tsx
 msgid "Stats"
@@ -615,6 +619,10 @@ msgstr "{typeString} 空头市场：以当前价格 {0} 空头仓位。"
 msgid "Claim {totalUsd}"
 msgstr "领取 {totalUsd}"
 
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Position Fees:"
+msgstr ""
+
 #: src/components/AccruedPositionPriceImpactRebateModal/AccruedPositionPriceImpactRebateModal.tsx
 #: src/components/ClaimablePositionPriceImpactRebateModal/ClaimablePositionPriceImpactRebateModal.tsx
 #: src/components/ClaimModal/ClaimModal.tsx
@@ -709,6 +717,10 @@ msgstr "最大"
 #: src/components/SettingsModal/SettingsModal.tsx
 msgid "Invalid slippage value"
 msgstr "无效滑点值"
+
+#: src/pages/LeaderboardPage/components/TestnetBanner.tsx
+msgid "USDC Accumulated"
+msgstr ""
 
 #: src/domain/synthetics/trade/utils/validation.ts
 msgid "Max {0} buyable amount exceeded"
@@ -986,6 +998,7 @@ msgstr "转移中..."
 #: src/components/Referrals/AffiliatesStats.tsx
 #: src/components/Referrals/TradersStats.tsx
 #: src/components/Referrals/TradersStats.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardContainer.tsx
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 #: src/pages/Pools/PoolsTimeRangeFilter.tsx
@@ -1131,6 +1144,10 @@ msgstr ""
 msgid "Express Trading was enabled to allow the use of collateral from your 0xMarkets Account balance. You can disable it in the <0>settings</0>."
 msgstr ""
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Borrowing Fees"
+msgstr ""
+
 #: src/pages/SyntheticsPage/SyntheticsPage.tsx
 msgid "Chart positions"
 msgstr "图表仓位"
@@ -1190,6 +1207,10 @@ msgstr "您将从多头仓位做多 {indexSymbol}，同时从 {collateralSymbol}
 #: src/domain/synthetics/orders/setAutoCancelOrdersTxn.ts
 msgid "Failed to update order(s)"
 msgstr "更新订单失败"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Pools TVL"
+msgstr ""
 
 #: src/components/TradeHistory/keys.ts
 msgid "Failed Market Decrease"
@@ -1470,6 +1491,11 @@ msgstr "购买 {0}"
 msgid "USD Value may not be accurate since the data does not contain prices for {0}"
 msgstr "USD 值可能不准确，因为数据不包含 {0} 的价格"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Total Fees"
+msgstr ""
+
 #: src/pages/AccountDashboard/DailyAndCumulativePnL.tsx
 msgid "Cumulative PnL"
 msgstr "累积盈亏"
@@ -1486,6 +1512,10 @@ msgstr "{0, plural, one {取消订单} other {取消 # 个订单}}"
 #: src/components/SettingsModal/DisplaySettings.tsx
 msgid "Display PnL After Fees"
 msgstr "显示费用后盈亏"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Platform Stats"
+msgstr ""
 
 #: src/components/Referrals/JoinReferralCode.tsx
 msgid "Referral code added."
@@ -1536,6 +1566,10 @@ msgstr "附属"
 #: src/components/OneClickPromoBanner/OneClickPromoBanner.tsx
 msgid "Try Express"
 msgstr "尝试快速"
+
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Liquidation Fees:"
+msgstr ""
 
 #: src/context/SubaccountContext/SubaccountContextProvider.tsx
 msgid "Failed to deactivate"
@@ -2207,6 +2241,10 @@ msgstr "{0}"
 #: src/pages/Dashboard/DashboardPageTitle.tsx
 #: src/pages/Dashboard/DashboardPageTitle.tsx
 msgid "0xMarkets is the utility and governance token. It also accrues 30% of the protocol fees via a buyback and distribution mechanism."
+msgstr ""
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Position Fees"
 msgstr ""
 
 #: src/components/SettingsModal/DebugSettings.tsx
@@ -2934,6 +2972,7 @@ msgstr ""
 #: landing/src/pages/Home/HeroSection/HeroSection.tsx
 #: src/components/TVChart/ChartHeader.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Open Interest"
 msgstr "开仓利息"
 
@@ -2996,6 +3035,7 @@ msgstr "减少杠杆以匹配最大允许杠杆。"
 
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Shorts"
 msgstr "做空"
 
@@ -3235,6 +3275,10 @@ msgstr "{daysConsidered} 天赚取费用"
 msgid "Fulfilling order request"
 msgstr "履行订单请求"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Liquidation Fees"
+msgstr ""
+
 #: src/components/GmList/GmList.tsx
 #: src/components/MarketsList/MarketsList.tsx
 msgid "0xMarkets Pools"
@@ -3290,6 +3334,7 @@ msgstr "PnL 分析"
 
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
 #: src/components/TableMarketFilter/MarketFilterLongShort.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Longs"
 msgstr "做多"
 
@@ -4877,6 +4922,10 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
+#: src/pages/Dashboard/StatsCard.tsx
+msgid "Borrowing Fees:"
+msgstr ""
+
 #: src/components/BuyCards/BuyCards.tsx
 msgid "GLV vaults automatically balance liquidity across multiple 0xMarkets pools and accrue fees generated by them."
 msgstr ""
@@ -5207,6 +5256,7 @@ msgstr "最高头寸"
 
 #: src/components/BuyCards/BuyCards.tsx
 #: src/components/SideNav/SideNav.tsx
+#: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
@@ -5373,6 +5423,10 @@ msgstr ""
 msgid "Date"
 msgstr "日期"
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Position Summary"
+msgstr ""
+
 #: src/pages/LeaderboardPage/components/CompetitionPrizes.tsx
 msgid "6-10 Places"
 msgstr ""
@@ -5495,6 +5549,10 @@ msgstr "在 Arbitrum 上授权 GLP"
 #: src/components/InterviewModal/InterviewModal.tsx
 msgid "Telegram account"
 msgstr "Telegram 账户"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Epoch Fees"
+msgstr ""
 
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 msgid "Sell {operationTokenSymbol}"
@@ -5920,6 +5978,7 @@ msgstr "您的 {1} 账户中没有足够的 {0} 来发送此交易。<0/><1/><2>
 
 #: landing/src/pages/Home/HeroSection/HeroSection.tsx
 #: src/components/Referrals/AffiliatesStats.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "Total Volume"
 msgstr "总交易量"
 
@@ -6249,10 +6308,6 @@ msgstr "仓位中已累积的正资金费用尚未可领取。<0/><1/>通过增�
 msgid "Fee values do not include incentives."
 msgstr "费用值不包括激励。"
 
-#: src/pages/Dashboard/DashboardV2.tsx
-msgid "For detailed stats"
-msgstr ""
-
 #: src/components/Referrals/AddAffiliateCode.tsx
 msgid "Generate Referral Code"
 msgstr "生成推荐代码"
@@ -6283,9 +6338,17 @@ msgstr "此代码尚未在 {nonTakenNetworkNames} 上注册，您将无法在那
 msgid "Referral code does not exist"
 msgstr ""
 
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Fee Breakdown"
+msgstr ""
+
 #: src/components/SideNav/LanguageNavItem.tsx
 msgid "Language"
 msgstr "语言"
+
+#: src/pages/Dashboard/PlatformStats.tsx
+msgid "Total Users"
+msgstr ""
 
 #: src/components/SettingsModal/TradingSettings.tsx
 msgid "The maximum allowed percentage difference between the mark price and the execution price for market orders."
@@ -6435,6 +6498,7 @@ msgstr "在 Explorer 中打开 {marketName}"
 #: src/components/TVChart/ChartHeader.tsx
 #: src/components/TVChart/ChartHeader.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Dashboard/PlatformStats.tsx
 msgid "24h Volume"
 msgstr "24 小时交易量"
 
@@ -6443,10 +6507,6 @@ msgstr "24 小时交易量"
 #: src/components/OldSubaccountWithdraw/OldSubaccountWithdraw.tsx
 msgid "Withdrawing from subaccount"
 msgstr ""
-
-#: src/pages/Dashboard/DashboardV2.tsx
-msgid "Total Stats"
-msgstr "总统计"
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "Claimed {0} successfully."
