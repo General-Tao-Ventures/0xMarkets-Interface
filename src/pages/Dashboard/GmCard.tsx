@@ -31,7 +31,7 @@ const TOKEN_COLOR_MAP: Record<string, string> = {
   default: "#888888",
 };
 
-import { AppCard, AppCardSection, AppCardSplit } from "components/AppCard/AppCard";
+import { AppCardSection, AppCardSplit } from "components/AppCard/AppCard";
 import Button from "components/Button/Button";
 import InteractivePieChart from "components/InteractivePieChart/InteractivePieChart";
 
@@ -80,7 +80,7 @@ export function GmCard() {
   }, [marketsInfoData, totalGMSupply]);
 
   return (
-    <AppCard>
+    <div className="relative overflow-hidden rounded-20 bg-slate-800">
       <AppCardSplit
         className="grid h-full grid-cols-[1fr_minmax(250px,auto)] max-md:grid-cols-1"
         leftClassName="max-md:border-b-1/2 max-md:border-r-0"
@@ -133,6 +133,6 @@ export function GmCard() {
           </AppCardSection>
         }
       />
-    </AppCard>
+    </div>
   );
 }

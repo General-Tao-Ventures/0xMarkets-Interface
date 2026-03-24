@@ -5256,7 +5256,6 @@ msgstr "Positions supérieures"
 
 #: src/components/BuyCards/BuyCards.tsx
 #: src/components/SideNav/SideNav.tsx
-#: src/pages/Dashboard/DashboardV2.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx

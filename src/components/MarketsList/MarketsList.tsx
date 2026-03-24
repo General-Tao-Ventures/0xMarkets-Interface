@@ -55,7 +55,7 @@ function MarketsListDesktop({ chainId, indexTokensStats }: { chainId: number; in
   );
 
   return (
-    <div className="my-15 rounded-4 bg-slate-900 text-left">
+    <div className="relative my-15 overflow-hidden rounded-20 bg-slate-800 text-left">
       <div className="flex flex-col gap-16 p-20 text-16">
         <span className="text-h2">
           <Trans>0xMarkets Pools</Trans>

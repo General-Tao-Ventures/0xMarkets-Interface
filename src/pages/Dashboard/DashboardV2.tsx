@@ -24,29 +24,22 @@ export default function DashboardV2() {
         <div className="default-container DashboardV2 page-layout flex flex-col gap-28">
           <PageTitle title={t`Stats`} qa="dashboard-page" />
 
-          {/* 1. Platform overview — the numbers people come here for */}
+          {/* 1. Platform overview */}
           <PlatformStats />
 
-          {/* 2. Markets — individual trading pairs */}
+          {/* 2. Markets + Pools */}
           <section className="flex flex-col gap-16">
             <h2 className="text-h2 px-12 font-medium">
               <Trans>Markets</Trans>
-            </h2>
-            <SyntheticsStateContextProvider skipLocalReferralCode={false} pageType="pools">
-              <MarketsList />
-            </SyntheticsStateContextProvider>
-          </section>
-
-          {/* 3. Liquidity pools */}
-          <section className="flex flex-col gap-16">
-            <h2 className="text-h2 px-12 font-medium">
-              <Trans>Pools</Trans>
             </h2>
             <div className="DashboardV2-token-cards">
               <div className="stats-wrapper stats-wrapper--gmx">
                 <GmCard />
               </div>
             </div>
+            <SyntheticsStateContextProvider skipLocalReferralCode={false} pageType="pools">
+              <MarketsList />
+            </SyntheticsStateContextProvider>
           </section>
         </div>
       </AppPageLayout>
