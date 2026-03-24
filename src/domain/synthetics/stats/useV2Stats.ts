@@ -19,6 +19,9 @@ export type DashboardOverview = {
   weeklyFees: bigint;
   epochFees: bigint;
   totalFees: bigint;
+  totalPositionFees: bigint;
+  totalBorrowingFees: bigint;
+  totalLiquidationFees: bigint;
   totalUsers: bigint;
 };
 
@@ -56,6 +59,9 @@ export default function useV2Stats(chainId: ContractsChainId): DashboardOverview
       weeklyFees: BigInt(feesInfo?.weeklyFees ?? 0) || 0n,
       epochFees: BigInt(feesInfo?.epochFees ?? 0) || 0n,
       totalFees: BigInt(feesInfo?.totalFees ?? 0) || 0n,
+      totalPositionFees: BigInt(feesInfo?.totalPositionFees ?? 0) || 0n,
+      totalBorrowingFees: BigInt(feesInfo?.totalBorrowingFees ?? 0) || 0n,
+      totalLiquidationFees: BigInt(feesInfo?.totalLiquidationFees ?? 0) || 0n,
       totalUsers: BigInt(usersInfo?.totalUsers ?? 0) || 0n,
     };
   }, [marketsInfoData, volumeInfo, feesInfo, usersInfo]);

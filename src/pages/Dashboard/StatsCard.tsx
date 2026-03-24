@@ -23,10 +23,43 @@ export function StatsCard() {
       <AppCardSection>
         <div className="App-card-row">
           <div className="label">
-            <Trans>Fees</Trans>
+            <Trans>Total Fees</Trans>
           </div>
           <div>
-            <span className="numbers">{formatAmountHuman(totalFeesUsd, USD_DECIMALS, true, 2)}</span>
+            <TooltipComponent
+              position="bottom-end"
+              className="whitespace-nowrap"
+              handle={formatAmountHuman(totalFeesUsd, USD_DECIMALS, true, 2)}
+              handleClassName="numbers"
+              content={
+                <>
+                  <p className="Tooltip-row">
+                    <span className="label">
+                      <Trans>Position Fees:</Trans>
+                    </span>
+                    <span className="numbers">
+                      {formatAmountHuman(v2Overview.totalPositionFees, USD_DECIMALS, true, 2)}
+                    </span>
+                  </p>
+                  <p className="Tooltip-row">
+                    <span className="label">
+                      <Trans>Borrowing Fees:</Trans>
+                    </span>
+                    <span className="numbers">
+                      {formatAmountHuman(v2Overview.totalBorrowingFees, USD_DECIMALS, true, 2)}
+                    </span>
+                  </p>
+                  <p className="Tooltip-row">
+                    <span className="label">
+                      <Trans>Liquidation Fees:</Trans>
+                    </span>
+                    <span className="numbers">
+                      {formatAmountHuman(v2Overview.totalLiquidationFees, USD_DECIMALS, true, 2)}
+                    </span>
+                  </p>
+                </>
+              }
+            />
           </div>
         </div>
         <div className="App-card-row">
