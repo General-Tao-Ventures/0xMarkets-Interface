@@ -6,14 +6,14 @@ import { CONFIG_UPDATE_INTERVAL } from "lib/timeConstants";
 
 const query = gql`
   query totalUsers {
-    userStats(where: { id_eq: "total" }) {
-      uniqueUsers
+    accountStatsConnection(orderBy: id_ASC) {
+      totalCount
     }
   }
 `;
 
 export default function useUsers(chainId: number) {
-  async function fetchUsersInfo(chainId: number) {
+  async function fetcher([, chainId]: [string, number]) {
     try {
       const client = getSubsquidGraphClient(chainId);
       if (!client) return { totalUsers: 0n };
@@ -21,31 +21,13 @@ export default function useUsers(chainId: number) {
         query,
         fetchPolicy: "no-cache",
       });
-      const { userStats } = data;
       return {
-        totalUsers: userStats[0] ? BigInt(userStats[0].uniqueUsers) : 0n,
+        totalUsers: BigInt(data.accountStatsConnection?.totalCount ?? 0),
       };
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(`Error fetching usersInfo data for chain ${chainId}:`, error);
-      return {
-        totalUsers: 0n,
-      };
-    }
-  }
-
-  async function fetcher([, chainId]) {
-    try {
-      const { totalUsers } = await fetchUsersInfo(chainId);
-      return {
-        totalUsers,
-      };
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Error fetching usersInfo data:", error);
-      return {
-        totalUsers: 0n,
-      };
+      return { totalUsers: 0n };
     }
   }
 

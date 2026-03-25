@@ -33,9 +33,14 @@ export default function useVolumeInfo(chainId: number) {
       const { hourlyVolumeInfos, totalVolumeInfos } = data;
       const dailyVolume = hourlyVolumeInfos.reduce((acc, { volumeUsd }) => acc + BigInt(volumeUsd), 0n);
 
+      const totalVolume = totalVolumeInfos.reduce(
+        (acc: bigint, { volumeUsd }: { volumeUsd: string }) => acc + BigInt(volumeUsd),
+        0n
+      );
+
       return {
         dailyVolume,
-        totalVolume: totalVolumeInfos[0] ? BigInt(totalVolumeInfos[0].volumeUsd) : 0n,
+        totalVolume,
       };
     } catch (error) {
       // eslint-disable-next-line no-console
