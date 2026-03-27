@@ -52,6 +52,10 @@ const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig
     "0x23F40e3279685413b252A6944AF9a0641D3aa6ce": {
       enabled: true,
     },
+    // TAO/USD [USD0-USD0]
+    "0x24061f45f954D880dCa0Ce122FFA60Cfd5447B5A": {
+      enabled: true,
+    },
   },
   [LOCALHOST]: {},
 };

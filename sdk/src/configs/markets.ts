@@ -77,6 +77,13 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
       longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
       shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
+    // TAO/USD [USD0-USD0]
+    "0x24061f45f954D880dCa0Ce122FFA60Cfd5447B5A": {
+      marketTokenAddress: "0x24061f45f954D880dCa0Ce122FFA60Cfd5447B5A",
+      indexTokenAddress: "0x8E235a31AB3bb754DA40d05e4E5787b67c8BeDcd",
+      longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+      shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
+    },
   },
   [LOCALHOST]: {},
 };

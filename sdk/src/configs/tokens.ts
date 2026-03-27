@@ -101,6 +101,16 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       imageUrl: "https://assets.coingecko.com/coins/images/7598/thumb/wrapped_bitcoin_wbtc.png",
       coingeckoUrl: "https://www.coingecko.com/en/coins/wrapped-bitcoin",
     },
+    {
+      name: "Bittensor",
+      symbol: "TAO",
+      decimals: 18,
+      address: "0x8E235a31AB3bb754DA40d05e4E5787b67c8BeDcd",
+      isSynthetic: true,
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/28452/small/ARUsPeNQ_400x400.jpeg",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/bittensor",
+    },
     /** Placeholder tokens */
     {
       name: "0xMarkets Market tokens",
