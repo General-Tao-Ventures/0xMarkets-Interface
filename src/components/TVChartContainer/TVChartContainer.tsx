@@ -8,6 +8,7 @@ import { useTheme } from "context/ThemeContext/ThemeContext";
 import { TokenPrices } from "domain/tokens";
 import { DataFeed } from "domain/tradingview/DataFeed";
 import { getObjectKeyFromValue, getSymbolName } from "domain/tradingview/utils";
+import { useDataFeedHeartbeat } from "lib/useDataFeedHeartbeat";
 import { useOracleKeeperFetcher } from "lib/oracleKeeperFetcher";
 import { useTradePageVersion } from "lib/useTradePageVersion";
 import { isChartAvailableForToken } from "sdk/configs/tokens";
@@ -54,6 +55,7 @@ export default function TVChartContainer({
   const { shouldShowPositionLines } = useSettings();
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const tvWidgetRef = useRef<IChartingLibraryWidget | null>(null);
+  useDataFeedHeartbeat(tvWidgetRef);
   const [chartReady, setChartReady] = useState(false);
   const [isChartChangingSymbol, setIsChartChangingSymbol] = useState(false);
   const [chartDataLoading, setChartDataLoading] = useState(true);
@@ -104,7 +106,10 @@ export default function TVChartContainer({
     datafeed.setOraclePriceGetter((symbol) => {
       const token = chartTokenRef.current;
       if (!token.symbol || token.symbol !== symbol || !("minPrice" in token)) return undefined;
-      return Number((token.minPrice + token.maxPrice) / 2n) / 1e30;
+      const price = Number((token.minPrice + token.maxPrice) / 2n) / 1e30;
+      // Return undefined if price is 0 (can happen transiently during reconnect)
+      // to prevent the oracle bridge from drawing a $0 candle on the chart.
+      return price > 0 ? price : undefined;
     });
   }, [datafeed]);
 
