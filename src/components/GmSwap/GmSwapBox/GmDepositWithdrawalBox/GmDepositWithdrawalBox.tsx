@@ -39,11 +39,15 @@ import TokenWithIcon from "components/TokenIcon/TokenWithIcon";
 import TokenSelector from "components/TokenSelector/TokenSelector";
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 
-import type { GmSwapBoxProps } from "../GmSwapBox";
-import { GmSwapBoxPoolRow } from "../GmSwapBoxPoolRow";
 import { useDepositAmountOut } from "domain/synthetics/markets/useDepositAmountOut";
 
+import type { GmSwapBoxProps } from "../GmSwapBox";
+import { GmSwapBoxPoolRow } from "../GmSwapBoxPoolRow";
 import { GmSwapWarningsRow } from "../GmSwapWarningsRow";
+import { SelectedPool } from "../SelectedPool";
+import { Mode, Operation } from "../types";
+import { useGmWarningState } from "../useGmWarningState";
+import { InfoRows } from "./InfoRows";
 
 import { useDepositWithdrawalAmounts } from "./useDepositWithdrawalAmounts";
 import { useDepositWithdrawalFees } from "./useDepositWithdrawalFees";
