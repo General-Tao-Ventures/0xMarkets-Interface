@@ -256,9 +256,10 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
         const candle = candles.find((c) => c.tokenSymbol === symbol);
         if (!candle) return;
 
-        // Use oracle price for close if available, so chart matches header
+        // Use oracle price for close if available, so chart matches header.
+        // Use || (not ??) so a transient 0 from the getter falls back to candle data.
         const oraclePrice = this.oraclePriceGetter?.(symbol);
-        const close = oraclePrice ?? candle.close;
+        const close = oraclePrice || candle.close;
 
         const bar: Bar = {
           time: candle.minuteTs,
@@ -518,7 +519,8 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       for (const [symbol, sub] of Object.entries(this.activeSubscriptions)) {
         if (!sub.lastBar) continue;
         const price = this.oraclePriceGetter?.(symbol);
-        if (price === undefined) continue;
+        // Skip if price is missing or transiently 0 to avoid drawing a $0 bar.
+        if (!price) continue;
 
         const displayPrice = price * sub.visualMultiplier;
         if (displayPrice === sub.lastBar.close) continue;

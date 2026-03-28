@@ -106,7 +106,10 @@ export default function TVChartContainer({
     datafeed.setOraclePriceGetter((symbol) => {
       const token = chartTokenRef.current;
       if (!token.symbol || token.symbol !== symbol || !("minPrice" in token)) return undefined;
-      return Number((token.minPrice + token.maxPrice) / 2n) / 1e30;
+      const price = Number((token.minPrice + token.maxPrice) / 2n) / 1e30;
+      // Return undefined if price is 0 (can happen transiently during reconnect)
+      // to prevent the oracle bridge from drawing a $0 candle on the chart.
+      return price > 0 ? price : undefined;
     });
   }, [datafeed]);
 
