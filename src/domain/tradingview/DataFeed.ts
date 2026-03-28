@@ -198,10 +198,18 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     onResult(barsToReturn, { noData: offset + countBack >= 10_000 || barsToReturn.length < countBack });
 
-    // Seed lastBar for the oracle price bridge so it can push ticks immediately
+    // Seed lastBar for the oracle price bridge so it can push ticks immediately.
+    // Only seed if the bar belongs to the CURRENT candle period. Seeding from a
+    // stale historical bar (e.g. after a reconnect gap) would cause the oracle
+    // bridge to stretch that old bar's low/high to the current price, producing
+    // a visible free-fall wick before the live stream resumes.
     const symbol = symbolInfo.ticker!;
     if (barsToReturn.length > 0 && this.activeSubscriptions[symbol] && !this.activeSubscriptions[symbol].lastBar) {
-      this.activeSubscriptions[symbol].lastBar = barsToReturn[barsToReturn.length - 1];
+      const lastBar = barsToReturn[barsToReturn.length - 1];
+      const currentCandleStartMs = getCurrentCandleTime(SUPPORTED_RESOLUTIONS_V2[resolution]) * 1000;
+      if (lastBar.time >= currentCandleStartMs) {
+        this.activeSubscriptions[symbol].lastBar = lastBar;
+      }
     }
 
     if (metricsIsFirstDrawTime) {
