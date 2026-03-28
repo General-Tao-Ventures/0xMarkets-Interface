@@ -96,22 +96,27 @@ export function useJsonRpcProvider(chainId: number | undefined, { isExpress = fa
   );
 
   useEffect(() => {
-    if (!chainId) {
+    if (!chainId || !rpcUrl) {
       return;
     }
 
-    async function initializeProvider() {
-      if (!rpcUrl) return;
+    let cancelled = false;
+    const network = Network.from(chainId);
+    const newProvider = new ethers.JsonRpcProvider(rpcUrl, network, { staticNetwork: network });
 
-      const provider = new ethers.JsonRpcProvider(rpcUrl, chainId);
+    newProvider._start();
+    newProvider._waitUntilReady().then(() => {
+      if (!cancelled) {
+        setProvider(newProvider);
+      }
+    }).catch(() => {
+      // Provider failed to initialize; will be retried when rpcUrl changes
+    });
 
-      provider._start();
-      await provider._waitUntilReady();
-
-      setProvider(provider);
-    }
-
-    initializeProvider();
+    return () => {
+      cancelled = true;
+      newProvider.destroy();
+    };
   }, [chainId, rpcUrl]);
 
   return { provider };
