@@ -1,5 +1,5 @@
 import { differenceInMilliseconds } from "date-fns";
-import { ethers, Provider } from "ethers";
+import { ethers, Network, Provider } from "ethers";
 import maxBy from "lodash/maxBy";
 import minBy from "lodash/minBy";
 import orderBy from "lodash/orderBy";
@@ -358,10 +358,11 @@ function initTrackerState() {
 
   return CONTRACTS_CHAIN_IDS.reduce<RpcTrackerState>((acc, chainId) => {
     const prepareProviders = (urls: string[], { isPublic }: { isPublic: boolean }) => {
+      const network = Network.from(chainId);
       return urls.reduce<Record<string, ProviderData>>((acc, rpcUrl) => {
         acc[rpcUrl] = {
           url: rpcUrl,
-          provider: new ethers.JsonRpcProvider(rpcUrl),
+          provider: new ethers.JsonRpcProvider(rpcUrl, network, { staticNetwork: network }),
           isPublic,
         };
 
