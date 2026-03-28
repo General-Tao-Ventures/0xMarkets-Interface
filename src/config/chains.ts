@@ -84,6 +84,7 @@ export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
   [BASE_SEPOLIA]: [
     "https://sepolia.base.org",
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
+    "https://base-sepolia.drpc.org",
   ],
   [LOCALHOST]: [
     "http://127.0.0.1:8545",
@@ -116,7 +117,10 @@ export const getConstant = <T extends ContractsChainId, K extends ConstantName>(
 };
 
 export function getFallbackRpcUrl(chainId: number, isLargeAccount: boolean): string {
-  return sample(isLargeAccount ? PRIVATE_RPC_PROVIDERS[chainId] : FALLBACK_PROVIDERS[chainId]);
+  const providers = isLargeAccount ? PRIVATE_RPC_PROVIDERS[chainId] : FALLBACK_PROVIDERS[chainId];
+  // Always prefer the first entry as the stable fallback rather than random selection.
+  // For BASE_SEPOLIA this ensures sepolia.base.org is used before Chainstack when quota is exhausted.
+  return providers?.[0] ?? sample(providers);
 }
 
 export function getExpressRpcUrl(chainId: number): string {
