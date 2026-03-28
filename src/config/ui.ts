@@ -3,6 +3,19 @@ export const TOAST_AUTO_CLOSE_TIME = 5000;
 export const WS_LOST_FOCUS_TIMEOUT = 60_000;
 export const TRADE_LOST_FOCUS_TIMEOUT = 15_000;
 
+// DataFeed self-healing: how long without a keeper ticker tick (while tab is visible)
+// before forcing a WS reconnect + chart reset. 60s is conservative enough to avoid
+// false positives during quiet markets (normal tick interval is 1-3s).
+export const DATA_FEED_STALE_TIMEOUT = 60_000;
+
+// DataFeed self-healing: how long the tab must have been hidden before a chart reset
+// is triggered on visibility restore. Under this threshold only the WS reconnects.
+export const CHART_RESET_IDLE_THRESHOLD = 300_000; // 5 minutes
+
+// DataFeed self-healing: minimum time between consecutive refreshes to prevent
+// D (heartbeat) and B (visibility restore) from both firing at once.
+export const REFRESH_DEBOUNCE = 3_000;
+
 export const PERCENTAGE_SUGGESTIONS = [10, 25, 50, 75];
 export const MAX_METAMASK_MOBILE_DECIMALS = 5;
 export const INPUT_LABEL_SEPARATOR = ":";
