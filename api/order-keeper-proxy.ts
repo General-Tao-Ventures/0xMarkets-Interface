@@ -3,6 +3,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 const ORDER_KEEPER_URL = process.env.ORDER_KEEPER_URL || "http://142.93.203.222:37018";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // TODO: remove after confirming env var — debug only
+  console.log("[debug] ORDER_KEEPER_URL =", ORDER_KEEPER_URL);
   const pathStr = (req.query._path as string) || "";
 
   const params = new URLSearchParams();
