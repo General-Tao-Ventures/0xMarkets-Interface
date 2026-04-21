@@ -72,16 +72,27 @@ export async function sendWalletTransaction({
       };
     }
 
-    const gasLimitPromise = gasLimit
+    // Estimate gas via our own RPC list instead of the wallet's RPC.
+    // Some Base Sepolia wallet RPCs (post-v1 reth nodes) reject
+    // eth_estimateGas with `intrinsic gas too high` (-32000) while
+    // eth_call against the same node succeeds, which surfaces in
+    // ethers v6 as a confusing `missing revert data` CALL_EXCEPTION.
+    // Routing estimation through our public/fallback RPC pool, plus a
+    // hardcoded ceiling, ensures we always send the tx with a gasLimit
+    // so the wallet never re-estimates internally against a broken node.
+    const provider = getProvider(undefined, chainId);
+
+    const FALLBACK_GAS_LIMIT = 5_000_000n;
+
+    const gasLimitPromise: Promise<bigint | number> = gasLimit
       ? Promise.resolve(gasLimit)
-      : estimateGasLimit(signer.provider!, {
+      : estimateGasLimit(provider, {
           to,
           from,
           data: callData,
           value,
-        }).catch(() => undefined);
+        }).catch(() => FALLBACK_GAS_LIMIT);
 
-    const provider = getProvider(undefined, chainId);
     const gasPriceDataPromise = gasPriceData
       ? Promise.resolve(gasPriceData)
       : getGasPrice(provider, chainId).catch(() => undefined);
