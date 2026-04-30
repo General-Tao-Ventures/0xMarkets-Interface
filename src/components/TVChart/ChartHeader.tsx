@@ -86,7 +86,7 @@ function ChartHeaderMobile() {
     }
 
     return (
-      <div className="grid grid-cols-[1fr_1fr] gap-16">
+      <div className="grid grid-cols-[1fr_1fr] gap-x-16 gap-y-16">
         <div>
           <div className="mb-4 text-[11px] font-medium uppercase text-typography-secondary">
             <Trans>24h Volume</Trans>
@@ -95,17 +95,15 @@ function ChartHeaderMobile() {
         </div>
 
         <div>
-          <div className="mb-4 whitespace-nowrap text-[11px] font-medium text-typography-secondary">
-            <span className="whitespace-nowrap text-[11px] font-medium uppercase text-typography-secondary">
-              <Trans>Open Interest</Trans>
+          <div className="mb-4 text-[11px] font-medium uppercase text-typography-secondary">
+            <Trans>Open Interest</Trans>{" "}
+            <span className="normal-case">
+              (<span className="text-green-500 numbers">{longOIPercentage}</span>
+              <span>/</span>
+              <span className="text-red-500 numbers">{shortOIPercentage}</span>)
             </span>
-            <span>{" ("}</span>
-            <span className="text-green-500 numbers">{longOIPercentage}</span>
-            <span>/</span>
-            <span className="text-red-500 numbers">{shortOIPercentage}</span>
-            <span>{")"}</span>
           </div>
-          <div className="flex flex-row items-center gap-8 ">
+          <div className="flex flex-col gap-2">
             <div className="flex flex-row items-center gap-8 numbers">{longOIValue}</div>
             <div className="flex flex-row items-center gap-8 numbers">{shortOIValue}</div>
           </div>
@@ -115,7 +113,7 @@ function ChartHeaderMobile() {
           <div className="mb-4 text-[11px] font-medium uppercase text-typography-secondary">
             <Trans>Available Liquidity</Trans>
           </div>
-          <div className="flex flex-row items-center gap-8">
+          <div className="flex flex-col gap-2">
             <div className="flex flex-row items-center gap-8 numbers">{liquidityLong}</div>
             <div className="flex flex-row items-center gap-8 numbers">{liquidityShort}</div>
           </div>
@@ -130,7 +128,7 @@ function ChartHeaderMobile() {
           <TooltipWithPortal
             variant="none"
             as="div"
-            className="inline-flex flex-row items-center gap-8"
+            className="inline-flex flex-col gap-2"
             position="bottom-end"
             content={<NetRate1hTooltip />}
           >
@@ -138,7 +136,6 @@ function ChartHeaderMobile() {
             <div className="numbers">{netRateShort}</div>
           </TooltipWithPortal>
         </div>
-
       </div>
     );
   }, [
