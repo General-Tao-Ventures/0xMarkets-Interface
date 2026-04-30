@@ -158,14 +158,14 @@ function ChartHeaderMobile() {
   ]);
 
   return (
-    <div className="rounded-8 bg-button-secondary">
-      <div className="flex items-start justify-between max-md:items-center">
+    <div className="rounded-8 border border-slate-800 bg-[rgba(5,14,22,0.3)] backdrop-blur-[34px]">
+      <div className="flex items-start justify-between p-8 max-md:items-center">
         <div className="inline-flex">
           <ChartTokenSelector selectedToken={selectedTokenOption} oneRowLabels={false} />
         </div>
 
         <div
-          className="flex cursor-pointer flex-row items-start gap-8 p-8"
+          className="flex cursor-pointer flex-row items-start gap-8"
           role="button"
           onClick={toggleDetailsVisible}
         >
