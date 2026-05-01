@@ -8,13 +8,9 @@ import useWallet from "lib/wallets/useWallet";
 import { NETWORK_OPTIONS } from "components/Header/AppHeaderChainAndSettings";
 import { OneClickButton } from "components/OneClickButton/OneClickButton";
 
-import Button from "components/Button/Button";
-
 import { AddressDropdown } from "../AddressDropdown/AddressDropdown";
 import ConnectWalletButton from "../ConnectWalletButton/ConnectWalletButton";
 import NetworkDropdown from "../NetworkDropdown/NetworkDropdown";
-
-const FAUCET_URL = "https://faucet.0xMarkets.io";
 
 type Props = {
   openSettings: () => void;
@@ -33,9 +29,6 @@ export function AppHeaderUser({ openSettings, menuToggle }: Props) {
       <div className="flex items-center gap-8 py-16">
         {openConnectModal ? (
           <>
-            <Button variant="ghost" to={FAUCET_URL} newTab>
-              <Trans>Faucet</Trans>
-            </Button>
             <ConnectWalletButton
               onClick={() => {
                 sendUserAnalyticsConnectWalletClickEvent("Header");
@@ -55,9 +48,6 @@ export function AppHeaderUser({ openSettings, menuToggle }: Props) {
 
   return (
     <div className="flex items-center gap-8 py-16">
-      <Button variant="ghost" to={FAUCET_URL} newTab>
-        <Trans>Faucet</Trans>
-      </Button>
       <div data-qa="user-address">
         <AddressDropdown account={account} />
       </div>
