@@ -23,12 +23,37 @@ function formatPct(value: number): string {
   return pctFormatter.format(value / 100);
 }
 
+function formatCountdown(targetIso: string, nowMs: number): string {
+  const target = new Date(targetIso).getTime();
+  const ms = target - nowMs;
+  if (ms <= 0) return "now";
+  const totalMinutes = Math.floor(ms / 60_000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+function formatRelative(targetIso: string, nowMs: number): string {
+  const target = new Date(targetIso).getTime();
+  const seconds = Math.max(0, Math.floor((nowMs - target) / 1000));
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ago`;
+}
+
 export default function CarthaLpCard() {
   const { data, isLoading, error } = useCarthaLpStats();
 
   if (error) {
     return null;
   }
+
+  const now = Date.now();
 
   return (
     <div className="rounded-8 border border-slate-800 bg-slate-750">
@@ -38,9 +63,11 @@ export default function CarthaLpCard() {
             <Trans>Cartha LP</Trans>
           </span>
           <span className="text-h2 font-medium normal-nums">
-            {data ? formatPct(data.max_apy.apy_annual_pct) : "—"}
+            <Trans>Earn up to</Trans>{" "}
+            <span className="text-blue-300">{data ? formatPct(data.max_apy.apy_annual_pct) : "—"}</span>{" "}
+            <Trans>APY</Trans>
             <span className="ml-8 text-body-medium text-typography-secondary">
-              <Trans>max APY (365d lock)</Trans>
+              {data ? <Trans>with a {data.max_apy.lock_days}-day lock</Trans> : null}
             </span>
           </span>
         </div>
@@ -50,7 +77,9 @@ export default function CarthaLpCard() {
             label={<Trans>TVL</Trans>}
             value={data ? usdFormatter.format(data.tvl.current_usd) : "—"}
             subValue={
-              data ? <Trans>{usdFormatter.format(data.tvl.boosted_usd)} boosted</Trans> : null
+              data ? (
+                <Trans>{usdFormatter.format(data.tvl.upcoming_usd)} next epoch</Trans>
+              ) : null
             }
           />
           <Stat
@@ -63,11 +92,13 @@ export default function CarthaLpCard() {
             }
           />
           <Stat
-            label={<Trans>Positions</Trans>}
-            value={data ? compactNumberFormatter.format(data.extras.total_positions_current) : "—"}
+            label={<Trans>Liquidity providers</Trans>}
+            value={data ? compactNumberFormatter.format(data.extras.total_miners_current) : "—"}
             subValue={
               data ? (
-                <Trans>{compactNumberFormatter.format(data.extras.total_miners_current)} miners</Trans>
+                <Trans>
+                  {compactNumberFormatter.format(data.extras.total_positions_current)} positions
+                </Trans>
               ) : null
             }
           />
@@ -87,6 +118,17 @@ export default function CarthaLpCard() {
             : null}
         </div>
       </div>
+
+      {data ? (
+        <div className="flex flex-wrap items-center justify-between gap-8 border-t-1/2 border-slate-800 px-16 py-10 text-body-small text-typography-secondary">
+          <span>
+            <Trans>Next epoch in {formatCountdown(data.epoch.upcoming_start, now)}</Trans>
+          </span>
+          <span>
+            <Trans>Updated {formatRelative(data.last_updated, now)}</Trans>
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }
