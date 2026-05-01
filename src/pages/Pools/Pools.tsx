@@ -15,6 +15,7 @@ import { ChainContentHeader } from "components/ChainContentHeader/ChainContentHe
 import { GmList } from "components/GmList/GmList";
 import Tabs from "components/Tabs/Tabs";
 
+import CarthaLpCard from "./CarthaLpCard";
 import PoolsTimeRangeFilter from "./PoolsTimeRangeFilter";
 import { usePoolsIsMobilePage } from "./usePoolsIsMobilePage";
 
@@ -61,6 +62,10 @@ export default function Pools() {
       >
         <PoolsTvl />
         <PoolsTimeRangeFilter timeRange={timeRange} setTimeRange={setTimeRange} />
+      </div>
+
+      <div className="mb-16">
+        <CarthaLpCard />
       </div>
 
       <div className="mb-16">
