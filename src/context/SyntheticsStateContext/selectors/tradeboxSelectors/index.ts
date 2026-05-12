@@ -17,8 +17,10 @@ import {
 import {
   MarketInfo,
   getAvailableUsdLiquidityForPosition,
+  getLadderMaxLeverageForNotional,
   getMaxAllowedLeverageByMinCollateralFactor,
   getTradeboxLeverageSliderMarks,
+  ladderMaxLeverageToBps,
 } from "domain/synthetics/markets";
 import { PreferredTradeTypePickStrategy, chooseSuitableMarket } from "domain/synthetics/markets/chooseSuitableMarket";
 import { DecreasePositionSwapType, isLimitOrderType, isSwapOrderType } from "domain/synthetics/orders";
@@ -1210,7 +1212,22 @@ export const selectTradeboxSelectedCollateralTokenSymbol = createSelector((q) =>
 
 export const selectTradeboxMaxLeverage = createSelector((q) => {
   const minCollateralFactor = q((s) => s.tradebox.marketInfo?.minCollateralFactor);
-  return getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor);
+  const baseMaxLeverage = getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor);
+
+  // Size-aware tier cap from the on-chain leverage ladder. The ladder only ever
+  // tightens — it never raises the market-wide cap. Returns the tighter of the
+  // two whenever a ladder is configured for this market.
+  const marketInfo = q((s) => s.tradebox.marketInfo);
+  if (!marketInfo?.leverageLadder?.length) {
+    return baseMaxLeverage;
+  }
+
+  const sizeDeltaUsd = q(selectTradeboxIncreasePositionAmounts)?.sizeDeltaUsd ?? 0n;
+  const ladderMaxLeverage = getLadderMaxLeverageForNotional(marketInfo, sizeDeltaUsd);
+  if (ladderMaxLeverage === undefined) return baseMaxLeverage;
+
+  const ladderMaxBps = ladderMaxLeverageToBps(ladderMaxLeverage);
+  return Math.min(baseMaxLeverage, ladderMaxBps);
 });
 
 export const selectTradeboxLeverageSliderMarks = createSelector((q) => {

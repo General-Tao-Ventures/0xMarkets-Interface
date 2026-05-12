@@ -147,6 +147,32 @@ export function getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor: 
   return wholeX * BASIS_POINTS_DIVISOR;
 }
 
+// Mirror of the on-chain `LeverageLadderUtils.getMaxLeverageForNotional`.
+// Returns the tier's max leverage (in 30-decimal fixed-point — same encoding
+// the contract uses) for a given post-trade notional. Returns `undefined` when
+// no ladder is configured, so callers can defer to the market-wide cap.
+export function getLadderMaxLeverageForNotional(
+  market: { leverageLadder?: Array<{ maxNotionalUsd: bigint; maxLeverage: bigint }> },
+  notionalUsd: bigint
+): bigint | undefined {
+  const ladder = market.leverageLadder;
+  if (!ladder || ladder.length === 0) return undefined;
+
+  for (const tier of ladder) {
+    if (notionalUsd <= tier.maxNotionalUsd) return tier.maxLeverage;
+  }
+  // Defensive — tail tier should be MAX_UINT, so this branch is unreachable
+  // when the ladder is well-formed. Returns the last tier's cap as a safe default.
+  return ladder[ladder.length - 1].maxLeverage;
+}
+
+// Converts a ladder's `maxLeverage` value (30-decimal fixed-point, e.g. 200n * 10n**30n)
+// into the BASIS_POINTS_DIVISOR units used elsewhere in the frontend leverage stack
+// (10000 = 1x). Mirrors how `getMaxAllowedLeverageByMinCollateralFactor` reports leverage.
+export function ladderMaxLeverageToBps(ladderMaxLeverage: bigint): number {
+  return Number((ladderMaxLeverage * BigInt(BASIS_POINTS_DIVISOR)) / PRECISION);
+}
+
 export function getOppositeCollateral(marketInfo: MarketInfo, tokenAddress: string) {
   const poolType = getTokenPoolType(marketInfo, tokenAddress);
 

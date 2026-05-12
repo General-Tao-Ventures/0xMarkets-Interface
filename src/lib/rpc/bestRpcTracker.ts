@@ -20,6 +20,7 @@ import {
 import { getContract, getDataStoreContract, getMulticallContract } from "config/contracts";
 import { getRpcProviderKey } from "config/localStorage";
 import { getIsLargeAccount } from "domain/stats/isLargeAccount";
+import { isDevelopment } from "config/env";
 import { isDebugMode } from "lib/localStorage";
 import { RpcTrackerRankingCounter } from "lib/metrics";
 import { emitMetricCounter } from "lib/metrics/emitMetricEvent";
@@ -421,6 +422,17 @@ export function getCurrentRpcUrls(rawChainId: number): { primary: string; second
 
   if (!RPC_PROVIDERS[chainId]?.length) {
     throw new Error(`No RPC providers found for chainId: ${chainId}`);
+  }
+
+  // In dev mode, force the local fork RPC. The tracker probe reads
+  // `minCollateralFactor` from a hard-coded market address that exists on the
+  // public testnet but not on the local fork (markets are redeployed at fresh
+  // addresses), so the probe returns 0 and disqualifies localhost. For dev
+  // testing against `npx hardhat node`, the first RPC in the providers list
+  // (which we ensure is localhost — see config/chains.ts) is what we want.
+  if (isDevelopment() && chainId === BASE_SEPOLIA) {
+    const localUrl = RPC_PROVIDERS[chainId][0];
+    return { primary: localUrl, secondary: localUrl };
   }
 
   if (trackerState[chainId]) {

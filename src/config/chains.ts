@@ -69,6 +69,8 @@ export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
     "https://base.drpc.org",
   ],
   [BASE_SEPOLIA]: [
+    // Local fork first when running against `npx hardhat node` for fork testing.
+    "http://127.0.0.1:8545",
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
     "https://base-sepolia.drpc.org",
     "https://base-sepolia.therpc.io",
@@ -82,6 +84,10 @@ export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
 export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
   [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("fallback")],
   [BASE_SEPOLIA]: [
+    // Local fork first — when running `npx hardhat node` against baseSepolia,
+    // this lets the dapp read state we wrote on the fork (token balances,
+    // ladder configs, etc.) instead of going to the real testnet.
+    "http://127.0.0.1:8545",
     "https://sepolia.base.org",
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
     "https://base-sepolia.drpc.org",

@@ -103,6 +103,7 @@ import TradeInfoIcon from "../TradeInfoIcon/TradeInfoIcon";
 import TwapRows from "../TwapRows/TwapRows";
 import { useDecreaseOrdersThatWillBeExecuted } from "./hooks/useDecreaseOrdersThatWillBeExecuted";
 import { useShowHighLeverageWarning } from "./hooks/useShowHighLeverageWarning";
+import { useShowLadderTierWarning } from "./hooks/useShowLadderTierWarning";
 import { useExpressTradingWarnings } from "./hooks/useShowOneClickTradingInfo";
 import { useTradeboxAcceptablePriceImpactValues } from "./hooks/useTradeboxAcceptablePriceImpactValues";
 import { useTradeboxTPSLReset } from "./hooks/useTradeboxTPSLReset";
@@ -233,6 +234,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
   });
 
   const { showHighLeverageWarning, dismissHighLeverageWarning } = useShowHighLeverageWarning();
+  const { showLadderTierWarning, activeTierMaxLeverage, tierBoundaryUsd } = useShowLadderTierWarning(marketInfo);
 
   const setIsDismissedRef = useLatest(priceImpactWarningState.setIsDismissed);
 
@@ -1037,6 +1039,21 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                     {showHighLeverageWarning && (
                       <AlertInfoCard type="info" onClose={dismissHighLeverageWarning}>
                         <Trans>Using high leverage increases the risk of liquidation.</Trans>
+                      </AlertInfoCard>
+                    )}
+                    {showLadderTierWarning && activeTierMaxLeverage !== undefined && (
+                      <AlertInfoCard type="info">
+                        {tierBoundaryUsd !== undefined ? (
+                          <Trans>
+                            For positions up to {formatUsd(tierBoundaryUsd)}, this market caps leverage at{" "}
+                            {activeTierMaxLeverage}x. Reduce size or post more margin to stay within the tier.
+                          </Trans>
+                        ) : (
+                          <Trans>
+                            At this size, this market caps leverage at {activeTierMaxLeverage}x. Reduce size or post
+                            more margin to stay within the tier.
+                          </Trans>
+                        )}
                       </AlertInfoCard>
                     )}
                     {isTrigger && (
