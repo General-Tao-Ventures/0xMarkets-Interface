@@ -368,10 +368,6 @@ function useMarketsConfigsRequest({
   return marketsConfigsQuery;
 }
 
-// Reads the per-market leverage ladder out of the multicall response.
-// `tierCount == 0` means no ladder configured — returns an empty array.
-// Otherwise returns the first `tierCount` (notional, leverage) pairs in
-// ascending order; trailing slots up to MAX_LADDER_TIERS are ignored.
 function parseLeverageLadder(
   dataStoreValues: Record<string, any>
 ): Array<{ maxNotionalUsd: bigint; maxLeverage: bigint }> {

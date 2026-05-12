@@ -1214,9 +1214,8 @@ export const selectTradeboxMaxLeverage = createSelector((q) => {
   const minCollateralFactor = q((s) => s.tradebox.marketInfo?.minCollateralFactor);
   const baseMaxLeverage = getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor);
 
-  // Size-aware tier cap from the on-chain leverage ladder. The ladder only ever
-  // tightens — it never raises the market-wide cap. Returns the tighter of the
-  // two whenever a ladder is configured for this market.
+  // Apply the leverage ladder if one is configured. It only tightens the cap,
+  // never raises it.
   const marketInfo = q((s) => s.tradebox.marketInfo);
   if (!marketInfo?.leverageLadder?.length) {
     return baseMaxLeverage;

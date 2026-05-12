@@ -46,10 +46,8 @@ export function getWsProvider(chainId: AnyChainId): WebSocketProvider | JsonRpcP
   }
 
   if (chainId === BASE_SEPOLIA) {
-    // In dev mode, route Base Sepolia to the local fork (hardhat node doesn't expose
-    // a WebSocket endpoint, so use polling JSON-RPC instead). This keeps event-driven
-    // refreshes pointing at the same chain the read path uses on a fork.
     if (isDevelopment()) {
+      // hardhat node has no WS; fall back to polling JSON-RPC against the fork.
       const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545", network, {
         staticNetwork: network,
       });

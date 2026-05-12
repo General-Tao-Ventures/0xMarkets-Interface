@@ -424,14 +424,11 @@ export function getCurrentRpcUrls(rawChainId: number): { primary: string; second
     throw new Error(`No RPC providers found for chainId: ${chainId}`);
   }
 
-  // In dev mode, force the local fork RPC. The tracker probe reads
-  // `minCollateralFactor` from a hard-coded market address that exists on the
-  // public testnet but not on the local fork (markets are redeployed at fresh
-  // addresses), so the probe returns 0 and disqualifies localhost. For dev
-  // testing against `npx hardhat node`, the first RPC in the providers list
-  // (which we ensure is localhost — see config/chains.ts) is what we want.
+  // In dev, route Base Sepolia to the local anvil fork. The tracker's probe
+  // disqualifies localhost (the probe address doesn't exist on the fork's
+  // freshly-deployed MarketStore), so we short-circuit here.
   if (isDevelopment() && chainId === BASE_SEPOLIA) {
-    const localUrl = RPC_PROVIDERS[chainId][0];
+    const localUrl = "http://127.0.0.1:8545";
     return { primary: localUrl, secondary: localUrl };
   }
 

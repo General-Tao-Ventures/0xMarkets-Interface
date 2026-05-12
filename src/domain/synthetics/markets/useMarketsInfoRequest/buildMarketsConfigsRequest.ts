@@ -21,8 +21,8 @@ export async function buildMarketsConfigsRequest(
     let prebuiltHashedKeys: Record<string, string> | undefined =
       HASHED_MARKET_CONFIG_KEYS[chainId]?.[marketAddress];
 
-    // Fork addresses (or any address not in MARKETS config) won't be in the
-    // prebuilt cache — derive keys at runtime from on-chain market metadata.
+    // Cache miss can happen for fork addresses or any market added after the
+    // last prebuild. Fall back to hashing on the fly.
     if (!prebuiltHashedKeys) {
       const market = marketsData?.[marketAddress];
       if (!market) {
@@ -257,9 +257,8 @@ export async function buildMarketsConfigsRequest(
   return request;
 }
 
-// Generates calls for every (notional, leverage) tier slot up to MAX_LADDER_TIERS.
-// Trailing slots beyond the configured tierCount return zero on chain — the parser
-// trims them based on the count read above.
+// Reads up to MAX_LADDER_TIERS slots; the parser trims trailing empties using
+// the tierCount value above.
 function buildLadderTierCalls(prebuiltHashedKeys: Record<string, string>) {
   const calls: Record<string, { methodName: string; params: [string] }> = {};
   for (let i = 0; i < MAX_LADDER_TIERS; i++) {
