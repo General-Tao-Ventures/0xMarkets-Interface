@@ -1214,8 +1214,6 @@ export const selectTradeboxMaxLeverage = createSelector((q) => {
   const minCollateralFactor = q((s) => s.tradebox.marketInfo?.minCollateralFactor);
   const baseMaxLeverage = getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor);
 
-  // Apply the leverage ladder if one is configured. It only tightens the cap,
-  // never raises it.
   const marketInfo = q((s) => s.tradebox.marketInfo);
   if (!marketInfo?.leverageLadder?.length) {
     return baseMaxLeverage;

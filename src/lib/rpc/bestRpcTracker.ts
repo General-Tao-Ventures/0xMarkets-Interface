@@ -20,7 +20,6 @@ import {
 import { getContract, getDataStoreContract, getMulticallContract } from "config/contracts";
 import { getRpcProviderKey } from "config/localStorage";
 import { getIsLargeAccount } from "domain/stats/isLargeAccount";
-import { isDevelopment } from "config/env";
 import { isDebugMode } from "lib/localStorage";
 import { RpcTrackerRankingCounter } from "lib/metrics";
 import { emitMetricCounter } from "lib/metrics/emitMetricEvent";
@@ -422,14 +421,6 @@ export function getCurrentRpcUrls(rawChainId: number): { primary: string; second
 
   if (!RPC_PROVIDERS[chainId]?.length) {
     throw new Error(`No RPC providers found for chainId: ${chainId}`);
-  }
-
-  // In dev, route Base Sepolia to the local anvil fork. The tracker's probe
-  // disqualifies localhost (the probe address doesn't exist on the fork's
-  // freshly-deployed MarketStore), so we short-circuit here.
-  if (isDevelopment() && chainId === BASE_SEPOLIA) {
-    const localUrl = "http://127.0.0.1:8545";
-    return { primary: localUrl, secondary: localUrl };
   }
 
   if (trackerState[chainId]) {

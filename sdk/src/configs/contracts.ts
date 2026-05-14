@@ -4,25 +4,25 @@ import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
 
 export const CONTRACTS = {
   [BASE_SEPOLIA]: {
-    // Synthetics - Redeployed Mar 2026 (v1.13 rebrand)
-    DataStore: "0x0cA7D71845cb485B7593bBdCbcac93d82d52d053",
-    EventEmitter: "0x68001935Ec7C2e3980f99435db3CabC89dea602B",
-    SubaccountRouter: "0xE0b283Aa82c47970472153A139b50B108F6F2357",
-    ExchangeRouter: "0x394b791D74E6F2bd803b0Ef10AF9115fE380EA88",
-    DepositVault: "0x590d1d8e50A3a3d9F3448657D1Cb64D486978781",
-    WithdrawalVault: "0xE47130E74CAEd3Cae1Bf2c7e1e0af0B592354b57",
-    OrderVault: "0x76DE02F06979a24A87F2cD743Ab533a44EdcFb08",
-    ShiftVault: "0xEF60117684991C41dea18de53446c437462d07cc",
+    // Redeployed May 2026 with leverage ladder
+    DataStore: "0x3B9d71B497aD2d3c32a7c24e96565f84a58089a7",
+    EventEmitter: "0xd5aAfa71f745645Db84cB4877873701ddAf2514c",
+    SubaccountRouter: "0x75069f9E4F161Ea04c323CBD2c325728B8b65967",
+    ExchangeRouter: "0x7B1687D038396A57A1950693632bAcb249BD64A6",
+    DepositVault: "0x4AFE24c4e2477F54aFa4bF30d6D7385e588dfeC4",
+    WithdrawalVault: "0x64D496E867000875Dd19C808592fAB6Fc99cBE7F",
+    OrderVault: "0x18916C70dFEb3fA3366089d35464aC40f5a1D903",
+    ShiftVault: "0xEB15262f24c0AdB52FaB1E496fDf8730B0195cD7",
 
-    SyntheticsReader: "0x4debCC0Cf123529C2a42beC0F8027B03DB1a8b9e",
-    SyntheticsRouter: "0xE92B08345125dc77eB071d1a2D513751C4D22714",
+    SyntheticsReader: "0xe4716038f45bA792123C64B227727E86791bcc62",
+    SyntheticsRouter: "0x33153255bed0219b571483e6a0801Fa0B916f7D7",
 
-    GlvReader: "0x903B6F1a02DD2eF528E00c5EE66942B2F4593fF1",
-    GlvRouter: "0xD2434Ea53F0b46200542d7CE886481D3cd07ACb3",
-    GlvVault: "0x5fEb1eF511E953dec5E016bFF32F8987cE6eD33a",
+    GlvReader: "0x5A442F98743659124476aAD8de6A8c37a6a99b7E",
+    GlvRouter: "0x48Ac47276C594146339F17508D2Dc1E3236652aF",
+    GlvVault: "0xC90Db83d377B91b20f7Ce140673f4C3f24bB2e71",
 
-    GelatoRelayRouter: "0x88640FBD9aBfEE38D422B47Cb6Be410515d9C431",
-    SubaccountGelatoRelayRouter: "0x9c882295c1E692Ecac7CcAd79A285a3e738ee741",
+    GelatoRelayRouter: "0x4040014Af824f606F7E830E3F45370AEf0fCE776",
+    SubaccountGelatoRelayRouter: "0x0B851E6F264a180E5D00530E08DC6a016698A84a",
 
     MultichainClaimsRouter: zeroAddress,
     MultichainGlvRouter: zeroAddress,
@@ -33,22 +33,22 @@ export const CONTRACTS = {
     MultichainVault: zeroAddress,
     LayerZeroProvider: zeroAddress,
 
-    ChainlinkPriceFeedProvider: "0x31060bBaD18D4a13Db2e66eD7b562968e93f1312",
+    ChainlinkPriceFeedProvider: "0x62a2ff1cDFDB0364825F37563769DA0171fA5c1E",
     ClaimHandler: zeroAddress,
 
     // External
-    ExternalHandler: "0xfcD54e4D5ECA91abbB18CA9429369617730F4395",
+    ExternalHandler: "0x0A9369A2453BC12c1be38DB664B9406981c46C8f",
     OpenOceanRouter: zeroAddress,
-    Multicall: "0xdD6E2999d0a882886A50c031c7a117058B4aCB5f",
+    Multicall: "0x295B86560221c6cb2Bed126Cf6D69cC6aC03e0C4",
     LayerZeroEndpoint: zeroAddress,
     ArbitrumNodeInterface: zeroAddress,
     GelatoRelayAddress: zeroAddress,
 
     // V1 legacy (not deployed on Base Sepolia)
     Vault: zeroAddress,
-    Reader: "0x4debCC0Cf123529C2a42beC0F8027B03DB1a8b9e",
+    Reader: "0xe4716038f45bA792123C64B227727E86791bcc62",
     PositionRouter: zeroAddress,
-    ReferralStorage: "0x29D5533a26ac87C28972d277CEFf2EC00843c5A7",
+    ReferralStorage: "0xF5F9CdBe6225aBFF7cE2F290d12bc1BaCCC926E2",
     VaultReader: zeroAddress,
     GlpManager: zeroAddress,
     RewardRouter: zeroAddress,
@@ -70,12 +70,12 @@ export const CONTRACTS = {
     GmxVester: zeroAddress,
     GlpVester: zeroAddress,
     AffiliateVester: zeroAddress,
-    Router: "0xE92B08345125dc77eB071d1a2D513751C4D22714",
-    GovToken: "0xA24dff4D381f97e9cb4DA7fb7b50505390cda522",
+    Router: "0x33153255bed0219b571483e6a0801Fa0B916f7D7",
+    GovToken: "0x8430dE0bAD0f2F58B56304ef708d934dFB8aeF3F",
     ES_GMX_IOU: zeroAddress,
     OrderBook: zeroAddress,
     UniswapGmxEthPool: zeroAddress,
-    Timelock: "0x461B737B685cd9cF68f9735792d7d0035B7AD68E",
+    Timelock: "0x40c6339E499DD2BAe91cc1cae740B64E2EAF6A15",
 
     // BASE_SEPOLIA specific tokens
     NATIVE_TOKEN: "0x4200000000000000000000000000000000000006",

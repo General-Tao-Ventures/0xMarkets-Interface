@@ -46,15 +46,6 @@ export function getWsProvider(chainId: AnyChainId): WebSocketProvider | JsonRpcP
   }
 
   if (chainId === BASE_SEPOLIA) {
-    if (isDevelopment()) {
-      // hardhat node has no WS; fall back to polling JSON-RPC against the fork.
-      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545", network, {
-        staticNetwork: network,
-      });
-      provider.pollingInterval = 2000;
-      return provider;
-    }
-
     return new ethers.WebSocketProvider("wss://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124", network, {
       staticNetwork: network,
     });
