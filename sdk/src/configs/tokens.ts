@@ -117,7 +117,6 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       symbol: "0xM",
       address: "<market-token-address>",
       decimals: 18,
-      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GM_LOGO.png",
       isPlatformToken: true,
     },
     {
@@ -125,7 +124,6 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       symbol: "GLV",
       address: "<market-token-address>",
       decimals: 18,
-      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GLV_LOGO.png",
       isPlatformToken: true,
     },
   ],
@@ -167,7 +165,6 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       symbol: "0xM",
       address: "<market-token-address>",
       decimals: 18,
-      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GM_LOGO.png",
       isPlatformToken: true,
     },
     {
@@ -175,7 +172,6 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       symbol: "GLV",
       address: "<market-token-address>",
       decimals: 18,
-      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GLV_LOGO.png",
       isPlatformToken: true,
     },
   ],

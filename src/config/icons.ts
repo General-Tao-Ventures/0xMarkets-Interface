@@ -10,37 +10,29 @@ import base from "img/ic_base_24.svg";
 import esGMXIcon from "img/ic_esgmx_40.svg";
 import glpIcon from "img/ic_glp_40.svg";
 import glvIcon from "img/ic_glv_40.svg";
-import gmxIcon from "img/ic_gmx_40.svg";
-import gmxOutlineIcon from "img/ic_gmxv1flat.svg";
 
 type ChainIcons = {
   network?: string;
-  gmx: string;
   glp: string;
   esgmx?: string;
   gm: string;
-  gmxOutline?: string;
   glv?: string;
 };
 
 const ICONS: Record<number | "common", ChainIcons> = {
   [BASE_SEPOLIA]: {
     network: base,
-    gmx: gmxIcon,
     glp: glpIcon,
     esgmx: esGMXIcon,
     gm: gmIcon,
   },
   [LOCALHOST]: {
     network: base,
-    gmx: gmxIcon,
     glp: glpIcon,
     esgmx: esGMXIcon,
     gm: gmIcon,
   },
   common: {
-    gmx: gmxIcon,
-    gmxOutline: gmxOutlineIcon,
     glp: glpIcon,
     esgmx: esGMXIcon,
     gm: gmIcon,
@@ -49,7 +41,7 @@ const ICONS: Record<number | "common", ChainIcons> = {
 };
 
 export const CHAIN_ID_TO_NETWORK_ICON: Record<AnyChainId | 0, string> = {
-  0: gmxIcon,
+  0: base,
   [SOURCE_BASE_MAINNET]: base,
   [BASE_SEPOLIA]: base,
   [LOCALHOST]: base,
