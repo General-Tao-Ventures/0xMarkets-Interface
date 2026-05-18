@@ -45,7 +45,8 @@ export function use24hPriceDeltaMap(
 
           const tokenDelta = data?.find(
             (candle) =>
-              candle.tokenSymbol === token.symbol || candle.tokenSymbol === getNormalizedTokenSymbol(token.symbol)
+              candle.tokenSymbol === token.symbol ||
+              getNormalizedTokenSymbol(candle.tokenSymbol) === token.symbol
           );
 
           if (!tokenDelta) {
