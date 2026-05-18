@@ -335,7 +335,8 @@ export function SyntheticsPage(p: Props) {
         />
       }
       className="max-lg:pb-40"
-      contentClassName="max-w-[none] md:pb-0 md:pt-0"
+      contentClassName="max-w-[none] md:pb-0 md:pt-0 max-md:!px-0"
+      pageWrapperClassName="max-md:!p-0"
     >
       <FavoriteTokenBar />
       <ChartHeader />

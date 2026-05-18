@@ -13,6 +13,7 @@ import CollapseIcon from "img/collapse.svg?react";
 import DashboardIcon from "img/dashboard.svg?react";
 import DatabaseIcon from "img/database.svg?react";
 import DocsIcon from "img/docs.svg?react";
+import EarnIcon from "img/earn.svg?react";
 import EcosystemIcon from "img/ecosystem.svg?react";
 import LeaderboardIcon from "img/leaderboard.svg?react";
 import LogoText from "img/logo-text.svg?react";
@@ -43,6 +44,7 @@ function SideNav({ className }: { className?: string }) {
         <MenuSection isCollapsed={isCollapsed} />
 
         <ul className="flex list-none flex-col px-0">
+          <FaucetNavItem isCollapsed={isCollapsed} />
           <LanguageNavItem isCollapsed={isCollapsed} />
           <DocsNavItem isCollapsed={isCollapsed} />
           <NavItem
@@ -59,6 +61,23 @@ function SideNav({ className }: { className?: string }) {
 
 export const DocsNavItem = ({ isCollapsed }: { isCollapsed: boolean | undefined }) => (
   <NavItem icon={<DocsIcon />} label={t`Docs`} isCollapsed={isCollapsed} to="https://docs.0xmarkets.io" external />
+);
+
+export const FaucetNavItem = ({
+  isCollapsed,
+  onClick,
+}: {
+  isCollapsed: boolean | undefined;
+  onClick?: () => void;
+}) => (
+  <NavItem
+    icon={<EarnIcon />}
+    label={t`Faucet`}
+    isCollapsed={isCollapsed}
+    to="https://faucet.0xMarkets.io"
+    external
+    onClick={onClick}
+  />
 );
 
 export function LogoSection({ isCollapsed }: { isCollapsed: boolean | undefined }) {
