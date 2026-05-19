@@ -164,6 +164,28 @@ export function getLadderMaxLeverageForNotional(
   return ladder[ladder.length - 1].maxLeverage;
 }
 
+// Highest leverage L such that (collateralUsd * L) stays within a tier whose
+// cap is >= L. Use when collateral is the stable input (Pay-driven mode) to
+// avoid the slider's "current size depends on current leverage" feedback loop.
+export function getLadderEquilibriumMaxLeverage(
+  market: { leverageLadder?: Array<{ maxNotionalUsd: bigint; maxLeverage: bigint }> },
+  collateralUsd: bigint
+): bigint | undefined {
+  const ladder = market.leverageLadder;
+  if (!ladder || ladder.length === 0) return undefined;
+  if (collateralUsd <= 0n) return ladder[0].maxLeverage;
+
+  let maxEq = 0n;
+  for (const tier of ladder) {
+    // L where notional reaches the tier ceiling: L = maxNotional / collateral.
+    // Multiply by PRECISION first so the result lands in 30-decimal fixed-point.
+    const fromNotional = (tier.maxNotionalUsd * PRECISION) / collateralUsd;
+    const eq = fromNotional < tier.maxLeverage ? fromNotional : tier.maxLeverage;
+    if (eq > maxEq) maxEq = eq;
+  }
+  return maxEq;
+}
+
 // 30-decimal fixed-point -> BPS units (10000 = 1x), to match the rest of the
 // leverage stack.
 export function ladderMaxLeverageToBps(ladderMaxLeverage: bigint): number {

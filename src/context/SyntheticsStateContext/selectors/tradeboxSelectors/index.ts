@@ -17,6 +17,7 @@ import {
 import {
   MarketInfo,
   getAvailableUsdLiquidityForPosition,
+  getLadderEquilibriumMaxLeverage,
   getLadderMaxLeverageForNotional,
   getMaxAllowedLeverageByMinCollateralFactor,
   getTradeboxLeverageSliderMarks,
@@ -1219,8 +1220,18 @@ export const selectTradeboxMaxLeverage = createSelector((q) => {
     return baseMaxLeverage;
   }
 
-  const sizeDeltaUsd = q(selectTradeboxIncreasePositionAmounts)?.sizeDeltaUsd ?? 0n;
-  const ladderMaxLeverage = getLadderMaxLeverageForNotional(marketInfo, sizeDeltaUsd);
+  const amounts = q(selectTradeboxIncreasePositionAmounts);
+  const strategy = q(selectTradeboxLeverageStrategy);
+
+  // In Pay-driven mode, collateral is the stable input; using it for the
+  // ladder lookup avoids the feedback loop where the cap depends on a size
+  // that depends on the slider position. In Size-driven mode, the size is
+  // the stable input, so the original notional-based lookup is correct.
+  const ladderMaxLeverage =
+    strategy === "leverageByCollateral"
+      ? getLadderEquilibriumMaxLeverage(marketInfo, amounts?.initialCollateralUsd ?? 0n)
+      : getLadderMaxLeverageForNotional(marketInfo, amounts?.sizeDeltaUsd ?? 0n);
+
   if (ladderMaxLeverage === undefined) return baseMaxLeverage;
 
   const ladderMaxBps = ladderMaxLeverageToBps(ladderMaxLeverage);
