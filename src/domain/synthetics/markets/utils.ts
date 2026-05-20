@@ -422,11 +422,10 @@ export function getIsZeroPriceImpactMarket(marketInfo: MarketInfo) {
 }
 
 // Always ends with `cap` so the slider's hard limit equals the protocol's
-// allowed leverage. Earlier branchy version dropped the cap for values
-// between 10 and 30 (slider stuck at 10x) and let the slider exceed the cap
-// for sub-10x values (slider reached 10x when ladder allowed only 3x or 5x).
+// allowed leverage. Math.floor (not Math.round) so a fractional cap never
+// produces a tick above the real limit.
 export function getTradeboxLeverageSliderMarks(maxLeverage: number) {
-  const cap = Math.round(maxLeverage / BASIS_POINTS_DIVISOR);
+  const cap = Math.floor(maxLeverage / BASIS_POINTS_DIVISOR);
   const intermediateTicks = [0.1, 1, 2, 5, 10, 25, 50, 100];
   const ticksBelowCap = intermediateTicks.filter((t) => t < cap);
   return [...ticksBelowCap, cap];

@@ -1235,7 +1235,14 @@ export const selectTradeboxMaxLeverage = createSelector((q) => {
   if (ladderMaxLeverage === undefined) return baseMaxLeverage;
 
   const ladderMaxBps = ladderMaxLeverageToBps(ladderMaxLeverage);
-  return Math.min(baseMaxLeverage, ladderMaxBps);
+  // Floor to a whole-integer leverage so the slider's hard cap never sits
+  // between two integers (e.g. equilibrium 35.71x would let the user drag to
+  // 35.72x, which crosses a tier boundary and is rejected on-chain).
+  const flooredLadderBps = Math.max(
+    BASIS_POINTS_DIVISOR,
+    Math.floor(ladderMaxBps / BASIS_POINTS_DIVISOR) * BASIS_POINTS_DIVISOR
+  );
+  return Math.min(baseMaxLeverage, flooredLadderBps);
 });
 
 export const selectTradeboxLeverageSliderMarks = createSelector((q) => {
