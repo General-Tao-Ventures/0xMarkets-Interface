@@ -1,77 +1,77 @@
 {
   "31337": {},
   "84532": {
-    "0x8B56af349B530101D9d569555722B55E3919e4f7": {
-      "optimalUsageFactorLong": "0x33d169469e45397a1253e9c83ad8843115f29c453260db97d3f6b718f5ed3f68",
-      "optimalUsageFactorShort": "0x2bca50be40e08d7f96945a406d199339dac1aeff164c8c692a03a20c51a0733f",
-      "baseBorrowingFactorLong": "0x363e5a35da82396bfc331bd743dc3ccd9e487a8f098227918f9fbd5e54a097dc",
-      "baseBorrowingFactorShort": "0x83f94b70e15a3aef2dea4dd26e4b3928b0a3adaa31aab597dff08145cca360b9",
-      "aboveOptimalUsageBorrowingFactorLong": "0x3a7a9760c10eaa89c542a601928c5be24818431a08a52acd33344fd1bbec75de",
-      "aboveOptimalUsageBorrowingFactorShort": "0xae8023e1344e04fadc381272698d404ab692a30968f111edccdb143f76e4bff5"
+    "0x7054eb596aCF4fC1C0686C9B2cdAC4aE6c6D0F33": {
+      "optimalUsageFactorLong": "0xa506f028e8a4e4d79ca9ef0a449f851a8fbd5613092f6c11a4ccaf245aca738b",
+      "optimalUsageFactorShort": "0x50b81a73965cb9b72b4648c7a80f222112674f1eb5a4cafeaa4d1ae07657139e",
+      "baseBorrowingFactorLong": "0x9dbbdb30253fff430e9be404d19187eacf3fcb50a69aa260b5cc0eb2cd4e3d35",
+      "baseBorrowingFactorShort": "0x1b1cdbe8bea5246f09154029b9526761c3c4067f3ba31fc60665d91356b492fa",
+      "aboveOptimalUsageBorrowingFactorLong": "0xc15f604d5992e10467e1a441b68da0e3a9c87383c9b809fdd1275640d48e24a2",
+      "aboveOptimalUsageBorrowingFactorShort": "0x12a2f4acfb092687510ee87f0b4d4d8763b49a3dea6e2b2d667b833cc89574f3"
     },
-    "0x8FbD927DE4De0883DF8a560b41F772E2377809E8": {
-      "optimalUsageFactorLong": "0x532a064ad66856b3593c9ac05e40e4477b0e53c77488a04fc017bbe8dd548829",
-      "optimalUsageFactorShort": "0x47241a096e46b474f5d38e9d1d46d43b5dba56fb2c060cbf28781b7dd6ef10b4",
-      "baseBorrowingFactorLong": "0x79176264fb02f20659fbf2ad0cbc1654d40a29b995e95f58907652cc870d7f3f",
-      "baseBorrowingFactorShort": "0x87f91fa867d4aae562a49f45987241bdbed5e04d38f730242af05972c70c4962",
-      "aboveOptimalUsageBorrowingFactorLong": "0xa247f2459fb762cdb5197132a668a2f2f235c5430f76a292f7ed5c6e0ecbdc8f",
-      "aboveOptimalUsageBorrowingFactorShort": "0xa339c6f313897d2a2b5de16d7b9e3773eed22b943eaae6c37bbb77ab665c353d"
+    "0xa09b59adf15B4ED98a099441b84Ff1eABf71B548": {
+      "optimalUsageFactorLong": "0xd095426e19218592a51d5c97891915fb71124924d67072fc24f22167668bb014",
+      "optimalUsageFactorShort": "0x12e0b1d51af4b3c0d10ccbb203104f279a52b93083b7a7d284213d7608b50f9c",
+      "baseBorrowingFactorLong": "0x11fc2c46b4ff50c85fde9d366983d21db0f30dfdb303c9509b9fb2fe3ea52162",
+      "baseBorrowingFactorShort": "0x9fc05a24bdb4e41a9437980c8d19e0976ae9889ebd8178d35607f4a805cb88d2",
+      "aboveOptimalUsageBorrowingFactorLong": "0xe8495a0cd6dbee7b73707bbe8eee526a6360537da16bea0ccb7c5edf69e16fd2",
+      "aboveOptimalUsageBorrowingFactorShort": "0xd4cd682fceb5f8acb331f231643255a06f23eba739aa5b491f780b614acc20ae"
     },
-    "0x9479d96EBFc0F2d4e5187F9ae51632770FBA6b6C": {
-      "optimalUsageFactorLong": "0x56bdc089198426c363d3c1bf8f0f913e5f1397d069856a47e62ecd1b308badf9",
-      "optimalUsageFactorShort": "0xc65f12c7490578d8c1a43ddc55620bd9b90c91efdd717c6c23e283b056e9565e",
-      "baseBorrowingFactorLong": "0x024f8f642692750f634e7e9072882833b1b6e642a9ea3773d3e018a29717ad8a",
-      "baseBorrowingFactorShort": "0xaae9ef79fe7154804efa06469b340d32ce90a6ef670a04b8f1cfb6336bb2bd05",
-      "aboveOptimalUsageBorrowingFactorLong": "0xccb13161bc3e0cb14df7139ff3de0a549383289603e8127638c795501963aeda",
-      "aboveOptimalUsageBorrowingFactorShort": "0x5978f320912b73b992bb0172dfba9b1e4170974f0c03a58b2b43ab936283d71d"
+    "0x89c3B33bEE4b9cD1B246BE44aDcEd870F74637a3": {
+      "optimalUsageFactorLong": "0x14fa5316055e84eea2da8fdafe0442ece4e86320c8b78b8de12e297470ac49bd",
+      "optimalUsageFactorShort": "0x03149c01ebc1d60afe0ae6cef6769a5fc8d46e78861bf44a04cf359acfa5487d",
+      "baseBorrowingFactorLong": "0xe6d3740d078f5455ef065bd37050be018c5fbeb58d54c9f87bf2ac504532c49d",
+      "baseBorrowingFactorShort": "0x9f433fac8d6c4f36f6b218ba4d3b07e760e8d55841eb12f75966b965351368f8",
+      "aboveOptimalUsageBorrowingFactorLong": "0x80ee7537c404553a3d712299fc4a59954e41000c0e47ca9f3e35c8b6b2ae41de",
+      "aboveOptimalUsageBorrowingFactorShort": "0xda87f6f458cb1aa5299c80b779768fda3c5985b0dcc97be1b99b5e360c653001"
     },
-    "0x8C0f2eB9804777118FA0cAA98e76e88F1ed5C8bA": {
-      "optimalUsageFactorLong": "0x8d8e21360e670b7d4da53d58916ca037d94d0eddbe544b99c5b2509c56405b4c",
-      "optimalUsageFactorShort": "0xc24a05aa5808ba68e803f67d9575605c7f138da342e7a3ed70ad17447e68605e",
-      "baseBorrowingFactorLong": "0x8cb4860aca0b202536c4b8ff194c0651b472d8fd7d3fb9d22ffa9a5f5cafcdcc",
-      "baseBorrowingFactorShort": "0x8b92268e9ca7463679fec90c362285bd5abaf9d89c9c15a0a0490777d4e4a920",
-      "aboveOptimalUsageBorrowingFactorLong": "0xbc9a83400c53395346c2abf275e59e66beb511b0717bd1b939ea65322281c326",
-      "aboveOptimalUsageBorrowingFactorShort": "0x141fbc486008bbbc3a6617163b77a119873108507923b3c41f07fa086d1713f1"
+    "0x6D260c4229dBb55a0a91041b5c07b320fdD6303B": {
+      "optimalUsageFactorLong": "0x59ac4668480a6361ac33715c1960921f160138aee138ae5ab7435170cd4262d9",
+      "optimalUsageFactorShort": "0x1187a5a85e5bc611ef47d33bb3dd4e55568b7cdc7f06c70b69a03f76c2c8fe6d",
+      "baseBorrowingFactorLong": "0x84c96e6cdbb3a2dcac5f70f2848d738431f848dd2a5ba875dea09461a0adf000",
+      "baseBorrowingFactorShort": "0x821007e9af5bce15a7110f7f895008b2087060b3933a6dbacff7737c4bc46901",
+      "aboveOptimalUsageBorrowingFactorLong": "0xd64033ba76559fd23882c35e70a3cf6a57a2d6f4131d142981239cabbd21a29e",
+      "aboveOptimalUsageBorrowingFactorShort": "0xebd00412503d413bc05422c04c931b01fda055cd5357a8315ea22c6e13a335a9"
     },
-    "0xF59FBcA079260351d30338eC6B839f3CFA8cCf42": {
-      "optimalUsageFactorLong": "0xed180f262b8bcac28a9a4fbec5443fc51e8202e8c0c44d16c58ad43af0390f19",
-      "optimalUsageFactorShort": "0x1f3953a60326f5416f84729cf35be45156cd6482530b634586ec76022fa0de13",
-      "baseBorrowingFactorLong": "0xec7e89a7f96c38b13694c4127e89aee05b364975b9eec8799874f2bdf04c085c",
-      "baseBorrowingFactorShort": "0xe6c7cbe96c4d257074680f18d02b008aaf77e28dce5c0334a206ca2f8f940af5",
-      "aboveOptimalUsageBorrowingFactorLong": "0x89224478ab96507b20fcc45b1c9e71999ab674d07749c20e4ff6e149269a980c",
-      "aboveOptimalUsageBorrowingFactorShort": "0x4ef7d1a0c1e72fdcae1a7be1bff1f6fe701abe5b11bc399e22f70b80b0293cbf"
+    "0xD847a999faCe1f862120117C33ae8faBA768fD4b": {
+      "optimalUsageFactorLong": "0xe071aa15835f03caf438431553858aaada437cd496a080ace7d8792f75d65c3a",
+      "optimalUsageFactorShort": "0x59a4271372211fb7059e2b0dc704a061e8eff52d3aec722a7440d80f497038e8",
+      "baseBorrowingFactorLong": "0xc53194c0a3be463610a0d77125e473d5ed74a77fae32f9d7023306e7555101fa",
+      "baseBorrowingFactorShort": "0xb0da07bd0a6d90b0b5e8a2266a680c0c853476154a1ebe44302c06f9cc79e04d",
+      "aboveOptimalUsageBorrowingFactorLong": "0x3f9cf8a29ac4eacdb85de70020a43e289b024466ba4a7c350aa2485c340733f2",
+      "aboveOptimalUsageBorrowingFactorShort": "0xd92e9d3988cb1598f2445d182d03a33fdeb0c42279fe71769da3c1ad117a67bf"
     },
-    "0x9941A181B007Afb125b70d34F61d6A0ABB9eba5A": {
-      "optimalUsageFactorLong": "0xc21e520dca54a74b4859061c3ddce91e23c4428ddb4f639115fdac17d06d7716",
-      "optimalUsageFactorShort": "0x083a8c5a3256474cd592983abb3f208690d63290bef69c67486adca8d04cacdf",
-      "baseBorrowingFactorLong": "0x21b722abed1ae26e08ac54e059a51f7e8da5861d009e2ecd2e784ea4047b0f9f",
-      "baseBorrowingFactorShort": "0x25fe8f6c7ba440a21aebadb4c1482c103924e2d689750cf595a0e19c92ea8a38",
-      "aboveOptimalUsageBorrowingFactorLong": "0x4d7633acb199f151771872e56b92d3ae3c8aea8887c332f98b03d2cc8c9fcb05",
-      "aboveOptimalUsageBorrowingFactorShort": "0x0ba3fabe90357b06896cbd61949864d31a755c582dc7e5c9caace3bbf9a5074d"
+    "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF": {
+      "optimalUsageFactorLong": "0x68d896f6b298fa1659c347f126377c2a034d1078cdc5762e61021475bd133979",
+      "optimalUsageFactorShort": "0x4779dcf5be4f20705dedad2969ef5ef7bb869e65ec5f5120a5bac23126cfed51",
+      "baseBorrowingFactorLong": "0xdfd182e6d4783d10e893fba70f0afdd51865ffea58540fc4317c4ee6ed5e2e38",
+      "baseBorrowingFactorShort": "0xc7ea6595ac3119c9daaf5883790f9483d9d130be6b2e9ce5f728418c6c7090e3",
+      "aboveOptimalUsageBorrowingFactorLong": "0x906817bb01f213bbf4428242f7b83e057a34822a67d1bddbd3d832436d1d704a",
+      "aboveOptimalUsageBorrowingFactorShort": "0xa3fdf1a34d6d507fcfe632b8a65c69a15d876dfa1e833d9e97f37e3d1c783f82"
     },
-    "0xddF31Fd58463207225AaCE5c96f0410813A6e20e": {
-      "optimalUsageFactorLong": "0xff30eb4c19b8ce296c9f78c4cd581e6a5c7bdb5212891b3ff1c9fb0776b5ebb6",
-      "optimalUsageFactorShort": "0x9421e7b17cce5c5c5c1a64eadb9f70e752975b9fb1804c9077127bbf11826846",
-      "baseBorrowingFactorLong": "0x9223917f2d217cffd427debed8ece7536b436c70e945f2ee3d7bf6e126d08b8c",
-      "baseBorrowingFactorShort": "0x6a533f26ab8ee6c9bcf85dcc7f99efc0efa4f237eef2e9dc7e9de8e5aa607e8e",
-      "aboveOptimalUsageBorrowingFactorLong": "0x28dbdf008a55b2e335d8c3094e30e4976b5683458a2839f00c51208ae92d5989",
-      "aboveOptimalUsageBorrowingFactorShort": "0x366656e7c79ebcbf8c51e48e21ac3d1791d24fbb1da80ae6db05697ca14cbde9"
+    "0x63D05Da932541380df8d9eE20D8FdB4B02849398": {
+      "optimalUsageFactorLong": "0x90dd076cd9f03a1ac98019b4a69a2125ba71188f2fe485e4be2b659b4814c721",
+      "optimalUsageFactorShort": "0xbad04ecbc5519411d848297b98ac9b66617f7ea9270346769c54deb0f9fd0194",
+      "baseBorrowingFactorLong": "0x57588d56a3feb6990fcb298e62a367958b71c962a7e6f96d3e6030adc1ddee8b",
+      "baseBorrowingFactorShort": "0x636d8717e5f162a0552eadad731e609209b640e5ca09cccbf15598aa6a761dce",
+      "aboveOptimalUsageBorrowingFactorLong": "0x8ddadf4d4bdffa1893184e136aa8eb0c87533d1d61634143bd2b1435dfc2eee6",
+      "aboveOptimalUsageBorrowingFactorShort": "0x3b69edcdddeb496fae82fefcd66f5c6b5ca4f3bee1c83a25ca32482d020b79b0"
     },
-    "0x04bbdaA7d89e6456786d0dDD3BA224c275309a18": {
-      "optimalUsageFactorLong": "0x5d854a956e1aa98ec039527835ef2349e358d8da411454a545c9ab93b60d746b",
-      "optimalUsageFactorShort": "0x652913135b31f9345b863b6e75f93f438dd0df856d5ea5b9a6fdcaf695f8827a",
-      "baseBorrowingFactorLong": "0x5dab8b338312074045e840f635c42665904208e1a831152288a7bf3f4d128050",
-      "baseBorrowingFactorShort": "0xcd359f33cb8a6cdb57722495c3f8b63f1e6481cc23536d40d7d776da30ab2e09",
-      "aboveOptimalUsageBorrowingFactorLong": "0x656ac28edfb0320a0ff05c29cd3578acaa602090b03bd24efb61fdf15e2c1e1f",
-      "aboveOptimalUsageBorrowingFactorShort": "0x42f332aa91ebb00d6f814cf34287690ae91f6ca932437880e6c7cb61d762eead"
+    "0x23F40e3279685413b252A6944AF9a0641D3aa6ce": {
+      "optimalUsageFactorLong": "0x2fe7ed1ec3dd9ea05746d6f0b65dc46587920b2f220badc59b8be6530bffcfee",
+      "optimalUsageFactorShort": "0x43d6f5d481edb4484b20d765168ba45fdcdedf30224cfa43732cce7a5ce8747f",
+      "baseBorrowingFactorLong": "0x075a52220de02a8ae32d68d1587b97bb32f08171daed63cad8bbd736a625b926",
+      "baseBorrowingFactorShort": "0xa2f7ae7cc0e6556b1853bafc0c3ea9f8c001ef90c354dd8f66cc5c3043419a44",
+      "aboveOptimalUsageBorrowingFactorLong": "0xb0603098664064080847020dbac356631a0fdc9b40b591e275c8e54744bf5fef",
+      "aboveOptimalUsageBorrowingFactorShort": "0x43bd64678c0930447bffb163149e2e2444efd8ae50016509d8d9753ff3cce8dd"
     },
-    "0x2fFBE33E825a1520D0eAFaf8D19B7d1bd7f025dD": {
-      "optimalUsageFactorLong": "0xf85ff1484407695c1bb7b485009def537e643344f1a54f75c28da4d0190ae902",
-      "optimalUsageFactorShort": "0xe8b9265518e5794efa68c864fb376450f1fad30079204abefb1464f301e60017",
-      "baseBorrowingFactorLong": "0x1666217a369f4cf52134174cbb5e4f5a9f780aa4d5cee72554dc72977a70c85c",
-      "baseBorrowingFactorShort": "0x08f2febcac43764d67fe203a3b9d608df253a38e615d7e390518f7ca5db172eb",
-      "aboveOptimalUsageBorrowingFactorLong": "0x68d6cdafc006cc0c9dfd444c3d3145beeac96780f1686e5093e8782f5f10c6df",
-      "aboveOptimalUsageBorrowingFactorShort": "0x99cd734665f1ba280b9f6f6350118839e1032d398f29ed15f3d5f64df0e3e917"
+    "0x24061f45f954D880dCa0Ce122FFA60Cfd5447B5A": {
+      "optimalUsageFactorLong": "0x0f3db34a1ab5f0a4416b3e53c43f8c9390fa56e8ba80a1140eb476183e922946",
+      "optimalUsageFactorShort": "0x8c452ffe118229b389e0d144f180c8774345006253c98a2a23571c3ee0fcfb94",
+      "baseBorrowingFactorLong": "0x20235d8a57a3de1e8082d9da596102f6a37a4bcfbc9a5c74185e4945be28f93d",
+      "baseBorrowingFactorShort": "0x96080c6ee321bca02e49f5cf2f1cfc5968417ad8730cb24f5f3ed29dc59b8dd0",
+      "aboveOptimalUsageBorrowingFactorLong": "0xf0cce3b536bdd815e8d6cbf3781b1fc3903e59142e55dfefce50985580c1c9bd",
+      "aboveOptimalUsageBorrowingFactorShort": "0x7d4e8e1ec427f14fe2da2bb762bb33213bea1e6b3dbeed92123589d521c32555"
     }
   }
 }

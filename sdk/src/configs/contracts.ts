@@ -4,25 +4,27 @@ import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
 
 export const CONTRACTS = {
   [BASE_SEPOLIA]: {
-    // Redeployed May 2026 with leverage ladder
-    DataStore: "0x3B9d71B497aD2d3c32a7c24e96565f84a58089a7",
-    EventEmitter: "0xd5aAfa71f745645Db84cB4877873701ddAf2514c",
-    SubaccountRouter: "0x75069f9E4F161Ea04c323CBD2c325728B8b65967",
-    ExchangeRouter: "0x7B1687D038396A57A1950693632bAcb249BD64A6",
-    DepositVault: "0x4AFE24c4e2477F54aFa4bF30d6D7385e588dfeC4",
-    WithdrawalVault: "0x64D496E867000875Dd19C808592fAB6Fc99cBE7F",
-    OrderVault: "0x18916C70dFEb3fA3366089d35464aC40f5a1D903",
-    ShiftVault: "0xEB15262f24c0AdB52FaB1E496fDf8730B0195cD7",
+    // Layer 1 + pinned singletons live on House A (0x0cA7D71… DataStore);
+    // Layer 2/3 below were redeployed against it in May 2026 to ship the
+    // leverage ladder without touching MarketToken addresses.
+    DataStore: "0x0cA7D71845cb485B7593bBdCbcac93d82d52d053",
+    EventEmitter: "0x68001935Ec7C2e3980f99435db3CabC89dea602B",
+    SubaccountRouter: "0x99Aa90A736cF592fe0D6DD4c948CeE951e259d04",
+    ExchangeRouter: "0xF940b74a65be4cd6E9D8a874a072759a19CC15aA",
+    DepositVault: "0x590d1d8e50A3a3d9F3448657D1Cb64D486978781",
+    WithdrawalVault: "0xE47130E74CAEd3Cae1Bf2c7e1e0af0B592354b57",
+    OrderVault: "0x76DE02F06979a24A87F2cD743Ab533a44EdcFb08",
+    ShiftVault: "0xEF60117684991C41dea18de53446c437462d07cc",
 
-    SyntheticsReader: "0xe4716038f45bA792123C64B227727E86791bcc62",
-    SyntheticsRouter: "0x33153255bed0219b571483e6a0801Fa0B916f7D7",
+    SyntheticsReader: "0xA47f995B1eb4BB0B431bE7D257e0637a52bDF83E",
+    SyntheticsRouter: "0xE92B08345125dc77eB071d1a2D513751C4D22714",
 
-    GlvReader: "0x5A442F98743659124476aAD8de6A8c37a6a99b7E",
-    GlvRouter: "0x48Ac47276C594146339F17508D2Dc1E3236652aF",
-    GlvVault: "0xC90Db83d377B91b20f7Ce140673f4C3f24bB2e71",
+    GlvReader: "0x037Fc657a470d29AA9eb11b1D8c6d72820c0e520",
+    GlvRouter: "0x916966Bd4611422Cfa68D284C78B0B434650cde0",
+    GlvVault: "0x5fEb1eF511E953dec5E016bFF32F8987cE6eD33a",
 
-    GelatoRelayRouter: "0x4040014Af824f606F7E830E3F45370AEf0fCE776",
-    SubaccountGelatoRelayRouter: "0x0B851E6F264a180E5D00530E08DC6a016698A84a",
+    GelatoRelayRouter: "0x11775fc8521bA024921e3E10fAE34350fFC8b37a",
+    SubaccountGelatoRelayRouter: "0x86E59890F68B3d38b0bF3FC11891E966b97414Cb",
 
     MultichainClaimsRouter: zeroAddress,
     MultichainGlvRouter: zeroAddress,
@@ -33,22 +35,22 @@ export const CONTRACTS = {
     MultichainVault: zeroAddress,
     LayerZeroProvider: zeroAddress,
 
-    ChainlinkPriceFeedProvider: "0x62a2ff1cDFDB0364825F37563769DA0171fA5c1E",
+    ChainlinkPriceFeedProvider: "0xe0A7f2a21373128DB38b55a6FEb081C6BCDCC22E",
     ClaimHandler: zeroAddress,
 
     // External
-    ExternalHandler: "0x0A9369A2453BC12c1be38DB664B9406981c46C8f",
+    ExternalHandler: "0xfcD54e4D5ECA91abbB18CA9429369617730F4395",
     OpenOceanRouter: zeroAddress,
-    Multicall: "0x295B86560221c6cb2Bed126Cf6D69cC6aC03e0C4",
+    Multicall: "0xdD6E2999d0a882886A50c031c7a117058B4aCB5f",
     LayerZeroEndpoint: zeroAddress,
     ArbitrumNodeInterface: zeroAddress,
     GelatoRelayAddress: zeroAddress,
 
     // V1 legacy (not deployed on Base Sepolia)
     Vault: zeroAddress,
-    Reader: "0xe4716038f45bA792123C64B227727E86791bcc62",
+    Reader: "0xA47f995B1eb4BB0B431bE7D257e0637a52bDF83E",
     PositionRouter: zeroAddress,
-    ReferralStorage: "0xF5F9CdBe6225aBFF7cE2F290d12bc1BaCCC926E2",
+    ReferralStorage: "0x29D5533a26ac87C28972d277CEFf2EC00843c5A7",
     VaultReader: zeroAddress,
     GlpManager: zeroAddress,
     RewardRouter: zeroAddress,
@@ -70,12 +72,12 @@ export const CONTRACTS = {
     GmxVester: zeroAddress,
     GlpVester: zeroAddress,
     AffiliateVester: zeroAddress,
-    Router: "0x33153255bed0219b571483e6a0801Fa0B916f7D7",
-    GovToken: "0x8430dE0bAD0f2F58B56304ef708d934dFB8aeF3F",
+    Router: "0xE92B08345125dc77eB071d1a2D513751C4D22714",
+    GovToken: "0xA24dff4D381f97e9cb4DA7fb7b50505390cda522",
     ES_GMX_IOU: zeroAddress,
     OrderBook: zeroAddress,
     UniswapGmxEthPool: zeroAddress,
-    Timelock: "0x40c6339E499DD2BAe91cc1cae740B64E2EAF6A15",
+    Timelock: "0xF5ECA46bD52E43E8ef34938EC036bF1A6dA723a2",
 
     // BASE_SEPOLIA specific tokens
     NATIVE_TOKEN: "0x4200000000000000000000000000000000000006",

@@ -20,40 +20,40 @@ type MarketUiConfig = {
 const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig>> = {
   [BASE_SEPOLIA]: {
     // EUR/USD [USD0-USD0]
-    "0x8B56af349B530101D9d569555722B55E3919e4f7": {
+    "0x7054eb596aCF4fC1C0686C9B2cdAC4aE6c6D0F33": {
       enabled: true,
     },
     // GBP/USD [USD0-USD0]
-    "0x8FbD927DE4De0883DF8a560b41F772E2377809E8": {
+    "0xa09b59adf15B4ED98a099441b84Ff1eABf71B548": {
       enabled: true,
     },
     // GOLD/USD [USD0-USD0]
-    "0x9479d96EBFc0F2d4e5187F9ae51632770FBA6b6C": {
+    "0x89c3B33bEE4b9cD1B246BE44aDcEd870F74637a3": {
       enabled: true,
     },
     // XAG/USD [USD0-USD0]
-    "0x8C0f2eB9804777118FA0cAA98e76e88F1ed5C8bA": {
+    "0x6D260c4229dBb55a0a91041b5c07b320fdD6303B": {
       enabled: true,
     },
     // USD/JPY [USD0-USD0]
-    "0xF59FBcA079260351d30338eC6B839f3CFA8cCf42": {
+    "0xD847a999faCe1f862120117C33ae8faBA768fD4b": {
       enabled: true,
     },
     // WTI/USD [USD0-USD0]
-    "0x9941A181B007Afb125b70d34F61d6A0ABB9eba5A": {
+    "0x80d260188c592F7F175F843EDc257b6A6Af6e5eF": {
       enabled: true,
       comingSoon: true,
     },
     // WBTC/USD [USD0-USD0]
-    "0xddF31Fd58463207225AaCE5c96f0410813A6e20e": {
+    "0x63D05Da932541380df8d9eE20D8FdB4B02849398": {
       enabled: true,
     },
     // WETH/USD [USD0-USD0]
-    "0x04bbdaA7d89e6456786d0dDD3BA224c275309a18": {
+    "0x23F40e3279685413b252A6944AF9a0641D3aa6ce": {
       enabled: true,
     },
     // TAO/USD [USD0-USD0]
-    "0x2fFBE33E825a1520D0eAFaf8D19B7d1bd7f025dD": {
+    "0x24061f45f954D880dCa0Ce122FFA60Cfd5447B5A": {
       enabled: true,
     },
   },
