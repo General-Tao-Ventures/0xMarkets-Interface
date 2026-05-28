@@ -19,7 +19,7 @@ import {
   getAvailableUsdLiquidityForPosition,
   getLadderEquilibriumMaxLeverage,
   getLadderMaxLeverageForNotional,
-  getMaxAllowedLeverageByMinCollateralFactor,
+  getMaxAllowedLeverageByMarketMaxLeverage,
   getTradeboxLeverageSliderMarks,
   ladderMaxLeverageToBps,
 } from "domain/synthetics/markets";
@@ -1212,8 +1212,9 @@ export const selectTradeboxSelectedCollateralTokenSymbol = createSelector((q) =>
 });
 
 export const selectTradeboxMaxLeverage = createSelector((q) => {
-  const minCollateralFactor = q((s) => s.tradebox.marketInfo?.minCollateralFactor);
-  const baseMaxLeverage = getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor);
+  // Per-market max leverage replaces the old minCollateralFactor-derived cap.
+  const maxLeverage = q((s) => s.tradebox.marketInfo?.maxLeverage);
+  const baseMaxLeverage = getMaxAllowedLeverageByMarketMaxLeverage(maxLeverage);
 
   const marketInfo = q((s) => s.tradebox.marketInfo);
   if (!marketInfo?.leverageLadder?.length) {

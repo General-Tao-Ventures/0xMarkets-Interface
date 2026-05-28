@@ -7,7 +7,7 @@ import {
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import {
   getLadderEquilibriumMaxLeverage,
-  getMaxAllowedLeverageByMinCollateralFactor,
+  getMaxAllowedLeverageByMarketMaxLeverage,
   ladderMaxLeverageToBps,
 } from "domain/synthetics/markets";
 import { BASIS_POINTS_DIVISOR } from "sdk/configs/factors";
@@ -51,7 +51,7 @@ export function useShowLadderTierWarning(marketInfo: MarketInfo | undefined): La
         : getLadderEquilibriumMaxLeverage(marketInfo, collateralUsd) ?? activeTier.maxLeverage;
 
     const ladderMaxBps = ladderMaxLeverageToBps(ladderContribRaw);
-    const baseMaxBps = getMaxAllowedLeverageByMinCollateralFactor(marketInfo.minCollateralFactor);
+    const baseMaxBps = getMaxAllowedLeverageByMarketMaxLeverage(marketInfo.maxLeverage);
 
     // Only show the banner when the ladder is actually the binding cap.
     if (ladderMaxBps >= baseMaxBps) return noBanner;
