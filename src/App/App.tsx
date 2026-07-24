@@ -63,15 +63,18 @@ function App() {
 
   let app = (
     <>
-      <div className="bg-yellow-500/20 text-center text-16 font-normal text-yellow-300 py-12 px-16">
-        You are using the testnet environment. Funds are not real. Please report any issues/bugs in{" "}
-        <a href="https://discord.gg/d87vC7uaNx" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+      <div className="bg-yellow-500/20 px-16 py-12 text-center text-16 font-normal text-yellow-300">
+        <span className="font-medium">Beta Mainnet Live:</span> You're early enough to find a bug. Spot something broken
+        or unexpectedly spicy? Let us know on{" "}
+        <a
+          href="https://discord.gg/d87vC7uaNx"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ps-2  underline hover:text-white"
+        >
           Discord
         </a>
         .{" "}
-        <a href="https://faucet.0xMarkets.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-          Get testnet tokens
-        </a>
       </div>
       <KeeperStatusBanner />
       <AppRoutes />

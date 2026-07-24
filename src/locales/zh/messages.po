@@ -177,6 +177,10 @@ msgstr ""
 msgid "0xM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Weekly rewards"
+msgstr ""
+
 #: src/components/TradeHistory/keys.ts
 msgid "Cancel Limit Swap"
 msgstr "取消限价交换"
@@ -489,6 +493,10 @@ msgstr "{actionsCount, plural, one {订单} other {# 个订单}}"
 msgid "Buy APE on Arbitrum with <0>Camelot</0>."
 msgstr "使用 <0>Camelot</0> 在 Arbitrum 上购买 APE。"
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "≤ {0}"
+msgstr ""
+
 #: landing/src/pages/Home/LeaveHomepageRedirectModal/LeaveHompageRedirectModal.tsx
 #: src/components/ModalViews/RedirectModal.tsx
 msgid "Don't show this message again for 30 days."
@@ -733,6 +741,10 @@ msgstr "代码已被使用"
 #: src/components/TVChartContainer/constants.ts
 msgid "SL - Short Dec."
 msgstr "止损 - 空头减少"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Updated {0}"
+msgstr ""
 
 #: src/components/SettingsModal/SettingsModal.tsx
 msgid "Slippage should be less than -5%"
@@ -1448,6 +1460,10 @@ msgstr "返利分配历史"
 msgid "Accrued Negative Funding Fee"
 msgstr "累积负资金费用"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Cartha LP"
+msgstr ""
+
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of close fee"
 msgstr "关闭费用之"
@@ -1468,9 +1484,8 @@ msgstr "显示详情"
 msgid "Driven by our community"
 msgstr ""
 
-#: src/components/AppHeader/AppHeaderUser.tsx
-#: src/components/AppHeader/AppHeaderUser.tsx
 #: src/components/Footer/constants.tsx
+#: src/components/SideNav/SideNav.tsx
 msgid "Faucet"
 msgstr ""
 
@@ -1587,6 +1602,10 @@ msgstr "没有开仓，订单无法执行，除非开仓"
 #: src/pages/Dashboard/OverviewCard.tsx
 msgid "Short Positions"
 msgstr "空头仓位"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "with a {0}-day lock"
+msgstr ""
 
 #: landing/src/pages/Home/SocialSection/SocialSlider.tsx
 msgid "<0>Have to keep an eye on <1>@GMX_IO</1> here. While all of DeFi is in shambles, GMX continues to show impressive sustained performance in users, AUM, volume/fees, open interest, and utilization of capital. Best place to swap between major assets on Arbitrum and exposure to the Arb airdrop</0>"
@@ -1902,6 +1921,7 @@ msgstr ""
 #. Total Value Locked
 #: src/components/MarketsList/MarketsList.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Pools/CarthaLpCard.tsx
 msgid "TVL"
 msgstr "TVL"
 
@@ -2298,6 +2318,10 @@ msgstr ""
 msgid "Cancel Deposit"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Leverage tiers"
+msgstr ""
+
 #: src/components/MarketStats/MarketGraphs.tsx
 msgid "Fee APR"
 msgstr "费用年化收益率"
@@ -2387,6 +2411,10 @@ msgstr "esGMX (IOU) 代币是可转移的。如果您愿意，可以将代币添
 msgid "Generating session..."
 msgstr "生成会话中..."
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Next epoch in {0}"
+msgstr ""
+
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Get Testnet Tokens"
 msgstr ""
@@ -2463,8 +2491,16 @@ msgstr "杠杆"
 msgid "Available to Trade Assets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY by lock period"
+msgstr ""
+
 #: landing/src/pages/Home/LiqiuditySection/PoolCard.tsx
 msgid "Annually"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} α"
 msgstr ""
 
 #: src/components/GmxAccountModal/keys.ts
@@ -2678,6 +2714,10 @@ msgstr "可领取价格影响回扣。<0/><1/><2>阅读更多</2>。"
 #: src/components/MarketNetFee/MarketNetFee.tsx
 msgid "{longOrShort} positions {fundingAction} a funding fee of {fundingRate} per hour and {borrowAction} a borrow fee of {borrowRate} per hour."
 msgstr "{longOrShort} 仓位 {fundingAction} 每小时 {fundingRate} 的资金费用，并 {borrowAction} 每小时 {borrowRate} 的借贷费用。"
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage is {activeTierMaxLeverage}x at this position size. Reduce size or post more margin for higher leverage."
+msgstr ""
 
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
@@ -3383,6 +3423,10 @@ msgstr "最佳"
 msgid "Anonymous chat with 0xMarkets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Earn up to"
+msgstr ""
+
 #: src/components/GmSwap/GmFees/GmFees.tsx
 #: src/components/PositionItem/PositionItem.tsx
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
@@ -3891,6 +3935,10 @@ msgstr "价差"
 msgid "This position was liquidated as the max. leverage of {formattedMaxLeverage} was exceeded when taking into account fees."
 msgstr "由于在考虑费用时超出了 {formattedMaxLeverage} 的最大杠杆，该头寸已被清算。"
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "> {0}"
+msgstr ""
+
 #: src/components/TradeBox/hooks/useTradeButtonState.tsx
 msgid "Swap {0}"
 msgstr "交换 {0}"
@@ -3916,6 +3964,10 @@ msgstr "正在加载..."
 
 #: landing/src/pages/Home/HeroSection/Features.tsx
 msgid "Use your preferred token to pay and collateralize your positions"
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage tightens as your position size grows."
 msgstr ""
 
 #: src/components/TradeHistory/TradeHistoryRow/utils/shared.ts
@@ -4266,6 +4318,10 @@ msgstr "没有清算价格，因为头寸的抵押品价值将增加以覆盖任
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
 msgid "0xM can be sold for {0} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} / week"
 msgstr ""
 
 #: src/components/TVChartContainer/DynamicLine.tsx
@@ -4757,6 +4813,10 @@ msgstr ""
 msgid "tBTC LP Incentives"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "—"
+msgstr ""
+
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of open fee"
 msgstr "开仓费用"
@@ -5107,6 +5167,10 @@ msgstr "推荐代码"
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
 msgid "{0} and {1} can be used to buy 0xM for this market up to the specified buying caps."
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} positions"
 msgstr ""
 
 #. Filter option for tokens favorites
@@ -5553,6 +5617,10 @@ msgstr "Telegram 账户"
 msgid "Epoch Fees"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "For positions up to {0}, max leverage is {activeTierMaxLeverage}x. Larger positions trigger lower caps."
+msgstr ""
+
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 msgid "Sell {operationTokenSymbol}"
 msgstr "出售 {operationTokenSymbol}"
@@ -5748,6 +5816,10 @@ msgstr "增加中"
 
 #: src/domain/synthetics/trade/utils/validation.ts
 msgid "Market unavailable"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0}d lock"
 msgstr ""
 
 #: src/components/SettingsModal/TradingSettings.tsx
@@ -5970,6 +6042,10 @@ msgstr "仅允许字母、数字和下划线。"
 msgid "High TWAP network fee"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY"
+msgstr ""
+
 #: src/components/Errors/errorToasts.tsx
 #: src/components/Errors/errorToasts.tsx
 msgid "There is not enough {0} in your account on {1} to send this transaction.<0/><1/><2>Buy or Transfer {2} to {3}</2>"
@@ -6165,6 +6241,10 @@ msgstr "{prefix} <0>{text}</0>"
 msgid "Failed to update settings"
 msgstr "更新设置失败"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Liquidity providers"
+msgstr ""
+
 #: src/domain/synthetics/markets/claimFundingFeesTxn.ts
 msgid "Funding claimed."
 msgstr ""
@@ -6288,6 +6368,10 @@ msgstr ""
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 msgid "About"
 msgstr "关于"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} next epoch"
+msgstr ""
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "This may take a few minutes."

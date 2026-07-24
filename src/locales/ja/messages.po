@@ -177,6 +177,10 @@ msgstr ""
 msgid "0xM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Weekly rewards"
+msgstr ""
+
 #: src/components/TradeHistory/keys.ts
 msgid "Cancel Limit Swap"
 msgstr "指値スワップのキャンセル"
@@ -489,6 +493,10 @@ msgstr "{actionsCount, plural, one {注文} other {# 注文}}"
 msgid "Buy APE on Arbitrum with <0>Camelot</0>."
 msgstr "<0>Camelot</0>でArbitrum上のAPEを購入。"
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "≤ {0}"
+msgstr ""
+
 #: landing/src/pages/Home/LeaveHomepageRedirectModal/LeaveHompageRedirectModal.tsx
 #: src/components/ModalViews/RedirectModal.tsx
 msgid "Don't show this message again for 30 days."
@@ -733,6 +741,10 @@ msgstr "そのコードは既に使用されています"
 #: src/components/TVChartContainer/constants.ts
 msgid "SL - Short Dec."
 msgstr "SL - ショート減少"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Updated {0}"
+msgstr ""
 
 #: src/components/SettingsModal/SettingsModal.tsx
 msgid "Slippage should be less than -5%"
@@ -1448,6 +1460,10 @@ msgstr "リベート分配履歴"
 msgid "Accrued Negative Funding Fee"
 msgstr "蓄積された負のファンディング手数料"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Cartha LP"
+msgstr ""
+
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of close fee"
 msgstr "クローズ手数料の"
@@ -1468,9 +1484,8 @@ msgstr "詳細を表示"
 msgid "Driven by our community"
 msgstr ""
 
-#: src/components/AppHeader/AppHeaderUser.tsx
-#: src/components/AppHeader/AppHeaderUser.tsx
 #: src/components/Footer/constants.tsx
+#: src/components/SideNav/SideNav.tsx
 msgid "Faucet"
 msgstr ""
 
@@ -1587,6 +1602,10 @@ msgstr "オープンのポジションはありません。オープンのポジ
 #: src/pages/Dashboard/OverviewCard.tsx
 msgid "Short Positions"
 msgstr "ショートポジション"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "with a {0}-day lock"
+msgstr ""
 
 #: landing/src/pages/Home/SocialSection/SocialSlider.tsx
 msgid "<0>Have to keep an eye on <1>@GMX_IO</1> here. While all of DeFi is in shambles, GMX continues to show impressive sustained performance in users, AUM, volume/fees, open interest, and utilization of capital. Best place to swap between major assets on Arbitrum and exposure to the Arb airdrop</0>"
@@ -1902,6 +1921,7 @@ msgstr ""
 #. Total Value Locked
 #: src/components/MarketsList/MarketsList.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Pools/CarthaLpCard.tsx
 msgid "TVL"
 msgstr "TVL"
 
@@ -2298,6 +2318,10 @@ msgstr ""
 msgid "Cancel Deposit"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Leverage tiers"
+msgstr ""
+
 #: src/components/MarketStats/MarketGraphs.tsx
 msgid "Fee APR"
 msgstr "手数料APR"
@@ -2387,6 +2411,10 @@ msgstr "esGMX (IOU)は移転可能です。自分のウォレットに加えて�
 msgid "Generating session..."
 msgstr "セッション生成中..."
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Next epoch in {0}"
+msgstr ""
+
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Get Testnet Tokens"
 msgstr ""
@@ -2463,8 +2491,16 @@ msgstr "レバレッジ"
 msgid "Available to Trade Assets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY by lock period"
+msgstr ""
+
 #: landing/src/pages/Home/LiqiuditySection/PoolCard.tsx
 msgid "Annually"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} α"
 msgstr ""
 
 #: src/components/GmxAccountModal/keys.ts
@@ -2678,6 +2714,10 @@ msgstr "請求可能な価格インパクトリベート。<0/><1/><2>詳細を�
 #: src/components/MarketNetFee/MarketNetFee.tsx
 msgid "{longOrShort} positions {fundingAction} a funding fee of {fundingRate} per hour and {borrowAction} a borrow fee of {borrowRate} per hour."
 msgstr "{longOrShort}ポジションは1時間あたり{fundingRate}のファンディング手数料を{fundingAction}し、1時間あたり{borrowRate}の借入手数料を{borrowAction}します。"
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage is {activeTierMaxLeverage}x at this position size. Reduce size or post more margin for higher leverage."
+msgstr ""
 
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
@@ -3383,6 +3423,10 @@ msgstr "最適"
 msgid "Anonymous chat with 0xMarkets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Earn up to"
+msgstr ""
+
 #: src/components/GmSwap/GmFees/GmFees.tsx
 #: src/components/PositionItem/PositionItem.tsx
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
@@ -3891,6 +3935,10 @@ msgstr "スプレッド"
 msgid "This position was liquidated as the max. leverage of {formattedMaxLeverage} was exceeded when taking into account fees."
 msgstr "このポジションは手数料を考慮した上での最大レバレッジ倍率({formattedMaxLeverage})を超過したため清算されました。"
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "> {0}"
+msgstr ""
+
 #: src/components/TradeBox/hooks/useTradeButtonState.tsx
 msgid "Swap {0}"
 msgstr "{0}をスワップ"
@@ -3916,6 +3964,10 @@ msgstr "ロード中..."
 
 #: landing/src/pages/Home/HeroSection/Features.tsx
 msgid "Use your preferred token to pay and collateralize your positions"
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage tightens as your position size grows."
 msgstr ""
 
 #: src/components/TradeHistory/TradeHistoryRow/utils/shared.ts
@@ -4266,6 +4318,10 @@ msgstr "ポジションの担保価値が負のPnLをカバーするために増
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
 msgid "0xM can be sold for {0} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} / week"
 msgstr ""
 
 #: src/components/TVChartContainer/DynamicLine.tsx
@@ -4757,6 +4813,10 @@ msgstr ""
 msgid "tBTC LP Incentives"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "—"
+msgstr ""
+
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of open fee"
 msgstr "オープン手数料の"
@@ -5107,6 +5167,10 @@ msgstr "紹介コード"
 
 #: src/pages/PoolsDetails/PoolsDetailsAbout.tsx
 msgid "{0} and {1} can be used to buy 0xM for this market up to the specified buying caps."
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} positions"
 msgstr ""
 
 #. Filter option for tokens favorites
@@ -5553,6 +5617,10 @@ msgstr "Telegramアカウント"
 msgid "Epoch Fees"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "For positions up to {0}, max leverage is {activeTierMaxLeverage}x. Larger positions trigger lower caps."
+msgstr ""
+
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 msgid "Sell {operationTokenSymbol}"
 msgstr "{operationTokenSymbol}を売却"
@@ -5748,6 +5816,10 @@ msgstr "増加中"
 
 #: src/domain/synthetics/trade/utils/validation.ts
 msgid "Market unavailable"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0}d lock"
 msgstr ""
 
 #: src/components/SettingsModal/TradingSettings.tsx
@@ -5970,6 +6042,10 @@ msgstr "文字、数字、アンダースコアのみ許可されます。"
 msgid "High TWAP network fee"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY"
+msgstr ""
+
 #: src/components/Errors/errorToasts.tsx
 #: src/components/Errors/errorToasts.tsx
 msgid "There is not enough {0} in your account on {1} to send this transaction.<0/><1/><2>Buy or Transfer {2} to {3}</2>"
@@ -6165,6 +6241,10 @@ msgstr "{prefix} <0>{text}</0>"
 msgid "Failed to update settings"
 msgstr "設定更新に失敗"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Liquidity providers"
+msgstr ""
+
 #: src/domain/synthetics/markets/claimFundingFeesTxn.ts
 msgid "Funding claimed."
 msgstr ""
@@ -6288,6 +6368,10 @@ msgstr ""
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 msgid "About"
 msgstr "について"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} next epoch"
+msgstr ""
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "This may take a few minutes."
