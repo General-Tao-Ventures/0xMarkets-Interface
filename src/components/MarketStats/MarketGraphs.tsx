@@ -18,7 +18,7 @@ import { PriceSnapshot, usePriceSnapshots } from "domain/synthetics/markets/useP
 import { TokensData, getMidPrice } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
 import { useLocalizedMap } from "lib/i18n";
-import { bigintToNumber, formatPercentage, formatUsdPrice, parseValue, PRECISION_DECIMALS } from "lib/numbers";
+import { bigintToNumber, formatPercentage, formatUsdPrice, numberToBigint, PRECISION_DECIMALS } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { usePrevious } from "lib/usePrevious";
 import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
@@ -220,31 +220,39 @@ export const formatPerformanceBps = (performance: number): string => {
 };
 
 const valueFormatter = (marketGraphType: MarketGraphType) => (value: number) => {
-  if (value === 0) {
+  if (!Number.isFinite(value) || value === 0) {
     return "0";
   }
 
-  const valueMap: Record<MarketGraphType, string> = {
-    performance: formatPerformanceBps(value),
-    price: formatUsdPrice(parseValue(value.toString(), USD_DECIMALS) ?? 0n) || "",
-    feeApr: `${Number(value.toFixed(2))}%`,
-  };
-
-  return valueMap[marketGraphType];
+  // Compute only the active branch — building a full Record eagerly used to call
+  // parseValue(value.toString()) for tiny floats ("3e-30") and crash Performance too.
+  switch (marketGraphType) {
+    case "performance":
+      return formatPerformanceBps(value);
+    case "price":
+      try {
+        return formatUsdPrice(numberToBigint(value, USD_DECIMALS)) || "";
+      } catch {
+        return "";
+      }
+    case "feeApr":
+      return `${Number(value.toFixed(2))}%`;
+  }
 };
 
 const axisValueFormatter = (marketGraphType: MarketGraphType) => (value: number) => {
-  if (value === 0) {
+  if (!Number.isFinite(value) || value === 0) {
     return "0";
   }
 
-  const valueMap: Record<MarketGraphType, string> = {
-    performance: formatPerformanceBps(value),
-    price: value.toString(),
-    feeApr: `${Number(value.toFixed(2))}%`,
-  };
-
-  return valueMap[marketGraphType];
+  switch (marketGraphType) {
+    case "performance":
+      return formatPerformanceBps(value);
+    case "price":
+      return value.toLocaleString(undefined, { maximumSignificantDigits: 6 });
+    case "feeApr":
+      return `${Number(value.toFixed(2))}%`;
+  }
 };
 
 const CHART_CURSOR_PROPS = {
@@ -287,18 +295,15 @@ const GraphChart = ({
         const snapshotTimestamp = new Date(Number(snapshot.snapshotTimestamp) * 1000);
         if (Number.isNaN(snapshotTimestamp.getTime())) return [];
         try {
-          return [
-            {
-              snapshotTimestamp,
-              value: bigintToNumber(
-                getMidPrice({
-                  minPrice: BigInt(snapshot.minPrice),
-                  maxPrice: BigInt(snapshot.maxPrice),
-                }),
-                USD_DECIMALS
-              ),
-            },
-          ];
+          const mid = getMidPrice({
+            minPrice: BigInt(snapshot.minPrice),
+            maxPrice: BigInt(snapshot.maxPrice),
+          });
+          // Skip dust / unset oracle snapshots that become ~0 floats on the chart.
+          if (mid <= 0n) return [];
+          const value = bigintToNumber(mid, USD_DECIMALS);
+          if (!Number.isFinite(value) || value <= 0) return [];
+          return [{ snapshotTimestamp, value }];
         } catch {
           return [];
         }
@@ -419,7 +424,15 @@ const GraphTooltip = ({ active, payload, formatValue }: any) => {
       shadow-lg`}
       >
         <span className=" text-typography-secondary">{format(item.snapshotTimestamp.getTime(), "MMMM dd, yyyy")}</span>
-        <span className="numbers">{formatValue(item.value)}</span>
+        <span className="numbers">
+          {(() => {
+            try {
+              return formatValue(item.value);
+            } catch {
+              return "—";
+            }
+          })()}
+        </span>
       </div>
     );
   }
