@@ -113,9 +113,13 @@ export function formatPositionPrice(
     return "NA";
   }
 
+  // Use formatUsd (not formatUsdPrice) so caller-provided market priceDecimals are honored.
+  const displayDecimals =
+    opts.displayDecimals ?? calculateDisplayDecimals(price, undefined, opts.visualMultiplier);
+
   return (
-    formatUsdPrice(price, {
-      displayDecimals: opts.displayDecimals,
+    formatUsd(price, {
+      displayDecimals,
       visualMultiplier: opts.visualMultiplier,
     }) ?? "NA"
   );
