@@ -177,6 +177,10 @@ msgstr ""
 msgid "0xM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Weekly rewards"
+msgstr ""
+
 #: src/components/TradeHistory/keys.ts
 msgid "Cancel Limit Swap"
 msgstr "Отмена лимитного обмена"
@@ -489,6 +493,10 @@ msgstr "{actionsCount, plural, one {Ордер} other {# Ордеров}}"
 msgid "Buy APE on Arbitrum with <0>Camelot</0>."
 msgstr "Купить APE на Arbitrum с <0>Camelot</0>."
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "≤ {0}"
+msgstr ""
+
 #: landing/src/pages/Home/LeaveHomepageRedirectModal/LeaveHompageRedirectModal.tsx
 #: src/components/ModalViews/RedirectModal.tsx
 msgid "Don't show this message again for 30 days."
@@ -733,6 +741,10 @@ msgstr "Код уже занят"
 #: src/components/TVChartContainer/constants.ts
 msgid "SL - Short Dec."
 msgstr "SL - Уменьшение шорта"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Updated {0}"
+msgstr ""
 
 #: src/components/SettingsModal/SettingsModal.tsx
 msgid "Slippage should be less than -5%"
@@ -1448,6 +1460,10 @@ msgstr "История Распределения Рибейтов"
 msgid "Accrued Negative Funding Fee"
 msgstr "Накопленная отрицательная комиссия финансирования"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Cartha LP"
+msgstr ""
+
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of close fee"
 msgstr "от комиссии закрытия"
@@ -1468,9 +1484,8 @@ msgstr "Показать детали"
 msgid "Driven by our community"
 msgstr ""
 
-#: src/components/AppHeader/AppHeaderUser.tsx
-#: src/components/AppHeader/AppHeaderUser.tsx
 #: src/components/Footer/constants.tsx
+#: src/components/SideNav/SideNav.tsx
 msgid "Faucet"
 msgstr ""
 
@@ -1587,6 +1602,10 @@ msgstr "Нет открытой позиции, ордер не может бы�
 #: src/pages/Dashboard/OverviewCard.tsx
 msgid "Short Positions"
 msgstr "Позиции Шорта"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "with a {0}-day lock"
+msgstr ""
 
 #: landing/src/pages/Home/SocialSection/SocialSlider.tsx
 msgid "<0>Have to keep an eye on <1>@GMX_IO</1> here. While all of DeFi is in shambles, GMX continues to show impressive sustained performance in users, AUM, volume/fees, open interest, and utilization of capital. Best place to swap between major assets on Arbitrum and exposure to the Arb airdrop</0>"
@@ -1902,6 +1921,7 @@ msgstr ""
 #. Total Value Locked
 #: src/components/MarketsList/MarketsList.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Pools/CarthaLpCard.tsx
 msgid "TVL"
 msgstr "TVL"
 
@@ -2298,6 +2318,10 @@ msgstr ""
 msgid "Cancel Deposit"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Leverage tiers"
+msgstr ""
+
 #: src/components/MarketStats/MarketGraphs.tsx
 msgid "Fee APR"
 msgstr "Годовая Процентная Ставка Комиссии"
@@ -2387,6 +2411,10 @@ msgstr "Токен esGMX (IOU) является переводимым. При �
 msgid "Generating session..."
 msgstr "Генерация сессии..."
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Next epoch in {0}"
+msgstr ""
+
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Get Testnet Tokens"
 msgstr ""
@@ -2463,8 +2491,16 @@ msgstr "Плечо"
 msgid "Available to Trade Assets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY by lock period"
+msgstr ""
+
 #: landing/src/pages/Home/LiqiuditySection/PoolCard.tsx
 msgid "Annually"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} α"
 msgstr ""
 
 #: src/components/GmxAccountModal/keys.ts
@@ -2678,6 +2714,10 @@ msgstr "Требуемые рибейты влияния цены.<0/><1/><2>П�
 #: src/components/MarketNetFee/MarketNetFee.tsx
 msgid "{longOrShort} positions {fundingAction} a funding fee of {fundingRate} per hour and {borrowAction} a borrow fee of {borrowRate} per hour."
 msgstr "Позиции {longOrShort} {fundingAction} комиссию за финансирование {fundingRate} в час и {borrowAction} комиссию за заимствование {borrowRate} в час."
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage is {activeTierMaxLeverage}x at this position size. Reduce size or post more margin for higher leverage."
+msgstr ""
 
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
@@ -3383,6 +3423,10 @@ msgstr "Оптимальный"
 msgid "Anonymous chat with 0xMarkets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Earn up to"
+msgstr ""
+
 #: src/components/GmSwap/GmFees/GmFees.tsx
 #: src/components/PositionItem/PositionItem.tsx
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
@@ -3891,6 +3935,10 @@ msgstr "Спред"
 msgid "This position was liquidated as the max. leverage of {formattedMaxLeverage} was exceeded when taking into account fees."
 msgstr "Эта позиция была ликвидирована, так как максимальное кредитное плечо {formattedMaxLeverage} было превышено с учетом комиссий."
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "> {0}"
+msgstr ""
+
 #: src/components/TradeBox/hooks/useTradeButtonState.tsx
 msgid "Swap {0}"
 msgstr "Обмен {0}"
@@ -3916,6 +3964,10 @@ msgstr "Загрузка..."
 
 #: landing/src/pages/Home/HeroSection/Features.tsx
 msgid "Use your preferred token to pay and collateralize your positions"
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage tightens as your position size grows."
 msgstr ""
 
 #: src/components/TradeHistory/TradeHistoryRow/utils/shared.ts
@@ -5109,6 +5161,10 @@ msgstr "Реферальные коды"
 msgid "{0} and {1} can be used to buy 0xM for this market up to the specified buying caps."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} positions"
+msgstr ""
+
 #. Filter option for tokens favorites
 #: src/context/TokensFavoritesContext/TokensFavoritesContextProvider.tsx
 msgid "All Markets"
@@ -5553,6 +5609,10 @@ msgstr "Аккаунт в Telegram"
 msgid "Epoch Fees"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "For positions up to {0}, max leverage is {activeTierMaxLeverage}x. Larger positions trigger lower caps."
+msgstr ""
+
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
 msgid "Sell {operationTokenSymbol}"
 msgstr "Продать {operationTokenSymbol}"
@@ -5970,6 +6030,10 @@ msgstr "Допускаются только буквы, цифры и подче
 msgid "High TWAP network fee"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY"
+msgstr ""
+
 #: src/components/Errors/errorToasts.tsx
 #: src/components/Errors/errorToasts.tsx
 msgid "There is not enough {0} in your account on {1} to send this transaction.<0/><1/><2>Buy or Transfer {2} to {3}</2>"
@@ -6165,6 +6229,10 @@ msgstr "{prefix} <0>{text}</0>"
 msgid "Failed to update settings"
 msgstr "Не удалось обновить настройки"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Liquidity providers"
+msgstr ""
+
 #: src/domain/synthetics/markets/claimFundingFeesTxn.ts
 msgid "Funding claimed."
 msgstr ""
@@ -6288,6 +6356,10 @@ msgstr ""
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 msgid "About"
 msgstr "О нас"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} next epoch"
+msgstr ""
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "This may take a few minutes."

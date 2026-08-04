@@ -6,9 +6,8 @@
 .pnp.js
 .vscode
 
-# lingui
+# lingui — compiled JS is generated; catalogs (including en) MUST be committed
 /src/locales/**/*.js
-/src/locales/en/messages.po
 /src/locales/_build/
 
 # testing
