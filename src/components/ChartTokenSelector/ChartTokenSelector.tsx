@@ -106,8 +106,8 @@ export default function ChartTokenSelector(props: Props) {
                     <span className="text-start text-[13px] font-medium text-typography-primary">
                       {!isSwap && <>{getTokenVisualMultiplier(selectedToken)}</>}
                       {REVERSED_PAIR_SYMBOLS.has(selectedToken.symbol)
-                        ? `USD-${selectedToken.symbol}`
-                        : `${selectedToken.symbol}-USD`}
+                        ? `USD-${selectedToken.baseSymbol || selectedToken.symbol}`
+                        : `${selectedToken.baseSymbol || selectedToken.symbol}-USD`}
                     </span>
 
                     {isSwap && !oneRowLabels ? (
@@ -452,7 +452,11 @@ function useFilterSortTokens({
             options,
             [
               (item) => stripBlacklistedWords(item.name),
-              (item) => (isSwap ? item.symbol : `${getTokenVisualMultiplier(item)}${item.symbol}`),
+              (item) =>
+                isSwap
+                  ? item.symbol
+                  : `${getTokenVisualMultiplier(item)}${item.baseSymbol || item.symbol}`,
+              (item) => item.baseSymbol || "",
             ],
             searchKeyword
           )

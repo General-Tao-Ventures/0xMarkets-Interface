@@ -89,8 +89,10 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       coingeckoUrl: "https://www.coingecko.com/en/coins/jpy",
     },
     {
-      name: "Wrapped Bitcoin",
+      name: "Bitcoin",
       symbol: "WBTC",
+      // Display as BTC in markets/charts; keep symbol WBTC for oracle/API.
+      baseSymbol: "BTC",
       decimals: 8,
       address: "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
       isSynthetic: false,

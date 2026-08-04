@@ -492,8 +492,9 @@ export function useTradeboxButtonState({
             submitButtonText = `${localizedTradeTypeLabels[tradeType!]} ...`;
           }
           const prefix = toToken ? getTokenVisualMultiplier(toToken) : "";
+          const displaySymbol = toToken?.baseSymbol || toToken?.symbol;
 
-          submitButtonText = `${localizedTradeTypeLabels[tradeType!]} ${prefix}${toToken?.symbol}`;
+          submitButtonText = `${localizedTradeTypeLabels[tradeType!]} ${prefix}${displaySymbol}`;
         }
       } else if (isLimit) {
         submitButtonText = t`Create ${getNameByOrderType(increaseAmounts?.limitOrderType, false)} order`;

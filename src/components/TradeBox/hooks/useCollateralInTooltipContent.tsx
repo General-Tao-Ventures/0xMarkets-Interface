@@ -26,7 +26,7 @@ export function useCollateralInTooltipContent() {
 }
 
 export function getCollateralInHintText(tradeType: TradeType, collateralToken: TokenData, marketInfo: MarketInfo) {
-  const indexSymbol = marketInfo.indexToken.symbol;
+  const indexSymbol = marketInfo.indexToken.baseSymbol || marketInfo.indexToken.symbol;
   const collateralSymbol = collateralToken.symbol;
 
   if (tradeType === TradeType.Long) {

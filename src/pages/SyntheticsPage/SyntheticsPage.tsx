@@ -180,9 +180,10 @@ export function SyntheticsPage(p: Props) {
 
     const prefix = isSwap ? "" : getTokenVisualMultiplier(chartToken);
 
+    const displaySymbol = chartToken?.baseSymbol || chartToken?.symbol;
     const title = getPageTitle(
       currentTokenPriceStr +
-        ` | ${prefix}${chartToken?.symbol}${chartToken?.symbol ? " " : ""}${chartToken?.isStable ? "" : "USD"}`
+        ` | ${prefix}${displaySymbol}${displaySymbol ? " " : ""}${chartToken?.isStable ? "" : "USD"}`
     );
     document.title = title;
   }, [chartToken, isSwap]);

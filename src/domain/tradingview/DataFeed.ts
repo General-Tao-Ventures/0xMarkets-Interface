@@ -114,9 +114,11 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     const prefix = visualMultiplier !== 1 ? getTokenVisualMultiplier(token) : "";
     const isReversedPair = symbolName === "JPY";
+    // Prefer baseSymbol for chart title (e.g. WBTC → BTC-USD); ticker stays the real symbol for data.
+    const displaySymbol = token.baseSymbol || symbolName;
     const pairName = isReversedPair
-      ? `USD-${prefix}${symbolName}`
-      : `${prefix}${symbolName}-USD`;
+      ? `USD-${prefix}${displaySymbol}`
+      : `${prefix}${displaySymbol}-USD`;
 
     const symbolInfo: LibrarySymbolInfo = {
       unit_id: visualMultiplier.toString(),
