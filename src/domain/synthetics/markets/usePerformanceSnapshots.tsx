@@ -49,12 +49,16 @@ export function usePerformanceSnapshots({
     const dataArray = Array.isArray(data) ? data : [];
 
     return dataArray.reduce((acc, item) => {
+      if (!item?.address || !Array.isArray(item.snapshots)) {
+        return acc;
+      }
       acc[item.address.toLowerCase()] = item.snapshots
         .map((snapshot) => {
           const performance = parseFixedPointString(snapshot.uniswapV2Performance);
-          if (typeof performance === "undefined") return null;
+          const snapshotTimestamp = parseInt(String(snapshot.snapshotTimestamp), 10);
+          if (typeof performance === "undefined" || !Number.isFinite(snapshotTimestamp)) return null;
           return {
-            snapshotTimestamp: parseInt(snapshot.snapshotTimestamp),
+            snapshotTimestamp,
             performance,
           };
         })

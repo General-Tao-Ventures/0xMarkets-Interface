@@ -112,7 +112,7 @@ export function getPoolUsdWithoutPnl(
   } else if (priceType === "maxPrice") {
     price = token.prices?.maxPrice;
   } else {
-    price = getMidPrice(token.prices);
+    price = token.prices ? getMidPrice(token.prices) : undefined;
   }
 
   return convertToUsd(poolAmount, token.decimals, price)!;

@@ -416,11 +416,13 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       }
 
       // Floor to on-chain MIN_LEVERAGE when configured (1e30 factor → x).
+      // Use integer tenths to avoid IEEE float overshoot (e.g. 1.1*10 → 11.000000000002).
       const minLeverageFactor = marketInfo?.minLeverage ?? 0n;
       if (minLeverageFactor > 0n) {
-        const minX = Number((minLeverageFactor * BigInt(BASIS_POINTS_DIVISOR)) / PRECISION) / BASIS_POINTS_DIVISOR;
+        const minXBps = Number((minLeverageFactor * BigInt(BASIS_POINTS_DIVISOR)) / PRECISION);
+        const minX = Math.ceil(minXBps / 1000) / 10;
         if (Number.isFinite(minX) && minX > 0 && leverageOption < minX) {
-          setLeverageOption(Math.min(maxX, Math.ceil(minX * 10) / 10));
+          setLeverageOption(Math.min(maxX, minX));
         }
       }
     },

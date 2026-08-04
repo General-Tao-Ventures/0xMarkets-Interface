@@ -59,8 +59,9 @@ const getGraphValue = ({
   const apy = isGlv
     ? getByKey(glvApyInfoData, glvOrMarketInfo.glvTokenAddress)
     : getByKey(marketsTokensApyData, glvOrMarketInfo.marketTokenAddress);
-  const tokenPrice = marketTokensData?.[address]?.prices.minPrice;
-  const marketPerformance = performance[address.toLowerCase()];
+  // prices may be missing while RPCs are rate-limited; optional-chain the whole path
+  const tokenPrice = marketTokensData?.[address]?.prices?.minPrice;
+  const marketPerformance = address ? performance[address.toLowerCase()] : undefined;
   const valuesMap: Record<MarketGraphType, string | undefined> = {
     performance: marketPerformance
       ? formatPercentage(marketPerformance, { bps: false, signed: true, showPlus: false })
@@ -175,7 +176,8 @@ export function MarketGraphs({ glvOrMarketInfo }: { glvOrMarketInfo: GlvOrMarket
               })}
               label={graphTitleLabelMap[marketGraphType]}
               valueClassName={cx("normal-nums", {
-                "text-green-300": marketGraphType === "performance" && performance[address.toLowerCase()] > 0n,
+                "text-green-300":
+                  marketGraphType === "performance" && (performance[address.toLowerCase()] ?? 0n) > 0n,
               })}
             />
             {!isMobile ? <div className="ml-auto">{poolsTabs}</div> : null}
@@ -266,34 +268,60 @@ const GraphChart = ({
 }) => {
   const performanceData = useMemo(
     () =>
-      performanceSnapshots.map((snapshot) => ({
-        snapshotTimestamp: new Date(snapshot.snapshotTimestamp * 1000),
-        value: bigintToNumber(snapshot.performance, PRECISION_DECIMALS),
-      })),
+      performanceSnapshots.flatMap((snapshot) => {
+        const snapshotTimestamp = new Date(Number(snapshot.snapshotTimestamp) * 1000);
+        if (Number.isNaN(snapshotTimestamp.getTime())) return [];
+        return [
+          {
+            snapshotTimestamp,
+            value: bigintToNumber(snapshot.performance, PRECISION_DECIMALS),
+          },
+        ];
+      }),
     [performanceSnapshots]
   );
 
   const priceData = useMemo(
     () =>
-      priceSnapshots.map((snapshot) => ({
-        snapshotTimestamp: new Date(snapshot.snapshotTimestamp * 1000),
-        value: bigintToNumber(
-          getMidPrice({
-            minPrice: BigInt(snapshot.minPrice),
-            maxPrice: BigInt(snapshot.maxPrice),
-          }),
-          USD_DECIMALS
-        ),
-      })),
+      priceSnapshots.flatMap((snapshot) => {
+        const snapshotTimestamp = new Date(Number(snapshot.snapshotTimestamp) * 1000);
+        if (Number.isNaN(snapshotTimestamp.getTime())) return [];
+        try {
+          return [
+            {
+              snapshotTimestamp,
+              value: bigintToNumber(
+                getMidPrice({
+                  minPrice: BigInt(snapshot.minPrice),
+                  maxPrice: BigInt(snapshot.maxPrice),
+                }),
+                USD_DECIMALS
+              ),
+            },
+          ];
+        } catch {
+          return [];
+        }
+      }),
     [priceSnapshots]
   );
 
   const apyData = useMemo(
     () =>
-      aprSnapshots.map((snapshot) => ({
-        snapshotTimestamp: new Date(snapshot.snapshotTimestamp * 1000),
-        value: bigintToNumber(BigInt(snapshot.aprByFee) + BigInt(snapshot.aprByBorrowingFee), 28),
-      })),
+      aprSnapshots.flatMap((snapshot) => {
+        const snapshotTimestamp = new Date(Number(snapshot.snapshotTimestamp) * 1000);
+        if (Number.isNaN(snapshotTimestamp.getTime())) return [];
+        try {
+          return [
+            {
+              snapshotTimestamp,
+              value: bigintToNumber(BigInt(snapshot.aprByFee) + BigInt(snapshot.aprByBorrowingFee), 28),
+            },
+          ];
+        } catch {
+          return [];
+        }
+      }),
     [aprSnapshots]
   );
 
@@ -317,6 +345,17 @@ const GraphChart = ({
       setData(dataMap[marketGraphType]);
     }
   }, [performanceData, priceData, apyData, marketGraphType, prevMarketGraphType]);
+
+  if (data.length === 0) {
+    return (
+      <div
+        className="text-body-small text-typography-secondary flex items-center justify-center"
+        style={{ height: isMobile ? 260 : 300 }}
+      >
+        {t`No data for this period`}
+      </div>
+    );
+  }
 
   return (
     <div>
