@@ -104,11 +104,10 @@ export default function TVChartContainer({
 
     const onCandlesSuccess = (event: Event) => {
       const isFirstDraw = (event as CustomEvent).detail?.isFirstTimeLoad;
-      if (isFirstDraw) {
-        setIsCandlesLoaded?.(true);
-      }
-      // Re-apply after bars land — saved chart state otherwise restores an empty future
-      // range (e.g. into 2027) and hides the ~12m of history we just fetched.
+      if (!isFirstDraw) return;
+      setIsCandlesLoaded?.(true);
+      // Only on first paint — later getBars (history scroll) must not snap the viewport.
+      // Saved chart state otherwise restores an empty future range (e.g. into 2027).
       fitHigherTimeframeVisibleRange(tvWidgetRef.current);
     };
 
