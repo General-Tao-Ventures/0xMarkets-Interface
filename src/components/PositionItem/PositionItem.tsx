@@ -25,6 +25,7 @@ import {
   PositionInfo,
   formatLeverage,
   formatLiquidationPrice,
+  formatPositionPrice,
   getEstimatedLiquidationTimeInHours,
   getNameByOrderType,
 } from "domain/synthetics/positions";
@@ -411,6 +412,7 @@ export function PositionItem(p: Props) {
               ? formatLiquidationPrice(p.position.liquidationPrice, {
                   displayDecimals: marketDecimals,
                   visualMultiplier: p.position.indexToken.visualMultiplier,
+                  markPrice: p.position.markPrice,
                 })
               : "..."
           }
@@ -433,6 +435,7 @@ export function PositionItem(p: Props) {
         {formatLiquidationPrice(p.position.liquidationPrice, {
           displayDecimals: marketDecimals,
           visualMultiplier: p.position.indexToken.visualMultiplier,
+          markPrice: p.position.markPrice,
         }) || "..."}
       </span>
     );
@@ -558,9 +561,10 @@ export function PositionItem(p: Props) {
             t`Opening...`
           ) : (
             <span className="numbers">
-              {formatUsd(p.position.entryPrice, {
+              {formatPositionPrice(p.position.entryPrice, {
                 displayDecimals: marketDecimals,
                 visualMultiplier: p.position.indexToken.visualMultiplier,
+                markPrice: p.position.markPrice,
               })}
             </span>
           )}
@@ -568,7 +572,7 @@ export function PositionItem(p: Props) {
         <TableTd>
           {/* markPrice */}
           <span className="numbers">
-            {formatUsd(p.position.markPrice, {
+            {formatPositionPrice(p.position.markPrice, {
               displayDecimals: marketDecimals,
               visualMultiplier: p.position.indexToken.visualMultiplier,
             })}
@@ -702,9 +706,10 @@ export function PositionItem(p: Props) {
               <Trans>Entry Price</Trans>
             </div>
             <div className="numbers">
-              {formatUsd(p.position.entryPrice, {
+              {formatPositionPrice(p.position.entryPrice, {
                 displayDecimals: marketDecimals,
                 visualMultiplier: p.position.indexToken.visualMultiplier,
+                markPrice: p.position.markPrice,
               })}
             </div>
           </div>
@@ -713,7 +718,7 @@ export function PositionItem(p: Props) {
               <Trans>Mark Price</Trans>
             </div>
             <div className="numbers">
-              {formatUsd(p.position.markPrice, {
+              {formatPositionPrice(p.position.markPrice, {
                 displayDecimals: marketDecimals,
                 visualMultiplier: p.position.indexToken.visualMultiplier,
               })}

@@ -35,10 +35,13 @@ export const chartOverridesDark: Partial<WidgetOverrides> = {
   "paneProperties.horzGridProperties.color": "#363A5960",
   "paneProperties.horzGridProperties.style": 2,
   // Tighter vertical padding so candles fill more of the pane (more Y resolution).
-  "paneProperties.topMargin": 4,
-  "paneProperties.bottomMargin": 4,
+  "paneProperties.topMargin": 6,
+  "paneProperties.bottomMargin": 6,
+  // Leave room on the right so forex price labels (1.1528) are not clipped.
+  "paneProperties.rightMargin": 12,
   "mainSeriesProperties.priceLineColor": "#8B94B6AA",
   "scalesProperties.textColor": colors.typography["secondary"].dark,
+  "scalesProperties.fontSize": 11,
   "mainSeriesProperties.statusViewStyle.showExchange": false,
   ...createChartStyleOverrides(colors.green[500].dark, colors.red[500].dark),
 };
@@ -52,10 +55,12 @@ export const chartOverridesLight: Partial<WidgetOverrides> = {
   "paneProperties.vertGridProperties.style": 2,
   "paneProperties.horzGridProperties.color": "#E0E0E0",
   "paneProperties.horzGridProperties.style": 2,
-  "paneProperties.topMargin": 4,
-  "paneProperties.bottomMargin": 4,
+  "paneProperties.topMargin": 6,
+  "paneProperties.bottomMargin": 6,
+  "paneProperties.rightMargin": 12,
   "mainSeriesProperties.priceLineColor": "#6B7280AA",
   "scalesProperties.textColor": colors.typography["secondary"].light,
+  "scalesProperties.fontSize": 11,
   "mainSeriesProperties.statusViewStyle.showExchange": false,
   ...createChartStyleOverrides(colors.green[500].light, colors.red[500].light),
 };

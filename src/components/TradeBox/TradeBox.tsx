@@ -1224,6 +1224,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                   selectedPosition
                     ? formatLiquidationPrice(selectedPosition?.liquidationPrice, {
                         visualMultiplier: toToken?.visualMultiplier,
+                        markPrice: selectedPosition?.markPrice,
                       })
                     : undefined
                 }

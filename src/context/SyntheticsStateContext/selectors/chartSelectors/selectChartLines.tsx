@@ -17,6 +17,29 @@ import { StaticChartLine } from "components/TVChartContainer/types";
 
 import { selectChartToken } from ".";
 
+/** Skip chart lines that would blow Y-axis autoscale (e.g. short liq → huge price). */
+function isSaneChartPrice(price: number, markPrice: number | undefined): boolean {
+  if (!Number.isFinite(price) || price <= 0) return false;
+  if (markPrice === undefined || !Number.isFinite(markPrice) || markPrice <= 0) {
+    // Absolute guard when mark is missing
+    return price < 1_000_000;
+  }
+  // Allow wide but finite band around mark (covers metals/crypto moves; blocks 1e9+ liq lines)
+  return price > markPrice / 100 && price < markPrice * 100;
+}
+
+function toChartPrice(
+  value: bigint | undefined,
+  priceDecimal: number,
+  visualMultiplier: number | undefined
+): number | undefined {
+  if (value === undefined || value < 0n) return undefined;
+  const formatted = formatAmount(value, USD_DECIMALS, priceDecimal, undefined, undefined, visualMultiplier);
+  if (!formatted || formatted === "NA") return undefined;
+  const price = parseFloat(formatted);
+  return Number.isFinite(price) ? price : undefined;
+}
+
 export const selectChartLines = createSelector<StaticChartLine[]>((q) => {
   const chainId = q(selectChainId);
   const { chartToken } = q(selectChartToken);
@@ -42,28 +65,23 @@ export const selectChartLines = createSelector<StaticChartLine[]>((q) => {
     const marketIndexName = getMarketIndexName(position.marketInfo!) ?? "";
     const tokenVisualMultiplier = token?.visualMultiplier;
 
-    const liquidationPrice = formatAmount(
-      position?.liquidationPrice,
-      USD_DECIMALS,
-      priceDecimal,
-      undefined,
-      undefined,
-      tokenVisualMultiplier
-    );
+    const markPrice = toChartPrice(position.markPrice, priceDecimal, tokenVisualMultiplier);
+    const entryPrice = toChartPrice(position.entryPrice, priceDecimal, tokenVisualMultiplier);
+    const liquidationPrice = toChartPrice(position.liquidationPrice, priceDecimal, tokenVisualMultiplier);
 
-    const lines: StaticChartLine[] = [
-      {
+    const lines: StaticChartLine[] = [];
+
+    if (entryPrice !== undefined && isSaneChartPrice(entryPrice, markPrice)) {
+      lines.push({
         title: t`Open ${longOrShortText} - ${marketIndexName}`,
-        price: parseFloat(
-          formatAmount(position.entryPrice, USD_DECIMALS, priceDecimal, undefined, undefined, tokenVisualMultiplier)
-        ),
-      },
-    ];
+        price: entryPrice,
+      });
+    }
 
-    if (liquidationPrice && liquidationPrice !== "NA") {
+    if (liquidationPrice !== undefined && isSaneChartPrice(liquidationPrice, markPrice ?? entryPrice)) {
       lines.push({
         title: t`Liq. ${longOrShortText} - ${marketIndexName}`,
-        price: parseFloat(liquidationPrice),
+        price: liquidationPrice,
       });
     }
 

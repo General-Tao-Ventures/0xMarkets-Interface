@@ -53,11 +53,22 @@ let metricsIsFirstDrawTime = true;
 const V1_UPDATE_INTERVAL = 1000;
 const V2_UPDATE_INTERVAL = 1000;
 
-const PREFETCH_CANDLES_COUNT = 300;
+const PREFETCH_CANDLES_COUNT = 400;
 /** Max chart lookback — matches keeper Benchmarks fill window. */
 const MAX_HISTORY_SECONDS = 365 * 24 * 60 * 60;
 /** Per-request bar cap (12 months of 1h ≈ 8760; paginated lower TFs). */
 const MAX_BARS_PER_REQUEST = 12_000;
+
+/** Ensure first paint of higher TFs can show ~12 months without waiting for scroll-back. */
+function minBarsForFirstLoad(resolution: ResolutionString): number {
+  if (resolution === "1D" || resolution === "1W" || resolution === "1M") return 400;
+  if (resolution === "60" || resolution === "240") return 800;
+  return 0;
+}
+
+function toUnixSeconds(ts: number): number {
+  return ts > 1e12 ? Math.floor(ts / 1000) : Math.floor(ts);
+}
 
 export class DataFeed extends EventTarget implements IBasicDataFeed {
   private subscriptions: Record<string, { destroy: () => void }> = {};
@@ -152,7 +163,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback
   ): Promise<void> {
-    const to = periodParams.to;
+    const to = toUnixSeconds(periodParams.to);
 
     const isFirstDraw = metricsIsFirstDrawTime;
     metricsIsFirstDrawTime = false;
@@ -160,7 +171,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     const periodSeconds = RESOLUTION_TO_SECONDS[resolution];
     // During a first data request we fetch regular amount of candles
     const countBack = periodParams.firstDataRequest
-      ? periodParams.countBack
+      ? Math.max(periodParams.countBack, minBarsForFirstLoad(resolution))
       : // But for subsequent requests we aggressively fetch more candles so that user can scroll back in time faster
         Math.max(periodParams.countBack * 2, 500);
 
@@ -199,19 +210,21 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       return;
     }
 
-    const barsToReturn: FromOldToNewArray<Bar> = [];
     const visualMultiplier = parseInt(symbolInfo.unit_id ?? "1");
+    // Filter (don't rely on break) so a mis-ordered payload can't truncate history.
+    const barsToReturn: FromOldToNewArray<Bar> = bars
+      .filter((bar) => toUnixSeconds(bar.time) <= to)
+      .map((bar) => multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier));
 
-    for (const bar of bars) {
-      if (bar.time <= to) {
-        barsToReturn.push(multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier));
-      } else {
-        break;
-      }
-    }
-
-    const reachedHistoryLimit = windowFrom <= oldestAllowedSec;
-    onResult(barsToReturn, { noData: reachedHistoryLimit || barsToReturn.length < countBack });
+    const oldestReturnedSec =
+      barsToReturn.length > 0
+        ? toUnixSeconds(barsToReturn[0].time > 1e12 ? barsToReturn[0].time / 1000 : barsToReturn[0].time)
+        : to;
+    const reachedHistoryLimit = windowFrom <= oldestAllowedSec || oldestReturnedSec <= oldestAllowedSec;
+    // Only end history when we hit the 12m floor or the API clearly ran out for this window.
+    onResult(barsToReturn, {
+      noData: barsToReturn.length === 0 || (barsToReturn.length < countBack && reachedHistoryLimit),
+    });
 
     // Seed lastBar for the oracle price bridge so it can push ticks immediately.
     // Only seed if the bar belongs to the CURRENT candle period. Seeding from a

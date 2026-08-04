@@ -230,6 +230,25 @@ export default function TVChartContainer({
 
       tvWidgetRef.current?.activeChart().dataReady(() => {
         setChartDataLoading(false);
+        try {
+          const chart = tvWidgetRef.current?.activeChart();
+          const priceScale = chart?.getPanes().at(0)?.getMainSourcePriceScale();
+          priceScale?.setAutoScale(true);
+
+          // Fit higher timeframes to ~12 months. Saved chart state otherwise leaves
+          // empty future months (e.g. 2027) or a tiny cluster of bars in the middle.
+          const nowSec = Math.floor(Date.now() / 1000);
+          const resolution = chart?.resolution();
+          const isHigherTf = resolution === "1D" || resolution === "1W" || resolution === "1M";
+          if (isHigherTf) {
+            chart?.setVisibleRange({
+              from: nowSec - 365 * 24 * 60 * 60,
+              to: nowSec + 2 * 24 * 60 * 60,
+            });
+          }
+        } catch {
+          // ignore — charting_library version differences
+        }
       });
     });
 
