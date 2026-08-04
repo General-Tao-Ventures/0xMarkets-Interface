@@ -1,7 +1,8 @@
-import { BASE_SEPOLIA } from "config/chains";
+import { BASE_MAINNET, BASE_SEPOLIA } from "config/chains";
 
 export type VolumeInfo = {
   totalVolume: bigint;
+  [BASE_MAINNET]: { totalVolume: bigint };
   [BASE_SEPOLIA]: { totalVolume: bigint };
 };
 

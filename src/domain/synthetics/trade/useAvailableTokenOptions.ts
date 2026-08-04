@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { LOCALHOST, BASE_SEPOLIA } from "config/chains";
+import { BASE_MAINNET, LOCALHOST, BASE_SEPOLIA } from "config/chains";
 import { getSortedMarketsAddressesKey } from "config/localStorage";
 import { isMarketComingSoon } from "config/markets";
 import { SORTED_MARKETS } from "config/static/sortedMarkets";
@@ -60,6 +60,7 @@ function getSortedMarketsConfigs(marketsData?: MarketsData, sortedAddresses?: st
 }
 
 const FORCE_ALLOWED_COLLATERAL_TOKENS: Record<ContractsChainId, string[]> = {
+  [BASE_MAINNET]: [],
   [BASE_SEPOLIA]: [],
   [LOCALHOST]: [],
 };

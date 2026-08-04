@@ -7,6 +7,7 @@ import {
   CONTRACTS_CHAIN_IDS as SDK_CONTRACTS_CHAIN_IDS,
   CONTRACTS_CHAIN_IDS_DEV as SDK_CONTRACTS_CHAIN_IDS_DEV,
   SOURCE_BASE_MAINNET,
+  BASE_MAINNET,
   BASE_SEPOLIA,
   LOCALHOST,
 } from "sdk/configs/chains";
@@ -21,10 +22,11 @@ export const CONTRACTS_CHAIN_IDS = isDevelopment() ? SDK_CONTRACTS_CHAIN_IDS_DEV
 const { parseEther } = ethers;
 
 // TODO take it from web3
-export const DEFAULT_CHAIN_ID = BASE_SEPOLIA;
+export const DEFAULT_CHAIN_ID = BASE_MAINNET;
 export const CHAIN_ID = DEFAULT_CHAIN_ID;
 
 export const IS_NETWORK_DISABLED: Record<ContractsChainId, boolean> = {
+  [BASE_MAINNET]: false,
   [BASE_SEPOLIA]: false,
   [LOCALHOST]: false,
 };
@@ -32,6 +34,19 @@ export const IS_NETWORK_DISABLED: Record<ContractsChainId, boolean> = {
 export const NETWORK_EXECUTION_TO_CREATE_FEE_FACTOR = {} as const;
 
 const constants = {
+  [BASE_MAINNET]: {
+    nativeTokenSymbol: "ETH",
+    wrappedTokenSymbol: "WETH",
+    defaultCollateralSymbol: "USDC",
+    defaultFlagOrdersEnabled: true,
+    positionReaderPropsLength: 9,
+    v2: true,
+
+    SWAP_ORDER_EXECUTION_GAS_FEE: parseEther("0.0003"),
+    INCREASE_ORDER_EXECUTION_GAS_FEE: parseEther("0.0003"),
+    // contract requires that execution fee be strictly greater than instead of gte
+    DECREASE_ORDER_EXECUTION_GAS_FEE: parseEther("0.000300001"),
+  },
   [BASE_SEPOLIA]: {
     nativeTokenSymbol: "ETH",
     wrappedTokenSymbol: "WETH",

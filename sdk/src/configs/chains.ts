@@ -3,15 +3,15 @@ import { base, Chain, baseSepolia, localhost as viemLocalhost } from "viem/chain
 
 import type { GasLimitsConfig } from "types/fees";
 
-import { SOURCE_BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./chainIds";
-export { SOURCE_BASE_MAINNET, BASE_SEPOLIA, LOCALHOST };
+import { SOURCE_BASE_MAINNET, BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./chainIds";
+export { SOURCE_BASE_MAINNET, BASE_MAINNET, BASE_SEPOLIA, LOCALHOST };
 
-export const CONTRACTS_CHAIN_IDS: ContractsChainId[] = [BASE_SEPOLIA];
-export const CONTRACTS_CHAIN_IDS_DEV: ContractsChainId[] = [BASE_SEPOLIA, LOCALHOST];
+export const CONTRACTS_CHAIN_IDS: ContractsChainId[] = [BASE_MAINNET];
+export const CONTRACTS_CHAIN_IDS_DEV: ContractsChainId[] = [BASE_MAINNET, BASE_SEPOLIA, LOCALHOST];
 
-export type ContractsChainId = typeof BASE_SEPOLIA | typeof LOCALHOST;
+export type ContractsChainId = typeof BASE_MAINNET | typeof BASE_SEPOLIA | typeof LOCALHOST;
 
-export type SettlementChainId = typeof BASE_SEPOLIA;
+export type SettlementChainId = typeof BASE_MAINNET | typeof BASE_SEPOLIA;
 export type SourceChainId = typeof SOURCE_BASE_MAINNET | typeof BASE_SEPOLIA;
 export type AnyChainId = ContractsChainId | SettlementChainId | SourceChainId;
 
@@ -24,6 +24,7 @@ export const CHAIN_NAMES_MAP: Record<AnyChainId, ChainName> = {
 };
 
 export const HIGH_EXECUTION_FEES_MAP: Record<ContractsChainId, number> = {
+  [BASE_MAINNET]: 5, // 5 USD
   [BASE_SEPOLIA]: 5, // 5 USD
   [LOCALHOST]: 5, // 5 USD
 };
@@ -33,16 +34,19 @@ export const MAX_FEE_PER_GAS_MAP: Record<number, bigint> = {};
 export const GAS_PRICE_PREMIUM_MAP: Record<number, bigint> = {};
 
 export const MAX_PRIORITY_FEE_PER_GAS_MAP: Record<ContractsChainId, bigint | undefined> = {
+  [BASE_MAINNET]: 1500000000n,
   [BASE_SEPOLIA]: 1500000000n,
   [LOCALHOST]: 1500000000n,
 };
 
 export const EXCESSIVE_EXECUTION_FEES_MAP: Partial<Record<ContractsChainId, number>> = {
+  [BASE_MAINNET]: 10, // 10 USD
   [BASE_SEPOLIA]: 10, // 10 USD
   [LOCALHOST]: 10, // 10 USD
 };
 
 export const MIN_EXECUTION_FEE_USD: Partial<Record<ContractsChainId, bigint | undefined>> = {
+  [BASE_MAINNET]: 1000000000000000000000000000n, // 1e27 $0.001
   [BASE_SEPOLIA]: 1000000000000000000000000000n, // 1e27 $0.001
 };
 
@@ -104,6 +108,10 @@ export const EXECUTION_FEE_CONFIG_V2: {
     defaultBufferBps?: number;
   };
 } = {
+  [BASE_MAINNET]: {
+    shouldUseMaxPriorityFeePerGas: false,
+    defaultBufferBps: 1000, // 10%
+  },
   [BASE_SEPOLIA]: {
     shouldUseMaxPriorityFeePerGas: false,
     defaultBufferBps: 1000, // 10%
@@ -124,6 +132,13 @@ type StaticGasLimitsConfig = Pick<
 >;
 
 export const GAS_LIMITS_STATIC_CONFIG: Record<ContractsChainId, StaticGasLimitsConfig> = {
+  [BASE_MAINNET]: {
+    createOrderGasLimit: 1_000_000n,
+    updateOrderGasLimit: 800_000n,
+    cancelOrderGasLimit: 700_000n,
+    tokenPermitGasLimit: 90_000n,
+    gmxAccountCollateralGasLimit: 0n,
+  },
   [BASE_SEPOLIA]: {
     createOrderGasLimit: 1_000_000n,
     updateOrderGasLimit: 800_000n,

@@ -2,12 +2,125 @@ import { zeroAddress } from "viem";
 
 import type { Token, TokenAddressTypesMap, TokenCategory } from "types/tokens";
 
-import { BASE_SEPOLIA, LOCALHOST } from "./chains";
+import { BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./chains";
 import { getContract } from "./contracts";
 
 export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
 export const TOKENS: { [chainId: number]: Token[] } = {
+  [BASE_MAINNET]: [
+    {
+      name: "Ethereum",
+      symbol: "ETH",
+      decimals: 18,
+      address: zeroAddress,
+      isNative: true,
+      isShortable: true,
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
+      isV1Available: true,
+    },
+    {
+      name: "Wrapped ETH",
+      symbol: "WETH",
+      address: "0x4200000000000000000000000000000000000006",
+      decimals: 18,
+      isWrapped: true,
+      baseSymbol: "ETH",
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
+    },
+    {
+      name: "USD Coin",
+      symbol: "USDC",
+      address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      decimals: 6,
+      isStable: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/usd-coin",
+    },
+    {
+      name: "Euro",
+      symbol: "EUR",
+      decimals: 18,
+      address: "0x2C6bdB9ab7d2d48710B7dd3349Ba099cdAB3B328",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/14423/small/stasis-euro.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/stasis-euro",
+    },
+    {
+      name: "British Pound",
+      symbol: "GBP",
+      decimals: 18,
+      address: "0x915327F0726eC569107C1B3F38c8e0Cf87eC9e72",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/1/small/gbp.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/gbp",
+    },
+    {
+      name: "Gold",
+      symbol: "GOLD",
+      decimals: 18,
+      address: "0x82aB51eb790D1C5f1B1434057A215Eb8cF360Da5",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/3090/small/gold.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/gold",
+    },
+    {
+      name: "Silver",
+      symbol: "XAG",
+      decimals: 18,
+      address: "0xA927aA364535ba04d88Fc5326D0773CC05d92c08",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/1090/small/silver.png",
+    },
+    {
+      name: "Japanese Yen",
+      symbol: "JPY",
+      decimals: 18,
+      address: "0xF40d284eF3F79451E19D500A57539F753dd79Dbf",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/1/small/jpy.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/jpy",
+    },
+    {
+      name: "Wrapped Bitcoin",
+      symbol: "WBTC",
+      decimals: 8,
+      address: "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+      isSynthetic: false,
+      imageUrl: "https://assets.coingecko.com/coins/images/7598/thumb/wrapped_bitcoin_wbtc.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/wrapped-bitcoin",
+    },
+    {
+      name: "Bittensor",
+      symbol: "TAO",
+      decimals: 18,
+      address: "0x53c87230E2A4640D4C200797147261300E7C284A",
+      isSynthetic: true,
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/28452/small/ARUsPeNQ_400x400.jpeg",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/bittensor",
+    },
+    {
+      name: "0xMarkets Market tokens",
+      symbol: "0xM",
+      address: "<market-token-address>",
+      decimals: 18,
+      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GM_LOGO.png",
+      isPlatformToken: true,
+    },
+    {
+      name: "GLV Market tokens",
+      symbol: "GLV",
+      address: "<market-token-address>",
+      decimals: 18,
+      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GLV_LOGO.png",
+      isPlatformToken: true,
+    },
+  ],
   [BASE_SEPOLIA]: [
     {
       name: "Ethereum",
@@ -189,7 +302,7 @@ export const V2_TOKENS: { [chainId: number]: Token[] } = {};
 export const WRAPPED_TOKENS_MAP: { [chainId: number]: Token } = {};
 export const NATIVE_TOKENS_MAP: { [chainId: number]: Token } = {};
 
-const CHAIN_IDS = [BASE_SEPOLIA, LOCALHOST];
+const CHAIN_IDS = [BASE_MAINNET, BASE_SEPOLIA, LOCALHOST];
 
 for (let j = 0; j < CHAIN_IDS.length; j++) {
   const chainId = CHAIN_IDS[j];

@@ -1,14 +1,16 @@
-import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
+import { ContractsChainId, BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./chains";
 
-const BASE_SEPOLIA_KEEPER_URL = "/api/keeper";
+const ORACLE_KEEPER_URL = "/api/keeper";
 
 const ORACLE_KEEPER_URLS: Record<ContractsChainId, string> = {
-  [BASE_SEPOLIA]: BASE_SEPOLIA_KEEPER_URL,
+  [BASE_MAINNET]: ORACLE_KEEPER_URL,
+  [BASE_SEPOLIA]: ORACLE_KEEPER_URL,
   [LOCALHOST]: "http://127.0.0.1:37017",
 };
 
 const ORACLE_KEEPER_FALLBACK_URLS: Record<ContractsChainId, string[]> = {
-  [BASE_SEPOLIA]: [BASE_SEPOLIA_KEEPER_URL],
+  [BASE_MAINNET]: [ORACLE_KEEPER_URL],
+  [BASE_SEPOLIA]: [ORACLE_KEEPER_URL],
   [LOCALHOST]: ["http://127.0.0.1:37017"],
 };
 

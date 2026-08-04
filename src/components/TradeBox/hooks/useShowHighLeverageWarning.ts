@@ -6,7 +6,7 @@ import {
   AB_HIGH_LEVERAGE_WARNING_MAJOR_TOKEN_LEVERAGE,
   AB_HIGH_LEVERAGE_WARNING_PROBABILITY,
 } from "config/ab";
-import { BASE_SEPOLIA, LOCALHOST, ContractsChainId } from "config/chains";
+import { BASE_MAINNET, BASE_SEPOLIA, LOCALHOST, ContractsChainId } from "config/chains";
 import { getHighLeverageWarningDismissedTimestampKey } from "config/localStorage";
 import { selectAccount, selectChainId } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { selectIsLeverageSliderEnabled } from "context/SyntheticsStateContext/selectors/settingsSelectors";
@@ -21,6 +21,7 @@ import { useIsAddressInGroup } from "lib/userAnalytics/getIsAddressInGroup";
 import { getToken } from "sdk/configs/tokens";
 
 const IS_MAJOR_TOKEN_MAP: Record<ContractsChainId, string[]> = {
+  [BASE_MAINNET]: ["ETH", "BTC"],
   [BASE_SEPOLIA]: ["ETH", "BTC"],
   [LOCALHOST]: ["ETH", "BTC"],
 };
