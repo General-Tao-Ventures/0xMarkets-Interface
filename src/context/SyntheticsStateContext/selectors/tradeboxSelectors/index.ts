@@ -2,6 +2,7 @@ import { maxUint256 } from "viem";
 
 import { getSwapDebugSettings, getSwapPriceImpactForExternalSwapThresholdBps } from "config/externalSwaps";
 import { BASIS_POINTS_DIVISOR, BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS } from "config/factors";
+import { getUiMaxLeverageBps } from "config/leverage";
 import { SyntheticsState } from "context/SyntheticsStateContext/SyntheticsStateContextProvider";
 import { createSelector } from "context/SyntheticsStateContext/utils";
 import {
@@ -1213,9 +1214,13 @@ export const selectTradeboxSelectedCollateralTokenSymbol = createSelector((q) =>
 
 export const selectTradeboxMaxLeverage = createSelector((q) => {
   const minCollateralFactor = q((s) => s.tradebox.marketInfo?.minCollateralFactor);
-  const baseMaxLeverage = getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor);
-
   const marketInfo = q((s) => s.tradebox.marketInfo);
+  const uiCapBps = getUiMaxLeverageBps(marketInfo?.indexToken?.symbol, marketInfo?.indexToken?.baseSymbol);
+  const baseMaxLeverage = Math.min(
+    getMaxAllowedLeverageByMinCollateralFactor(minCollateralFactor),
+    uiCapBps
+  );
+
   if (!marketInfo?.leverageLadder?.length) {
     return baseMaxLeverage;
   }
