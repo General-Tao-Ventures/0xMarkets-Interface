@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const SQUID_URL = process.env.SQUID_URL || "http://34.10.239.169:4350";
+// Prefer Vercel/local env — no public hostname yet, so fail closed if unset in handlers below.
+const SQUID_URL = process.env.SQUID_URL;
 
 /** Allowlist only — GraphQL is the sole Squid surface the Interface needs. */
 const ALLOWED_PATHS = new Set(["graphql"]);
@@ -37,6 +38,10 @@ function buildSafeTarget(baseUrl: string, pathStr: string, search: string): URL 
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!SQUID_URL) {
+    return res.status(500).json({ error: "SQUID_URL is not configured" });
+  }
+
   const pathStr = (req.query._path as string) || "graphql";
 
   const params = new URLSearchParams();
