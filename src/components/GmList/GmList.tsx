@@ -29,6 +29,8 @@ import { TableTh, TableTheadTr } from "components/Table/Table";
 import { ButtonRowScrollFadeContainer, TableScrollFadeContainer } from "components/TableScrollFade/TableScrollFade";
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 
+import NewLinkIcon from "img/ic_new_link.svg?react";
+
 const LIQUIDITY_APP_URL = "https://liquidity.0xmarkets.io/";
 
 import { FeeApyLabel } from "./FeeApyLabel";
@@ -140,13 +142,15 @@ export function GmList({
       className="grow"
       titleAction={
         <Button
-          variant="primary"
-          size="medium"
+          variant="secondary"
+          size="small"
           to={LIQUIDITY_APP_URL}
           newTab
-          showExternalLinkArrow
+          showExternalLinkArrow={false}
+          className="whitespace-nowrap !px-12 !py-6 !text-body-small !text-typography-secondary hover:!text-typography-primary"
         >
           <Trans>Manage Liquidity</Trans>
+          <NewLinkIcon className="ml-6 size-12 shrink-0 opacity-70" />
         </Button>
       }
       description={

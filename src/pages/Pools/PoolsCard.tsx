@@ -20,7 +20,7 @@ export default function PoolsCard({
     <div className={cx("overflow-hidden rounded-8 border border-slate-800 bg-slate-750", className)}>
       <div className="flex h-full flex-col">
         <div className="flex flex-col gap-8 border-b-1/2 border-slate-800 p-16">
-          <div className="flex items-start justify-between gap-12">
+          <div className="flex items-center justify-between gap-12">
             <span className="text-h3 font-medium max-md:text-body-medium">{title}</span>
             {titleAction ? <div className="shrink-0">{titleAction}</div> : null}
           </div>
