@@ -345,11 +345,34 @@ const GraphChart = ({
       price: priceData,
       feeApr: apyData,
     };
+    const next = dataMap[marketGraphType];
+    const sourceLen =
+      marketGraphType === "performance"
+        ? performanceSnapshots.length
+        : marketGraphType === "price"
+          ? priceSnapshots.length
+          : aprSnapshots.length;
 
-    if (prevMarketGraphType !== marketGraphType || dataMap[marketGraphType].length > 0) {
-      setData(dataMap[marketGraphType]);
+    // Keep prior points only while a refetch has not returned yet (sourceLen === 0 and
+    // next empty). Once snapshots arrive — including all-dust filtered to [] — update
+    // so we don't keep a stale previous period on the chart.
+    if (
+      prevMarketGraphType !== marketGraphType ||
+      next.length > 0 ||
+      sourceLen > 0
+    ) {
+      setData(next);
     }
-  }, [performanceData, priceData, apyData, marketGraphType, prevMarketGraphType]);
+  }, [
+    performanceData,
+    priceData,
+    apyData,
+    marketGraphType,
+    prevMarketGraphType,
+    performanceSnapshots.length,
+    priceSnapshots.length,
+    aprSnapshots.length,
+  ]);
 
   if (data.length === 0) {
     return (
