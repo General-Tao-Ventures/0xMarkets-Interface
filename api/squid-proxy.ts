@@ -1,14 +1,17 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-// Prefer Vercel/local env — no public hostname yet, so fail closed if unset in handlers below.
+// Prefer Vercel/local env — fail closed if unset.
 const SQUID_URL = process.env.SQUID_URL;
 
 /** Allowlist only — GraphQL is the sole Squid surface the Interface needs. */
 const ALLOWED_PATHS = new Set(["graphql"]);
 
+/**
+ * Build a same-origin URL under SQUID_URL.
+ * Accepts either host root (`http://host:4350`) or a full GraphQL URL
+ * (`http://host:4350/graphql`) without doubling `/graphql`.
+ */
 function buildSafeTarget(baseUrl: string, pathStr: string, search: string): URL | null {
-  const base = new URL(baseUrl);
-
   let decoded: string;
   try {
     decoded = decodeURIComponent(pathStr || "graphql");
@@ -17,17 +20,22 @@ function buildSafeTarget(baseUrl: string, pathStr: string, search: string): URL 
   }
 
   const cleaned = decoded.replace(/^\/+/, "").replace(/\\/g, "").replace(/\/+$/, "");
-
   if (!ALLOWED_PATHS.has(cleaned)) {
     return null;
   }
 
-  const target = new URL(cleaned, `${base.origin}${base.pathname.replace(/\/?$/, "/")}`);
+  const base = new URL(baseUrl);
+  // Strip a trailing /graphql so env can be either root or full GraphQL endpoint
+  let basePath = base.pathname.replace(/\/+$/, "") || "";
+  if (basePath.endsWith("/graphql")) {
+    basePath = basePath.slice(0, -"/graphql".length);
+  }
+
+  const target = new URL(`${basePath}/${cleaned}`.replace(/\/{2,}/g, "/"), base.origin);
   if (target.origin !== base.origin) {
     return null;
   }
 
-  // Final guard: pathname must end with the allowlisted segment (no traversal residue)
   const normalizedPath = target.pathname.replace(/\/+$/, "");
   if (!normalizedPath.endsWith(`/${cleaned}`) && normalizedPath !== `/${cleaned}`) {
     return null;
