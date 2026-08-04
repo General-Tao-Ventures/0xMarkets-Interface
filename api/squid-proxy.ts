@@ -2,18 +2,22 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const SQUID_URL = process.env.SQUID_URL || "http://34.10.239.169:4350";
 
-/** Only allow simple relative path segments under the configured Squid origin. */
+/** Allowlist only — GraphQL is the sole Squid surface the Interface needs. */
+const ALLOWED_PATHS = new Set(["graphql"]);
+
 function buildSafeTarget(baseUrl: string, pathStr: string, search: string): URL | null {
   const base = new URL(baseUrl);
-  const cleaned = (pathStr || "graphql").replace(/^\/+/, "").replace(/\\/g, "");
 
-  // Reject absolute / protocol-relative / traversal paths that can override host
-  if (
-    !cleaned ||
-    cleaned.includes("://") ||
-    cleaned.startsWith("//") ||
-    cleaned.split("/").some((seg) => seg === "..")
-  ) {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathStr || "graphql");
+  } catch {
+    return null;
+  }
+
+  const cleaned = decoded.replace(/^\/+/, "").replace(/\\/g, "").replace(/\/+$/, "");
+
+  if (!ALLOWED_PATHS.has(cleaned)) {
     return null;
   }
 
@@ -21,6 +25,13 @@ function buildSafeTarget(baseUrl: string, pathStr: string, search: string): URL 
   if (target.origin !== base.origin) {
     return null;
   }
+
+  // Final guard: pathname must end with the allowlisted segment (no traversal residue)
+  const normalizedPath = target.pathname.replace(/\/+$/, "");
+  if (!normalizedPath.endsWith(`/${cleaned}`) && normalizedPath !== `/${cleaned}`) {
+    return null;
+  }
+
   target.search = search;
   return target;
 }
