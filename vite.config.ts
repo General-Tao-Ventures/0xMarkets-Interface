@@ -11,11 +11,26 @@ import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { BREAKPOINTS } from "./src/lib/breakpoints";
 
+/** Normalize SQUID_URL so `/api/squid/graphql` never becomes `/graphql/graphql`. */
+function squidProxyTarget(raw: string): string {
+  try {
+    const url = new URL(raw);
+    let pathname = url.pathname.replace(/\/+$/, "") || "";
+    if (pathname.endsWith("/graphql")) {
+      pathname = pathname.slice(0, -"/graphql".length);
+    }
+    url.pathname = pathname || "/";
+    return url.toString().replace(/\/$/, "") || url.origin;
+  } catch {
+    return raw.replace(/\/graphql\/?$/, "");
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const keeperUrl = env.KEEPER_URL || "https://keeper.0xmarkets.io";
   const orderKeeperUrl = env.ORDER_KEEPER_URL || "http://127.0.0.1:37018";
-  const squidUrl = env.SQUID_URL || "http://127.0.0.1:4350";
+  const squidUrl = squidProxyTarget(env.SQUID_URL || "http://127.0.0.1:4350");
 
   return {
     worker: {
