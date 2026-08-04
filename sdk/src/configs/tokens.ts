@@ -319,6 +319,7 @@ for (let j = 0; j < CHAIN_IDS.length; j++) {
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     TOKENS_MAP[chainId][token.address] = token;
+    TOKENS_MAP[chainId][token.address.toLowerCase()] = token;
     TOKENS_BY_SYMBOL_MAP[chainId][token.symbol] = token;
 
     if (token.isWrapped) {
@@ -397,11 +398,12 @@ export function getToken(chainId: number, address: string) {
   if (!TOKENS_MAP[chainId]) {
     throw new Error(`Incorrect chainId ${chainId}`);
   }
-  if (!TOKENS_MAP[chainId][address]) {
+  const token = TOKENS_MAP[chainId][address] || TOKENS_MAP[chainId][address.toLowerCase()];
+  if (!token) {
     throw new Error(`Incorrect address "${address}" for chainId ${chainId}`);
   }
 
-  return TOKENS_MAP[chainId][address];
+  return token;
 }
 
 export function getTokenBySymbol(

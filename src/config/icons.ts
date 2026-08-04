@@ -1,6 +1,7 @@
 import {
   AnyChainId,
   SOURCE_BASE_MAINNET,
+  BASE_MAINNET,
   BASE_SEPOLIA,
   LOCALHOST,
 } from "config/chains";
@@ -23,21 +24,19 @@ type ChainIcons = {
   glv?: string;
 };
 
+const BASE_CHAIN_ICONS: ChainIcons = {
+  network: base,
+  gmx: gmxIcon,
+  glp: glpIcon,
+  esgmx: esGMXIcon,
+  gm: gmIcon,
+};
+
 const ICONS: Record<number | "common", ChainIcons> = {
-  [BASE_SEPOLIA]: {
-    network: base,
-    gmx: gmxIcon,
-    glp: glpIcon,
-    esgmx: esGMXIcon,
-    gm: gmIcon,
-  },
-  [LOCALHOST]: {
-    network: base,
-    gmx: gmxIcon,
-    glp: glpIcon,
-    esgmx: esGMXIcon,
-    gm: gmIcon,
-  },
+  // BASE_MAINNET === SOURCE_BASE_MAINNET (8453) — required or Pools/Stats/Leaderboard crash
+  [BASE_MAINNET]: BASE_CHAIN_ICONS,
+  [BASE_SEPOLIA]: BASE_CHAIN_ICONS,
+  [LOCALHOST]: BASE_CHAIN_ICONS,
   common: {
     gmx: gmxIcon,
     gmxOutline: gmxOutlineIcon,

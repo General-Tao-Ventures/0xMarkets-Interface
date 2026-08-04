@@ -78,10 +78,12 @@ const ALCHEMY_WHITELISTED_DOMAINS = ["0xmarkets.io", "app.0xmarkets.io"];
 
 export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
   [SOURCE_BASE_MAINNET]: [
+    // Prefer browser-friendly public RPCs (llamarpc often fails CORS from Vercel Preview)
+    getAlchemyBaseMainnetHttpUrl("fallback"),
     "https://mainnet.base.org",
-    "https://base.llamarpc.com",
     "https://base-rpc.publicnode.com",
     "https://base.drpc.org",
+    "https://rpc.ankr.com/base",
   ],
   [BASE_SEPOLIA]: [
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
