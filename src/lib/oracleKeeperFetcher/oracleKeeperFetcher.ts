@@ -163,8 +163,21 @@ export class OracleKeeperFetcher implements OracleFetcher {
       });
   }
 
-  async fetchOracleCandles(tokenSymbol: string, period: string, limit: number): Promise<FromNewToOldArray<Bar>> {
-    return fetchJson<{ candles: number[][] }>(buildUrl(this.url!, "/prices/candles", { tokenSymbol, period, limit }))
+  async fetchOracleCandles(
+    tokenSymbol: string,
+    period: string,
+    limit: number,
+    opts?: { from?: number; to?: number }
+  ): Promise<FromNewToOldArray<Bar>> {
+    return fetchJson<{ candles: number[][] }>(
+      buildUrl(this.url!, "/prices/candles", {
+        tokenSymbol,
+        period,
+        limit,
+        from: opts?.from,
+        to: opts?.to,
+      })
+    )
       .then((res) => {
         if (!Array.isArray(res.candles) || (res.candles.length === 0 && limit > 0)) {
           throw new Error("Invalid candles response");

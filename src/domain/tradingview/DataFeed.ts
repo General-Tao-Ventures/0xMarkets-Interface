@@ -54,6 +54,10 @@ const V1_UPDATE_INTERVAL = 1000;
 const V2_UPDATE_INTERVAL = 1000;
 
 const PREFETCH_CANDLES_COUNT = 300;
+/** Max chart lookback — matches keeper Benchmarks fill window. */
+const MAX_HISTORY_SECONDS = 365 * 24 * 60 * 60;
+/** Per-request bar cap (12 months of 1h ≈ 8760; paginated lower TFs). */
+const MAX_BARS_PER_REQUEST = 12_000;
 
 export class DataFeed extends EventTarget implements IBasicDataFeed {
   private subscriptions: Record<string, { destroy: () => void }> = {};
@@ -151,12 +155,17 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     const isFirstDraw = metricsIsFirstDrawTime;
     metricsIsFirstDrawTime = false;
 
-    const offset = Math.trunc(Math.max((Date.now() / 1000 - to) / RESOLUTION_TO_SECONDS[resolution], 0));
+    const periodSeconds = RESOLUTION_TO_SECONDS[resolution];
     // During a first data request we fetch regular amount of candles
     const countBack = periodParams.firstDataRequest
       ? periodParams.countBack
       : // But for subsequent requests we aggressively fetch more candles so that user can scroll back in time faster
         Math.max(periodParams.countBack * 2, 500);
+
+    const oldestAllowedSec = Math.floor(Date.now() / 1000) - MAX_HISTORY_SECONDS;
+    const windowTo = to;
+    const windowFrom = Math.max(oldestAllowedSec, windowTo - countBack * periodSeconds);
+    const fetchCount = Math.min(countBack, MAX_BARS_PER_REQUEST);
 
     const token = getTokenBySymbol(this.chainId, symbolInfo.ticker!);
     const isStable = token.isStable;
@@ -164,10 +173,13 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     let bars: FromOldToNewArray<Bar> = [];
     try {
       if (!isStable) {
-        bars = await this.fetchCandles(symbolInfo.ticker!, resolution, countBack + offset);
+        bars = await this.fetchCandles(symbolInfo.ticker!, resolution, fetchCount, {
+          from: windowFrom,
+          to: windowTo,
+        });
       } else {
         const currentCandleTime = getCurrentCandleTime(SUPPORTED_RESOLUTIONS_V2[resolution]);
-        bars = this.getStableCandles(currentCandleTime, resolution, countBack + offset);
+        bars = this.getStableCandles(currentCandleTime, resolution, fetchCount);
       }
     } catch (e) {
       onError(String(e));
@@ -196,7 +208,8 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       }
     }
 
-    onResult(barsToReturn, { noData: offset + countBack >= 10_000 || barsToReturn.length < countBack });
+    const reachedHistoryLimit = windowFrom <= oldestAllowedSec;
+    onResult(barsToReturn, { noData: reachedHistoryLimit || barsToReturn.length < countBack });
 
     // Seed lastBar for the oracle price bridge so it can push ticks immediately.
     // Only seed if the bar belongs to the CURRENT candle period. Seeding from a
@@ -405,10 +418,12 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     symbol: string,
     resolution: ResolutionString,
     count: number,
-    isPrefetch = false
+    optsOrPrefetch: { from?: number; to?: number } | boolean = false
   ): Promise<FromOldToNewArray<Bar>> {
+    const isPrefetch = optsOrPrefetch === true;
+    const rangeOpts = typeof optsOrPrefetch === "object" ? optsOrPrefetch : undefined;
     const prefetchKey = `${symbol}-${resolution}`;
-    if (prefetchKey in this.prefetchedBarsPromises && !isPrefetch && metricsIsFirstLoadTime) {
+    if (prefetchKey in this.prefetchedBarsPromises && !isPrefetch && !rangeOpts && metricsIsFirstLoadTime) {
       metricsIsFirstLoadTime = false;
       const promise = this.prefetchedBarsPromises[prefetchKey];
       delete this.prefetchedBarsPromises[prefetchKey];
@@ -431,7 +446,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     metrics.startTimer("candlesLoad");
 
-    count = Math.min(count, 10000);
+    count = Math.min(count, MAX_BARS_PER_REQUEST);
 
     let success = true;
     let result: FromOldToNewArray<Bar> = [];
@@ -459,7 +474,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     } else {
       result = await Promise.race([
         this.oracleFetcher
-          .fetchOracleCandles(symbol, SUPPORTED_RESOLUTIONS_V2[resolution], count)
+          .fetchOracleCandles(symbol, SUPPORTED_RESOLUTIONS_V2[resolution], count, rangeOpts)
           .then((bars) => bars.slice().reverse()),
         sleep(5000).then(() => Promise.reject("Oracle candles timeout")),
       ])

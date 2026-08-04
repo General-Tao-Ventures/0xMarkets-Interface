@@ -2,8 +2,17 @@ import { useMemo } from "react";
 import useSWR from "swr";
 
 import { defined } from "lib/guards";
-import { parseValue, PRECISION_DECIMALS } from "lib/numbers";
 import { PerformancePeriod, PerformanceSnapshotsResponse, useOracleKeeperFetcher } from "lib/oracleKeeperFetcher";
+
+/** Keeper returns 30-decimal fixed-point ints as decimal strings, not human floats. */
+function parseFixedPointString(value: string | undefined): bigint | undefined {
+  if (value === undefined || value === "") return undefined;
+  try {
+    return BigInt(value);
+  } catch {
+    return undefined;
+  }
+}
 
 export type PerformanceSnapshot = {
   performance: bigint;
@@ -42,7 +51,7 @@ export function usePerformanceSnapshots({
     return dataArray.reduce((acc, item) => {
       acc[item.address.toLowerCase()] = item.snapshots
         .map((snapshot) => {
-          const performance = parseValue(snapshot.uniswapV2Performance, PRECISION_DECIMALS);
+          const performance = parseFixedPointString(snapshot.uniswapV2Performance);
           if (typeof performance === "undefined") return null;
           return {
             snapshotTimestamp: parseInt(snapshot.snapshotTimestamp),

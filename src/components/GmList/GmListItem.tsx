@@ -287,11 +287,11 @@ export function GmListItem({
           <SyntheticsInfoRow
             label={<PerformanceLabel />}
             value={
-              marketPerformance
+              marketPerformance !== undefined
                 ? formatPercentage(marketPerformance, { bps: false, signed: true, showPlus: false })
-                : "..."
+                : "—"
             }
-            valueClassName={marketPerformance ? "numbers" : undefined}
+            valueClassName={marketPerformance !== undefined ? "numbers" : undefined}
           />
         </div>
 
@@ -393,12 +393,12 @@ export function GmListItem({
       </TableTdActionable>
 
       <TableTdActionable className="w-[18%]">
-        {marketPerformance ? (
+        {marketPerformance !== undefined ? (
           <div className="numbers">
             {formatPercentage(marketPerformance, { bps: false, signed: true, showPlus: false })}
           </div>
         ) : (
-          "..."
+          "—"
         )}
       </TableTdActionable>
 
