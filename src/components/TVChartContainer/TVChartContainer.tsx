@@ -42,6 +42,26 @@ type Props = {
   setIsCandlesLoaded?: (isCandlesLoaded: boolean) => void;
 };
 
+/** Daily/weekly/monthly: show ~12m of history with almost no empty future pad. */
+function fitHigherTimeframeVisibleRange(widget: IChartingLibraryWidget | null | undefined) {
+  try {
+    const chart = widget?.activeChart();
+    if (!chart) return;
+    const resolution = chart.resolution();
+    const isHigherTf = resolution === "1D" || resolution === "1W" || resolution === "1M";
+    if (!isHigherTf) return;
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    chart.setVisibleRange({
+      from: nowSec - 365 * 24 * 60 * 60,
+      to: nowSec + 12 * 60 * 60, // half-day pad — avoid blank months into next year
+    });
+    chart.getPanes().at(0)?.getMainSourcePriceScale()?.setAutoScale(true);
+  } catch {
+    // charting_library version differences / chart not ready
+  }
+}
+
 export default function TVChartContainer({
   chartToken,
   chainId,
@@ -81,20 +101,28 @@ export default function TVChartContainer({
 
   useEffect(() => {
     const newDatafeed = new DataFeed(chainId, oracleKeeperFetcher, tradePageVersion);
-    if (setIsCandlesLoaded) {
-      newDatafeed.addEventListener("candlesDisplay.success", (event: Event) => {
-        const isFirstDraw = (event as CustomEvent).detail.isFirstTimeLoad;
-        if (isFirstDraw) {
-          setIsCandlesLoaded(true);
-        }
-      });
-    }
+
+    const onCandlesSuccess = (event: Event) => {
+      const isFirstDraw = (event as CustomEvent).detail?.isFirstTimeLoad;
+      if (isFirstDraw) {
+        setIsCandlesLoaded?.(true);
+      }
+      // Re-apply after bars land — saved chart state otherwise restores an empty future
+      // range (e.g. into 2027) and hides the ~12m of history we just fetched.
+      fitHigherTimeframeVisibleRange(tvWidgetRef.current);
+    };
+
+    newDatafeed.addEventListener("candlesDisplay.success", onCandlesSuccess);
     setDatafeed((prev) => {
       if (prev) {
         prev.destroy();
       }
       return newDatafeed;
     });
+
+    return () => {
+      newDatafeed.removeEventListener("candlesDisplay.success", onCandlesSuccess);
+    };
   }, [chainId, oracleKeeperFetcher, setIsCandlesLoaded, tradePageVersion]);
 
   // Keep a ref to the latest oracle prices so the DataFeed can read them synchronously
@@ -234,18 +262,10 @@ export default function TVChartContainer({
           const chart = tvWidgetRef.current?.activeChart();
           const priceScale = chart?.getPanes().at(0)?.getMainSourcePriceScale();
           priceScale?.setAutoScale(true);
-
-          // Fit higher timeframes to ~12 months. Saved chart state otherwise leaves
-          // empty future months (e.g. 2027) or a tiny cluster of bars in the middle.
-          const nowSec = Math.floor(Date.now() / 1000);
-          const resolution = chart?.resolution();
-          const isHigherTf = resolution === "1D" || resolution === "1W" || resolution === "1M";
-          if (isHigherTf) {
-            chart?.setVisibleRange({
-              from: nowSec - 365 * 24 * 60 * 60,
-              to: nowSec + 2 * 24 * 60 * 60,
-            });
-          }
+          fitHigherTimeframeVisibleRange(tvWidgetRef.current);
+          // Saved layout can re-apply after dataReady; nudge again on the next ticks.
+          requestAnimationFrame(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current));
+          window.setTimeout(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current), 250);
         } catch {
           // ignore — charting_library version differences
         }
