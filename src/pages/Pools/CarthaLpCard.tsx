@@ -1,4 +1,3 @@
-import { Trans } from "@lingui/macro";
 import cx from "classnames";
 
 import { useCarthaLpStats, type CarthaApyTier } from "domain/cartha/useCarthaLpStats";
@@ -46,6 +45,13 @@ function formatRelative(targetIso: string, nowMs: number): string {
   return `${hours}h ago`;
 }
 
+/**
+ * Cartha LP stats card.
+ *
+ * Labels are plain English (not Lingui `<Trans>`) so they render correctly
+ * even when catalogs haven't been re-extracted — missing catalog entries
+ * were showing hashed message IDs ("BEBTOQ", "PFUEDL", …) on Preview.
+ */
 export default function CarthaLpCard() {
   const { data, isLoading, error } = useCarthaLpStats();
 
@@ -60,46 +66,38 @@ export default function CarthaLpCard() {
       <div className="flex flex-wrap items-end justify-between gap-16 border-b-1/2 border-slate-800 p-16">
         <div className="flex flex-col gap-4">
           <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
-            <Trans>Cartha LP</Trans>
+            Cartha LP
           </span>
           <span className="text-h2 font-medium normal-nums">
-            <Trans>Earn up to</Trans>{" "}
+            Earn up to{" "}
             <span className="text-blue-300">{data ? formatPct(data.max_apy.apy_annual_pct) : "—"}</span>{" "}
-            <Trans>APY</Trans>
+            APY
             <span className="ml-8 text-body-medium text-typography-secondary">
-              {data ? <Trans>with a {data.max_apy.lock_days}-day lock</Trans> : null}
+              {data ? `with a ${data.max_apy.lock_days}-day lock` : null}
             </span>
           </span>
         </div>
 
         <div className="flex flex-wrap items-end gap-x-32 gap-y-12">
           <Stat
-            label={<Trans>TVL</Trans>}
+            label="TVL"
             value={data ? usdFormatter.format(data.tvl.current_usd) : "—"}
-            subValue={
-              data ? (
-                <Trans>{usdFormatter.format(data.tvl.upcoming_usd)} next epoch</Trans>
-              ) : null
-            }
+            subValue={data ? `${usdFormatter.format(data.tvl.upcoming_usd)} next epoch` : null}
           />
           <Stat
-            label={<Trans>Weekly rewards</Trans>}
+            label="Weekly rewards"
             value={data ? usdFormatter.format(data.weekly_rewards.weekly_usd) : "—"}
             subValue={
-              data ? (
-                <Trans>{compactNumberFormatter.format(data.weekly_rewards.weekly_alpha)} α</Trans>
-              ) : null
+              data ? `${compactNumberFormatter.format(data.weekly_rewards.weekly_alpha)} α` : null
             }
           />
           <Stat
-            label={<Trans>Liquidity providers</Trans>}
+            label="Liquidity providers"
             value={data ? compactNumberFormatter.format(data.extras.total_miners_current) : "—"}
             subValue={
-              data ? (
-                <Trans>
-                  {compactNumberFormatter.format(data.extras.total_positions_current)} positions
-                </Trans>
-              ) : null
+              data
+                ? `${compactNumberFormatter.format(data.extras.total_positions_current)} positions`
+                : null
             }
           />
         </div>
@@ -107,7 +105,7 @@ export default function CarthaLpCard() {
 
       <div className="p-16">
         <div className="mb-12 text-body-small font-medium uppercase tracking-wide text-typography-secondary">
-          <Trans>APY by lock period</Trans>
+          APY by lock period
         </div>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {data?.apy_tiers.map((tier) => (
@@ -121,12 +119,8 @@ export default function CarthaLpCard() {
 
       {data ? (
         <div className="flex flex-wrap items-center justify-between gap-8 border-t-1/2 border-slate-800 px-16 py-10 text-body-small text-typography-secondary">
-          <span>
-            <Trans>Next epoch in {formatCountdown(data.epoch.upcoming_start, now)}</Trans>
-          </span>
-          <span>
-            <Trans>Updated {formatRelative(data.last_updated, now)}</Trans>
-          </span>
+          <span>Next epoch in {formatCountdown(data.epoch.upcoming_start, now)}</span>
+          <span>Updated {formatRelative(data.last_updated, now)}</span>
         </div>
       ) : null}
     </div>
@@ -160,13 +154,13 @@ function ApyTierCell({ tier, isMax }: { tier?: CarthaApyTier; isMax?: boolean })
       })}
     >
       <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
-        {tier ? <Trans>{tier.lock_days}d lock</Trans> : <Trans>—</Trans>}
+        {tier ? `${tier.lock_days}d lock` : "—"}
       </span>
       <span className="text-body-large font-medium normal-nums">
         {tier ? formatPct(tier.apy_annual_pct) : "—"}
       </span>
       <span className="text-body-small text-typography-secondary normal-nums">
-        {tier ? <Trans>{formatPct(tier.apy_weekly_pct)} / week</Trans> : null}
+        {tier ? `${formatPct(tier.apy_weekly_pct)} / week` : null}
       </span>
     </div>
   );
