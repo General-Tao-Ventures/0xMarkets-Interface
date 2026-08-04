@@ -243,14 +243,13 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     const lastIdx = ladder.length - 1;
     return (
       <div className="text-12">
-        <div className="mb-6 font-medium">
-          <Trans>Leverage tiers</Trans>
-        </div>
+        {/* Plain strings: these Trans keys were never extracted → Preview showed hash IDs like "nd5Bji" */}
+        <div className="mb-6 font-medium">Leverage tiers</div>
         {ladder.map((tier, i) => {
           const isTail = i === lastIdx;
           const range = isTail
-            ? t`> ${formatUsd(ladder[i - 1].maxNotionalUsd)}`
-            : t`≤ ${formatUsd(tier.maxNotionalUsd)}`;
+            ? `> ${formatUsd(ladder[i - 1].maxNotionalUsd)}`
+            : `≤ ${formatUsd(tier.maxNotionalUsd)}`;
           return (
             <div key={i} className="flex justify-between gap-16 py-2">
               <span className="text-slate-300">{range}</span>
@@ -258,9 +257,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
             </div>
           );
         })}
-        <div className="mt-6 text-slate-300">
-          <Trans>Max leverage tightens as your position size grows.</Trans>
-        </div>
+        <div className="mt-6 text-slate-300">Max leverage tightens as your position size grows.</div>
       </div>
     );
   }, [marketInfo?.leverageLadder]);
@@ -1082,17 +1079,10 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                     )}
                     {showLadderTierWarning && activeTierMaxLeverage !== undefined && (
                       <AlertInfoCard type="info">
-                        {tierBoundaryUsd !== undefined ? (
-                          <Trans>
-                            For positions up to {formatUsd(tierBoundaryUsd)}, max leverage is{" "}
-                            {activeTierMaxLeverage}x. Larger positions trigger lower caps.
-                          </Trans>
-                        ) : (
-                          <Trans>
-                            Max leverage is {activeTierMaxLeverage}x at this position size. Reduce size or post more
-                            margin for higher leverage.
-                          </Trans>
-                        )}
+                        {/* Plain strings: unextracted Lingui macros rendered as "nd5Bji" on Preview */}
+                        {tierBoundaryUsd !== undefined
+                          ? `For positions up to ${formatUsd(tierBoundaryUsd)}, max leverage is ${activeTierMaxLeverage}x. Larger positions trigger lower caps.`
+                          : `Max leverage is ${activeTierMaxLeverage}x at this position size. Reduce size or post more margin for higher leverage.`}
                       </AlertInfoCard>
                     )}
                     {isTrigger && (
