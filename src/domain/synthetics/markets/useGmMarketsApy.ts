@@ -314,17 +314,27 @@ export function useGmMarketsApy(
         return acc;
       }, {} as MarketTokensAPRData);
 
-      const marketsTokensApyData = Object.entries(apys.markets).reduce((acc, [address, { baseApy }]) => {
+      // Keeper returns ApyInfo as arrays; tolerate a legacy address→info map too.
+      const marketApyEntries: [string, { baseApy: number }][] = Array.isArray(apys.markets)
+        ? apys.markets.map((m) => [m.address, m])
+        : Object.entries(apys.markets as Record<string, { baseApy: number }>);
+
+      const marketsTokensApyData = marketApyEntries.reduce((acc, [address, { baseApy }]) => {
         acc[address] = numberToBigint(baseApy, 30);
         return acc;
       }, {} as MarketTokensAPRData);
 
+      const apyValues = Object.values(marketsTokensApyData);
       const avgMarketsApy =
-        Object.values(marketsTokensApyData).reduce((acc, apr) => {
-          return acc + apr;
-        }, 0n) / BigInt(marketAddresses.length);
+        apyValues.length > 0
+          ? apyValues.reduce((acc, apr) => acc + apr, 0n) / BigInt(apyValues.length)
+          : 0n;
 
-      const glvApyInfoData = Object.entries(apys.glvs).reduce((acc, [address, { baseApy }]) => {
+      const glvApyEntries: [string, { baseApy: number }][] = Array.isArray(apys.glvs)
+        ? apys.glvs.map((m) => [m.address, m])
+        : Object.entries(apys.glvs as Record<string, { baseApy: number }>);
+
+      const glvApyInfoData = glvApyEntries.reduce((acc, [address, { baseApy }]) => {
         acc[address] = numberToBigint(baseApy, 30);
         return acc;
       }, {} as MarketTokensAPRData);
