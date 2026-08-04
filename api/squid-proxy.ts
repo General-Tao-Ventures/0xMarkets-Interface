@@ -2,6 +2,29 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const SQUID_URL = process.env.SQUID_URL || "http://34.10.239.169:4350";
 
+/** Only allow simple relative path segments under the configured Squid origin. */
+function buildSafeTarget(baseUrl: string, pathStr: string, search: string): URL | null {
+  const base = new URL(baseUrl);
+  const cleaned = (pathStr || "graphql").replace(/^\/+/, "").replace(/\\/g, "");
+
+  // Reject absolute / protocol-relative / traversal paths that can override host
+  if (
+    !cleaned ||
+    cleaned.includes("://") ||
+    cleaned.startsWith("//") ||
+    cleaned.split("/").some((seg) => seg === "..")
+  ) {
+    return null;
+  }
+
+  const target = new URL(cleaned, `${base.origin}${base.pathname.replace(/\/?$/, "/")}`);
+  if (target.origin !== base.origin) {
+    return null;
+  }
+  target.search = search;
+  return target;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const pathStr = (req.query._path as string) || "graphql";
 
@@ -15,8 +38,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  const target = new URL(`/${pathStr}`, SQUID_URL);
-  target.search = params.toString();
+  const target = buildSafeTarget(SQUID_URL, pathStr, params.toString());
+  if (!target) {
+    return res.status(400).json({ error: "Invalid Squid proxy path" });
+  }
 
   try {
     const response = await fetch(target.toString(), {

@@ -20,10 +20,11 @@ import { useIsFreshAccountForHighLeverageTrading } from "domain/synthetics/accou
 import { useIsAddressInGroup } from "lib/userAnalytics/getIsAddressInGroup";
 import { getToken } from "sdk/configs/tokens";
 
+// Match index-token symbols from sdk/configs/tokens (mainnet uses WETH/WBTC; Sepolia also has BTC)
 const IS_MAJOR_TOKEN_MAP: Record<ContractsChainId, string[]> = {
-  [BASE_MAINNET]: ["ETH", "BTC"],
-  [BASE_SEPOLIA]: ["ETH", "BTC"],
-  [LOCALHOST]: ["ETH", "BTC"],
+  [BASE_MAINNET]: ["ETH", "WETH", "BTC", "WBTC"],
+  [BASE_SEPOLIA]: ["ETH", "WETH", "BTC", "WBTC"],
+  [LOCALHOST]: ["ETH", "WETH", "BTC", "WBTC"],
 };
 
 const WAIVE_DISMISSAL_PERIOD_MS = 24 * 60 * 60 * 1000; // 24 hours
