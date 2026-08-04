@@ -295,24 +295,6 @@ export function GmListItem({
           />
         </div>
 
-        <div className="mt-12 flex gap-8">
-          <Button
-            variant="primary-action"
-            className="flex-1"
-            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Deposit`}
-          >
-            <Trans>Deposit</Trans>
-          </Button>
-          <Button
-            variant="secondary"
-            className="flex-1 text-green-500"
-            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Withdrawal`}
-          >
-            <span className="text-red-400">
-              <Trans>Withdraw</Trans>
-            </span>
-          </Button>
-        </div>
       </div>
     );
   }
@@ -420,32 +402,11 @@ export function GmListItem({
         )}
       </TableTdActionable>
 
-      <TableTdActionable className="w-[14%]">
+      <TableTdActionable className="w-[14%] pr-16">
         <SnapshotGraph
           performanceSnapshots={marketPerformanceSnapshots ?? EMPTY_ARRAY}
           performance={marketPerformance ?? 0n}
         />
-      </TableTdActionable>
-
-      <TableTdActionable className="w-[10%] pr-16">
-        <div className="flex items-center gap-6">
-          <Button
-            variant="primary-action"
-            className="text-12 px-10 py-6"
-            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Deposit`}
-          >
-            <Trans>Deposit</Trans>
-          </Button>
-          <Button
-            variant="secondary"
-            className="text-12 px-10 py-6"
-            to={`/pools/details?market=${marketOrGlvTokenAddress}&operation=Withdrawal`}
-          >
-            <span className="text-red-400">
-              <Trans>Withdraw</Trans>
-            </span>
-          </Button>
-        </div>
       </TableTdActionable>
     </TableTrActionable>
   );

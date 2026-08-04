@@ -1461,7 +1461,7 @@ msgid "Accrued Negative Funding Fee"
 msgstr "Comisión de Financiación Negativa Acumulada"
 
 #: src/pages/Pools/CarthaLpCard.tsx
-msgid "Cartha LP"
+msgid "0xMarkets LP"
 msgstr ""
 
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
@@ -2934,8 +2934,6 @@ msgstr "Cancelar Orden"
 msgid "Claiming position price impact fees failed"
 msgstr ""
 
-#: src/components/GmList/GmListItem.tsx
-#: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmxAccountModal/MainView.tsx
@@ -4051,6 +4049,10 @@ msgstr "<0>{fromTokenText} </0>{fromTokenIcon}<1> a </1>{toTokenIcon}"
 #: src/components/TradeboxPoolWarnings/TradeboxPoolWarnings.tsx
 msgid "Insufficient liquidity in any {0}/USD market pools for your order."
 msgstr "Insuficiente liquidez en cualquier {0}/USD mercado de pools para tu orden."
+
+#: src/components/GmList/GmList.tsx
+msgid "Manage Liquidity"
+msgstr ""
 
 #: src/pages/LeaderboardPage/components/LeaderboardAccountsTable.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardPositionsTable.tsx
@@ -5216,8 +5218,6 @@ msgid "Deactivate 1CT (One-Click Trading)"
 msgstr "Desactivar 1CT (One-Click Trading)"
 
 #: src/components/AddressDropdown/AddressDropdownWithMultichain.tsx
-#: src/components/GmList/GmListItem.tsx
-#: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmxAccountModal/DepositView.tsx

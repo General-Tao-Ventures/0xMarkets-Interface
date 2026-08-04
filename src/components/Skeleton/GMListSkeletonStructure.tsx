@@ -27,13 +27,13 @@ export default function GMListSkeletonStructure({ withFavorite = true }: { withF
         <Skeleton width={72} height={12} />
       </TableTd>
       <TableTd>
-        <Skeleton width={140} count={1} />
+        <Skeleton width={48} height={12} />
       </TableTd>
       <TableTd>
-        <Skeleton width={210} count={1} />
+        <Skeleton width={80} height={12} />
       </TableTd>
-      <TableTd className="w-[130px]">
-        <Skeleton containerClassName="flex justify-end gap-10" className="flex-grow" width={90} inline count={1} />
+      <TableTd>
+        <Skeleton width={140} height={32} />
       </TableTd>
     </TableTr>
   );

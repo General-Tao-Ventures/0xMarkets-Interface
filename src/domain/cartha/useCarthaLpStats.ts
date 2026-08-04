@@ -61,7 +61,7 @@ export function useCarthaLpStats() {
   return useSWR<CarthaLpStats>("cartha-lp-stats", {
     fetcher: async () => {
       const res = await fetch(CARTHA_LP_STATS_URL);
-      if (!res.ok) throw new Error(`cartha lp-stats: ${res.status}`);
+      if (!res.ok) throw new Error(`0xMarkets LP-stats: ${res.status}`);
       return res.json();
     },
     refreshInterval: 60_000,

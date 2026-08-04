@@ -46,7 +46,7 @@ function formatRelative(targetIso: string, nowMs: number): string {
   return `${hours}h ago`;
 }
 
-/** Cartha LP stats card. */
+/** 0xMarkets LP stats card. */
 export default function CarthaLpCard() {
   const { data, isLoading, error } = useCarthaLpStats();
 
@@ -61,7 +61,7 @@ export default function CarthaLpCard() {
       <div className="flex flex-wrap items-end justify-between gap-16 border-b-1/2 border-slate-800 p-16">
         <div className="flex flex-col gap-4">
           <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
-            <Trans>Cartha LP</Trans>
+            <Trans>0xMarkets LP</Trans>
           </span>
           <span className="text-h2 font-medium normal-nums">
             <Trans>Earn up to</Trans>{" "}
