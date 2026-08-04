@@ -1,8 +1,12 @@
-import { BASE_SEPOLIA } from "./chains";
+import { BASE_MAINNET, BASE_SEPOLIA } from "./chains";
 import { isDevelopment } from "./env";
 import { getSubgraphUrlKey } from "./localStorage";
 
 const SUBGRAPH_URLS = {
+  [BASE_MAINNET]: {
+    // Same-origin Vercel proxy → GCP Squid (avoids mixed-content on HTTPS Preview/Prod)
+    subsquid: "/api/squid/graphql",
+  },
   [BASE_SEPOLIA]: {
     subsquid: "https://zero-x-markets.squids.live/0xmarkets-base-sepolia@v1/api/graphql",
   },

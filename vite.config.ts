@@ -93,6 +93,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/order-keeper/, ""),
         },
+        "/api/squid": {
+          target: "http://34.10.239.169:4350",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/squid/, ""),
+        },
       },
     },
     test: {
