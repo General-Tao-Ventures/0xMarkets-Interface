@@ -4,7 +4,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { useLatest } from "react-use";
 
 import { isContractsChain } from "config/chains";
-import { isDevelopment } from "config/env";
+import { isLocal } from "config/env";
 import { isSourceChain } from "config/multichain";
 import {
   selectTradeboxAvailableTokensOptions,
@@ -75,7 +75,7 @@ export function useTradeParamsProcessor() {
 
       if (
         chainIdFromParams &&
-        (isContractsChain(Number(chainIdFromParams), isDevelopment()) || isSourceChain(Number(chainIdFromParams)))
+        (isContractsChain(Number(chainIdFromParams), isLocal()) || isSourceChain(Number(chainIdFromParams)))
       ) {
         await switchNetwork(Number(chainIdFromParams), true);
       }

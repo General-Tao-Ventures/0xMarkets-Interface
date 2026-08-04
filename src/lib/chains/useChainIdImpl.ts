@@ -9,12 +9,14 @@ import {
   BASE_MAINNET,
   isContractsChain,
 } from "config/chains";
-import { isDevelopment } from "config/env";
+import { isLocal } from "config/env";
 import { SELECTED_NETWORK_LOCAL_STORAGE_KEY } from "config/localStorage";
 import { isSettlementChain, isSourceChain } from "config/multichain";
 import { getRainbowKitConfig } from "lib/wallets/rainbowKitConfig";
 
-const IS_DEVELOPMENT = isDevelopment();
+// Match CONTRACTS_CHAIN_IDS: Sepolia/Localhost only on localhost. Preview is
+// isDevelopment()=true but must reject 84532 so it cannot load Sepolia markets.
+const ALLOW_DEV_CHAINS = isLocal();
 
 const INITIAL_CHAIN_ID: ContractsChainId = BASE_MAINNET;
 
@@ -38,11 +40,11 @@ export function useChainIdImpl(settlementChainId: SettlementChainId): {
     srcChainId = possibleSrcChainId;
   }
 
-  const isCurrentChainSupported = connectedChainId && isContractsChain(connectedChainId, IS_DEVELOPMENT);
+  const isCurrentChainSupported = connectedChainId && isContractsChain(connectedChainId, ALLOW_DEV_CHAINS);
   const isCurrentChainSource = connectedChainId && isSourceChain(connectedChainId);
 
   const isLocalStorageChainSupported =
-    chainIdFromLocalStorage && isContractsChain(chainIdFromLocalStorage, IS_DEVELOPMENT);
+    chainIdFromLocalStorage && isContractsChain(chainIdFromLocalStorage, ALLOW_DEV_CHAINS);
   const isLocalStorageChainSource = chainIdFromLocalStorage && isSourceChain(chainIdFromLocalStorage);
 
   const mustChangeChainId = !connectedChainId || (!isCurrentChainSource && !isCurrentChainSupported);
@@ -57,7 +59,7 @@ export function useChainIdImpl(settlementChainId: SettlementChainId): {
 
     const connectHandler = (connectInfo: { chainId: string }) => {
       const rawChainId = parseInt(connectInfo.chainId);
-      if (isContractsChain(rawChainId, IS_DEVELOPMENT) || isSourceChain(rawChainId)) {
+      if (isContractsChain(rawChainId, ALLOW_DEV_CHAINS) || isSourceChain(rawChainId)) {
         setDisplayedChainId(rawChainId);
         localStorage.setItem(SELECTED_NETWORK_LOCAL_STORAGE_KEY, rawChainId.toString());
       }
@@ -133,7 +135,7 @@ export function useChainIdImpl(settlementChainId: SettlementChainId): {
         }
         if (
           !isSourceChain(account.chainId) &&
-          !isContractsChain(account.chainId, IS_DEVELOPMENT) &&
+          !isContractsChain(account.chainId, ALLOW_DEV_CHAINS) &&
           !isSettlementChain(account.chainId)
         ) {
           return;
@@ -154,7 +156,7 @@ export function useChainIdImpl(settlementChainId: SettlementChainId): {
 
     const switchNetworkHandler = (switchNetworkInfo: CustomEvent<{ chainId: number }>) => {
       const newChainId = switchNetworkInfo.detail.chainId;
-      if (isContractsChain(newChainId, IS_DEVELOPMENT) || isSourceChain(newChainId)) {
+      if (isContractsChain(newChainId, ALLOW_DEV_CHAINS) || isSourceChain(newChainId)) {
         setDisplayedChainId(newChainId);
       }
     };
