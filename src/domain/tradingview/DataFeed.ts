@@ -54,12 +54,12 @@ const V1_UPDATE_INTERVAL = 1000;
 const V2_UPDATE_INTERVAL = 1000;
 
 const PREFETCH_CANDLES_COUNT = 400;
-/** Max chart lookback — matches keeper Benchmarks fill window. */
-const MAX_HISTORY_SECONDS = 365 * 24 * 60 * 60;
-/** Per-request bar cap (12 months of 1h ≈ 8760; paginated lower TFs). */
+/** Max chart lookback — matches keeper Benchmarks fill window (~3 years). */
+const MAX_HISTORY_SECONDS = 3 * 365 * 24 * 60 * 60;
+/** Per-request bar cap (paginated; full 3y of 1h is fetched across scroll-back). */
 const MAX_BARS_PER_REQUEST = 12_000;
 
-/** Ensure first paint of higher TFs can show ~12 months without waiting for scroll-back. */
+/** First paint: enough for ~12m default viewport; scroll-back loads older history. */
 function minBarsForFirstLoad(resolution: ResolutionString): number {
   if (resolution === "1D" || resolution === "1W" || resolution === "1M") return 400;
   if (resolution === "60" || resolution === "240") return 800;

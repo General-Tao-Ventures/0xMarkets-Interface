@@ -42,7 +42,7 @@ type Props = {
   setIsCandlesLoaded?: (isCandlesLoaded: boolean) => void;
 };
 
-/** Daily/weekly/monthly: show ~12m of history with almost no empty future pad. */
+/** Daily/weekly/monthly default viewport: ~12m (full ~3y available via scroll-back). */
 function fitHigherTimeframeVisibleRange(widget: IChartingLibraryWidget | null | undefined) {
   try {
     const chart = widget?.activeChart();
