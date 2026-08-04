@@ -236,6 +236,15 @@ function useIncentivesBonusApr(
   return marketAndGlvTokensAPRData;
 }
 
+type ApyInfoItem = { address: string; baseApy: number };
+
+/** Normalize keeper APY payloads: array, address→info map, or missing/null. */
+function apyInfoEntries(source: ApyInfoItem[] | Record<string, { baseApy: number }> | null | undefined): [string, { baseApy: number }][] {
+  if (source == null) return [];
+  if (Array.isArray(source)) return source.map((m) => [m.address, m]);
+  return Object.entries(source);
+}
+
 export function useGmMarketsApy(
   chainId: ContractsChainId,
   srcChainId: SourceChainId | undefined,
@@ -315,10 +324,8 @@ export function useGmMarketsApy(
       }, {} as MarketTokensAPRData);
 
       // Keeper returns ApyInfo as arrays; tolerate a legacy address→info map too.
-      const marketApyEntries: [string, { baseApy: number }][] = Array.isArray(apys.markets)
-        ? apys.markets.map((m) => [m.address, m])
-        : Object.entries(apys.markets as Record<string, { baseApy: number }>);
-
+      // Mainnet has no GLVs, so `glvs` (and sometimes `markets`) may be missing/null.
+      const marketApyEntries = apyInfoEntries(apys.markets);
       const marketsTokensApyData = marketApyEntries.reduce((acc, [address, { baseApy }]) => {
         acc[address] = numberToBigint(baseApy, 30);
         return acc;
@@ -330,10 +337,7 @@ export function useGmMarketsApy(
           ? apyValues.reduce((acc, apr) => acc + apr, 0n) / BigInt(apyValues.length)
           : 0n;
 
-      const glvApyEntries: [string, { baseApy: number }][] = Array.isArray(apys.glvs)
-        ? apys.glvs.map((m) => [m.address, m])
-        : Object.entries(apys.glvs as Record<string, { baseApy: number }>);
-
+      const glvApyEntries = apyInfoEntries(apys.glvs);
       const glvApyInfoData = glvApyEntries.reduce((acc, [address, { baseApy }]) => {
         acc[address] = numberToBigint(baseApy, 30);
         return acc;
