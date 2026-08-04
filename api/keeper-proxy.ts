@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const KEEPER_URL = process.env.KEEPER_URL || "http://142.93.203.222:37017";
+const KEEPER_URL = process.env.KEEPER_URL || "http://34.60.248.247:37017";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const pathStr = (req.query._path as string) || "";
