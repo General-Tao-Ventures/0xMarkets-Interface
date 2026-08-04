@@ -322,6 +322,8 @@ function useMarketsConfigsRequest({
             minCollateralFactorForOpenInterestShort:
               dataStoreValues.minCollateralFactorForOpenInterestShort.returnValues[0],
 
+            minLeverage: dataStoreValues.minLeverage.returnValues[0],
+
             positionFeeFactorForBalanceWasImproved:
               dataStoreValues.positionFeeFactorForBalanceWasImproved.returnValues[0],
             positionFeeFactorForBalanceWasNotImproved:

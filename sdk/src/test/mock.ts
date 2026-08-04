@@ -287,6 +287,7 @@ export function mockMarketsInfoData(
       virtualShortTokenId: zeroAddress,
 
       leverageLadder: [],
+      minLeverage: 0n,
 
       ...(overrides[key] || {}),
     };

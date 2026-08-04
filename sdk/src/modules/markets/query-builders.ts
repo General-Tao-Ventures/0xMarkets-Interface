@@ -243,7 +243,7 @@ export async function buildMarketsConfigsRequest(
   for (const marketAddress of marketsAddresses || []) {
     let prebuiltHashedKeys = HASHED_MARKET_CONFIG_KEYS[chainId]?.[marketAddress];
 
-    if (!prebuiltHashedKeys) {
+    if (!prebuiltHashedKeys || !prebuiltHashedKeys.minLeverage) {
       // eslint-disable-next-line no-console
       console.warn(
         `No pre-built hashed config keys found for the market ${marketAddress}. Run \`yarn prebuild\` to generate them.`
@@ -253,7 +253,10 @@ export async function buildMarketsConfigsRequest(
         throw new Error(`No market data found for the market ${marketAddress}`);
       }
 
-      prebuiltHashedKeys = hashMarketConfigKeys(marketsData[marketAddress]);
+      prebuiltHashedKeys = {
+        ...(prebuiltHashedKeys ?? {}),
+        ...hashMarketConfigKeys(marketsData[marketAddress]),
+      };
     }
 
     request[`${marketAddress}-dataStore`] = {
@@ -427,6 +430,10 @@ export async function buildMarketsConfigsRequest(
         minCollateralFactorForOpenInterestShort: {
           methodName: "getUint",
           params: [prebuiltHashedKeys.minCollateralFactorForOpenInterestShort],
+        },
+        minLeverage: {
+          methodName: "getUint",
+          params: [prebuiltHashedKeys.minLeverage],
         },
         positionImpactExponentFactor: {
           methodName: "getUint",

@@ -249,6 +249,8 @@ export class Markets extends Module {
 
             minCollateralFactorForLiquidation: dataStoreValues.minCollateralFactorForLiquidation.returnValues[0],
 
+            minLeverage: dataStoreValues.minLeverage.returnValues[0],
+
             positionFeeFactorForBalanceWasImproved:
               dataStoreValues.positionFeeFactorForBalanceWasImproved.returnValues[0],
             positionFeeFactorForBalanceWasNotImproved:

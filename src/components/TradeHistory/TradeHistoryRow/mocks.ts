@@ -355,6 +355,7 @@ export const requestIncreasePosition = prepare({
     virtualLongTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -829,6 +830,7 @@ export const withdraw1Usd = prepare({
     virtualLongTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -1299,6 +1301,7 @@ export const deposit1Usd = prepare({
     virtualLongTokenId: "0x275d2a6e341e6a078d4eee59b08907d1e50825031c5481f9551284f4b7ee2fb9",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -1735,6 +1738,7 @@ export const createOrderDecreaseLong = prepare({
     virtualLongTokenId: "0x04533137e2e8ae1c11111111a0dd36e023e0d6217198f889f9eb9c2a6727481d",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
 
     maxLongPoolUsdForDeposit: {
       type: "bigint",
@@ -2196,6 +2200,7 @@ export const cancelOrderIncreaseLong = prepare({
     virtualLongTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -2664,6 +2669,7 @@ export const createOrderIncreaseLong = prepare({
     virtualLongTokenId: "0x04533137e2e8ae1c11111111a0dd36e023e0d6217198f889f9eb9c2a6727481d",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -3143,6 +3149,7 @@ export const executeOrderDecreaseShort = prepare({
     virtualLongTokenId: "0xd6f594c665cfd695fe0f7241434c3e44f7d3b0e20145e97654d944d26203ddb8",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -3632,6 +3639,7 @@ export const executeOrderIncreaseLong = prepare({
     virtualLongTokenId: "0xab14694c1d031aa28aedaf394a1c4f0054ad43be42448259b8bc064efa1af97c",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -4119,6 +4127,7 @@ export const frozenOrderIncreaseShort = prepare({
     virtualLongTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -4582,6 +4591,7 @@ export const undefinedOrder = prepare({
     virtualLongTokenId: "0x3c48977e4fc47fa4616e13af7ceb68b0d545dce7b1fb9ec7b85bb6e00870a051",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -5066,6 +5076,7 @@ export const liquidated = prepare({
     virtualLongTokenId: "0xc31eff1feab296b571fe8131f0a4addc859c36445b90ea23edd116081d5eb0e8",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -5604,6 +5615,7 @@ export const increaseLongETH = prepare({
     virtualLongTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     maxLongPoolUsdForDeposit: {
       type: "bigint",
       hex: "0x00",
@@ -6158,6 +6170,7 @@ export const createOrderStopMarketLong = prepare({
     virtualLongTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     claimableFundingAmountLong: { type: "bigint", value: "119" },
     claimableFundingAmountShort: { type: "bigint", value: "337105" },
     marketTokenAddress: "0x47c031236e19d024b42f8AE6780E44A573170703",
@@ -6384,6 +6397,7 @@ export const executeOrderStopMarketLong = prepare({
     virtualLongTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
     leverageLadder: [],
+    minLeverage: 0n,
     claimableFundingAmountLong: { type: "bigint", value: "119" },
     claimableFundingAmountShort: { type: "bigint", value: "337105" },
     marketTokenAddress: "0x47c031236e19d024b42f8AE6780E44A573170703",

@@ -64,6 +64,7 @@ export enum CustomErrorName {
   InsufficientExecutionFee = "InsufficientExecutionFee",
   OrderNotFulfillableAtAcceptablePrice = "OrderNotFulfillableAtAcceptablePrice",
   InsufficientSwapOutputAmount = "InsufficientSwapOutputAmount",
+  InvalidLeverage = "InvalidLeverage",
 }
 
 export function getIsUserRejectedError(errorType: TxErrorType) {

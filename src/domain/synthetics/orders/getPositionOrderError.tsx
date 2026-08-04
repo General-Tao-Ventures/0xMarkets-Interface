@@ -10,6 +10,7 @@ import {
 } from "domain/synthetics/orders";
 import { PositionInfoLoaded } from "domain/synthetics/positions";
 import { NextPositionValues } from "domain/synthetics/trade";
+import { formatAmount, PRECISION } from "lib/numbers";
 
 export function getPositionOrderError({
   positionOrder,
@@ -20,6 +21,7 @@ export function getPositionOrderError({
   existingPosition,
   nextPositionValuesForIncrease,
   maxAllowedLeverage,
+  minLeverage,
 }: {
   positionOrder: PositionOrderInfo;
   markPrice: bigint | undefined;
@@ -29,6 +31,8 @@ export function getPositionOrderError({
   existingPosition: PositionInfoLoaded | undefined;
   nextPositionValuesForIncrease: NextPositionValues | undefined;
   maxAllowedLeverage: number | undefined;
+  /** On-chain MIN_LEVERAGE (1e30 factor). 0 / undefined = no floor. */
+  minLeverage?: bigint;
 }): string | undefined {
   if (markPrice === undefined) {
     return t`Loading...`;
@@ -110,13 +114,24 @@ export function getPositionOrderError({
     }
   }
 
-  if (isLimitIncreaseOrderType(positionOrder.orderType)) {
+  if (isLimitIncreaseOrderType(positionOrder.orderType) || isStopIncreaseOrderType(positionOrder.orderType)) {
     if (
       nextPositionValuesForIncrease?.nextLeverage !== undefined &&
       maxAllowedLeverage !== undefined &&
       nextPositionValuesForIncrease.nextLeverage > maxAllowedLeverage
     ) {
       return t`Max leverage: ${(maxAllowedLeverage / BASIS_POINTS_DIVISOR).toFixed(1)}x`;
+    }
+
+    if (
+      minLeverage !== undefined &&
+      minLeverage > 0n &&
+      nextPositionValuesForIncrease?.nextLeverage !== undefined
+    ) {
+      const minLeverageBps = (minLeverage * BigInt(BASIS_POINTS_DIVISOR)) / PRECISION;
+      if (nextPositionValuesForIncrease.nextLeverage < minLeverageBps) {
+        return t`Min. leverage: ${formatAmount(minLeverageBps, 4, 2)}x`;
+      }
     }
   }
 }

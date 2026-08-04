@@ -131,6 +131,7 @@ const marketInfo: MarketInfo = {
   virtualLongTokenId: "0x3c48977e4fc47fa4616e13af7ceb68b0d545dce7b1fb9ec7b85bb6e00870a051",
   virtualShortTokenId: "0x0000000000000000000000000000000000000000000000000000000000000000",
   leverageLadder: [],
+    minLeverage: 0n,
 };
 
 const position: PositionInfoLoaded = {

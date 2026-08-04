@@ -176,6 +176,8 @@ export function useFastMarketsInfoRequest(chainId: number) {
             minCollateralFactorForLiquidation: BigInt(mInfo.minCollateralFactor),
             minCollateralFactorForOpenInterestLong: BigInt(mInfo.minCollateralFactorForOpenInterestLong),
             minCollateralFactorForOpenInterestShort: BigInt(mInfo.minCollateralFactorForOpenInterestShort),
+            // Fast path has no minLeverage slot; full multicall fills it in.
+            minLeverage: 0n,
 
             swapImpactPoolAmountLong: BigInt(mInfo.swapImpactPoolAmountLong),
             swapImpactPoolAmountShort: BigInt(mInfo.swapImpactPoolAmountShort),

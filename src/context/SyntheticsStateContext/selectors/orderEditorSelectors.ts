@@ -747,6 +747,7 @@ export const selectOrderEditorPositionOrderError = createSelector((q) => {
   const existingPosition = q(selectOrderEditorExistingPosition);
   const nextPositionValuesForIncrease = q(selectOrderEditorNextPositionValuesForIncrease);
   const maxAllowedLeverage = q(selectOrderEditorMaxAllowedLeverage);
+  const minLeverage = q((s) => selectMarketsInfoData(s)?.[positionOrder.marketAddress]?.minLeverage);
 
   return getPositionOrderError({
     positionOrder,
@@ -757,6 +758,7 @@ export const selectOrderEditorPositionOrderError = createSelector((q) => {
     existingPosition,
     nextPositionValuesForIncrease,
     maxAllowedLeverage,
+    minLeverage,
   });
 });
 
@@ -788,6 +790,7 @@ export const makeSelectOrderEditorPositionOrderError = createSelectorFactory(
       const existingPosition = q(selectExistingPosition);
       const nextPositionValuesForIncrease = q(selectNextPositionValuesForIncrease);
       const maxAllowedLeverage = q(selectMaxAllowedLeverage);
+      const minLeverage = q((s) => selectMarketsInfoData(s)?.[order.marketAddress]?.minLeverage);
 
       return getPositionOrderError({
         positionOrder,
@@ -798,6 +801,7 @@ export const makeSelectOrderEditorPositionOrderError = createSelectorFactory(
         existingPosition,
         nextPositionValuesForIncrease,
         maxAllowedLeverage,
+        minLeverage,
       });
     });
   }

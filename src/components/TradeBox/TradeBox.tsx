@@ -70,6 +70,7 @@ import {
   formatUsd,
   formatUsdPrice,
   parseValue,
+  PRECISION,
 } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { useCursorInside } from "lib/useCursorInside";
@@ -406,11 +407,24 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
 
   useEffect(
     function validateLeverageOption() {
-      if (leverageOption && leverageOption > maxAllowedLeverage / BASIS_POINTS_DIVISOR) {
-        setLeverageOption(maxAllowedLeverage / BASIS_POINTS_DIVISOR);
+      if (leverageOption === undefined) return;
+
+      const maxX = maxAllowedLeverage / BASIS_POINTS_DIVISOR;
+      if (leverageOption > maxX) {
+        setLeverageOption(maxX);
+        return;
+      }
+
+      // Floor to on-chain MIN_LEVERAGE when configured (1e30 factor → x).
+      const minLeverageFactor = marketInfo?.minLeverage ?? 0n;
+      if (minLeverageFactor > 0n) {
+        const minX = Number((minLeverageFactor * BigInt(BASIS_POINTS_DIVISOR)) / PRECISION) / BASIS_POINTS_DIVISOR;
+        if (Number.isFinite(minX) && minX > 0 && leverageOption < minX) {
+          setLeverageOption(Math.min(maxX, Math.ceil(minX * 10) / 10));
+        }
       }
     },
-    [leverageOption, maxAllowedLeverage, setLeverageOption]
+    [leverageOption, maxAllowedLeverage, marketInfo?.minLeverage, setLeverageOption]
   );
 
   useEffect(

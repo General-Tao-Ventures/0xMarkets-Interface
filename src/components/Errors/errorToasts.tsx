@@ -124,6 +124,17 @@ export function getTxnErrorToast(
     return toastParams;
   }
 
+  if (errorData.contractError === CustomErrorName.InvalidLeverage) {
+    toastParams.errorContent = (
+      <Trans>
+        Leverage is below this market&apos;s minimum. Increase position size or reduce collateral so leverage meets the
+        minimum, then try again.
+      </Trans>
+    );
+
+    return toastParams;
+  }
+
   switch (errorData.txErrorType) {
     case TxErrorType.NotEnoughFunds:
       toastParams.errorContent = (

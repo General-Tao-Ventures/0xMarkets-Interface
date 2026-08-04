@@ -27,6 +27,7 @@ import {
   MIN_COLLATERAL_FACTOR_FOR_OPEN_INTEREST_MULTIPLIER_KEY,
   MIN_COLLATERAL_FACTOR_KEY,
   MIN_FUNDING_FACTOR_PER_SECOND,
+  MIN_LEVERAGE_KEY,
   MIN_POSITION_IMPACT_POOL_AMOUNT_KEY,
   OPEN_INTEREST_IN_TOKENS_KEY,
   OPEN_INTEREST_KEY,
@@ -236,6 +237,10 @@ export function hashMarketConfigKeys(market: MarketConfig) {
     minCollateralFactorForOpenInterestShort: [
       ["bytes32", "address", "bool"],
       [MIN_COLLATERAL_FACTOR_FOR_OPEN_INTEREST_MULTIPLIER_KEY, marketAddress, false],
+    ],
+    minLeverage: [
+      ["bytes32", "address"],
+      [MIN_LEVERAGE_KEY, marketAddress],
     ],
     positionImpactExponentFactor: [
       ["bytes32", "address"],

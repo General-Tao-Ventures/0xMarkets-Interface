@@ -77,6 +77,9 @@ export type MarketInfo = Market &
     minCollateralFactorForOpenInterestLong: bigint;
     minCollateralFactorForOpenInterestShort: bigint;
 
+    // Opt-in floor (1e30 factor). 0 / missing means no min-leverage check on open/increase.
+    minLeverage: bigint;
+
     swapImpactPoolAmountLong: bigint;
     swapImpactPoolAmountShort: bigint;
 
