@@ -532,7 +532,13 @@ function applyAcceptablePrice(p: {
   values.proportionalPendingImpactDeltaUsd = totalImpactValues.proportionalPendingImpactDeltaUsd;
   values.priceImpactDiffUsd = totalImpactValues.priceImpactDiffUsd;
 
-  if (isTrigger) {
+  // Market decreases: unbound acceptable price. Keeper Pyth Lazer prices can be off by
+  // 1e12 vs UI tickers when feed multipliers used wrong token decimals (6 vs 18), which
+  // made every EUR/GOLD/etc. close fail OrderNotFulfillableAtAcceptablePrice. Same
+  // unbounded pattern as StopLossDecrease; pool price impact still applies on fill.
+  if (!isTrigger) {
+    values.acceptablePrice = isLong ? 0n : MaxUint256;
+  } else if (isTrigger) {
     if (values.triggerOrderType === OrderType.StopLossDecrease) {
       if (isLong) {
         values.acceptablePrice = 0n;

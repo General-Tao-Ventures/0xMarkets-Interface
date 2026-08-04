@@ -316,6 +316,9 @@ export function buildDecreaseOrderPayload(
   let acceptablePrice: ContractPrice;
   if (p.acceptablePrice === MaxUint256) {
     acceptablePrice = MaxUint256 as ContractPrice;
+  } else if (p.acceptablePrice === 0n) {
+    // Unbounded market/stop-loss decrease for longs — do not apply slippage math to 0.
+    acceptablePrice = 0n as ContractPrice;
   } else {
     acceptablePrice = convertToContractPrice(
       applySlippageToPrice(p.allowedSlippage, p.acceptablePrice, false, p.isLong),
