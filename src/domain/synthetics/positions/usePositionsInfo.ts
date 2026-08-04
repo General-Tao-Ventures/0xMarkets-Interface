@@ -207,15 +207,19 @@ export function usePositionsInfoRequest(
         priceImpactDiffUsd: netPriceImapctValues?.priceImpactDiffUsd ?? 0n,
       });
 
-      const pnlAfterFees = getPositionPnlAfterFees({
-        pnl,
-        pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-        pendingFundingFeesUsd: pendingFundingFeesUsd,
-        closingFeeUsd,
-        uiFeeUsd,
-        totalPendingImpactDeltaUsd: netPriceImapctValues?.totalImpactDeltaUsd ?? 0n,
-        priceImpactDiffUsd: netPriceImapctValues?.priceImpactDiffUsd ?? 0n,
-      });
+      // When entry is insane, zero PnL-after-fees too — otherwise fees/impact still
+      // produce a non-zero dollar PnL while percent stays 0 and confuses the UI.
+      const pnlAfterFees = hasSaneEntryPrice
+        ? getPositionPnlAfterFees({
+            pnl,
+            pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
+            pendingFundingFeesUsd: pendingFundingFeesUsd,
+            closingFeeUsd,
+            uiFeeUsd,
+            totalPendingImpactDeltaUsd: netPriceImapctValues?.totalImpactDeltaUsd ?? 0n,
+            priceImpactDiffUsd: netPriceImapctValues?.priceImpactDiffUsd ?? 0n,
+          })
+        : 0n;
 
       const pnlAfterFeesPercentage =
         hasSaneEntryPrice && collateralUsd != 0n
