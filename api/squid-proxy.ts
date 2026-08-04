@@ -1,7 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-// Prefer Vercel/local env — fail closed if unset.
-const SQUID_URL = process.env.SQUID_URL;
+/** Self-hosted Base mainnet Squid (GCP). Override via SQUID_URL. */
+const DEFAULT_SQUID_URL = "http://34.10.239.169:4350";
+
+// Prefer Vercel/local env; fall back to mainnet Squid so Preview/Prod
+// volume/fees/history keep working when SQUID_URL isn't set in the project.
+const SQUID_URL = process.env.SQUID_URL || DEFAULT_SQUID_URL;
 
 /** Allowlist only — GraphQL is the sole Squid surface the Interface needs. */
 const ALLOWED_PATHS = new Set(["graphql"]);
@@ -46,10 +50,6 @@ function buildSafeTarget(baseUrl: string, pathStr: string, search: string): URL 
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!SQUID_URL) {
-    return res.status(500).json({ error: "SQUID_URL is not configured" });
-  }
-
   const pathStr = (req.query._path as string) || "graphql";
 
   const params = new URLSearchParams();

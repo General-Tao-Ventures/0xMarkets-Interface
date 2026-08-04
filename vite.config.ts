@@ -30,7 +30,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const keeperUrl = env.KEEPER_URL || "https://keeper.0xmarkets.io";
   const orderKeeperUrl = env.ORDER_KEEPER_URL || "http://127.0.0.1:37018";
-  const squidUrl = squidProxyTarget(env.SQUID_URL || "http://127.0.0.1:4350");
+  // Default to the GCP mainnet Squid (same as api/squid-proxy.ts) so local
+  // yarn-dev history/APR work without a local indexer. Override with SQUID_URL.
+  const squidUrl = squidProxyTarget(env.SQUID_URL || "http://34.10.239.169:4350");
 
   return {
     worker: {
