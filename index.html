@@ -46,6 +46,30 @@
     <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png" />
     <meta name="theme-color" content="#ffffff" />
     <title>0xMarkets | Decentralized Perpetual Exchange</title>
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://googletagmanager.com";
+      })(window, document, "script", "dataLayer", "GTM-5QJR6MZVSJ");
+    </script>
+    <!-- End Google Tag Manager -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://googletagmanager.com"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-5QJR6MZVSJ");
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -58,8 +82,6 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-    <GoogleTagManager gtmId="GTM-5QJR6MZVSJ" />
-    <GoogleAnalytics gaId="G-5QJR6MZVSJ" />
     <script type="module" src="/src/index.tsx"></script>
     <script async src="/charting_library/charting_library.standalone.js"></script>
   </body>

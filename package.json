@@ -45,7 +45,6 @@
     "@lingui/core": "4.10.0",
     "@lingui/macro": "4.11.3",
     "@lingui/react": "4.10.0",
-    "@next/third-parties": "latest",
     "@plausible-analytics/tracker": "0.4.4",
     "@rainbow-me/rainbowkit": "2.2.0",
     "@sentry/react": "10.43.0",
