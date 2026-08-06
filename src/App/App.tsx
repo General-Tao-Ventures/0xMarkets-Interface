@@ -75,14 +75,6 @@ function App() {
           Discord
         </a>
         .{" "}
-        <a
-          href="https://faucet.0xMarkets.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-white"
-        >
-          Get testnet tokens
-        </a>
       </div>
       <KeeperStatusBanner />
       <AppRoutes />
