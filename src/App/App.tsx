@@ -67,7 +67,7 @@ function App() {
         You’re early. 0xMarkets is on <span className="font-medium">mainnet</span> and in beta and you may experience
         bugs - please share anything weird, broken, or unexpectedly spicy in{" "}
         <a
-          href="https://discord.gg/d87vC7uaNx"
+          href="https://discord.gg/zGkW2kTsGM"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-white"
