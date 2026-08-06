@@ -20,7 +20,7 @@ import {
 } from "lib/numbers";
 import { PositionTradeAction, TradeActionType } from "sdk/types/tradeHistory";
 import { bigMath } from "sdk/utils/bigmath";
-import { isFxDisplayReversedSymbol, toFxDisplayPrice } from "sdk/utils/fxDisplay";
+import { isFxDisplayReversedSymbol, toFxDisplayIsLong, toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import {
   INEQUALITY_GT,
@@ -70,8 +70,9 @@ export const formatPositionMessage = (
 
   const isIncrease = isIncreaseOrderType(tradeAction.orderType);
   const isLong = tradeAction.isLong;
-  const longShortText = isLong ? t`Long` : t`Short`;
   const indexTokenSymbol = tradeAction.indexToken.symbol;
+  // USD/JPY display flips Long/Short to match inverted quote; keep on-chain isLong for inequality math below.
+  const longShortText = toFxDisplayIsLong(isLong, indexTokenSymbol) ? t`Long` : t`Short`;
 
   //          | long | short
   // increase |  <   |  >
