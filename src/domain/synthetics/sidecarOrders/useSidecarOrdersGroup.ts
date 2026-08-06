@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo } from "react";
 
 import { USD_DECIMALS } from "config/factors";
+import { selectChartToken } from "context/SyntheticsStateContext/selectors/chartSelectors";
 import {
   selectSelectedMarketPriceDecimals,
   selectSelectedMarketVisualMultiplier,
@@ -38,6 +39,8 @@ export function useSidecarOrdersGroup<T extends SidecarOrderEntryBase>({
 
   const visualMultiplier = useSelector(selectSelectedMarketVisualMultiplier);
   const priceDecimals = useSelector(selectSelectedMarketPriceDecimals);
+  const { chartToken } = useSelector(selectChartToken);
+  const indexSymbol = chartToken?.symbol;
 
   const getPercentageBySizeUsd = useCallback(
     (sizeUsd: bigint | null) => {
@@ -92,13 +95,13 @@ export function useSidecarOrdersGroup<T extends SidecarOrderEntryBase>({
         });
       } else if (field === "price") {
         if (nextField) {
-          price = getDefaultEntryField(USD_DECIMALS, nextField, visualMultiplier, priceDecimals);
+          price = getDefaultEntryField(USD_DECIMALS, nextField, visualMultiplier, priceDecimals, indexSymbol);
         }
       }
 
       return { ...entry, sizeUsd, percentage, price } as T;
     },
-    [getPercentageBySizeUsd, getSizeUsdByPercentage, visualMultiplier, priceDecimals]
+    [getPercentageBySizeUsd, getSizeUsdByPercentage, visualMultiplier, priceDecimals, indexSymbol]
   );
 
   const initialState = useMemo(() => {

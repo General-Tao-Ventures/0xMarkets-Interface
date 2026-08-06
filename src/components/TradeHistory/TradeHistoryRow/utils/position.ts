@@ -20,7 +20,7 @@ import {
 } from "lib/numbers";
 import { PositionTradeAction, TradeActionType } from "sdk/types/tradeHistory";
 import { bigMath } from "sdk/utils/bigmath";
-import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
+import { isFxDisplayReversedSymbol, toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import {
   INEQUALITY_GT,
@@ -109,6 +109,20 @@ export const formatPositionMessage = (
     triggerPriceInequality = INEQUALITY_LT;
   } else if (ot === OrderType.StopLossDecrease && !isLong) {
     triggerPriceInequality = INEQUALITY_GT;
+  }
+
+  // USD/JPY display inverts the quote, so Above/Below must flip with it.
+  if (isFxDisplayReversedSymbol(indexTokenSymbol)) {
+    if (acceptablePriceInequality === INEQUALITY_GT) {
+      acceptablePriceInequality = INEQUALITY_LT;
+    } else if (acceptablePriceInequality === INEQUALITY_LT) {
+      acceptablePriceInequality = INEQUALITY_GT;
+    }
+    if (triggerPriceInequality === INEQUALITY_GT) {
+      triggerPriceInequality = INEQUALITY_LT;
+    } else if (triggerPriceInequality === INEQUALITY_LT) {
+      triggerPriceInequality = INEQUALITY_GT;
+    }
   }
 
   const sizeDeltaText = formatUsd(sizeDeltaUsd * (isIncrease ? BN_ONE : BN_NEGATIVE_ONE), {

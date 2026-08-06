@@ -148,6 +148,7 @@ export const selectTradeboxSidecarOrdersExistingSlEntries = createSelector((q) =
     sort: isLong ? "desc" : "asc",
     visualMultiplier,
     priceDecimals,
+    indexSymbol: existingSlOrders?.[0]?.indexToken?.symbol,
   });
 });
 
@@ -163,6 +164,7 @@ export const selectTradeboxSidecarOrdersExistingTpEntries = createSelector((q) =
     sort: isLong ? "asc" : "desc",
     visualMultiplier,
     priceDecimals,
+    indexSymbol: existingTpOrders?.[0]?.indexToken?.symbol,
   });
 });
 
@@ -177,6 +179,7 @@ export const selectTradeboxSidecarOrdersExistingLimitEntries = createSelector((q
     sort: "desc",
     visualMultiplier,
     priceDecimals,
+    indexSymbol: existingLimitOrders?.[0]?.indexToken?.symbol,
   });
 });
 
