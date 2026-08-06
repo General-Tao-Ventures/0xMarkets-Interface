@@ -85,6 +85,8 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       decimals: 18,
       address: "0xF40d284eF3F79451E19D500A57539F753dd79Dbf",
       isSynthetic: true,
+      // Displayed as USD/JPY (~157); keep 4dp like other FX pairs.
+      priceDecimals: 4,
       imageUrl: "https://assets.coingecko.com/coins/images/1/small/jpy.png",
       coingeckoUrl: "https://www.coingecko.com/en/coins/jpy",
     },
@@ -201,6 +203,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       decimals: 6,
       address: "0x7836DF766375f02D71fa3617F5F06a0712699A81",
       isSynthetic: true,
+      priceDecimals: 4,
       imageUrl: "https://assets.coingecko.com/coins/images/1/small/jpy.png",
       coingeckoUrl: "https://www.coingecko.com/en/coins/jpy",
     },
