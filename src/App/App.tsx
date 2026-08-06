@@ -64,8 +64,8 @@ function App() {
   let app = (
     <>
       <div className="bg-yellow-500/20 px-16 py-12 text-center text-16 font-normal text-yellow-300">
-        <span className="font-medium">Beta Mainnet Live:</span> You're early enough to find a bug. Spot something broken
-        or unexpectedly spicy? Let us know on{" "}
+        You’re early. 0xMarkets is on <span className="font-medium">mainnet</span> and in beta and you may experience
+        bugs - please share anything weird, broken, or unexpectedly spicy in{" "}
         <a
           href="https://discord.gg/d87vC7uaNx"
           target="_blank"
