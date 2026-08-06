@@ -136,7 +136,12 @@ export default function TVChartContainer({
       const price = Number((token.minPrice + token.maxPrice) / 2n) / 1e30;
       // Return undefined if price is 0 (can happen transiently during reconnect)
       // to prevent the oracle bridge from drawing a $0 candle on the chart.
-      return price > 0 ? price : undefined;
+      if (!(price > 0)) return undefined;
+      // JPY tickers are JPY/USD (~0.006) to match the chain; chart candles are USD/JPY (~157).
+      if (symbol === "JPY") {
+        return 1 / price;
+      }
+      return price;
     });
   }, [datafeed]);
 

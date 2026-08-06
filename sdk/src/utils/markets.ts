@@ -7,7 +7,11 @@ import { applyFactor, PRECISION } from "./numbers";
 import { getByKey } from "./objects";
 import { convertToContractTokenPrices, convertToUsd, getMidPrice } from "./tokens";
 
-const REVERSED_PAIR_SYMBOLS = new Set(["JPY"]);
+/**
+ * Prefer explicit market.reversed for labels. JPY index is priced as JPY/USD on-chain
+ * (~0.006); auto-labeling it USD/JPY made Entry/Mark look like a broken FX quote.
+ */
+const REVERSED_PAIR_SYMBOLS = new Set<string>();
 
 export function getMarketFullName(p: {
   longToken: Token;

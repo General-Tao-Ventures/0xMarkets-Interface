@@ -34,7 +34,7 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
       longTokenAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       shortTokenAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     },
-    // JPY/USD [USDC-USDC] (on-chain reversed=false)
+    // JPY/USD [USDC-USDC] (index priced as JPY/USD; chart candles still USD/JPY)
     "0x516dE27eeb84cD7f86035a03f29187aC3b3448f4": {
       marketTokenAddress: "0x516dE27eeb84cD7f86035a03f29187aC3b3448f4",
       indexTokenAddress: "0xF40d284eF3F79451E19D500A57539F753dd79Dbf",
