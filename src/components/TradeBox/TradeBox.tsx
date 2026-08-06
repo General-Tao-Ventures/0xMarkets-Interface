@@ -866,6 +866,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
         topRightLabel={t`Mark`}
         topRightValue={formatUsdPrice(toFxDisplayPrice(markPrice, toToken?.symbol), {
           visualMultiplier: toToken?.visualMultiplier,
+          displayDecimals: toToken?.priceDecimals,
         })}
         onClickTopRightLabel={setMarkPriceAsTriggerPrice}
         inputValue={triggerPriceInputValue}

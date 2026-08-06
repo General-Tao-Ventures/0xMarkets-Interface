@@ -300,7 +300,8 @@ export function formatUsdPrice(price?: bigint, opts: Parameters<typeof formatUsd
     return "NA";
   }
 
-  const decimals = calculateDisplayDecimals(price, undefined, opts.visualMultiplier);
+  // Prefer caller-provided decimals (e.g. token.priceDecimals for FX: JPY=3, EUR/GBP=5).
+  const decimals = opts.displayDecimals ?? calculateDisplayDecimals(price, undefined, opts.visualMultiplier);
 
   return formatUsd(price, {
     ...opts,

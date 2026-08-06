@@ -104,9 +104,10 @@ export function useChartHeaderFormattedValues() {
     return (
       formatUsdPrice(toFxDisplayPrice(avgPriceValue, chartToken?.symbol), {
         visualMultiplier,
+        displayDecimals: chartToken?.priceDecimals,
       }) || "..."
     );
-  }, [avgPriceValue, visualMultiplier, chartToken?.symbol]);
+  }, [avgPriceValue, visualMultiplier, chartToken?.symbol, chartToken?.priceDecimals]);
 
   const [longOIValue, longOIPercentage] = useMemo(() => {
     if (info?.longOpenInterestPercentage !== undefined && info.openInterestLong !== undefined) {
