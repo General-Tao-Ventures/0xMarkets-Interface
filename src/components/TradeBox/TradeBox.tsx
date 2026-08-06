@@ -60,7 +60,6 @@ import { useMaxAvailableAmount } from "domain/tokens/useMaxAvailableAmount";
 import { useLocalizedMap } from "lib/i18n";
 import { throttleLog } from "lib/logging";
 import {
-  calculateDisplayDecimals,
   formatAmount,
   formatAmountFree,
   formatBalanceAmount,
@@ -71,6 +70,7 @@ import {
   formatUsdPrice,
   parseValue,
   PRECISION,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { useCursorInside } from "lib/useCursorInside";
@@ -613,13 +613,13 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       formatAmount(
         displayMark,
         USD_DECIMALS,
-        calculateDisplayDecimals(displayMark, undefined, toToken?.visualMultiplier),
+        resolvePriceDisplayDecimals(toToken?.priceDecimals, displayMark, toToken?.visualMultiplier),
         undefined,
         undefined,
         toToken?.visualMultiplier
       )
     );
-  }, [markPrice, setTriggerPriceInputValue, toToken?.symbol, toToken?.visualMultiplier]);
+  }, [markPrice, setTriggerPriceInputValue, toToken?.priceDecimals, toToken?.symbol, toToken?.visualMultiplier]);
 
   const handleLimitPricePercentageShortcut = useCallback(
     (pct: number) => {
@@ -631,13 +631,17 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       const displayMark = toFxDisplayPrice(markPrice, toToken?.symbol) ?? markPrice;
       const bps = BigInt(Math.round(pct * 100));
       const adjustedPrice = (displayMark * (10000n + bps)) / 10000n;
-      const displayDecimals = calculateDisplayDecimals(adjustedPrice, undefined, toToken?.visualMultiplier);
+      const displayDecimals = resolvePriceDisplayDecimals(
+        toToken?.priceDecimals,
+        adjustedPrice,
+        toToken?.visualMultiplier
+      );
 
       setTriggerPriceInputValue(
         formatAmount(adjustedPrice, USD_DECIMALS, displayDecimals, undefined, undefined, toToken?.visualMultiplier)
       );
     },
-    [markPrice, setTriggerPriceInputValue, toToken?.symbol, toToken?.visualMultiplier]
+    [markPrice, setTriggerPriceInputValue, toToken?.priceDecimals, toToken?.symbol, toToken?.visualMultiplier]
   );
 
   const handleTriggerMarkPriceClick = useCallback(
@@ -971,6 +975,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     return formatLiquidationPrice(nextPositionValues?.nextLiqPrice, {
       visualMultiplier: toToken?.visualMultiplier,
       indexSymbol: toToken?.symbol,
+      displayDecimals: toToken?.priceDecimals,
     });
   }, [
     isTrigger,
@@ -980,6 +985,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     nextPositionValues?.nextLiqPrice,
     toToken?.visualMultiplier,
     toToken?.symbol,
+    toToken?.priceDecimals,
     selectedPosition,
   ]);
 
@@ -1253,6 +1259,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                         visualMultiplier: toToken?.visualMultiplier,
                         markPrice: selectedPosition?.markPrice,
                         indexSymbol: toToken?.symbol,
+                        displayDecimals: toToken?.priceDecimals,
                       })
                     : undefined
                 }

@@ -4,7 +4,7 @@ import uniqueId from "lodash/uniqueId";
 import { USD_DECIMALS } from "config/factors";
 import { BASIS_POINTS_DIVISOR, MAX_ALLOWED_LEVERAGE } from "config/factors";
 import { PositionOrderInfo } from "domain/synthetics/orders";
-import { calculateDisplayDecimals, formatAmount, parseValue, removeTrailingZeros } from "lib/numbers";
+import { formatAmount, parseValue, removeTrailingZeros, resolvePriceDisplayDecimals } from "lib/numbers";
 
 import type { InitialEntry, EntryField, SidecarOrderEntry, SidecarOrderEntryBase } from "./types";
 
@@ -14,7 +14,8 @@ export const PERCENTAGE_DECIMALS = 0;
 export function getDefaultEntryField(
   decimals: number | undefined,
   { input, value, error }: Partial<EntryField> = {},
-  visualMultiplier?: number
+  visualMultiplier?: number,
+  priceDecimals?: number
 ): EntryField {
   let nextInput = "";
   let nextValue: bigint | null = null;
@@ -34,7 +35,7 @@ export function getDefaultEntryField(
           formatAmount(
             value,
             decimals,
-            calculateDisplayDecimals(value, decimals, visualMultiplier),
+            resolvePriceDisplayDecimals(priceDecimals, value, visualMultiplier),
             undefined,
             undefined,
             visualMultiplier
@@ -68,10 +69,12 @@ export function prepareInitialEntries({
   positionOrders,
   sort = "desc",
   visualMultiplier,
+  priceDecimals,
 }: {
   positionOrders: PositionOrderInfo[] | undefined;
   sort: "desc" | "asc";
   visualMultiplier?: number;
+  priceDecimals?: number;
 }): undefined | InitialEntry[] {
   if (!positionOrders) return;
 
@@ -86,7 +89,7 @@ export function prepareInitialEntries({
     .map((order) => {
       const entry: InitialEntry = {
         sizeUsd: getDefaultEntryField(USD_DECIMALS, { value: order.sizeDeltaUsd }),
-        price: getDefaultEntryField(USD_DECIMALS, { value: order.triggerPrice }, visualMultiplier),
+        price: getDefaultEntryField(USD_DECIMALS, { value: order.triggerPrice }, visualMultiplier, priceDecimals),
         order,
       };
 

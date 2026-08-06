@@ -644,6 +644,7 @@ function MarketListItem({
               {tokenData
                 ? formatUsdPrice(toFxDisplayPrice(getMidPrice(tokenData.prices), tokenData.symbol), {
                     visualMultiplier: tokenData.visualMultiplier,
+                    displayDecimals: tokenData.priceDecimals,
                   })
                 : "-"}
             </span>
@@ -687,6 +688,7 @@ function MarketListItem({
             {tokenData
               ? formatUsdPrice(toFxDisplayPrice(getMidPrice(tokenData.prices), tokenData.symbol), {
                   visualMultiplier: tokenData.visualMultiplier,
+                  displayDecimals: tokenData.priceDecimals,
                 })
               : "-"}
           </span>

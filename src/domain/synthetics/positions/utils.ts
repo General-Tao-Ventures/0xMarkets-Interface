@@ -7,11 +7,11 @@ import { Token } from "domain/tokens";
 import { CHART_PERIODS } from "lib/legacy";
 import {
   applyFactor,
-  calculateDisplayDecimals,
   expandDecimals,
   formatAmount,
   formatUsd,
   formatUsdPrice,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { bigMath } from "sdk/utils/bigmath";
 import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
@@ -124,8 +124,11 @@ export function formatPositionPrice(
   }
 
   // Use formatUsd (not formatUsdPrice) so caller-provided market priceDecimals are honored.
-  const displayDecimals =
-    opts.displayDecimals ?? calculateDisplayDecimals(displayPrice, undefined, opts.visualMultiplier);
+  const displayDecimals = resolvePriceDisplayDecimals(
+    opts.displayDecimals,
+    displayPrice,
+    opts.visualMultiplier
+  );
 
   return (
     formatUsd(displayPrice, {
@@ -157,22 +160,24 @@ export function formatLiquidationPrice(
     return "NA";
   }
 
-  const priceDecimalPlaces = calculateDisplayDecimals(displayLiq!, undefined, opts.visualMultiplier);
-
   return formatUsd(displayLiq, {
-    displayDecimals: opts.displayDecimals ?? priceDecimalPlaces,
+    displayDecimals: resolvePriceDisplayDecimals(opts.displayDecimals, displayLiq, opts.visualMultiplier),
     visualMultiplier: opts.visualMultiplier,
     maxThreshold: "1000000",
   });
 }
 
-export function formatAcceptablePrice(acceptablePrice?: bigint, opts: { visualMultiplier?: number } = {}) {
+export function formatAcceptablePrice(
+  acceptablePrice?: bigint,
+  opts: { visualMultiplier?: number; displayDecimals?: number; indexSymbol?: string } = {}
+) {
   if (acceptablePrice !== undefined && (acceptablePrice == 0n || acceptablePrice >= ethers.MaxInt256)) {
     return "NA";
   }
 
-  return formatUsdPrice(acceptablePrice, {
-    ...opts,
+  return formatUsdPrice(toFxDisplayPrice(acceptablePrice, opts.indexSymbol), {
+    visualMultiplier: opts.visualMultiplier,
+    displayDecimals: opts.displayDecimals,
   });
 }
 

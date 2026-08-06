@@ -31,7 +31,7 @@ import {
 } from "domain/synthetics/positions";
 import { TradeMode } from "domain/synthetics/trade";
 import { CHART_PERIODS } from "lib/legacy";
-import { calculateDisplayDecimals, formatBalanceAmount, formatDeltaUsd, formatUsd } from "lib/numbers";
+import { formatBalanceAmount, formatDeltaUsd, formatUsd, resolvePriceDisplayDecimals } from "lib/numbers";
 import { getPositiveOrNegativeClass } from "lib/utils";
 import { toFxDisplayIsLong, toFxDisplayPrice, toFxDisplayThresholdType } from "sdk/utils/fxDisplay";
 import { getMarketIndexName } from "sdk/utils/markets";
@@ -954,9 +954,9 @@ function PositionItemOrderText({ order }: { order: PositionOrderInfo }) {
       {!isTwap && !isMarketOrderType(order.orderType) && (
         <span className="numbers">
           {formatUsd(displayTrigger, {
-            displayDecimals: calculateDisplayDecimals(
+            displayDecimals: resolvePriceDisplayDecimals(
+              order.indexToken?.priceDecimals,
               displayTrigger,
-              undefined,
               order.indexToken?.visualMultiplier
             ),
             visualMultiplier: order.indexToken?.visualMultiplier,

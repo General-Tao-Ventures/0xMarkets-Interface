@@ -17,6 +17,7 @@ import {
 import { calculateDisplayDecimals } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { MARKETS } from "sdk/configs/markets";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { ExternalSwapQuote, ExternalSwapQuoteParams } from "sdk/types/trade";
 import { buildMarketsAdjacencyGraph } from "sdk/utils/swap/buildMarketsAdjacencyGraph";
 import { createFindSwapPath, getWrappedAddress } from "sdk/utils/swap/swapPath";
@@ -81,7 +82,12 @@ export const selectSelectedMarketPriceDecimals = createSelector((q) => {
     return 2;
   }
 
-  return calculateDisplayDecimals(chartToken.prices.minPrice);
+  if (chartToken.priceDecimals !== undefined) {
+    return chartToken.priceDecimals;
+  }
+
+  const displayPrice = toFxDisplayPrice(chartToken.prices.minPrice, chartToken.symbol) ?? chartToken.prices.minPrice;
+  return calculateDisplayDecimals(displayPrice);
 });
 
 export const makeSelectMarketPriceDecimals = createSelectorFactory((tokenAddress?: string) =>
@@ -94,9 +100,14 @@ export const makeSelectMarketPriceDecimals = createSelectorFactory((tokenAddress
       return;
     }
 
-    const visualMultiplier = isSwap ? 1 : token.visualMultiplier;
+    if (token.priceDecimals !== undefined) {
+      return token.priceDecimals;
+    }
 
-    return calculateDisplayDecimals(token.prices.minPrice, undefined, visualMultiplier);
+    const visualMultiplier = isSwap ? 1 : token.visualMultiplier;
+    const displayPrice = toFxDisplayPrice(token.prices.minPrice, token.symbol) ?? token.prices.minPrice;
+
+    return calculateDisplayDecimals(displayPrice, undefined, visualMultiplier);
   })
 );
 

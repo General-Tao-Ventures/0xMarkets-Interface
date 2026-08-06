@@ -25,7 +25,7 @@ import { estimateBatchExpressParams } from "domain/synthetics/express/expressOrd
 import { useMarkets } from "domain/synthetics/markets";
 import { sendBatchOrderTxn } from "domain/synthetics/orders/sendBatchOrderTxn";
 import { useOrderTxnCallbacks } from "domain/synthetics/orders/useOrderTxnCallbacks";
-import { calculateDisplayDecimals, formatAmount, numberToBigint } from "lib/numbers";
+import { formatAmount, numberToBigint, resolvePriceDisplayDecimals } from "lib/numbers";
 import { getByKey } from "lib/objects";
 import { useJsonRpcProvider } from "lib/rpc";
 import useWallet from "lib/wallets/useWallet";
@@ -162,7 +162,11 @@ export function DynamicLines({
       }
 
       const displayTrigger = toFxDisplayPrice(order.triggerPrice, indexToken.symbol) ?? order.triggerPrice;
-      const decimals = calculateDisplayDecimals(displayTrigger, USD_DECIMALS, indexToken?.visualMultiplier);
+      const decimals = resolvePriceDisplayDecimals(
+        indexToken.priceDecimals,
+        displayTrigger,
+        indexToken?.visualMultiplier
+      );
       setTriggerPriceInputValue(
         formatAmount(displayTrigger, USD_DECIMALS, decimals, undefined, undefined, indexToken?.visualMultiplier)
       );

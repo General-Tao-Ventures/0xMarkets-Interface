@@ -65,13 +65,13 @@ import { helperToast } from "lib/helperToast";
 import { useLocalizedMap } from "lib/i18n";
 import { initDecreaseOrderMetricData, sendOrderSubmittedMetric, sendTxnValidationErrorMetric } from "lib/metrics/utils";
 import {
-  calculateDisplayDecimals,
   formatAmount,
   formatAmountFree,
   formatDeltaUsd,
   formatPercentage,
   formatUsd,
   parseValue,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { useJsonRpcProvider } from "lib/rpc";
 import { useHasOutdatedUi } from "lib/useHasOutdatedUi";
@@ -954,7 +954,11 @@ export function PositionSeller() {
                         formatAmount(
                           displayMark,
                           USD_DECIMALS,
-                          calculateDisplayDecimals(displayMark, USD_DECIMALS, toToken?.visualMultiplier),
+                          resolvePriceDisplayDecimals(
+                            marketDecimals ?? toToken?.priceDecimals,
+                            displayMark,
+                            toToken?.visualMultiplier
+                          ),
                           undefined,
                           undefined,
                           toToken?.visualMultiplier

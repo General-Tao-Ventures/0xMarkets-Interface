@@ -35,7 +35,7 @@ import { adaptToV1TokenInfo, convertToTokenAmount, convertToUsd } from "domain/s
 import { getMarkPrice } from "domain/synthetics/trade";
 import { TokensRatioAndSlippage } from "domain/tokens";
 import { getExchangeRate, getExchangeRateDisplay } from "lib/legacy";
-import { calculateDisplayDecimals, formatAmount, formatBalanceAmount, formatUsd } from "lib/numbers";
+import { calculateDisplayDecimals, formatAmount, formatBalanceAmount, formatUsd, resolvePriceDisplayDecimals } from "lib/numbers";
 import { getWrappedToken } from "sdk/configs/tokens";
 import { toFxDisplayIsLong, toFxDisplayPrice, toFxDisplayThresholdType } from "sdk/utils/fxDisplay";
 
@@ -326,19 +326,20 @@ function MarkPrice({ order, className }: { order: OrderInfo; className?: string 
   }, [order]);
 
   const positionOrder = order as PositionOrderInfo;
-  const priceDecimals = calculateDisplayDecimals(
-    positionOrder.indexToken?.prices?.minPrice,
-    undefined,
+  const indexSymbol = isSwapOrderType(order.orderType) ? undefined : positionOrder.indexToken?.symbol;
+  const displayMinPrice = toFxDisplayPrice(positionOrder.indexToken?.prices?.minPrice, indexSymbol);
+  const priceDecimals = resolvePriceDisplayDecimals(
+    positionOrder.indexToken?.priceDecimals,
+    displayMinPrice ?? positionOrder.indexToken?.prices?.minPrice,
     positionOrder.indexToken?.visualMultiplier
   );
 
   const markPriceFormatted = useMemo(() => {
-    const indexSymbol = isSwapOrderType(order.orderType) ? undefined : (order as PositionOrderInfo).indexToken?.symbol;
     return formatUsd(toFxDisplayPrice(markPrice, indexSymbol), {
       displayDecimals: priceDecimals,
       visualMultiplier: positionOrder.indexToken?.visualMultiplier,
     });
-  }, [markPrice, order, priceDecimals, positionOrder.indexToken?.symbol, positionOrder.indexToken?.visualMultiplier]);
+  }, [markPrice, indexSymbol, priceDecimals, positionOrder.indexToken?.visualMultiplier]);
 
   if (isTwapOrder(order) || isMarketOrderType(order.orderType)) {
     const { markSwapRatioText } = getSwapRatioText(order);
@@ -415,9 +416,13 @@ function TriggerPrice({
 
   if (isMarketOrderType(order.orderType)) {
     const positionOrder = order as PositionOrderInfo;
-    const priceDecimals = calculateDisplayDecimals(
+    const displayMinPrice = toFxDisplayPrice(
       positionOrder?.indexToken?.prices?.minPrice,
-      undefined,
+      positionOrder.indexToken?.symbol
+    );
+    const priceDecimals = resolvePriceDisplayDecimals(
+      positionOrder?.indexToken?.priceDecimals,
+      displayMinPrice ?? positionOrder?.indexToken?.prices?.minPrice,
       positionOrder?.indexToken?.visualMultiplier
     );
 
@@ -475,9 +480,13 @@ function TriggerPrice({
     );
   } else {
     const positionOrder = order as PositionOrderInfo;
-    const priceDecimals = calculateDisplayDecimals(
+    const displayMinPrice = toFxDisplayPrice(
       positionOrder?.indexToken?.prices?.minPrice,
-      undefined,
+      positionOrder.indexToken?.symbol
+    );
+    const priceDecimals = resolvePriceDisplayDecimals(
+      positionOrder?.indexToken?.priceDecimals,
+      displayMinPrice ?? positionOrder?.indexToken?.prices?.minPrice,
       positionOrder?.indexToken?.visualMultiplier
     );
     return (

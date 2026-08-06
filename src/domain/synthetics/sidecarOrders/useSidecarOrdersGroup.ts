@@ -1,7 +1,10 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo } from "react";
 
 import { USD_DECIMALS } from "config/factors";
-import { selectSelectedMarketVisualMultiplier } from "context/SyntheticsStateContext/selectors/statsSelectors";
+import {
+  selectSelectedMarketPriceDecimals,
+  selectSelectedMarketVisualMultiplier,
+} from "context/SyntheticsStateContext/selectors/statsSelectors";
 import {
   makeSelectTradeboxSidecarOrdersEntriesIsUntouched,
   makeSelectTradeboxSidecarOrdersState,
@@ -34,6 +37,7 @@ export function useSidecarOrdersGroup<T extends SidecarOrderEntryBase>({
   const totalPositionSizeUsd = useSelector(selectTradeboxSidecarOrdersTotalSizeUsd);
 
   const visualMultiplier = useSelector(selectSelectedMarketVisualMultiplier);
+  const priceDecimals = useSelector(selectSelectedMarketPriceDecimals);
 
   const getPercentageBySizeUsd = useCallback(
     (sizeUsd: bigint | null) => {
@@ -88,13 +92,13 @@ export function useSidecarOrdersGroup<T extends SidecarOrderEntryBase>({
         });
       } else if (field === "price") {
         if (nextField) {
-          price = getDefaultEntryField(USD_DECIMALS, nextField, visualMultiplier);
+          price = getDefaultEntryField(USD_DECIMALS, nextField, visualMultiplier, priceDecimals);
         }
       }
 
       return { ...entry, sizeUsd, percentage, price } as T;
     },
-    [getPercentageBySizeUsd, getSizeUsdByPercentage, visualMultiplier]
+    [getPercentageBySizeUsd, getSizeUsdByPercentage, visualMultiplier, priceDecimals]
   );
 
   const initialState = useMemo(() => {

@@ -794,6 +794,19 @@ export function calculateDisplayDecimals(
   return 9;
 }
 
+/** Prefer configured token.priceDecimals (FX: JPY=3, EUR/GBP=5); else infer from price magnitude. */
+export function resolvePriceDisplayDecimals(
+  priceDecimals: number | undefined,
+  price?: bigint,
+  visualMultiplier?: number
+) {
+  if (priceDecimals !== undefined) {
+    return priceDecimals;
+  }
+
+  return calculateDisplayDecimals(price, undefined, visualMultiplier);
+}
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
 }

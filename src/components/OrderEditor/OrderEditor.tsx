@@ -75,7 +75,6 @@ import { numericBinarySearch } from "lib/binarySearch";
 import { useChainId } from "lib/chains";
 import { helperToast } from "lib/helperToast";
 import {
-  calculateDisplayDecimals,
   formatAmount,
   formatAmountFree,
   formatBalanceAmount,
@@ -84,6 +83,7 @@ import {
   formatUsd,
   formatUsdPrice,
   parseValue,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { getByKey } from "lib/objects";
 import { useJsonRpcProvider } from "lib/rpc";
@@ -526,7 +526,7 @@ export function OrderEditor(p: Props) {
 
         setSizeInputValue(formatAmountFree(positionOrder.sizeDeltaUsd ?? 0n, USD_DECIMALS));
         const price = toFxDisplayPrice(positionOrder.triggerPrice ?? 0n, indexToken?.symbol) ?? 0n;
-        const decimals = calculateDisplayDecimals(price, USD_DECIMALS, indexToken?.visualMultiplier);
+        const decimals = resolvePriceDisplayDecimals(indexToken?.priceDecimals, price, indexToken?.visualMultiplier);
 
         if (triggerPriceInputValue === "") {
           setTriggerPriceInputValue(
@@ -538,6 +538,7 @@ export function OrderEditor(p: Props) {
       setIsInited(true);
     },
     [
+      indexToken?.priceDecimals,
       indexToken?.symbol,
       indexToken?.visualMultiplier,
       isInited,
@@ -625,6 +626,7 @@ export function OrderEditor(p: Props) {
                 topRightLabel={t`Mark`}
                 topRightValue={formatUsdPrice(toFxDisplayPrice(markPrice, indexToken?.symbol), {
                   visualMultiplier: indexToken?.visualMultiplier,
+                  displayDecimals: indexToken?.priceDecimals,
                 })}
                 onClickTopRightLabel={() => {
                   const displayMark = toFxDisplayPrice(markPrice, indexToken?.symbol) ?? markPrice;
@@ -633,7 +635,11 @@ export function OrderEditor(p: Props) {
                     formatAmount(
                       displayMark,
                       USD_DECIMALS,
-                      calculateDisplayDecimals(displayMark, USD_DECIMALS, indexToken?.visualMultiplier),
+                      resolvePriceDisplayDecimals(
+                        indexToken?.priceDecimals,
+                        displayMark,
+                        indexToken?.visualMultiplier
+                      ),
                       undefined,
                       undefined,
                       indexToken?.visualMultiplier
@@ -709,6 +715,8 @@ export function OrderEditor(p: Props) {
                 label={t`Acceptable Price`}
                 value={formatAcceptablePrice(acceptablePrice, {
                   visualMultiplier: indexToken?.visualMultiplier,
+                  displayDecimals: indexToken?.priceDecimals,
+                  indexSymbol: indexToken?.symbol,
                 })}
               />
 
@@ -717,6 +725,8 @@ export function OrderEditor(p: Props) {
                   label={t`Liq. Price`}
                   value={formatLiquidationPrice(existingPosition.liquidationPrice, {
                     visualMultiplier: indexToken?.visualMultiplier,
+                    indexSymbol: indexToken?.symbol,
+                    displayDecimals: indexToken?.priceDecimals,
                   })}
                 />
               )}

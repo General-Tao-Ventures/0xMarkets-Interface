@@ -16,9 +16,11 @@ import {
   formatTokenAmount,
   formatTokenAmountWithUsd,
   formatUsd,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { PositionTradeAction, TradeActionType } from "sdk/types/tradeHistory";
 import { bigMath } from "sdk/utils/bigmath";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import {
   INEQUALITY_GT,
@@ -54,9 +56,12 @@ export const formatPositionMessage = (
   }
 
   const collateralDeltaAmount = tradeAction.initialCollateralDeltaAmount;
-  const marketPriceDecimals = calculateDisplayDecimals(
-    tradeAction.indexToken.prices.minPrice,
-    undefined,
+  const displayMinPrice =
+    toFxDisplayPrice(tradeAction.indexToken.prices.minPrice, tradeAction.indexToken.symbol) ??
+    tradeAction.indexToken.prices.minPrice;
+  const marketPriceDecimals = resolvePriceDisplayDecimals(
+    tradeAction.indexToken.priceDecimals,
+    displayMinPrice,
     tradeAction.indexToken.visualMultiplier
   );
 
@@ -127,16 +132,16 @@ export const formatPositionMessage = (
   });
 
   const marketPrice = getTokenPriceByTradeAction(tradeAction);
-  const formattedMarketPrice = formatUsd(marketPrice, {
+  const formattedMarketPrice = formatUsd(toFxDisplayPrice(marketPrice, indexTokenSymbol), {
     displayDecimals: marketPriceDecimals,
     visualMultiplier: tradeAction.indexToken.visualMultiplier,
   });
 
-  const formattedAcceptablePrice = formatUsd(tradeAction.acceptablePrice, {
+  const formattedAcceptablePrice = formatUsd(toFxDisplayPrice(tradeAction.acceptablePrice, indexTokenSymbol), {
     displayDecimals: marketPriceDecimals,
     visualMultiplier: tradeAction.indexToken.visualMultiplier,
   })!;
-  const formattedTriggerPrice = formatUsd(tradeAction.triggerPrice, {
+  const formattedTriggerPrice = formatUsd(toFxDisplayPrice(tradeAction.triggerPrice, indexTokenSymbol), {
     displayDecimals: marketPriceDecimals,
     visualMultiplier: tradeAction.indexToken.visualMultiplier,
   })!;
@@ -163,7 +168,7 @@ export const formatPositionMessage = (
     }
   );
 
-  const formattedExecutionPrice = formatUsd(tradeAction.executionPrice, {
+  const formattedExecutionPrice = formatUsd(toFxDisplayPrice(tradeAction.executionPrice, indexTokenSymbol), {
     displayDecimals: marketPriceDecimals,
     visualMultiplier: tradeAction.indexToken.visualMultiplier,
   });
@@ -225,7 +230,7 @@ export const formatPositionMessage = (
       error?.args?.price &&
         infoRow(
           t`Order Execution Price`,
-          formatUsd(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), {
+          formatUsd(toFxDisplayPrice(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), indexTokenSymbol), {
             displayDecimals: marketPriceDecimals,
             visualMultiplier: tradeAction.indexToken.visualMultiplier,
           })
@@ -295,7 +300,7 @@ export const formatPositionMessage = (
   ) {
     const customPrice =
       triggerPriceInequality +
-      formatUsd(tradeAction.triggerPrice, {
+      formatUsd(toFxDisplayPrice(tradeAction.triggerPrice, indexTokenSymbol), {
         displayDecimals: marketPriceDecimals,
         visualMultiplier: tradeAction.indexToken.visualMultiplier,
       })!;
@@ -359,7 +364,7 @@ export const formatPositionMessage = (
         error?.args?.price &&
           infoRow(
             t`Order Execution Price`,
-            formatUsd(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), {
+            formatUsd(toFxDisplayPrice(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), indexTokenSymbol), {
               displayDecimals: marketPriceDecimals,
               visualMultiplier: tradeAction.indexToken.visualMultiplier,
             })
@@ -394,7 +399,7 @@ export const formatPositionMessage = (
       error?.args?.price &&
         infoRow(
           t`Order Execution Price`,
-          formatUsd(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), {
+          formatUsd(toFxDisplayPrice(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), indexTokenSymbol), {
             displayDecimals: marketPriceDecimals,
             visualMultiplier: tradeAction.indexToken.visualMultiplier,
           })
@@ -444,7 +449,7 @@ export const formatPositionMessage = (
   ) {
     const customPrice =
       triggerPriceInequality +
-      formatUsd(tradeAction.triggerPrice, {
+      formatUsd(toFxDisplayPrice(tradeAction.triggerPrice, indexTokenSymbol), {
         displayDecimals: marketPriceDecimals,
         visualMultiplier: tradeAction.indexToken.visualMultiplier,
       })!;
@@ -493,7 +498,7 @@ export const formatPositionMessage = (
         error?.args?.price &&
           infoRow(
             t`Order Execution Price`,
-            formatUsd(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), {
+            formatUsd(toFxDisplayPrice(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), indexTokenSymbol), {
               displayDecimals: marketPriceDecimals,
               visualMultiplier: tradeAction.indexToken.visualMultiplier,
             })
@@ -511,7 +516,7 @@ export const formatPositionMessage = (
   ) {
     const customPrice =
       triggerPriceInequality +
-      formatUsd(tradeAction.triggerPrice, {
+      formatUsd(toFxDisplayPrice(tradeAction.triggerPrice, indexTokenSymbol), {
         displayDecimals: marketPriceDecimals,
         visualMultiplier: tradeAction.indexToken.visualMultiplier,
       })!;
@@ -571,7 +576,7 @@ export const formatPositionMessage = (
         error?.args?.price &&
           infoRow(
             t`Order Execution Price`,
-            formatUsd(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), {
+            formatUsd(toFxDisplayPrice(parseContractPrice(error.args.price, tradeAction.indexToken.decimals), indexTokenSymbol), {
               displayDecimals: marketPriceDecimals,
               visualMultiplier: tradeAction.indexToken.visualMultiplier,
             })
