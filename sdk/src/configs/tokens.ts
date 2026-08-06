@@ -12,6 +12,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Ethereum",
       symbol: "ETH",
+      priceDecimals: 2,
       decimals: 18,
       address: zeroAddress,
       isNative: true,
@@ -24,6 +25,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Wrapped ETH",
       symbol: "WETH",
+      priceDecimals: 2,
       address: "0x4200000000000000000000000000000000000006",
       decimals: 18,
       isWrapped: true,
@@ -65,6 +67,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Gold",
       symbol: "GOLD",
+      priceDecimals: 3,
       decimals: 18,
       address: "0x82aB51eb790D1C5f1B1434057A215Eb8cF360Da5",
       isSynthetic: true,
@@ -74,6 +77,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Silver",
       symbol: "XAG",
+      priceDecimals: 3,
       decimals: 18,
       address: "0xA927aA364535ba04d88Fc5326D0773CC05d92c08",
       isSynthetic: true,
@@ -93,6 +97,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Bitcoin",
       symbol: "WBTC",
+      priceDecimals: 2,
       // Display as BTC in markets/charts; keep symbol WBTC for oracle/API.
       baseSymbol: "BTC",
       decimals: 8,
@@ -104,6 +109,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Bittensor",
       symbol: "TAO",
+      priceDecimals: 2,
       decimals: 18,
       address: "0x53c87230E2A4640D4C200797147261300E7C284A",
       isSynthetic: true,
@@ -132,6 +138,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Ethereum",
       symbol: "ETH",
+      priceDecimals: 2,
       decimals: 18,
       address: zeroAddress,
       isNative: true,
@@ -144,6 +151,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Wrapped ETH",
       symbol: "WETH",
+      priceDecimals: 2,
       address: "0x4200000000000000000000000000000000000006",
       decimals: 18,
       isWrapped: true,
@@ -183,6 +191,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Gold",
       symbol: "GOLD",
+      priceDecimals: 3,
       decimals: 6,
       address: "0xf4ac308123764edFB7453a7446D01277D7DEa1A7",
       isSynthetic: true,
@@ -192,6 +201,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Silver",
       symbol: "SILVER",
+      priceDecimals: 3,
       decimals: 6,
       address: "0x25f79151C3E00ba7710EcF02192836994E36b440",
       isSynthetic: true,
@@ -218,6 +228,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Bitcoin",
       symbol: "BTC",
+      priceDecimals: 2,
       decimals: 8,
       address: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
       isSynthetic: false,
@@ -227,6 +238,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Bittensor",
       symbol: "TAO",
+      priceDecimals: 2,
       decimals: 18,
       address: "0x8E235a31AB3bb754DA40d05e4E5787b67c8BeDcd",
       isSynthetic: true,
@@ -256,6 +268,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Ethereum",
       symbol: "ETH",
+      priceDecimals: 2,
       decimals: 18,
       address: zeroAddress,
       isNative: true,
@@ -268,6 +281,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Wrapped ETH",
       symbol: "WETH",
+      priceDecimals: 2,
       address: "0x4200000000000000000000000000000000000006",
       decimals: 18,
       isWrapped: true,
