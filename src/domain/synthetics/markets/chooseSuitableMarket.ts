@@ -111,7 +111,7 @@ export function chooseSuitableMarket({
   }
 
   const indexSymbol =
-    maxLongLiquidityPool?.marketInfo.indexToken.symbol ?? maxShortLiquidityPool?.marketInfo.indexToken.symbol;
+    maxLongLiquidityPool?.marketInfo?.indexToken?.symbol ?? maxShortLiquidityPool?.marketInfo?.indexToken?.symbol;
 
   const preferredIndexIsLong =
     preferredTradeType === TradeType.Long || preferredTradeType === TradeType.Short

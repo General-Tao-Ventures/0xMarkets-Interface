@@ -33,7 +33,7 @@ import { TradeMode } from "domain/synthetics/trade";
 import { CHART_PERIODS } from "lib/legacy";
 import { calculateDisplayDecimals, formatBalanceAmount, formatDeltaUsd, formatUsd } from "lib/numbers";
 import { getPositiveOrNegativeClass } from "lib/utils";
-import { toFxDisplayIsLong } from "sdk/utils/fxDisplay";
+import { toFxDisplayIsLong, toFxDisplayPrice, toFxDisplayThresholdType } from "sdk/utils/fxDisplay";
 import { getMarketIndexName } from "sdk/utils/markets";
 
 import { AmountWithUsdBalance } from "components/AmountWithUsd/AmountWithUsd";
@@ -941,7 +941,9 @@ function PositionItemOrder({
 }
 
 function PositionItemOrderText({ order }: { order: PositionOrderInfo }) {
-  const triggerThresholdType = order.triggerThresholdType;
+  const indexSymbol = order.indexToken?.symbol;
+  const triggerThresholdType = toFxDisplayThresholdType(order.triggerThresholdType, indexSymbol);
+  const displayTrigger = toFxDisplayPrice(order.triggerPrice, indexSymbol) ?? order.triggerPrice;
   const isIncrease = isIncreaseOrderType(order.orderType);
   const isTwap = isTwapOrder(order);
 
@@ -951,9 +953,9 @@ function PositionItemOrderText({ order }: { order: PositionOrderInfo }) {
       {!isTwap && !isMarketOrderType(order.orderType) ? `: ${triggerThresholdType} ` : null}
       {!isTwap && !isMarketOrderType(order.orderType) && (
         <span className="numbers">
-          {formatUsd(order.triggerPrice, {
+          {formatUsd(displayTrigger, {
             displayDecimals: calculateDisplayDecimals(
-              order.triggerPrice,
+              displayTrigger,
               undefined,
               order.indexToken?.visualMultiplier
             ),

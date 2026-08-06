@@ -31,6 +31,7 @@ import { useJsonRpcProvider } from "lib/rpc";
 import useWallet from "lib/wallets/useWallet";
 import { getToken } from "sdk/configs/tokens";
 import { PositionOrderInfo } from "sdk/types/orders";
+import { toFxDisplayPrice, toFxIndexPrice } from "sdk/utils/fxDisplay";
 import { getOrderKeys } from "sdk/utils/orders";
 
 import { DynamicLine } from "./DynamicLine";
@@ -117,6 +118,7 @@ export function DynamicLines({
 
   const getError = useCallback(
     (id: string, price: number): string | undefined => {
+      // Chart line prices are display-domain (USD/JPY ~157); validation needs index-domain.
       let triggerPrice = numberToBigint(price, USD_DECIMALS);
 
       return calcSelector((state) => {
@@ -133,6 +135,7 @@ export function DynamicLines({
         if (!indexToken) return undefined;
 
         triggerPrice = triggerPrice / BigInt(indexToken?.visualMultiplier ?? 1);
+        triggerPrice = toFxIndexPrice(triggerPrice, indexToken.symbol) ?? triggerPrice;
 
         return makeSelectOrderEditorPositionOrderError(id, triggerPrice)(state);
       });
@@ -152,16 +155,17 @@ export function DynamicLines({
       const indexToken = getToken(chainId, indexTokenAddress);
       if (!indexToken) return;
 
-      const decimals = calculateDisplayDecimals(order.triggerPrice, USD_DECIMALS, indexToken?.visualMultiplier);
-      const formattedInitialPrice = formatAmount(
-        order.triggerPrice,
-        USD_DECIMALS,
-        decimals,
-        undefined,
-        undefined,
-        indexToken?.visualMultiplier
+      // Dragged chart price is already display-domain; order.triggerPrice is index-domain.
+      if (price !== undefined) {
+        setTriggerPriceInputValue(String(price));
+        return;
+      }
+
+      const displayTrigger = toFxDisplayPrice(order.triggerPrice, indexToken.symbol) ?? order.triggerPrice;
+      const decimals = calculateDisplayDecimals(displayTrigger, USD_DECIMALS, indexToken?.visualMultiplier);
+      setTriggerPriceInputValue(
+        formatAmount(displayTrigger, USD_DECIMALS, decimals, undefined, undefined, indexToken?.visualMultiplier)
       );
-      setTriggerPriceInputValue(price !== undefined ? String(price) : formattedInitialPrice);
     },
     [chainId, marketsData, ordersInfoData, setEditingOrderState, setTriggerPriceInputValue]
   );

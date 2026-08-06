@@ -37,7 +37,7 @@ import { TokensRatioAndSlippage } from "domain/tokens";
 import { getExchangeRate, getExchangeRateDisplay } from "lib/legacy";
 import { calculateDisplayDecimals, formatAmount, formatBalanceAmount, formatUsd } from "lib/numbers";
 import { getWrappedToken } from "sdk/configs/tokens";
-import { toFxDisplayIsLong, toFxDisplayPrice } from "sdk/utils/fxDisplay";
+import { toFxDisplayIsLong, toFxDisplayPrice, toFxDisplayThresholdType } from "sdk/utils/fxDisplay";
 
 import { AppCard, AppCardSection } from "components/AppCard/AppCard";
 import Button from "components/Button/Button";
@@ -375,7 +375,8 @@ function MarkPrice({ order, className }: { order: OrderInfo; className?: string 
           return (
             <Trans>
               <p>
-                The order will be executed when the oracle price is {positionOrder.triggerThresholdType}{" "}
+                The order will be executed when the oracle price is{" "}
+                {toFxDisplayThresholdType(positionOrder.triggerThresholdType, positionOrder.indexToken?.symbol)}{" "}
                 {formatUsd(toFxDisplayPrice(positionOrder.triggerPrice, positionOrder.indexToken?.symbol), {
                   displayDecimals: priceDecimals,
                   visualMultiplier: positionOrder.indexToken?.visualMultiplier,
@@ -483,7 +484,7 @@ function TriggerPrice({
       <TooltipWithPortal
         handle={
           <span>
-            {positionOrder.triggerThresholdType}{" "}
+            {toFxDisplayThresholdType(positionOrder.triggerThresholdType, positionOrder.indexToken?.symbol)}{" "}
             {formatUsd(toFxDisplayPrice(positionOrder.triggerPrice, positionOrder.indexToken?.symbol), {
               displayDecimals: priceDecimals,
               visualMultiplier: positionOrder.indexToken?.visualMultiplier,
@@ -498,7 +499,7 @@ function TriggerPrice({
               value={
                 isStopLossOrderType(positionOrder.orderType) || isStopIncreaseOrderType(positionOrder.orderType)
                   ? "NA"
-                  : `${positionOrder.triggerThresholdType} ${formatUsd(toFxDisplayPrice(positionOrder.acceptablePrice, positionOrder.indexToken?.symbol), {
+                  : `${toFxDisplayThresholdType(positionOrder.triggerThresholdType, positionOrder.indexToken?.symbol)} ${formatUsd(toFxDisplayPrice(positionOrder.acceptablePrice, positionOrder.indexToken?.symbol), {
                       displayDecimals: priceDecimals,
                       visualMultiplier: positionOrder.indexToken?.visualMultiplier,
                     })}`

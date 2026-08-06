@@ -6,6 +6,7 @@ import {
   isFxDisplayReversedSymbol,
   toFxDisplayIsLong,
   toFxDisplayPrice,
+  toFxDisplayThresholdType,
   toFxIndexIsLong,
   toFxIndexPrice,
 } from "../fxDisplay";
@@ -31,5 +32,11 @@ describe("fxDisplay", () => {
     expect(toFxIndexIsLong(true, "JPY")).toBe(false);
     expect(toFxDisplayIsLong(true, "EUR")).toBe(true);
     expect(toFxIndexIsLong(false, "JPY")).toBe(true);
+  });
+
+  it("flips trigger threshold for USD/JPY display", () => {
+    expect(toFxDisplayThresholdType(">", "JPY")).toBe("<");
+    expect(toFxDisplayThresholdType("<", "JPY")).toBe(">");
+    expect(toFxDisplayThresholdType(">", "EUR")).toBe(">");
   });
 });

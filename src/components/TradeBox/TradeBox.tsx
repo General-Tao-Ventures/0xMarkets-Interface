@@ -77,7 +77,7 @@ import { useCursorInside } from "lib/useCursorInside";
 import { sendTradeBoxInteractionStartedEvent } from "lib/userAnalytics";
 import useWallet from "lib/wallets/useWallet";
 import { NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
-import { TradeMode } from "sdk/types/trade";
+import { TradeMode, TradeType } from "sdk/types/trade";
 import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import { AlertInfoCard } from "components/AlertInfo/AlertInfoCard";
@@ -190,6 +190,9 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     setNumberOfParts,
     setDuration,
   } = useSelector(selectTradeboxState);
+
+  // tradeFlags.isLong is index-domain for JPY; UI chrome should follow TradeType (display).
+  const displayIsLong = tradeType === TradeType.Long;
 
   const fromToken = useSelector(selectTradeboxFromToken);
   const toToken = getByKey(tokensData, toTokenAddress);
@@ -1074,7 +1077,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                           marks={leverageSliderMarks}
                           value={leverageOption}
                           onChange={setLeverageOption}
-                          isPositive={isLong}
+                          isPositive={displayIsLong}
                           isSlim
                         />
                         {ladderTooltipContent && (
@@ -1155,7 +1158,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                     sizeUsd={isSwap ? payUsd : increaseAmounts?.sizeDeltaUsd}
                     marketInfo={marketInfo}
                     type={isSwap ? "swap" : "increase"}
-                    isLong={isLong}
+                    isLong={displayIsLong}
                   />
                 )}
               </div>

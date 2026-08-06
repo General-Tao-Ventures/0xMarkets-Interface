@@ -43,3 +43,19 @@ export function toFxDisplayIsLong(isLong: boolean, indexSymbol?: string): boolea
 export function toFxIndexIsLong(displayIsLong: boolean, indexSymbol?: string): boolean {
   return isFxDisplayReversedSymbol(indexSymbol) ? !displayIsLong : displayIsLong;
 }
+
+/**
+ * Flip trigger threshold when showing inverted FX quotes (price order reverses).
+ * TriggerThresholdType uses ">" / "<".
+ */
+export function toFxDisplayThresholdType<T extends string>(
+  thresholdType: T | undefined,
+  indexSymbol?: string
+): T | undefined {
+  if (thresholdType === undefined || !isFxDisplayReversedSymbol(indexSymbol)) return thresholdType;
+  if (thresholdType === ">") return "<" as T;
+  if (thresholdType === "<") return ">" as T;
+  if (thresholdType === "Above") return "Below" as T;
+  if (thresholdType === "Below") return "Above" as T;
+  return thresholdType;
+}
