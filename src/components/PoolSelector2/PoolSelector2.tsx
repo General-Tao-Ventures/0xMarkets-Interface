@@ -9,6 +9,7 @@ import { getMarketPoolName } from "domain/synthetics/markets/utils";
 import type { MarketStat } from "domain/synthetics/stats/marketsInfoDataToIndexTokensStats";
 import { TradeType } from "domain/synthetics/trade";
 import { formatAmountHuman, formatPercentage, formatRatePercentage, formatUsd } from "lib/numbers";
+import { toFxIndexIsLong } from "sdk/utils/fxDisplay";
 
 import { TableTd, TableTh, TableTheadTr } from "components/Table/Table";
 import TokenIcon from "components/TokenIcon/TokenIcon";
@@ -100,7 +101,8 @@ function PoolListItemDesktop({
   tradeType: TradeType;
   onSelect: () => void;
 } & MarketLiquidityAndFeeStat) {
-  const isLong = tradeType === TradeType.Long;
+  // Net fees / side stats are index-domain; TradeType is display-domain for USD/JPY.
+  const isLong = toFxIndexIsLong(tradeType === TradeType.Long, marketStat.marketInfo.indexToken.symbol);
   const poolName = getMarketPoolName(marketStat.marketInfo);
   const formattedLiquidity = formatAmountHuman(liquidity, USD_DECIMALS);
 
@@ -187,7 +189,7 @@ function PoolListItemMobile({
   tradeType: TradeType;
   onSelect: () => void;
 } & MarketLiquidityAndFeeStat) {
-  const isLong = tradeType === TradeType.Long;
+  const isLong = toFxIndexIsLong(tradeType === TradeType.Long, marketStat.marketInfo.indexToken.symbol);
   const longTokenSymbol = marketStat.marketInfo.longToken.symbol;
   const shortTokenSymbol = marketStat.marketInfo.shortToken.symbol;
   const poolName = getMarketPoolName(marketStat.marketInfo);

@@ -47,6 +47,7 @@ import { getPositionKey } from "lib/legacy";
 import { BN_ZERO, parseValue } from "lib/numbers";
 import { getWrappedToken } from "sdk/configs/tokens";
 import { getExecutionFee } from "sdk/utils/fees/executionFee";
+import { toFxDisplayIsLong, toFxIndexPrice } from "sdk/utils/fxDisplay";
 import { getByKey } from "sdk/utils/objects";
 
 import { SyntheticsState } from "../SyntheticsStateContextProvider";
@@ -177,7 +178,8 @@ export const selectOrderEditorTriggerPrice = createSelector((q) => {
     triggerPrice = triggerPrice / BigInt(indexToken?.visualMultiplier ?? 1);
   }
 
-  return triggerPrice;
+  // Input is display-domain for FX-reversed markets (USD/JPY).
+  return toFxIndexPrice(triggerPrice, indexToken.symbol);
 });
 
 export const selectOrdersList = createSelector((q) => {
@@ -288,7 +290,9 @@ const selectOrderEditorNextPositionValuesForIncreaseArgs = createSelector((q) =>
     positionKey: existingPosition?.key,
     increaseStrategy: "independent",
     tradeMode: isLimitOrderType(order.orderType) ? TradeMode.Limit : TradeMode.Trigger,
-    tradeType: positionOrder?.isLong ? TradeType.Long : TradeType.Short,
+    tradeType: toFxDisplayIsLong(Boolean(positionOrder?.isLong), positionIndexToken?.symbol)
+      ? TradeType.Long
+      : TradeType.Short,
     triggerPrice: isLimitOrderType(order.orderType) ? triggerPrice : undefined,
     tokenTypeForSwapRoute: existingPosition ? "collateralToken" : "indexToken",
     isPnlInLeverage,
@@ -327,7 +331,9 @@ const makeSelectOrderEditorNextPositionValuesForIncreaseArgs = createSelectorFac
         increaseStrategy: "independent",
         externalSwapQuote: undefined,
         tradeMode: isLimitOrderType(order.orderType) ? TradeMode.Limit : TradeMode.Trigger,
-        tradeType: positionOrder?.isLong ? TradeType.Long : TradeType.Short,
+        tradeType: toFxDisplayIsLong(Boolean(positionOrder?.isLong), positionIndexToken?.symbol)
+          ? TradeType.Long
+          : TradeType.Short,
         triggerPrice: isLimitOrderType(order.orderType) ? triggerPrice : undefined,
         tokenTypeForSwapRoute: existingPosition ? "collateralToken" : "indexToken",
         isPnlInLeverage,

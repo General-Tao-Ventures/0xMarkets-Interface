@@ -10,6 +10,7 @@ import {
 } from "types/trade";
 
 import { bigMath } from "../bigmath";
+import { isFxDisplayReversedSymbol } from "../fxDisplay";
 import { getShouldUseMaxPrice } from "../prices";
 
 export function applySlippageToPrice(allowedSlippage: number, price: bigint, isIncrease: boolean, isLong: boolean) {
@@ -53,11 +54,25 @@ export function getSwapCount({
   }
 }
 
-export const createTradeFlags = (tradeType: TradeType, tradeMode: TradeMode): TradeFlags => {
-  const isLong = tradeType === TradeType.Long;
-  const isShort = tradeType === TradeType.Short;
+/**
+ * @param indexSymbol When set for FX-display-reversed markets (e.g. JPY),
+ *   TradeType.Long means Long USD/XXX in the UI but Short on-chain (index XXX/USD).
+ */
+export const createTradeFlags = (
+  tradeType: TradeType,
+  tradeMode: TradeMode,
+  indexSymbol?: string
+): TradeFlags => {
+  let isLong = tradeType === TradeType.Long;
+  let isShort = tradeType === TradeType.Short;
   const isSwap = tradeType === TradeType.Swap;
   const isPosition = isLong || isShort;
+
+  if (isPosition && isFxDisplayReversedSymbol(indexSymbol)) {
+    isLong = !isLong;
+    isShort = !isShort;
+  }
+
   const isMarket = tradeMode === TradeMode.Market;
   const isLimit = tradeMode === TradeMode.Limit || tradeMode === TradeMode.StopMarket;
   const isTrigger = tradeMode === TradeMode.Trigger;

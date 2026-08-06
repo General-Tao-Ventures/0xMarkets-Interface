@@ -34,6 +34,7 @@ import { useMissedCoinsSearch } from "domain/synthetics/userFeedback/useMissedCo
 import { stripBlacklistedWords, type Token } from "domain/tokens";
 import { getMidPrice } from "domain/tokens/utils";
 import { formatAmountHuman, formatUsdPrice } from "lib/numbers";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { EMPTY_ARRAY } from "lib/objects";
 import { searchBy } from "lib/searchBy";
 import { useBreakpoints } from "lib/useBreakpoints";
@@ -641,7 +642,9 @@ function MarketListItem({
           <div className="flex flex-col gap-4">
             <span className="numbers">
               {tokenData
-                ? formatUsdPrice(getMidPrice(tokenData.prices), { visualMultiplier: tokenData.visualMultiplier })
+                ? formatUsdPrice(toFxDisplayPrice(getMidPrice(tokenData.prices), tokenData.symbol), {
+                    visualMultiplier: tokenData.visualMultiplier,
+                  })
                 : "-"}
             </span>
             {isMobile && <span>{dayPriceDeltaComponent}</span>}
@@ -682,7 +685,9 @@ function MarketListItem({
         <div className="flex flex-col gap-4">
           <span className="numbers">
             {tokenData
-              ? formatUsdPrice(getMidPrice(tokenData.prices), { visualMultiplier: tokenData.visualMultiplier })
+              ? formatUsdPrice(toFxDisplayPrice(getMidPrice(tokenData.prices), tokenData.symbol), {
+                  visualMultiplier: tokenData.visualMultiplier,
+                })
               : "-"}
           </span>
           {isMobile && <span>{dayPriceDeltaComponent}</span>}

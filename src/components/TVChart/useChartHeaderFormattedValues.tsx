@@ -23,6 +23,7 @@ import {
 } from "lib/numbers";
 import { getToken } from "sdk/configs/tokens";
 import { bigMath } from "sdk/utils/bigmath";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
 
@@ -101,11 +102,11 @@ export function useChartHeaderFormattedValues() {
 
   const avgPrice = useMemo(() => {
     return (
-      formatUsdPrice(avgPriceValue, {
+      formatUsdPrice(toFxDisplayPrice(avgPriceValue, chartToken?.symbol), {
         visualMultiplier,
       }) || "..."
     );
-  }, [avgPriceValue, visualMultiplier]);
+  }, [avgPriceValue, visualMultiplier, chartToken?.symbol]);
 
   const [longOIValue, longOIPercentage] = useMemo(() => {
     if (info?.longOpenInterestPercentage !== undefined && info.openInterestLong !== undefined) {

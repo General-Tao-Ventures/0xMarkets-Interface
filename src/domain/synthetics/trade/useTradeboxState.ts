@@ -22,6 +22,7 @@ import { getContract } from "sdk/configs/contracts";
 import { getToken, isValidToken, isSimilarToken } from "sdk/configs/tokens";
 import { TradeMode, TradeType } from "sdk/types/trade";
 import { TwapDuration } from "sdk/types/twap";
+import { toFxDisplayIsLong } from "sdk/utils/fxDisplay";
 import { createTradeFlags } from "sdk/utils/trade";
 
 import { MarketsData, MarketsInfoData } from "../markets";
@@ -305,6 +306,8 @@ export function useTradeboxState(
   const [keepLeverage, setKeepLeverage] = useLocalStorageSerializeKey(getKeepLeverageKey(chainId), true);
   const [leverageInputValue, setLeverageInputValue] = useState<string>(() => leverageOption?.toString() ?? "");
 
+  // Display-domain flags only (no FX isLong flip). Market map keys follow TradeType.
+  // Index-domain isLong for orders comes from selectTradeboxTradeFlags (with indexSymbol).
   const tradeFlags = useMemo(() => createTradeFlags(tradeType, tradeMode), [tradeType, tradeMode]);
   const { isSwap } = tradeFlags;
 
@@ -315,7 +318,7 @@ export function useTradeboxState(
     ? storedOptions?.tokens.swapToTokenAddress
     : storedOptions?.tokens.indexTokenAddress;
 
-  const longOrShort = tradeFlags.isLong ? "long" : "short";
+  const longOrShort = tradeType === TradeType.Long ? "long" : "short";
   const marketAddress = toTokenAddress ? storedOptions?.markets[toTokenAddress]?.[longOrShort] : undefined;
   const marketInfo = getByKey(marketsInfoData, marketAddress);
 
@@ -473,14 +476,16 @@ export function useTradeboxState(
             draft.tradeMode = tradeMode;
           }
 
-          draft.tradeType = position.isLong ? TradeType.Long : TradeType.Short;
+          // UI TradeType is display-domain (USD/JPY); map keys follow that.
+          const displayIsLong = toFxDisplayIsLong(position.isLong, position.indexToken.symbol);
+          draft.tradeType = displayIsLong ? TradeType.Long : TradeType.Short;
           const newIndexTokenAddress = position.indexToken.address;
           draft.tokens.indexTokenAddress = newIndexTokenAddress;
           draft.markets[newIndexTokenAddress] = draft.markets[newIndexTokenAddress] || {};
-          draft.markets[newIndexTokenAddress][position.isLong ? "long" : "short"] = position.marketAddress;
+          draft.markets[newIndexTokenAddress][displayIsLong ? "long" : "short"] = position.marketAddress;
           set(
             draft,
-            ["collaterals", position.marketAddress, position.isLong ? "long" : "short"],
+            ["collaterals", position.marketAddress, displayIsLong ? "long" : "short"],
             position.collateralTokenAddress
           );
         });
@@ -524,15 +529,17 @@ export function useTradeboxState(
               order.initialCollateralTokenAddress
             );
           } else {
-            draft.tradeType = order.isLong ? TradeType.Long : TradeType.Short;
-            const newIndexTokenAddress = (order as PositionOrderInfo).indexToken.address;
+            const indexToken = (order as PositionOrderInfo).indexToken;
+            const displayIsLong = toFxDisplayIsLong(order.isLong, indexToken.symbol);
+            draft.tradeType = displayIsLong ? TradeType.Long : TradeType.Short;
+            const newIndexTokenAddress = indexToken.address;
             draft.tokens.indexTokenAddress = newIndexTokenAddress;
             draft.tokens.fromTokenAddress = order.initialCollateralToken.address;
             draft.markets[newIndexTokenAddress] = draft.markets[newIndexTokenAddress] || {};
-            draft.markets[newIndexTokenAddress][order.isLong ? "long" : "short"] = order.marketAddress;
+            draft.markets[newIndexTokenAddress][displayIsLong ? "long" : "short"] = order.marketAddress;
             set(
               draft,
-              ["collaterals", order.marketAddress, order.isLong ? "long" : "short"],
+              ["collaterals", order.marketAddress, displayIsLong ? "long" : "short"],
               order.initialCollateralToken
             );
           }

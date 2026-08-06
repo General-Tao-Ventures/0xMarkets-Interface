@@ -53,6 +53,7 @@ import { selectExternalSwapQuoteParams } from "context/SyntheticsStateContext/se
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import { useGmxAccountShowDepositButton } from "domain/multichain/useGmxAccountShowDepositButton";
 import { ExpressTxnParams } from "domain/synthetics/express";
+import { getMarketIndexName } from "domain/synthetics/markets";
 import { getNameByOrderType, substractMaxLeverageSlippage } from "domain/synthetics/positions/utils";
 import { useSidecarEntries } from "domain/synthetics/sidecarOrders/useSidecarEntries";
 import { useSidecarOrders } from "domain/synthetics/sidecarOrders/useSidecarOrders";
@@ -69,7 +70,7 @@ import { mustNeverExist } from "lib/types";
 import { useHasOutdatedUi } from "lib/useHasOutdatedUi";
 import { sendUserAnalyticsConnectWalletClickEvent } from "lib/userAnalytics";
 import { useEthersSigner } from "lib/wallets/useEthersSigner";
-import { convertTokenAddress, getToken, getTokenBySymbol, getTokenVisualMultiplier } from "sdk/configs/tokens";
+import { convertTokenAddress, getToken, getTokenBySymbol } from "sdk/configs/tokens";
 import { ExecutionFee } from "sdk/types/fees";
 import { TokenData } from "sdk/types/tokens";
 import { TradeMode, TradeType } from "sdk/types/trade";
@@ -490,11 +491,11 @@ export function useTradeboxButtonState({
         } else {
           if (!toToken?.symbol) {
             submitButtonText = `${localizedTradeTypeLabels[tradeType!]} ...`;
+          } else {
+            // JPY etc. → "Long USD/JPY" (display pair), not "Long JPY".
+            const marketLabel = getMarketIndexName({ indexToken: toToken, isSpotOnly: false });
+            submitButtonText = `${localizedTradeTypeLabels[tradeType!]} ${marketLabel}`;
           }
-          const prefix = toToken ? getTokenVisualMultiplier(toToken) : "";
-          const displaySymbol = toToken?.baseSymbol || toToken?.symbol;
-
-          submitButtonText = `${localizedTradeTypeLabels[tradeType!]} ${prefix}${displaySymbol}`;
         }
       } else if (isLimit) {
         submitButtonText = t`Create ${getNameByOrderType(increaseAmounts?.limitOrderType, false)} order`;

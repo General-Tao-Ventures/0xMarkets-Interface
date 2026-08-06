@@ -37,6 +37,7 @@ import { TokensRatioAndSlippage } from "domain/tokens";
 import { getExchangeRate, getExchangeRateDisplay } from "lib/legacy";
 import { calculateDisplayDecimals, formatAmount, formatBalanceAmount, formatUsd } from "lib/numbers";
 import { getWrappedToken } from "sdk/configs/tokens";
+import { toFxDisplayIsLong, toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import { AppCard, AppCardSection } from "components/AppCard/AppCard";
 import Button from "components/Button/Button";
@@ -332,11 +333,12 @@ function MarkPrice({ order, className }: { order: OrderInfo; className?: string 
   );
 
   const markPriceFormatted = useMemo(() => {
-    return formatUsd(markPrice, {
+    const indexSymbol = isSwapOrderType(order.orderType) ? undefined : (order as PositionOrderInfo).indexToken?.symbol;
+    return formatUsd(toFxDisplayPrice(markPrice, indexSymbol), {
       displayDecimals: priceDecimals,
       visualMultiplier: positionOrder.indexToken?.visualMultiplier,
     });
-  }, [markPrice, priceDecimals, positionOrder.indexToken?.visualMultiplier]);
+  }, [markPrice, order, priceDecimals, positionOrder.indexToken?.symbol, positionOrder.indexToken?.visualMultiplier]);
 
   if (isTwapOrder(order) || isMarketOrderType(order.orderType)) {
     const { markSwapRatioText } = getSwapRatioText(order);
@@ -374,7 +376,7 @@ function MarkPrice({ order, className }: { order: OrderInfo; className?: string 
             <Trans>
               <p>
                 The order will be executed when the oracle price is {positionOrder.triggerThresholdType}{" "}
-                {formatUsd(positionOrder.triggerPrice, {
+                {formatUsd(toFxDisplayPrice(positionOrder.triggerPrice, positionOrder.indexToken?.symbol), {
                   displayDecimals: priceDecimals,
                   visualMultiplier: positionOrder.indexToken?.visualMultiplier,
                 })}
@@ -429,7 +431,7 @@ function TriggerPrice({
         content={
           <StatsTooltipRow
             label={t`Acceptable Price`}
-            value={formatUsd(positionOrder.acceptablePrice, {
+            value={formatUsd(toFxDisplayPrice(positionOrder.acceptablePrice, positionOrder.indexToken?.symbol), {
               displayDecimals: priceDecimals,
               visualMultiplier: positionOrder.indexToken?.visualMultiplier,
             })}
@@ -482,7 +484,7 @@ function TriggerPrice({
         handle={
           <span>
             {positionOrder.triggerThresholdType}{" "}
-            {formatUsd(positionOrder.triggerPrice, {
+            {formatUsd(toFxDisplayPrice(positionOrder.triggerPrice, positionOrder.indexToken?.symbol), {
               displayDecimals: priceDecimals,
               visualMultiplier: positionOrder.indexToken?.visualMultiplier,
             })}
@@ -496,7 +498,7 @@ function TriggerPrice({
               value={
                 isStopLossOrderType(positionOrder.orderType) || isStopIncreaseOrderType(positionOrder.orderType)
                   ? "NA"
-                  : `${positionOrder.triggerThresholdType} ${formatUsd(positionOrder.acceptablePrice, {
+                  : `${positionOrder.triggerThresholdType} ${formatUsd(toFxDisplayPrice(positionOrder.acceptablePrice, positionOrder.indexToken?.symbol), {
                       displayDecimals: priceDecimals,
                       visualMultiplier: positionOrder.indexToken?.visualMultiplier,
                     })}`
@@ -617,7 +619,7 @@ function OrderItemLarge({
               <MarketWithDirectionLabel
                 bordered
                 indexName={indexName}
-                isLong={order.isLong}
+                isLong={toFxDisplayIsLong(order.isLong, tokenSymbol)}
                 tokenSymbol={tokenSymbol}
               />
             }
@@ -718,7 +720,13 @@ function OrderItemSmall({
 
     const tokenSymbol = marketInfoData?.[order.marketAddress]?.indexToken.symbol;
 
-    return <MarketWithDirectionLabel isLong={order.isLong} indexName={indexName} tokenSymbol={tokenSymbol} />;
+    return (
+      <MarketWithDirectionLabel
+        isLong={toFxDisplayIsLong(order.isLong, tokenSymbol)}
+        indexName={indexName}
+        tokenSymbol={tokenSymbol}
+      />
+    );
   }, [
     marketInfoData,
     order.initialCollateralToken,

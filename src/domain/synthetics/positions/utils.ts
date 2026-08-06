@@ -14,6 +14,7 @@ import {
   formatUsdPrice,
 } from "lib/numbers";
 import { bigMath } from "sdk/utils/bigmath";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import {
   capPositionImpactUsdByMaxPriceImpactFactor,
@@ -107,18 +108,27 @@ export function isSaneIndexPrice(
 /** Format entry/mark prices; returns "NA" instead of unreadable "> $1,000,000,000" thresholds. */
 export function formatPositionPrice(
   price?: bigint,
-  opts: { displayDecimals?: number; visualMultiplier?: number; markPrice?: bigint } = {}
+  opts: {
+    displayDecimals?: number;
+    visualMultiplier?: number;
+    markPrice?: bigint;
+    /** Index token symbol — JPY etc. are shown as USD/XXX (~157) not index (~0.006). */
+    indexSymbol?: string;
+  } = {}
 ) {
-  if (!isSaneIndexPrice(price, opts)) {
+  const displayPrice = toFxDisplayPrice(price, opts.indexSymbol);
+  const displayMark = toFxDisplayPrice(opts.markPrice, opts.indexSymbol);
+
+  if (!isSaneIndexPrice(displayPrice, { ...opts, markPrice: displayMark })) {
     return "NA";
   }
 
   // Use formatUsd (not formatUsdPrice) so caller-provided market priceDecimals are honored.
   const displayDecimals =
-    opts.displayDecimals ?? calculateDisplayDecimals(price, undefined, opts.visualMultiplier);
+    opts.displayDecimals ?? calculateDisplayDecimals(displayPrice, undefined, opts.visualMultiplier);
 
   return (
-    formatUsd(price, {
+    formatUsd(displayPrice, {
       displayDecimals,
       visualMultiplier: opts.visualMultiplier,
     }) ?? "NA"
@@ -127,11 +137,19 @@ export function formatPositionPrice(
 
 export function formatLiquidationPrice(
   liquidationPrice?: bigint,
-  opts: { displayDecimals?: number; visualMultiplier?: number; markPrice?: bigint } = {}
+  opts: {
+    displayDecimals?: number;
+    visualMultiplier?: number;
+    markPrice?: bigint;
+    indexSymbol?: string;
+  } = {}
 ) {
+  const displayLiq = toFxDisplayPrice(liquidationPrice, opts.indexSymbol);
+  const displayMark = toFxDisplayPrice(opts.markPrice, opts.indexSymbol);
+
   if (
-    !isSaneIndexPrice(liquidationPrice, {
-      markPrice: opts.markPrice,
+    !isSaneIndexPrice(displayLiq, {
+      markPrice: displayMark,
       visualMultiplier: opts.visualMultiplier,
       maxAbs: 1_000_000,
     })
@@ -139,9 +157,9 @@ export function formatLiquidationPrice(
     return "NA";
   }
 
-  const priceDecimalPlaces = calculateDisplayDecimals(liquidationPrice!, undefined, opts.visualMultiplier);
+  const priceDecimalPlaces = calculateDisplayDecimals(displayLiq!, undefined, opts.visualMultiplier);
 
-  return formatUsd(liquidationPrice, {
+  return formatUsd(displayLiq, {
     displayDecimals: opts.displayDecimals ?? priceDecimalPlaces,
     visualMultiplier: opts.visualMultiplier,
     maxThreshold: "1000000",

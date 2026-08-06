@@ -7,11 +7,7 @@ import { applyFactor, PRECISION } from "./numbers";
 import { getByKey } from "./objects";
 import { convertToContractTokenPrices, convertToUsd, getMidPrice } from "./tokens";
 
-/**
- * Prefer explicit market.reversed for labels. JPY index is priced as JPY/USD on-chain
- * (~0.006); auto-labeling it USD/JPY made Entry/Mark look like a broken FX quote.
- */
-const REVERSED_PAIR_SYMBOLS = new Set<string>();
+import { isFxDisplayReversedSymbol } from "./fxDisplay";
 
 export function getMarketFullName(p: {
   longToken: Token;
@@ -34,7 +30,8 @@ export function getMarketIndexName(
 
   const baseName = getMarketBaseName(p);
   const token = "indexToken" in p ? p.indexToken : p.glvToken;
-  const isReversed = p.reversed ?? REVERSED_PAIR_SYMBOLS.has(token.symbol);
+  // JPY (and friends) are shown as USD/XXX even when on-chain market.reversed is false.
+  const isReversed = Boolean(p.reversed) || isFxDisplayReversedSymbol(token.symbol);
   return isReversed ? `USD/${baseName}` : `${baseName}/USD`;
 }
 

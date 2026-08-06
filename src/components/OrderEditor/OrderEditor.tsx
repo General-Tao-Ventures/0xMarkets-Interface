@@ -90,6 +90,7 @@ import { useJsonRpcProvider } from "lib/rpc";
 import { sendEditOrderEvent } from "lib/userAnalytics";
 import useWallet from "lib/wallets/useWallet";
 import { bigMath } from "sdk/utils/bigmath";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { BatchOrderTxnParams, buildUpdateOrderPayload } from "sdk/utils/orderTransactions";
 
 import { AcceptablePriceImpactInputRow } from "components/AcceptablePriceImpactInputRow/AcceptablePriceImpactInputRow";
@@ -524,7 +525,7 @@ export function OrderEditor(p: Props) {
         const positionOrder = p.order as PositionOrderInfo;
 
         setSizeInputValue(formatAmountFree(positionOrder.sizeDeltaUsd ?? 0n, USD_DECIMALS));
-        const price = positionOrder.triggerPrice ?? 0n;
+        const price = toFxDisplayPrice(positionOrder.triggerPrice ?? 0n, indexToken?.symbol) ?? 0n;
         const decimals = calculateDisplayDecimals(price, USD_DECIMALS, indexToken?.visualMultiplier);
 
         if (triggerPriceInputValue === "") {
@@ -537,6 +538,7 @@ export function OrderEditor(p: Props) {
       setIsInited(true);
     },
     [
+      indexToken?.symbol,
       indexToken?.visualMultiplier,
       isInited,
       p.order,
@@ -621,21 +623,23 @@ export function OrderEditor(p: Props) {
               <BuyInputSection
                 topLeftLabel={priceLabel}
                 topRightLabel={t`Mark`}
-                topRightValue={formatUsdPrice(markPrice, {
+                topRightValue={formatUsdPrice(toFxDisplayPrice(markPrice, indexToken?.symbol), {
                   visualMultiplier: indexToken?.visualMultiplier,
                 })}
-                onClickTopRightLabel={() =>
+                onClickTopRightLabel={() => {
+                  const displayMark = toFxDisplayPrice(markPrice, indexToken?.symbol) ?? markPrice;
+                  if (displayMark === undefined) return;
                   setTriggerPriceInputValue(
                     formatAmount(
-                      markPrice,
+                      displayMark,
                       USD_DECIMALS,
-                      calculateDisplayDecimals(markPrice, USD_DECIMALS, indexToken?.visualMultiplier),
+                      calculateDisplayDecimals(displayMark, USD_DECIMALS, indexToken?.visualMultiplier),
                       undefined,
                       undefined,
                       indexToken?.visualMultiplier
                     )
-                  )
-                }
+                  );
+                }}
                 inputValue={triggerPriceInputValue}
                 onInputValueChange={(e) => setTriggerPriceInputValue(e.target.value)}
               >

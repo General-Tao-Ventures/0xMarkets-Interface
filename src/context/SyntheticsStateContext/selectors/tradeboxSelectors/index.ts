@@ -57,6 +57,7 @@ import { mustNeverExist } from "lib/types";
 import { NATIVE_TOKEN_ADDRESS, convertTokenAddress } from "sdk/configs/tokens";
 import { bigMath } from "sdk/utils/bigmath";
 import { getExecutionFee } from "sdk/utils/fees/executionFee";
+import { toFxIndexPrice } from "sdk/utils/fxDisplay";
 import { createTradeFlags } from "sdk/utils/trade";
 
 import { selectIsExpressTransactionAvailable } from "../expressSelectors";
@@ -250,7 +251,6 @@ export const selectExternalSwapInputsByLeverageSize = createSelector((q) => {
 
   const tradeMode = q(selectTradeboxTradeMode);
   const tradeType = q(selectTradeboxTradeType);
-  const tradeFlags = createTradeFlags(tradeType, tradeMode);
   const userReferralInfo = q(selectUserReferralInfo);
   const triggerPrice = q(selectTradeboxTriggerPrice);
   const collateralToken = q(selectTradeboxCollateralToken);
@@ -259,6 +259,7 @@ export const selectExternalSwapInputsByLeverageSize = createSelector((q) => {
 
   const toTokenAmount = q(selectTradeboxToTokenAmount);
   const marketInfo = q(selectTradeboxMarketInfo);
+  const tradeFlags = createTradeFlags(tradeType, tradeMode, marketInfo?.indexToken.symbol);
   const leverage = q(selectTradeboxLeverage);
   const uiFeeFactor = q(selectUiFeeFactor);
 
@@ -610,8 +611,8 @@ export const selectTradeboxSwapAmounts = createSelector((q) => {
 export const selectTradeboxTradeFlags = createSelector((q) => {
   const tradeType = q(selectTradeboxTradeType);
   const tradeMode = q(selectTradeboxTradeMode);
-  const tradeFlags = createTradeFlags(tradeType, tradeMode);
-  return tradeFlags;
+  const marketInfo = q(selectTradeboxMarketInfo);
+  return createTradeFlags(tradeType, tradeMode, marketInfo?.indexToken.symbol);
 });
 
 export const selectTradeboxTradeFeesType = createSelector(
@@ -935,12 +936,15 @@ const selectTradeboxNextPositionValuesForIncreaseWithoutPnlInLeverage = createSe
 export const selectTradeboxTriggerPrice = createSelector((q) => {
   const triggerPriceInputValue = q(selectTradeboxTriggerPriceInputValue);
   const visualMultiplier = q(selectSelectedMarketVisualMultiplier);
+  const marketInfo = q(selectTradeboxMarketInfo);
 
   const parsedValue = parseValue(triggerPriceInputValue, USD_DECIMALS);
 
   if (parsedValue === undefined || parsedValue === 0n) return undefined;
 
-  return parsedValue / BigInt(visualMultiplier);
+  // Input is in display domain (USD/JPY ~157); protocol math needs index (JPY/USD ~0.006).
+  const indexPrice = toFxIndexPrice(parsedValue / BigInt(visualMultiplier), marketInfo?.indexToken.symbol);
+  return indexPrice;
 });
 
 const selectNextValuesDecreaseArgs = createSelector((q) => {

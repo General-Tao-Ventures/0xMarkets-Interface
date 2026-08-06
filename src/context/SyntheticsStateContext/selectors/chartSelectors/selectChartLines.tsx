@@ -11,6 +11,7 @@ import { getTokenData } from "domain/synthetics/tokens";
 import { formatAmount } from "lib/numbers";
 import { EMPTY_ARRAY } from "lib/objects";
 import { convertTokenAddress, getPriceDecimals } from "sdk/configs/tokens";
+import { toFxDisplayIsLong, toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { getMarketIndexName } from "sdk/utils/markets";
 
 import { StaticChartLine } from "components/TVChartContainer/types";
@@ -60,14 +61,20 @@ export const selectChartLines = createSelector<StaticChartLine[]>((q) => {
 
   const positionLines = filteredPositions.flatMap((position) => {
     const priceDecimal = getPriceDecimals(chainId, position.indexToken.symbol);
-    const longOrShortText = position.isLong ? t`Long` : t`Short`;
+    const displayIsLong = toFxDisplayIsLong(position.isLong, position.indexToken.symbol);
+    const longOrShortText = displayIsLong ? t`Long` : t`Short`;
     const token = q((state) => getTokenData(selectTokensData(state), position.marketInfo?.indexTokenAddress, "native"));
     const marketIndexName = getMarketIndexName(position.marketInfo!) ?? "";
     const tokenVisualMultiplier = token?.visualMultiplier;
+    const indexSymbol = position.indexToken.symbol;
 
-    const markPrice = toChartPrice(position.markPrice, priceDecimal, tokenVisualMultiplier);
-    const entryPrice = toChartPrice(position.entryPrice, priceDecimal, tokenVisualMultiplier);
-    const liquidationPrice = toChartPrice(position.liquidationPrice, priceDecimal, tokenVisualMultiplier);
+    const markPrice = toChartPrice(toFxDisplayPrice(position.markPrice, indexSymbol), priceDecimal, tokenVisualMultiplier);
+    const entryPrice = toChartPrice(toFxDisplayPrice(position.entryPrice, indexSymbol), priceDecimal, tokenVisualMultiplier);
+    const liquidationPrice = toChartPrice(
+      toFxDisplayPrice(position.liquidationPrice, indexSymbol),
+      priceDecimal,
+      tokenVisualMultiplier
+    );
 
     const lines: StaticChartLine[] = [];
 

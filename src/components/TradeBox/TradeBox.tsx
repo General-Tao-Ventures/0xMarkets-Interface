@@ -78,6 +78,7 @@ import { sendTradeBoxInteractionStartedEvent } from "lib/userAnalytics";
 import useWallet from "lib/wallets/useWallet";
 import { NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
 import { TradeMode } from "sdk/types/trade";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import { AlertInfoCard } from "components/AlertInfo/AlertInfoCard";
 import Button from "components/Button/Button";
@@ -602,17 +603,20 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       return;
     }
 
+    // Trigger input is display-domain (USD/JPY ~157).
+    const displayMark = toFxDisplayPrice(markPrice, toToken?.symbol) ?? markPrice;
+
     setTriggerPriceInputValue(
       formatAmount(
-        markPrice,
+        displayMark,
         USD_DECIMALS,
-        calculateDisplayDecimals(markPrice, undefined, toToken?.visualMultiplier),
+        calculateDisplayDecimals(displayMark, undefined, toToken?.visualMultiplier),
         undefined,
         undefined,
         toToken?.visualMultiplier
       )
     );
-  }, [markPrice, setTriggerPriceInputValue, toToken?.visualMultiplier]);
+  }, [markPrice, setTriggerPriceInputValue, toToken?.symbol, toToken?.visualMultiplier]);
 
   const handleLimitPricePercentageShortcut = useCallback(
     (pct: number) => {
@@ -620,16 +624,17 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
         return;
       }
 
-      // pct is e.g. -5, -1, 1, 5 — scale to basis points to avoid float math
+      // Apply % on display quote so +1% on USD/JPY moves ~157 → ~159 (not inverted index).
+      const displayMark = toFxDisplayPrice(markPrice, toToken?.symbol) ?? markPrice;
       const bps = BigInt(Math.round(pct * 100));
-      const adjustedPrice = (markPrice * (10000n + bps)) / 10000n;
+      const adjustedPrice = (displayMark * (10000n + bps)) / 10000n;
       const displayDecimals = calculateDisplayDecimals(adjustedPrice, undefined, toToken?.visualMultiplier);
 
       setTriggerPriceInputValue(
         formatAmount(adjustedPrice, USD_DECIMALS, displayDecimals, undefined, undefined, toToken?.visualMultiplier)
       );
     },
-    [markPrice, setTriggerPriceInputValue, toToken?.visualMultiplier]
+    [markPrice, setTriggerPriceInputValue, toToken?.symbol, toToken?.visualMultiplier]
   );
 
   const handleTriggerMarkPriceClick = useCallback(
@@ -856,7 +861,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       <BuyInputSection
         topLeftLabel={priceLabel}
         topRightLabel={t`Mark`}
-        topRightValue={formatUsdPrice(markPrice, {
+        topRightValue={formatUsdPrice(toFxDisplayPrice(markPrice, toToken?.symbol), {
           visualMultiplier: toToken?.visualMultiplier,
         })}
         onClickTopRightLabel={setMarkPriceAsTriggerPrice}
@@ -961,6 +966,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
 
     return formatLiquidationPrice(nextPositionValues?.nextLiqPrice, {
       visualMultiplier: toToken?.visualMultiplier,
+      indexSymbol: toToken?.symbol,
     });
   }, [
     isTrigger,
@@ -969,6 +975,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     increaseAmounts,
     nextPositionValues?.nextLiqPrice,
     toToken?.visualMultiplier,
+    toToken?.symbol,
     selectedPosition,
   ]);
 
@@ -1241,6 +1248,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                     ? formatLiquidationPrice(selectedPosition?.liquidationPrice, {
                         visualMultiplier: toToken?.visualMultiplier,
                         markPrice: selectedPosition?.markPrice,
+                        indexSymbol: toToken?.symbol,
                       })
                     : undefined
                 }

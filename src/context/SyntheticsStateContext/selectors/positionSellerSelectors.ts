@@ -19,6 +19,7 @@ import { mustNeverExist } from "lib/types";
 import { NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
 import { TradeMode, TradeType } from "sdk/types/trade";
 import { bigMath } from "sdk/utils/bigmath";
+import { toFxDisplayIsLong, toFxIndexPrice } from "sdk/utils/fxDisplay";
 import { getExecutionFee } from "sdk/utils/fees/executionFee";
 import { getIsEquivalentTokens } from "sdk/utils/tokens";
 
@@ -86,7 +87,9 @@ const selectPositionSellerDecreaseAmountArgs = createSelector((q) => {
   const selectedTriggerAcceptablePriceImpactBps = q(selectPositionSellerSelectedTriggerAcceptablePriceImpactBps);
   const positionKey = q(selectClosingPositionKey);
   const orderOption = q(selectPositionSellerOrderOption);
-  const tradeType = position.isLong ? TradeType.Long : TradeType.Short;
+  const tradeType = toFxDisplayIsLong(position.isLong, position.indexToken.symbol)
+    ? TradeType.Long
+    : TradeType.Short;
   const collateralTokenAddress = position.collateralTokenAddress;
   const marketAddress = position.market.marketTokenAddress;
   const triggerPrice = q(selectPositionSellerTriggerPrice);
@@ -384,5 +387,5 @@ export const selectPositionSellerTriggerPrice = createSelector((q) => {
     triggerPrice = triggerPrice / BigInt(toToken?.visualMultiplier ?? 1);
   }
 
-  return triggerPrice;
+  return toFxIndexPrice(triggerPrice, toToken.symbol);
 });
