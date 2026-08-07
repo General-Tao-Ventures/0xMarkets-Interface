@@ -55,7 +55,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
         <div className="mb-8 text-12 font-medium uppercase tracking-[0.08em] text-typography-secondary">
           0xMarkets
         </div>
-        <h1 className="mb-8 text-h2 text-typography-primary">Soft launch lock</h1>
+        <h1 className="mb-8 text-h2 text-typography-primary">The Inner Circle</h1>
         <p className="mb-20 text-body-medium text-typography-secondary">Enter the invite password to trade.</p>
         <label className="mb-8 block text-body-small text-typography-secondary" htmlFor="site-password">
           Password
