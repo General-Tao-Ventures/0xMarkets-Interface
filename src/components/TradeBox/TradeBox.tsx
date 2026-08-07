@@ -121,13 +121,26 @@ import { PriceImpactFeesRow } from "./TradeBoxRows/PriceImpactFeesRow";
 
 import "./TradeBox.scss";
 
-/** Cap synced trade input amounts at 2dp; keep more precision if 2dp would round to 0. */
+/** Prefer 2dp for synced trade inputs, but keep more precision when 2dp would alter size meaningfully. */
 function formatTradeInputAmount(amount: bigint, tokenDecimals: number): string {
-  const capped = formatAmountFree(amount, tokenDecimals, 2);
-  if (amount > 0n && (capped === "0" || Number(capped) === 0)) {
-    return formatAmountFree(amount, tokenDecimals, 6);
+  const preferred = formatAmountFree(amount, tokenDecimals, 2);
+  const parsedPreferred = parseValue(preferred, tokenDecimals);
+
+  if (parsedPreferred === undefined) {
+    return formatAmountFree(amount, tokenDecimals, 8);
   }
-  return capped;
+
+  if (amount === 0n) {
+    return preferred;
+  }
+
+  const diff = parsedPreferred > amount ? parsedPreferred - amount : amount - parsedPreferred;
+  // If rounding changes the amount by more than 0.1%, keep 8dp so focus/token switches don't shrink size.
+  if (diff * 1000n > amount) {
+    return formatAmountFree(amount, tokenDecimals, 8);
+  }
+
+  return preferred;
 }
 
 export function TradeBox({ isMobile }: { isMobile: boolean }) {
