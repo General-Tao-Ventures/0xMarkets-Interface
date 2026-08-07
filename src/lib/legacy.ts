@@ -8,6 +8,7 @@ import { getContract } from "config/contracts";
 import { isLocal } from "config/env";
 import { BASIS_POINTS_DIVISOR, BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS } from "config/factors";
 import { PRODUCTION_HOST } from "config/links";
+import { getMarketLogoUrl } from "config/marketLogos";
 import { TokenInfo, getMostAbundantStableToken } from "domain/tokens";
 import { getTokenInfo } from "domain/tokens/utils";
 
@@ -1291,6 +1292,14 @@ const imageStaticMap = mapKeys(
 );
 
 export function importImage(name) {
+  const marketMatch = typeof name === "string" ? name.match(/^ic_([a-z0-9]+)_\d+\.svg$/i) : null;
+  if (marketMatch) {
+    const marketLogo = getMarketLogoUrl(marketMatch[1]);
+    if (marketLogo) {
+      return marketLogo;
+    }
+  }
+
   if (name in imageStaticMap) {
     return imageStaticMap[name] as string;
   }

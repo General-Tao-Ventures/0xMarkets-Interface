@@ -142,15 +142,15 @@ export function GmList({
       className="grow"
       titleAction={
         <Button
-          variant="secondary"
-          size="small"
+          variant="primary"
+          size="medium"
           to={LIQUIDITY_APP_URL}
           newTab
           showExternalLinkArrow={false}
-          className="whitespace-nowrap !px-12 !py-6 !text-body-small !text-typography-secondary hover:!text-typography-primary"
+          className="whitespace-nowrap !px-16 !py-10 !text-body-medium font-medium"
         >
           <Trans>Manage Liquidity</Trans>
-          <NewLinkIcon className="ml-6 size-12 shrink-0 opacity-70" />
+          <NewLinkIcon className="ml-8 size-14 shrink-0" />
         </Button>
       }
       description={

@@ -15,6 +15,8 @@ const TOKEN_COLOR_MAP: Record<string, string> = {
   EUR: "#003399",
   GBP: "#CF142B",
   GOLD: "#FFD700",
+  SILVER: "#C0C0C0",
+  XAG: "#C0C0C0",
   JPY: "#BC002D",
   default: "#6062a6",
 };
@@ -45,10 +47,11 @@ export function CompositionDiagram({ data, label }: Props) {
         item.type === "market"
           ? bigintToNumber(item.gmBalanceUsd, USD_DECIMALS)
           : bigintToNumber(item.amount, USD_DECIMALS);
-      const color =
-        (item.type === "market"
-          ? TOKEN_COLOR_MAP[item.market.indexToken.symbol]
-          : TOKEN_COLOR_MAP[item.token.symbol]) ?? TOKEN_COLOR_MAP.default;
+      const colorKey =
+        item.type === "market"
+          ? (item.market.indexToken.baseSymbol ?? item.market.indexToken.symbol)
+          : (item.token.baseSymbol ?? item.token.symbol);
+      const color = TOKEN_COLOR_MAP[colorKey] ?? TOKEN_COLOR_MAP.default;
       return {
         key: item.type === "market" ? item.market.marketTokenAddress : `${item.token.address}-${item.side}`,
         color,

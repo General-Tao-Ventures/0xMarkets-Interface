@@ -64,7 +64,8 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <!-- Load before the app module so window.TradingView.widget exists on first chart mount. -->
+    <script src="/charting_library/charting_library.standalone.js"></script>
     <script type="module" src="/src/index.tsx"></script>
-    <script async src="/charting_library/charting_library.standalone.js"></script>
   </body>
 </html>

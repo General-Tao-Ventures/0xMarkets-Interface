@@ -48,7 +48,7 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
       longTokenAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       shortTokenAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     },
-    // XAG/USD [USDC-USDC]
+    // SILVER/USD [USDC-USDC] (oracle ticker: XAG)
     "0x73cc35AC21C6675eF5204078cAb42Cb5fB6c0F23": {
       marketTokenAddress: "0x73cc35AC21C6675eF5204078cAb42Cb5fB6c0F23",
       indexTokenAddress: "0xA927aA364535ba04d88Fc5326D0773CC05d92c08",
@@ -99,7 +99,7 @@ export const MARKETS: Record<ContractsChainId, Record<string, MarketConfig>> = {
       longTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
       shortTokenAddress: "0x3ae4474579d24a743c9016F017e76185A834d837",
     },
-    // XAG/USD [USD0-USD0] (v2 — replaces old 0xF95b market)
+    // SILVER/USD [USD0-USD0] (v2 — replaces old 0xF95b market; oracle ticker: XAG)
     "0x6D260c4229dBb55a0a91041b5c07b320fdD6303B": {
       marketTokenAddress: "0x6D260c4229dBb55a0a91041b5c07b320fdD6303B",
       indexTokenAddress: "0x25f79151C3E00ba7710EcF02192836994E36b440",

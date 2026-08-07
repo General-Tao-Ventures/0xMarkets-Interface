@@ -1,6 +1,7 @@
 import cx from "classnames";
 
 import { CHAIN_ID_TO_NETWORK_ICON } from "config/icons";
+import { getMarketLogoUrl } from "config/marketLogos";
 import { importImage } from "lib/legacy";
 
 import "./TokenIcon.scss";
@@ -9,6 +10,12 @@ function getIconUrlPath(symbol, size: 24 | 40) {
   if (!symbol || !size) return;
 
   return `ic_${symbol.toLowerCase()}_${size}.svg`;
+}
+
+function resolveIconSrc(symbol: string, size: 24 | 40) {
+  const marketLogo = getMarketLogoUrl(symbol);
+  if (marketLogo) return marketLogo;
+  return importImage(getIconUrlPath(symbol, size));
 }
 
 type Props = {
@@ -22,10 +29,9 @@ type Props = {
 };
 
 function TokenIcon({ className, symbol, displaySize, importSize = 24, badge, badgeClassName, chainIdBadge }: Props) {
-  const iconPath = getIconUrlPath(symbol, importSize);
   const classNames = cx("Token-icon inline rounded-full", className);
 
-  if (!iconPath) return <></>;
+  if (!symbol) return <></>;
 
   let sub;
   let containerClassName = "";
@@ -51,16 +57,16 @@ function TokenIcon({ className, symbol, displaySize, importSize = 24, badge, bad
           )}
         >
           <img
-            className="z-20 -mr-10 rounded-[100%] border-2 border-slate-900 bg-slate-900"
-            src={importImage(getIconUrlPath(badge[0], 24))}
+            className="z-20 -mr-10 rounded-[100%] border-2 border-slate-900 bg-slate-900 object-cover"
+            src={resolveIconSrc(badge[0], 24)}
             alt={badge[0]}
             width={20}
             height={20}
           />
           <img
-            className="z-10 rounded-[100%] border-2 border-slate-900 bg-slate-900"
-            src={importImage(getIconUrlPath(badge[1], 24))}
-            alt={badge[0]}
+            className="z-10 rounded-[100%] border-2 border-slate-900 bg-slate-900 object-cover"
+            src={resolveIconSrc(badge[1], 24)}
+            alt={badge[1]}
             width={20}
             height={20}
           />
@@ -93,8 +99,8 @@ function TokenIcon({ className, symbol, displaySize, importSize = 24, badge, bad
   const img = (
     <img
       data-qa="token-icon"
-      className={sub ? containerClassName : classNames}
-      src={importImage(iconPath)}
+      className={cx(sub ? containerClassName : classNames, "object-cover")}
+      src={resolveIconSrc(symbol, importSize)}
       alt={symbol}
       width={displaySize}
       height={displaySize}
