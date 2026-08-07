@@ -177,6 +177,10 @@ msgstr ""
 msgid "0xM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Weekly rewards"
+msgstr ""
+
 #: src/components/TradeHistory/keys.ts
 msgid "Cancel Limit Swap"
 msgstr ""
@@ -489,6 +493,10 @@ msgstr ""
 msgid "Buy APE on Arbitrum with <0>Camelot</0>."
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "≤ {0}"
+msgstr ""
+
 #: landing/src/pages/Home/LeaveHomepageRedirectModal/LeaveHompageRedirectModal.tsx
 #: src/components/ModalViews/RedirectModal.tsx
 msgid "Don't show this message again for 30 days."
@@ -732,6 +740,10 @@ msgstr ""
 
 #: src/components/TVChartContainer/constants.ts
 msgid "SL - Short Dec."
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Updated {0}"
 msgstr ""
 
 #: src/components/SettingsModal/SettingsModal.tsx
@@ -1448,6 +1460,10 @@ msgstr ""
 msgid "Accrued Negative Funding Fee"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "0xMarkets LP"
+msgstr ""
+
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of close fee"
 msgstr ""
@@ -1468,9 +1484,8 @@ msgstr ""
 msgid "Driven by our community"
 msgstr ""
 
-#: src/components/AppHeader/AppHeaderUser.tsx
-#: src/components/AppHeader/AppHeaderUser.tsx
 #: src/components/Footer/constants.tsx
+#: src/components/SideNav/SideNav.tsx
 msgid "Faucet"
 msgstr ""
 
@@ -1586,6 +1601,10 @@ msgstr ""
 #: src/components/MarketNetFee/MarketNetFee.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
 msgid "Short Positions"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "with a {0}-day lock"
 msgstr ""
 
 #: landing/src/pages/Home/SocialSection/SocialSlider.tsx
@@ -1902,6 +1921,7 @@ msgstr ""
 #. Total Value Locked
 #: src/components/MarketsList/MarketsList.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Pools/CarthaLpCard.tsx
 msgid "TVL"
 msgstr ""
 
@@ -2298,6 +2318,10 @@ msgstr ""
 msgid "Cancel Deposit"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Leverage tiers"
+msgstr ""
+
 #: src/components/MarketStats/MarketGraphs.tsx
 msgid "Fee APR"
 msgstr ""
@@ -2387,6 +2411,10 @@ msgstr ""
 msgid "Generating session..."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Next epoch in {0}"
+msgstr ""
+
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Get Testnet Tokens"
 msgstr ""
@@ -2463,8 +2491,16 @@ msgstr ""
 msgid "Available to Trade Assets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY by lock period"
+msgstr ""
+
 #: landing/src/pages/Home/LiqiuditySection/PoolCard.tsx
 msgid "Annually"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} α"
 msgstr ""
 
 #: src/components/GmxAccountModal/keys.ts
@@ -2677,6 +2713,10 @@ msgstr ""
 
 #: src/components/MarketNetFee/MarketNetFee.tsx
 msgid "{longOrShort} positions {fundingAction} a funding fee of {fundingRate} per hour and {borrowAction} a borrow fee of {borrowRate} per hour."
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage is {activeTierMaxLeverage}x at this position size. Reduce size or post more margin for higher leverage."
 msgstr ""
 
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
@@ -2894,8 +2934,6 @@ msgstr ""
 msgid "Claiming position price impact fees failed"
 msgstr ""
 
-#: src/components/GmList/GmListItem.tsx
-#: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmxAccountModal/MainView.tsx
@@ -3381,6 +3419,10 @@ msgstr ""
 
 #: src/components/InterviewModal/InterviewModal.tsx
 msgid "Anonymous chat with 0xMarkets"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Earn up to"
 msgstr ""
 
 #: src/components/GmSwap/GmFees/GmFees.tsx
@@ -3891,6 +3933,10 @@ msgstr ""
 msgid "This position was liquidated as the max. leverage of {formattedMaxLeverage} was exceeded when taking into account fees."
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "> {0}"
+msgstr ""
+
 #: src/components/TradeBox/hooks/useTradeButtonState.tsx
 msgid "Swap {0}"
 msgstr ""
@@ -3916,6 +3962,10 @@ msgstr ""
 
 #: landing/src/pages/Home/HeroSection/Features.tsx
 msgid "Use your preferred token to pay and collateralize your positions"
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage tightens as your position size grows."
 msgstr ""
 
 #: src/components/TradeHistory/TradeHistoryRow/utils/shared.ts
@@ -3998,6 +4048,10 @@ msgstr ""
 
 #: src/components/TradeboxPoolWarnings/TradeboxPoolWarnings.tsx
 msgid "Insufficient liquidity in any {0}/USD market pools for your order."
+msgstr ""
+
+#: src/components/GmList/GmList.tsx
+msgid "Manage Liquidity"
 msgstr ""
 
 #: src/pages/LeaderboardPage/components/LeaderboardAccountsTable.tsx
@@ -5109,6 +5163,10 @@ msgstr ""
 msgid "{0} and {1} can be used to buy 0xM for this market up to the specified buying caps."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} positions"
+msgstr ""
+
 #. Filter option for tokens favorites
 #: src/context/TokensFavoritesContext/TokensFavoritesContextProvider.tsx
 msgid "All Markets"
@@ -5160,8 +5218,6 @@ msgid "Deactivate 1CT (One-Click Trading)"
 msgstr ""
 
 #: src/components/AddressDropdown/AddressDropdownWithMultichain.tsx
-#: src/components/GmList/GmListItem.tsx
-#: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmxAccountModal/DepositView.tsx
@@ -5551,6 +5607,10 @@ msgstr ""
 
 #: src/pages/Dashboard/PlatformStats.tsx
 msgid "Epoch Fees"
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "For positions up to {0}, max leverage is {activeTierMaxLeverage}x. Larger positions trigger lower caps."
 msgstr ""
 
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
@@ -5970,6 +6030,10 @@ msgstr ""
 msgid "High TWAP network fee"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY"
+msgstr ""
+
 #: src/components/Errors/errorToasts.tsx
 #: src/components/Errors/errorToasts.tsx
 msgid "There is not enough {0} in your account on {1} to send this transaction.<0/><1/><2>Buy or Transfer {2} to {3}</2>"
@@ -6165,6 +6229,10 @@ msgstr ""
 msgid "Failed to update settings"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Liquidity providers"
+msgstr ""
+
 #: src/domain/synthetics/markets/claimFundingFeesTxn.ts
 msgid "Funding claimed."
 msgstr ""
@@ -6287,6 +6355,10 @@ msgstr ""
 #: src/pages/Ecosystem/Ecosystem.tsx
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 msgid "About"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} next epoch"
 msgstr ""
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx

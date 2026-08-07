@@ -1,7 +1,6 @@
 import { Trans } from "@lingui/macro";
 import { useEffect, useMemo, useState } from "react";
 
-import { BASE_SEPOLIA } from "config/chains";
 import { USD_DECIMALS } from "config/factors";
 import { usePositionsTotalCollateral } from "domain/synthetics/positions/usePositionsTotalCollateral";
 import useV2Stats from "domain/synthetics/stats/useV2Stats";
@@ -17,9 +16,9 @@ import { getFormattedFeesDuration } from "./getFormattedFeesDuration";
 export function OverviewCard() {
   const { chainId } = useChainId();
 
-  const v2Overview = useV2Stats(BASE_SEPOLIA);
+  const v2Overview = useV2Stats(chainId);
 
-  const positionsCollateralUsd = usePositionsTotalCollateral(BASE_SEPOLIA);
+  const positionsCollateralUsd = usePositionsTotalCollateral(chainId);
 
   // #region TVL
   const gmTvl = v2Overview.totalGMLiquidity;

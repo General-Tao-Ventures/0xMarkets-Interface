@@ -3,6 +3,7 @@ import cx from "classnames";
 import { ReactNode, useCallback } from "react";
 
 import {
+  BASE_MAINNET,
   BASE_SEPOLIA,
   LOCALHOST,
   ContractsChainId,
@@ -24,6 +25,7 @@ const gmIcon = getIcon("common", "gm");
 const glvIcon = getIcon("common", "glv");
 
 const NETWORK_ICONS: Record<ContractsChainId, React.ComponentType<{ className?: string }>> = {
+  [BASE_MAINNET]: BaseIcon,
   [BASE_SEPOLIA]: BaseIcon,
   [LOCALHOST]: BaseIcon,
 };
@@ -99,7 +101,7 @@ export default function BuyCards() {
               chainId={chainId}
               active={active}
               to={getTrackingLink("/buy_gmx")}
-              network={BASE_SEPOLIA}
+              network={BASE_MAINNET}
             />
           </div>
           <TrackingLink>
@@ -130,7 +132,7 @@ export default function BuyCards() {
           <div className={cx("buy flex gap-12 max-lg:flex-col")}>
             <BuyLink
               to={getTrackingLink("/pools?pickBestGlv=1")}
-              network={BASE_SEPOLIA}
+              network={BASE_MAINNET}
               chainId={chainId}
               active={active}
             />
@@ -162,7 +164,7 @@ export default function BuyCards() {
           <div className={cx("buy flex gap-12 max-lg:flex-col")}>
             <BuyLink
               to={getTrackingLink("/pools")}
-              network={BASE_SEPOLIA}
+              network={BASE_MAINNET}
               chainId={chainId}
               active={active}
             />

@@ -35,8 +35,9 @@ import { adaptToV1TokenInfo, convertToTokenAmount, convertToUsd } from "domain/s
 import { getMarkPrice } from "domain/synthetics/trade";
 import { TokensRatioAndSlippage } from "domain/tokens";
 import { getExchangeRate, getExchangeRateDisplay } from "lib/legacy";
-import { calculateDisplayDecimals, formatAmount, formatBalanceAmount, formatUsd } from "lib/numbers";
+import { calculateDisplayDecimals, formatAmount, formatBalanceAmount, formatUsd, resolvePriceDisplayDecimals } from "lib/numbers";
 import { getWrappedToken } from "sdk/configs/tokens";
+import { toFxDisplayIsLong, toFxDisplayPrice, toFxDisplayThresholdType } from "sdk/utils/fxDisplay";
 
 import { AppCard, AppCardSection } from "components/AppCard/AppCard";
 import Button from "components/Button/Button";
@@ -325,18 +326,20 @@ function MarkPrice({ order, className }: { order: OrderInfo; className?: string 
   }, [order]);
 
   const positionOrder = order as PositionOrderInfo;
-  const priceDecimals = calculateDisplayDecimals(
-    positionOrder.indexToken?.prices?.minPrice,
-    undefined,
+  const indexSymbol = isSwapOrderType(order.orderType) ? undefined : positionOrder.indexToken?.symbol;
+  const displayMinPrice = toFxDisplayPrice(positionOrder.indexToken?.prices?.minPrice, indexSymbol);
+  const priceDecimals = resolvePriceDisplayDecimals(
+    positionOrder.indexToken?.priceDecimals,
+    displayMinPrice ?? positionOrder.indexToken?.prices?.minPrice,
     positionOrder.indexToken?.visualMultiplier
   );
 
   const markPriceFormatted = useMemo(() => {
-    return formatUsd(markPrice, {
+    return formatUsd(toFxDisplayPrice(markPrice, indexSymbol), {
       displayDecimals: priceDecimals,
       visualMultiplier: positionOrder.indexToken?.visualMultiplier,
     });
-  }, [markPrice, priceDecimals, positionOrder.indexToken?.visualMultiplier]);
+  }, [markPrice, indexSymbol, priceDecimals, positionOrder.indexToken?.visualMultiplier]);
 
   if (isTwapOrder(order) || isMarketOrderType(order.orderType)) {
     const { markSwapRatioText } = getSwapRatioText(order);
@@ -373,8 +376,9 @@ function MarkPrice({ order, className }: { order: OrderInfo; className?: string 
           return (
             <Trans>
               <p>
-                The order will be executed when the oracle price is {positionOrder.triggerThresholdType}{" "}
-                {formatUsd(positionOrder.triggerPrice, {
+                The order will be executed when the oracle price is{" "}
+                {toFxDisplayThresholdType(positionOrder.triggerThresholdType, positionOrder.indexToken?.symbol)}{" "}
+                {formatUsd(toFxDisplayPrice(positionOrder.triggerPrice, positionOrder.indexToken?.symbol), {
                   displayDecimals: priceDecimals,
                   visualMultiplier: positionOrder.indexToken?.visualMultiplier,
                 })}
@@ -412,9 +416,13 @@ function TriggerPrice({
 
   if (isMarketOrderType(order.orderType)) {
     const positionOrder = order as PositionOrderInfo;
-    const priceDecimals = calculateDisplayDecimals(
+    const displayMinPrice = toFxDisplayPrice(
       positionOrder?.indexToken?.prices?.minPrice,
-      undefined,
+      positionOrder.indexToken?.symbol
+    );
+    const priceDecimals = resolvePriceDisplayDecimals(
+      positionOrder?.indexToken?.priceDecimals,
+      displayMinPrice ?? positionOrder?.indexToken?.prices?.minPrice,
       positionOrder?.indexToken?.visualMultiplier
     );
 
@@ -429,7 +437,7 @@ function TriggerPrice({
         content={
           <StatsTooltipRow
             label={t`Acceptable Price`}
-            value={formatUsd(positionOrder.acceptablePrice, {
+            value={formatUsd(toFxDisplayPrice(positionOrder.acceptablePrice, positionOrder.indexToken?.symbol), {
               displayDecimals: priceDecimals,
               visualMultiplier: positionOrder.indexToken?.visualMultiplier,
             })}
@@ -472,17 +480,21 @@ function TriggerPrice({
     );
   } else {
     const positionOrder = order as PositionOrderInfo;
-    const priceDecimals = calculateDisplayDecimals(
+    const displayMinPrice = toFxDisplayPrice(
       positionOrder?.indexToken?.prices?.minPrice,
-      undefined,
+      positionOrder.indexToken?.symbol
+    );
+    const priceDecimals = resolvePriceDisplayDecimals(
+      positionOrder?.indexToken?.priceDecimals,
+      displayMinPrice ?? positionOrder?.indexToken?.prices?.minPrice,
       positionOrder?.indexToken?.visualMultiplier
     );
     return (
       <TooltipWithPortal
         handle={
           <span>
-            {positionOrder.triggerThresholdType}{" "}
-            {formatUsd(positionOrder.triggerPrice, {
+            {toFxDisplayThresholdType(positionOrder.triggerThresholdType, positionOrder.indexToken?.symbol)}{" "}
+            {formatUsd(toFxDisplayPrice(positionOrder.triggerPrice, positionOrder.indexToken?.symbol), {
               displayDecimals: priceDecimals,
               visualMultiplier: positionOrder.indexToken?.visualMultiplier,
             })}
@@ -496,7 +508,7 @@ function TriggerPrice({
               value={
                 isStopLossOrderType(positionOrder.orderType) || isStopIncreaseOrderType(positionOrder.orderType)
                   ? "NA"
-                  : `${positionOrder.triggerThresholdType} ${formatUsd(positionOrder.acceptablePrice, {
+                  : `${toFxDisplayThresholdType(positionOrder.triggerThresholdType, positionOrder.indexToken?.symbol)} ${formatUsd(toFxDisplayPrice(positionOrder.acceptablePrice, positionOrder.indexToken?.symbol), {
                       displayDecimals: priceDecimals,
                       visualMultiplier: positionOrder.indexToken?.visualMultiplier,
                     })}`
@@ -617,7 +629,7 @@ function OrderItemLarge({
               <MarketWithDirectionLabel
                 bordered
                 indexName={indexName}
-                isLong={order.isLong}
+                isLong={toFxDisplayIsLong(order.isLong, tokenSymbol)}
                 tokenSymbol={tokenSymbol}
               />
             }
@@ -718,7 +730,13 @@ function OrderItemSmall({
 
     const tokenSymbol = marketInfoData?.[order.marketAddress]?.indexToken.symbol;
 
-    return <MarketWithDirectionLabel isLong={order.isLong} indexName={indexName} tokenSymbol={tokenSymbol} />;
+    return (
+      <MarketWithDirectionLabel
+        isLong={toFxDisplayIsLong(order.isLong, tokenSymbol)}
+        indexName={indexName}
+        tokenSymbol={tokenSymbol}
+      />
+    );
   }, [
     marketInfoData,
     order.initialCollateralToken,

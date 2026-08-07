@@ -9,6 +9,7 @@ export enum LineStyle {
 export type StaticChartLine = {
   price: number;
   title: string;
+  isLong: boolean;
 };
 
 export type DynamicChartLine = {

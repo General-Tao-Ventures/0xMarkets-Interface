@@ -18,7 +18,7 @@ import { PriceSnapshot, usePriceSnapshots } from "domain/synthetics/markets/useP
 import { TokensData, getMidPrice } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
 import { useLocalizedMap } from "lib/i18n";
-import { bigintToNumber, formatPercentage, formatUsdPrice, parseValue, PRECISION_DECIMALS } from "lib/numbers";
+import { bigintToNumber, formatPercentage, formatUsdPrice, numberToBigint, PRECISION_DECIMALS } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { usePrevious } from "lib/usePrevious";
 import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
@@ -59,8 +59,9 @@ const getGraphValue = ({
   const apy = isGlv
     ? getByKey(glvApyInfoData, glvOrMarketInfo.glvTokenAddress)
     : getByKey(marketsTokensApyData, glvOrMarketInfo.marketTokenAddress);
-  const tokenPrice = marketTokensData?.[address]?.prices.minPrice;
-  const marketPerformance = performance[address.toLowerCase()];
+  // prices may be missing while RPCs are rate-limited; optional-chain the whole path
+  const tokenPrice = marketTokensData?.[address]?.prices?.minPrice;
+  const marketPerformance = address ? performance[address.toLowerCase()] : undefined;
   const valuesMap: Record<MarketGraphType, string | undefined> = {
     performance: marketPerformance
       ? formatPercentage(marketPerformance, { bps: false, signed: true, showPlus: false })
@@ -175,7 +176,8 @@ export function MarketGraphs({ glvOrMarketInfo }: { glvOrMarketInfo: GlvOrMarket
               })}
               label={graphTitleLabelMap[marketGraphType]}
               valueClassName={cx("normal-nums", {
-                "text-green-300": marketGraphType === "performance" && performance[address.toLowerCase()] > 0n,
+                "text-green-300":
+                  marketGraphType === "performance" && (performance[address.toLowerCase()] ?? 0n) > 0n,
               })}
             />
             {!isMobile ? <div className="ml-auto">{poolsTabs}</div> : null}
@@ -218,31 +220,39 @@ export const formatPerformanceBps = (performance: number): string => {
 };
 
 const valueFormatter = (marketGraphType: MarketGraphType) => (value: number) => {
-  if (value === 0) {
+  if (!Number.isFinite(value) || value === 0) {
     return "0";
   }
 
-  const valueMap: Record<MarketGraphType, string> = {
-    performance: formatPerformanceBps(value),
-    price: formatUsdPrice(parseValue(value.toString(), USD_DECIMALS) ?? 0n) || "",
-    feeApr: `${Number(value.toFixed(2))}%`,
-  };
-
-  return valueMap[marketGraphType];
+  // Compute only the active branch — building a full Record eagerly used to call
+  // parseValue(value.toString()) for tiny floats ("3e-30") and crash Performance too.
+  switch (marketGraphType) {
+    case "performance":
+      return formatPerformanceBps(value);
+    case "price":
+      try {
+        return formatUsdPrice(numberToBigint(value, USD_DECIMALS)) || "";
+      } catch {
+        return "";
+      }
+    case "feeApr":
+      return `${Number(value.toFixed(2))}%`;
+  }
 };
 
 const axisValueFormatter = (marketGraphType: MarketGraphType) => (value: number) => {
-  if (value === 0) {
+  if (!Number.isFinite(value) || value === 0) {
     return "0";
   }
 
-  const valueMap: Record<MarketGraphType, string> = {
-    performance: formatPerformanceBps(value),
-    price: value.toString(),
-    feeApr: `${Number(value.toFixed(2))}%`,
-  };
-
-  return valueMap[marketGraphType];
+  switch (marketGraphType) {
+    case "performance":
+      return formatPerformanceBps(value);
+    case "price":
+      return value.toLocaleString(undefined, { maximumSignificantDigits: 6 });
+    case "feeApr":
+      return `${Number(value.toFixed(2))}%`;
+  }
 };
 
 const CHART_CURSOR_PROPS = {
@@ -266,34 +276,57 @@ const GraphChart = ({
 }) => {
   const performanceData = useMemo(
     () =>
-      performanceSnapshots.map((snapshot) => ({
-        snapshotTimestamp: new Date(snapshot.snapshotTimestamp * 1000),
-        value: bigintToNumber(snapshot.performance, PRECISION_DECIMALS),
-      })),
+      performanceSnapshots.flatMap((snapshot) => {
+        const snapshotTimestamp = new Date(Number(snapshot.snapshotTimestamp) * 1000);
+        if (Number.isNaN(snapshotTimestamp.getTime())) return [];
+        return [
+          {
+            snapshotTimestamp,
+            value: bigintToNumber(snapshot.performance, PRECISION_DECIMALS),
+          },
+        ];
+      }),
     [performanceSnapshots]
   );
 
   const priceData = useMemo(
     () =>
-      priceSnapshots.map((snapshot) => ({
-        snapshotTimestamp: new Date(snapshot.snapshotTimestamp * 1000),
-        value: bigintToNumber(
-          getMidPrice({
+      priceSnapshots.flatMap((snapshot) => {
+        const snapshotTimestamp = new Date(Number(snapshot.snapshotTimestamp) * 1000);
+        if (Number.isNaN(snapshotTimestamp.getTime())) return [];
+        try {
+          const mid = getMidPrice({
             minPrice: BigInt(snapshot.minPrice),
             maxPrice: BigInt(snapshot.maxPrice),
-          }),
-          USD_DECIMALS
-        ),
-      })),
+          });
+          // Skip dust / unset oracle snapshots that become ~0 floats on the chart.
+          if (mid <= 0n) return [];
+          const value = bigintToNumber(mid, USD_DECIMALS);
+          if (!Number.isFinite(value) || value <= 0) return [];
+          return [{ snapshotTimestamp, value }];
+        } catch {
+          return [];
+        }
+      }),
     [priceSnapshots]
   );
 
   const apyData = useMemo(
     () =>
-      aprSnapshots.map((snapshot) => ({
-        snapshotTimestamp: new Date(snapshot.snapshotTimestamp * 1000),
-        value: bigintToNumber(BigInt(snapshot.aprByFee) + BigInt(snapshot.aprByBorrowingFee), 28),
-      })),
+      aprSnapshots.flatMap((snapshot) => {
+        const snapshotTimestamp = new Date(Number(snapshot.snapshotTimestamp) * 1000);
+        if (Number.isNaN(snapshotTimestamp.getTime())) return [];
+        try {
+          return [
+            {
+              snapshotTimestamp,
+              value: bigintToNumber(BigInt(snapshot.aprByFee) + BigInt(snapshot.aprByBorrowingFee), 28),
+            },
+          ];
+        } catch {
+          return [];
+        }
+      }),
     [aprSnapshots]
   );
 
@@ -312,11 +345,45 @@ const GraphChart = ({
       price: priceData,
       feeApr: apyData,
     };
+    const next = dataMap[marketGraphType];
+    const sourceLen =
+      marketGraphType === "performance"
+        ? performanceSnapshots.length
+        : marketGraphType === "price"
+          ? priceSnapshots.length
+          : aprSnapshots.length;
 
-    if (prevMarketGraphType !== marketGraphType || dataMap[marketGraphType].length > 0) {
-      setData(dataMap[marketGraphType]);
+    // Keep prior points only while a refetch has not returned yet (sourceLen === 0 and
+    // next empty). Once snapshots arrive — including all-dust filtered to [] — update
+    // so we don't keep a stale previous period on the chart.
+    if (
+      prevMarketGraphType !== marketGraphType ||
+      next.length > 0 ||
+      sourceLen > 0
+    ) {
+      setData(next);
     }
-  }, [performanceData, priceData, apyData, marketGraphType, prevMarketGraphType]);
+  }, [
+    performanceData,
+    priceData,
+    apyData,
+    marketGraphType,
+    prevMarketGraphType,
+    performanceSnapshots.length,
+    priceSnapshots.length,
+    aprSnapshots.length,
+  ]);
+
+  if (data.length === 0) {
+    return (
+      <div
+        className="text-body-small text-typography-secondary flex items-center justify-center"
+        style={{ height: isMobile ? 260 : 300 }}
+      >
+        {t`No data for this period`}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -380,7 +447,15 @@ const GraphTooltip = ({ active, payload, formatValue }: any) => {
       shadow-lg`}
       >
         <span className=" text-typography-secondary">{format(item.snapshotTimestamp.getTime(), "MMMM dd, yyyy")}</span>
-        <span className="numbers">{formatValue(item.value)}</span>
+        <span className="numbers">
+          {(() => {
+            try {
+              return formatValue(item.value);
+            } catch {
+              return "—";
+            }
+          })()}
+        </span>
       </div>
     );
   }

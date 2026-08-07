@@ -1,6 +1,11 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+# Keep locale catalogs in sync with source Trans/t macros, then stage them so
+# commits can't land with stale .po files (which show as hash IDs like "nd5Bji"
+# in production builds that strip inline message fallbacks).
 yarn lingui:generate
+git add src/locales/*/messages.po
+
 yarn lint-staged
 yarn tscheck

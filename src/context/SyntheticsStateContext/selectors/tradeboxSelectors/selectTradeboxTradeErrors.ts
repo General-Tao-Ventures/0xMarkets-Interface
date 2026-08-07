@@ -24,6 +24,7 @@ import {
   selectTradeboxTradeRatios,
   selectTradeboxTriggerPrice,
   selectTradeboxIsStakeOrUnstake,
+  selectTradeboxMaxLeverage,
 } from "context/SyntheticsStateContext/selectors/tradeboxSelectors";
 import { createSelector } from "context/SyntheticsStateContext/utils";
 import {
@@ -89,6 +90,7 @@ export const selectTradeboxIncreaseTradeError = createSelector((q) => {
   const nextLeverageWithoutPnl = q(selectTradeboxNextLeverageWithoutPnl);
   const numberOfParts = q(selectTradeboxTwapNumberOfParts);
   const chainId = q(selectChainId);
+  const maxLeverageForTradeBps = q(selectTradeboxMaxLeverage);
 
   return getIncreaseError({
     marketInfo,
@@ -118,6 +120,7 @@ export const selectTradeboxIncreaseTradeError = createSelector((q) => {
     isTwap,
     minPositionSizeUsd,
     chainId,
+    maxLeverageForTradeBps,
   });
 });
 

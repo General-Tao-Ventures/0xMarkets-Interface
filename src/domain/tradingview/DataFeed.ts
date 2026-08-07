@@ -53,7 +53,22 @@ let metricsIsFirstDrawTime = true;
 const V1_UPDATE_INTERVAL = 1000;
 const V2_UPDATE_INTERVAL = 1000;
 
-const PREFETCH_CANDLES_COUNT = 300;
+const PREFETCH_CANDLES_COUNT = 400;
+/** Max chart lookback — matches keeper Benchmarks fill window (~3 years). */
+const MAX_HISTORY_SECONDS = 3 * 365 * 24 * 60 * 60;
+/** Per-request bar cap (paginated; full 3y of 1h is fetched across scroll-back). */
+const MAX_BARS_PER_REQUEST = 12_000;
+
+/** First paint: enough for ~12m default viewport; scroll-back loads older history. */
+function minBarsForFirstLoad(resolution: ResolutionString): number {
+  if (resolution === "1D" || resolution === "1W" || resolution === "1M") return 400;
+  if (resolution === "60" || resolution === "240") return 800;
+  return 0;
+}
+
+function toUnixSeconds(ts: number): number {
+  return ts > 1e12 ? Math.floor(ts / 1000) : Math.floor(ts);
+}
 
 export class DataFeed extends EventTarget implements IBasicDataFeed {
   private subscriptions: Record<string, { destroy: () => void }> = {};
@@ -110,9 +125,11 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     const prefix = visualMultiplier !== 1 ? getTokenVisualMultiplier(token) : "";
     const isReversedPair = symbolName === "JPY";
+    // Prefer baseSymbol for chart title (e.g. WBTC → BTC-USD); ticker stays the real symbol for data.
+    const displaySymbol = token.baseSymbol || symbolName;
     const pairName = isReversedPair
-      ? `USD-${prefix}${symbolName}`
-      : `${prefix}${symbolName}-USD`;
+      ? `USD-${prefix}${displaySymbol}`
+      : `${prefix}${displaySymbol}-USD`;
 
     const symbolInfo: LibrarySymbolInfo = {
       unit_id: visualMultiplier.toString(),
@@ -146,17 +163,22 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback
   ): Promise<void> {
-    const to = periodParams.to;
+    const to = toUnixSeconds(periodParams.to);
 
     const isFirstDraw = metricsIsFirstDrawTime;
     metricsIsFirstDrawTime = false;
 
-    const offset = Math.trunc(Math.max((Date.now() / 1000 - to) / RESOLUTION_TO_SECONDS[resolution], 0));
+    const periodSeconds = RESOLUTION_TO_SECONDS[resolution];
     // During a first data request we fetch regular amount of candles
     const countBack = periodParams.firstDataRequest
-      ? periodParams.countBack
+      ? Math.max(periodParams.countBack, minBarsForFirstLoad(resolution))
       : // But for subsequent requests we aggressively fetch more candles so that user can scroll back in time faster
         Math.max(periodParams.countBack * 2, 500);
+
+    const oldestAllowedSec = Math.floor(Date.now() / 1000) - MAX_HISTORY_SECONDS;
+    const windowTo = to;
+    const windowFrom = Math.max(oldestAllowedSec, windowTo - countBack * periodSeconds);
+    const fetchCount = Math.min(countBack, MAX_BARS_PER_REQUEST);
 
     const token = getTokenBySymbol(this.chainId, symbolInfo.ticker!);
     const isStable = token.isStable;
@@ -164,10 +186,13 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     let bars: FromOldToNewArray<Bar> = [];
     try {
       if (!isStable) {
-        bars = await this.fetchCandles(symbolInfo.ticker!, resolution, countBack + offset);
+        bars = await this.fetchCandles(symbolInfo.ticker!, resolution, fetchCount, {
+          from: windowFrom,
+          to: windowTo,
+        });
       } else {
         const currentCandleTime = getCurrentCandleTime(SUPPORTED_RESOLUTIONS_V2[resolution]);
-        bars = this.getStableCandles(currentCandleTime, resolution, countBack + offset);
+        bars = this.getStableCandles(currentCandleTime, resolution, fetchCount);
       }
     } catch (e) {
       onError(String(e));
@@ -185,18 +210,21 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       return;
     }
 
-    const barsToReturn: FromOldToNewArray<Bar> = [];
     const visualMultiplier = parseInt(symbolInfo.unit_id ?? "1");
+    // Filter (don't rely on break) so a mis-ordered payload can't truncate history.
+    const barsToReturn: FromOldToNewArray<Bar> = bars
+      .filter((bar) => toUnixSeconds(bar.time) <= to)
+      .map((bar) => multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier));
 
-    for (const bar of bars) {
-      if (bar.time <= to) {
-        barsToReturn.push(multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier));
-      } else {
-        break;
-      }
-    }
-
-    onResult(barsToReturn, { noData: offset + countBack >= 10_000 || barsToReturn.length < countBack });
+    const oldestReturnedSec =
+      barsToReturn.length > 0
+        ? toUnixSeconds(barsToReturn[0].time > 1e12 ? barsToReturn[0].time / 1000 : barsToReturn[0].time)
+        : to;
+    const reachedHistoryLimit = windowFrom <= oldestAllowedSec || oldestReturnedSec <= oldestAllowedSec;
+    // Only end history when we hit the 12m floor or the API clearly ran out for this window.
+    onResult(barsToReturn, {
+      noData: barsToReturn.length === 0 || (barsToReturn.length < countBack && reachedHistoryLimit),
+    });
 
     // Seed lastBar for the oracle price bridge so it can push ticks immediately.
     // Only seed if the bar belongs to the CURRENT candle period. Seeding from a
@@ -405,10 +433,12 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     symbol: string,
     resolution: ResolutionString,
     count: number,
-    isPrefetch = false
+    optsOrPrefetch: { from?: number; to?: number } | boolean = false
   ): Promise<FromOldToNewArray<Bar>> {
+    const isPrefetch = optsOrPrefetch === true;
+    const rangeOpts = typeof optsOrPrefetch === "object" ? optsOrPrefetch : undefined;
     const prefetchKey = `${symbol}-${resolution}`;
-    if (prefetchKey in this.prefetchedBarsPromises && !isPrefetch && metricsIsFirstLoadTime) {
+    if (prefetchKey in this.prefetchedBarsPromises && !isPrefetch && !rangeOpts && metricsIsFirstLoadTime) {
       metricsIsFirstLoadTime = false;
       const promise = this.prefetchedBarsPromises[prefetchKey];
       delete this.prefetchedBarsPromises[prefetchKey];
@@ -431,7 +461,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
     metrics.startTimer("candlesLoad");
 
-    count = Math.min(count, 10000);
+    count = Math.min(count, MAX_BARS_PER_REQUEST);
 
     let success = true;
     let result: FromOldToNewArray<Bar> = [];
@@ -459,7 +489,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     } else {
       result = await Promise.race([
         this.oracleFetcher
-          .fetchOracleCandles(symbol, SUPPORTED_RESOLUTIONS_V2[resolution], count)
+          .fetchOracleCandles(symbol, SUPPORTED_RESOLUTIONS_V2[resolution], count, rangeOpts)
           .then((bars) => bars.slice().reverse()),
         sleep(5000).then(() => Promise.reject("Oracle candles timeout")),
       ])

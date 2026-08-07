@@ -63,15 +63,18 @@ function App() {
 
   let app = (
     <>
-      <div className="bg-yellow-500/20 text-center text-16 font-normal text-yellow-300 py-12 px-16">
-        You are using the testnet environment. Funds are not real. Please report any issues/bugs in{" "}
-        <a href="https://discord.gg/d87vC7uaNx" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+      <div className="bg-yellow-500/20 px-16 py-12 text-center text-16 font-normal text-yellow-300">
+        You're early. This is the 0xMarkets <span className="font-medium">BETA</span> on Base Mainnet.{" "}
+        <span className="font-medium">Funds and trades are real</span>. Any issues or feedback — please tell us in{" "}
+        <a
+          href="https://discord.gg/zGkW2kTsGM"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-white"
+        >
           Discord
         </a>
         .{" "}
-        <a href="https://faucet.0xMarkets.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-          Get testnet tokens
-        </a>
       </div>
       <KeeperStatusBanner />
       <AppRoutes />

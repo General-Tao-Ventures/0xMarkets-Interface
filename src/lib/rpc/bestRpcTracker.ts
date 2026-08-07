@@ -8,6 +8,7 @@ import { Address } from "viem";
 
 import {
   AnyChainId,
+  BASE_MAINNET,
   BASE_SEPOLIA,
   LOCALHOST,
   CONTRACTS_CHAIN_IDS,
@@ -42,6 +43,7 @@ export const RPC_TRACKER_UPDATE_EVENT = "rpc-tracker-update-event";
 const PROBE_SAMPLE_FIELD = "minCollateralFactor";
 // Markets used for `PROBE_SAMPLE_FIELD` reading
 const PROBE_SAMPLE_MARKET: Record<ContractsChainId, Address> = {
+  [BASE_MAINNET]: "0xF8EEf96D4af581d60d394AFD613ea75C502945dc", // EUR/USD mainnet GM
   [BASE_SEPOLIA]: "0x0ec8334dAc31DdFC08a7ab35F3dB24ef94889554", // EUR/USD
   [LOCALHOST]: "0x0000000000000000000000000000000000000000", // Placeholder - add actual market address after deployment
 };

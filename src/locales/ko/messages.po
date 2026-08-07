@@ -177,6 +177,10 @@ msgstr ""
 msgid "0xM can be sold for {0} and {1} for this market up to the specified selling caps. The remaining tokens in the pool are reserved for currently open positions."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Weekly rewards"
+msgstr ""
+
 #: src/components/TradeHistory/keys.ts
 msgid "Cancel Limit Swap"
 msgstr "지정가 스왑 취소"
@@ -489,6 +493,10 @@ msgstr "{actionsCount, plural, one {주문} other {# 주문}}"
 msgid "Buy APE on Arbitrum with <0>Camelot</0>."
 msgstr "<0>Camelot</0>으로 Arbitrum에서 APE 구매."
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "≤ {0}"
+msgstr ""
+
 #: landing/src/pages/Home/LeaveHomepageRedirectModal/LeaveHompageRedirectModal.tsx
 #: src/components/ModalViews/RedirectModal.tsx
 msgid "Don't show this message again for 30 days."
@@ -733,6 +741,10 @@ msgstr "이미 사용된 코드입니다"
 #: src/components/TVChartContainer/constants.ts
 msgid "SL - Short Dec."
 msgstr "SL - 숏 감소"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Updated {0}"
+msgstr ""
 
 #: src/components/SettingsModal/SettingsModal.tsx
 msgid "Slippage should be less than -5%"
@@ -1448,6 +1460,10 @@ msgstr "소개 보수 분배 내역"
 msgid "Accrued Negative Funding Fee"
 msgstr "누적 음의 펀딩 수수료"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "0xMarkets LP"
+msgstr ""
+
 #: src/components/TradeFeesRow/TradeFeesRow.tsx
 msgid "of close fee"
 msgstr "종료 수수료의"
@@ -1468,9 +1484,8 @@ msgstr "세부 사항 표시"
 msgid "Driven by our community"
 msgstr ""
 
-#: src/components/AppHeader/AppHeaderUser.tsx
-#: src/components/AppHeader/AppHeaderUser.tsx
 #: src/components/Footer/constants.tsx
+#: src/components/SideNav/SideNav.tsx
 msgid "Faucet"
 msgstr ""
 
@@ -1587,6 +1602,10 @@ msgstr "열려있는 포지션이 없습니다. 열려있는 포지션이 없는
 #: src/pages/Dashboard/OverviewCard.tsx
 msgid "Short Positions"
 msgstr "숏 포지션"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "with a {0}-day lock"
+msgstr ""
 
 #: landing/src/pages/Home/SocialSection/SocialSlider.tsx
 msgid "<0>Have to keep an eye on <1>@GMX_IO</1> here. While all of DeFi is in shambles, GMX continues to show impressive sustained performance in users, AUM, volume/fees, open interest, and utilization of capital. Best place to swap between major assets on Arbitrum and exposure to the Arb airdrop</0>"
@@ -1902,6 +1921,7 @@ msgstr ""
 #. Total Value Locked
 #: src/components/MarketsList/MarketsList.tsx
 #: src/pages/Dashboard/OverviewCard.tsx
+#: src/pages/Pools/CarthaLpCard.tsx
 msgid "TVL"
 msgstr "TVL"
 
@@ -2298,6 +2318,10 @@ msgstr ""
 msgid "Cancel Deposit"
 msgstr ""
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Leverage tiers"
+msgstr ""
+
 #: src/components/MarketStats/MarketGraphs.tsx
 msgid "Fee APR"
 msgstr "수수료 APR"
@@ -2387,6 +2411,10 @@ msgstr "esGMX (IOU) 토큰은 양도 가능합니다. 지갑에 토큰을 추가
 msgid "Generating session..."
 msgstr "세션 생성 중..."
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Next epoch in {0}"
+msgstr ""
+
 #: src/pages/LeaderboardPage/components/TestnetBanner.tsx
 msgid "Get Testnet Tokens"
 msgstr ""
@@ -2463,8 +2491,16 @@ msgstr "레버리지"
 msgid "Available to Trade Assets"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY by lock period"
+msgstr ""
+
 #: landing/src/pages/Home/LiqiuditySection/PoolCard.tsx
 msgid "Annually"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} α"
 msgstr ""
 
 #: src/components/GmxAccountModal/keys.ts
@@ -2678,6 +2714,10 @@ msgstr "수령 가능한 가격 영향 리베이트.<0/><1/><2>더 읽기</2>."
 #: src/components/MarketNetFee/MarketNetFee.tsx
 msgid "{longOrShort} positions {fundingAction} a funding fee of {fundingRate} per hour and {borrowAction} a borrow fee of {borrowRate} per hour."
 msgstr "{longOrShort} 포지션은 시간당 {fundingRate} 자금 수수료를 {fundingAction}하고 시간당 {borrowRate} 차입 수수료를 {borrowAction}합니다."
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage is {activeTierMaxLeverage}x at this position size. Reduce size or post more margin for higher leverage."
+msgstr ""
 
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
 #: src/components/OrderList/filters/OrderTypeFilter.tsx
@@ -2894,8 +2934,6 @@ msgstr "주문 취소"
 msgid "Claiming position price impact fees failed"
 msgstr ""
 
-#: src/components/GmList/GmListItem.tsx
-#: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmxAccountModal/MainView.tsx
@@ -3381,6 +3419,10 @@ msgstr "최적"
 
 #: src/components/InterviewModal/InterviewModal.tsx
 msgid "Anonymous chat with 0xMarkets"
+msgstr ""
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Earn up to"
 msgstr ""
 
 #: src/components/GmSwap/GmFees/GmFees.tsx
@@ -3891,6 +3933,10 @@ msgstr "스프레드"
 msgid "This position was liquidated as the max. leverage of {formattedMaxLeverage} was exceeded when taking into account fees."
 msgstr "수수료를 고려했을 때 최대 레버리지 {formattedMaxLeverage}가 초과되어 해당 포지션이 청산되었습니다."
 
+#: src/components/TradeBox/TradeBox.tsx
+msgid "> {0}"
+msgstr ""
+
 #: src/components/TradeBox/hooks/useTradeButtonState.tsx
 msgid "Swap {0}"
 msgstr "{0} 스왑"
@@ -3916,6 +3962,10 @@ msgstr "로딩 중..."
 
 #: landing/src/pages/Home/HeroSection/Features.tsx
 msgid "Use your preferred token to pay and collateralize your positions"
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "Max leverage tightens as your position size grows."
 msgstr ""
 
 #: src/components/TradeHistory/TradeHistoryRow/utils/shared.ts
@@ -3999,6 +4049,10 @@ msgstr "<0>{fromTokenText} </0>{fromTokenIcon}<1>에서 </1>{toTokenIcon}"
 #: src/components/TradeboxPoolWarnings/TradeboxPoolWarnings.tsx
 msgid "Insufficient liquidity in any {0}/USD market pools for your order."
 msgstr "주문에 대한 {0}/USD 시장 풀의 유동성이 부족합니다."
+
+#: src/components/GmList/GmList.tsx
+msgid "Manage Liquidity"
+msgstr ""
 
 #: src/pages/LeaderboardPage/components/LeaderboardAccountsTable.tsx
 #: src/pages/LeaderboardPage/components/LeaderboardPositionsTable.tsx
@@ -5109,6 +5163,10 @@ msgstr "추천 코드"
 msgid "{0} and {1} can be used to buy 0xM for this market up to the specified buying caps."
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} positions"
+msgstr ""
+
 #. Filter option for tokens favorites
 #: src/context/TokensFavoritesContext/TokensFavoritesContextProvider.tsx
 msgid "All Markets"
@@ -5160,8 +5218,6 @@ msgid "Deactivate 1CT (One-Click Trading)"
 msgstr "1CT(원클릭 거래) 비활성화"
 
 #: src/components/AddressDropdown/AddressDropdownWithMultichain.tsx
-#: src/components/GmList/GmListItem.tsx
-#: src/components/GmList/GmListItem.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmSwap/GmSwapBox/GmSwapBoxHeader.tsx
 #: src/components/GmxAccountModal/DepositView.tsx
@@ -5551,6 +5607,10 @@ msgstr "텔레그램 계정"
 
 #: src/pages/Dashboard/PlatformStats.tsx
 msgid "Epoch Fees"
+msgstr ""
+
+#: src/components/TradeBox/TradeBox.tsx
+msgid "For positions up to {0}, max leverage is {activeTierMaxLeverage}x. Larger positions trigger lower caps."
 msgstr ""
 
 #: src/components/GmSwap/GmSwapBox/GmDepositWithdrawalBox/useGmSwapSubmitState.tsx
@@ -5970,6 +6030,10 @@ msgstr "문자, 숫자 및 언더스코어만 허용됩니다."
 msgid "High TWAP network fee"
 msgstr ""
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "APY"
+msgstr ""
+
 #: src/components/Errors/errorToasts.tsx
 #: src/components/Errors/errorToasts.tsx
 msgid "There is not enough {0} in your account on {1} to send this transaction.<0/><1/><2>Buy or Transfer {2} to {3}</2>"
@@ -6165,6 +6229,10 @@ msgstr "{prefix} <0>{text}</0>"
 msgid "Failed to update settings"
 msgstr "설정 업데이트 실패"
 
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "Liquidity providers"
+msgstr ""
+
 #: src/domain/synthetics/markets/claimFundingFeesTxn.ts
 msgid "Funding claimed."
 msgstr ""
@@ -6288,6 +6356,10 @@ msgstr ""
 #: src/pages/PoolsDetails/PoolsDetails.tsx
 msgid "About"
 msgstr "소개"
+
+#: src/pages/Pools/CarthaLpCard.tsx
+msgid "{0} next epoch"
+msgstr ""
 
 #: src/domain/synthetics/claims/useClaimFundsTransactionCallback.tsx
 msgid "This may take a few minutes."

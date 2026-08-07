@@ -1,7 +1,8 @@
 {
   "rewrites": [
     { "source": "/api/keeper/:path*", "destination": "/api/keeper-proxy?_path=:path*" },
-    { "source": "/api/order-keeper/:path*", "destination": "/api/order-keeper-proxy?_path=:path*" }
+    { "source": "/api/order-keeper/:path*", "destination": "/api/order-keeper-proxy?_path=:path*" },
+    { "source": "/api/squid/:path*", "destination": "/api/squid-proxy?_path=:path*" }
   ],
   "headers": [
     {
@@ -24,6 +25,10 @@
     "api/order-keeper-proxy.ts": {
       "memory": 128,
       "maxDuration": 10
+    },
+    "api/squid-proxy.ts": {
+      "memory": 128,
+      "maxDuration": 15
     },
     "api/upload.ts": {
       "memory": 256,

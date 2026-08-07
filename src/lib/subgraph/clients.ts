@@ -1,11 +1,12 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
-import { BASE_SEPOLIA } from "config/chains";
+import { BASE_MAINNET, BASE_SEPOLIA } from "config/chains";
 
 import { createClient } from "./utils";
 
 type GraphClient = ApolloClient<any>;
 
+export const baseMainnetSubsquidClient = createClient(BASE_MAINNET, "subsquid");
 export const baseSepoliaSubsquidClient = createClient(BASE_SEPOLIA, "subsquid");
 
 export const chainlinkClient: GraphClient | null = null;
@@ -13,6 +14,9 @@ export const chainlinkClient: GraphClient | null = null;
 export const REFERRAL_SUPPORTED_CHAIN_IDS: number[] = [];
 
 export function getSubsquidGraphClient(chainId: number): GraphClient | null {
+  if (chainId === BASE_MAINNET) {
+    return baseMainnetSubsquidClient;
+  }
   if (chainId === BASE_SEPOLIA) {
     return baseSepoliaSubsquidClient;
   }

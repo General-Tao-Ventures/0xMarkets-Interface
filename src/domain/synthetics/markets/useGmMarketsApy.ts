@@ -236,6 +236,15 @@ function useIncentivesBonusApr(
   return marketAndGlvTokensAPRData;
 }
 
+type ApyInfoItem = { address: string; baseApy: number };
+
+/** Normalize keeper APY payloads: array, address→info map, or missing/null. */
+function apyInfoEntries(source: ApyInfoItem[] | Record<string, { baseApy: number }> | null | undefined): [string, { baseApy: number }][] {
+  if (source == null) return [];
+  if (Array.isArray(source)) return source.map((m) => [m.address, m]);
+  return Object.entries(source);
+}
+
 export function useGmMarketsApy(
   chainId: ContractsChainId,
   srcChainId: SourceChainId | undefined,
@@ -314,17 +323,29 @@ export function useGmMarketsApy(
         return acc;
       }, {} as MarketTokensAPRData);
 
-      const marketsTokensApyData = Object.entries(apys.markets).reduce((acc, [address, { baseApy }]) => {
-        acc[address] = numberToBigint(baseApy, 30);
+      // Keeper returns ApyInfo as arrays; tolerate a legacy address→info map too.
+      // Mainnet has no GLVs, so `glvs` (and sometimes `markets`) may be missing/null.
+      // Seed every known market at 0 so Fee APY shows 0.00% instead of "..." when
+      // the keeper only has snapshots for a subset (or address casing differs).
+      const marketsTokensApyData = marketAddresses.reduce((acc, marketAddress) => {
+        acc[marketAddress] = 0n;
         return acc;
       }, {} as MarketTokensAPRData);
 
-      const avgMarketsApy =
-        Object.values(marketsTokensApyData).reduce((acc, apr) => {
-          return acc + apr;
-        }, 0n) / BigInt(marketAddresses.length);
+      const marketAddressByLower = new Map(marketAddresses.map((a) => [a.toLowerCase(), a]));
+      for (const [address, { baseApy }] of apyInfoEntries(apys.markets)) {
+        const key = marketAddressByLower.get(address.toLowerCase()) ?? address;
+        marketsTokensApyData[key] = numberToBigint(baseApy, 30);
+      }
 
-      const glvApyInfoData = Object.entries(apys.glvs).reduce((acc, [address, { baseApy }]) => {
+      const apyValues = Object.values(marketsTokensApyData);
+      const avgMarketsApy =
+        apyValues.length > 0
+          ? apyValues.reduce((acc, apr) => acc + apr, 0n) / BigInt(apyValues.length)
+          : 0n;
+
+      const glvApyEntries = apyInfoEntries(apys.glvs);
+      const glvApyInfoData = glvApyEntries.reduce((acc, [address, { baseApy }]) => {
         acc[address] = numberToBigint(baseApy, 30);
         return acc;
       }, {} as MarketTokensAPRData);

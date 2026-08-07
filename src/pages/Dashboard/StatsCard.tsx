@@ -1,15 +1,16 @@
 import { Trans } from "@lingui/macro";
 
-import { BASE_SEPOLIA } from "config/chains";
 import { USD_DECIMALS } from "config/factors";
 import useV2Stats from "domain/synthetics/stats/useV2Stats";
+import { useChainId } from "lib/chains";
 import { formatAmountHuman } from "lib/numbers";
 
 import { AppCard, AppCardSection } from "components/AppCard/AppCard";
 import TooltipComponent from "components/Tooltip/Tooltip";
 
 export function StatsCard() {
-  const v2Overview = useV2Stats(BASE_SEPOLIA);
+  const { chainId } = useChainId();
+  const v2Overview = useV2Stats(chainId);
 
   const totalFeesUsd = v2Overview.totalFees;
   const totalVolume = v2Overview.totalVolume;

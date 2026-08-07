@@ -14,6 +14,8 @@ export type TokenOption = {
   maxShortLiquidity: bigint;
   marketTokenAddress: string;
   indexTokenAddress: string;
+  /** Needed by chooseSuitableMarket for FX display-domain Long/Short mapping (e.g. JPY). */
+  marketInfo: MarketInfo;
 };
 
 function bnClampMin(value: bigint, min: bigint) {
@@ -38,11 +40,12 @@ export function createGetMaxLongShortLiquidityPool(sortedAllMarkets: MarketInfo[
       maxShortLiquidity: bnClampMin(maxShortLiquidity, BN_ZERO),
       marketTokenAddress: marketInfo.marketTokenAddress,
       indexTokenAddress: marketInfo.indexTokenAddress,
-    };
+      marketInfo,
+    } satisfies TokenOption;
   });
 
   const groupedIndexMarkets: { [marketAddress: string]: TokenOption[] } = groupBy(
-    marketsWithMaxReservedUsd as any,
+    marketsWithMaxReservedUsd,
     (market) => market.indexTokenAddress
   );
 

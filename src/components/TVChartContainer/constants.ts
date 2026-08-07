@@ -34,8 +34,14 @@ export const chartOverridesDark: Partial<WidgetOverrides> = {
   "paneProperties.vertGridProperties.style": 2,
   "paneProperties.horzGridProperties.color": "#363A5960",
   "paneProperties.horzGridProperties.style": 2,
+  // Tighter vertical padding so candles fill more of the pane (more Y resolution).
+  "paneProperties.topMargin": 6,
+  "paneProperties.bottomMargin": 6,
+  // Leave room on the right so forex price labels (1.1528) are not clipped.
+  "paneProperties.rightMargin": 12,
   "mainSeriesProperties.priceLineColor": "#8B94B6AA",
   "scalesProperties.textColor": colors.typography["secondary"].dark,
+  "scalesProperties.fontSize": 11,
   "mainSeriesProperties.statusViewStyle.showExchange": false,
   ...createChartStyleOverrides(colors.green[500].dark, colors.red[500].dark),
 };
@@ -49,8 +55,12 @@ export const chartOverridesLight: Partial<WidgetOverrides> = {
   "paneProperties.vertGridProperties.style": 2,
   "paneProperties.horzGridProperties.color": "#E0E0E0",
   "paneProperties.horzGridProperties.style": 2,
+  "paneProperties.topMargin": 6,
+  "paneProperties.bottomMargin": 6,
+  "paneProperties.rightMargin": 12,
   "mainSeriesProperties.priceLineColor": "#6B7280AA",
   "scalesProperties.textColor": colors.typography["secondary"].light,
+  "scalesProperties.fontSize": 11,
   "mainSeriesProperties.statusViewStyle.showExchange": false,
   ...createChartStyleOverrides(colors.green[500].light, colors.red[500].light),
 };
@@ -120,6 +130,13 @@ export const defaultChartProps = {
         format: (price) => {
           const bn = numberToBigint(price, USD_DECIMALS);
           let displayDecimals = calculateDisplayDecimals(bn);
+
+          // Tokens with an explicit pricescale (e.g. EUR/GBP priceDecimals: 3 → 1000)
+          // should use that scale so the Y-axis matches resolveSymbol.
+          const pricescale = symbolInfo.pricescale;
+          if (typeof pricescale === "number" && pricescale > 100) {
+            displayDecimals = Math.max(0, Math.round(Math.log10(pricescale)));
+          }
 
           // Custom float formatting to avoid floating point precision issues like 256.999
           const roundedFloat = Math.round(price * 10 ** displayDecimals) / 10 ** displayDecimals;

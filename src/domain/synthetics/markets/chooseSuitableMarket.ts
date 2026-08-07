@@ -1,6 +1,7 @@
 import type { TokenOption } from "context/SyntheticsStateContext/selectors/tradeboxSelectors";
 import type { PositionInfo, PositionsInfoData } from "domain/synthetics/positions";
 import { TradeType } from "domain/synthetics/trade";
+import { toFxDisplayIsLong, toFxIndexIsLong } from "sdk/utils/fxDisplay";
 
 import { isMarketIndexToken } from "./utils";
 import { isLimitOrderType, OrdersInfoData } from "../orders";
@@ -108,7 +109,21 @@ export function chooseSuitableMarket({
       tradeType: TradeType.Swap,
     };
   }
-  const maxLiquidtyPool = preferredTradeType === TradeType.Long ? maxLongLiquidityPool : maxShortLiquidityPool;
+
+  const indexSymbol =
+    maxLongLiquidityPool?.marketInfo?.indexToken?.symbol ?? maxShortLiquidityPool?.marketInfo?.indexToken?.symbol;
+
+  const preferredIndexIsLong =
+    preferredTradeType === TradeType.Long || preferredTradeType === TradeType.Short
+      ? toFxIndexIsLong(preferredTradeType === TradeType.Long, indexSymbol)
+      : undefined;
+
+  const maxLiquidtyPool =
+    preferredIndexIsLong === undefined
+      ? maxLongLiquidityPool
+      : preferredIndexIsLong
+        ? maxLongLiquidityPool
+        : maxShortLiquidityPool;
 
   if (preferredTradeType === "largestPosition" && positionsInfo) {
     let largestLongPositionOrOrder = getLargestRelatedExistingPositionOrOrder({
@@ -149,7 +164,14 @@ export function chooseSuitableMarket({
       largestPositionOrOrder = largestLongPositionOrOrder || largestShortPositionOrOrder;
     }
 
-    const largestPositionTradeType = largestPositionOrOrder?.entity.isLong ? TradeType.Long : TradeType.Short;
+    const entitySymbol =
+      largestPositionOrOrder?.type === "position"
+        ? largestPositionOrOrder.entity.indexToken.symbol
+        : "indexToken" in largestPositionOrOrder!.entity
+          ? largestPositionOrOrder!.entity.indexToken?.symbol
+          : indexSymbol;
+    const displayIsLong = toFxDisplayIsLong(Boolean(largestPositionOrOrder?.entity.isLong), entitySymbol);
+    const largestPositionTradeType = displayIsLong ? TradeType.Long : TradeType.Short;
 
     return {
       indexTokenAddress,
@@ -171,10 +193,11 @@ export function chooseSuitableMarket({
 
   const largestPositionOrOrder =
     positionsInfo &&
+    preferredIndexIsLong !== undefined &&
     getLargestRelatedExistingPositionOrOrder({
       positionsInfo,
       ordersInfo,
-      isLong: preferredTradeType === TradeType.Long,
+      isLong: preferredIndexIsLong,
       indexTokenAddress,
     });
 

@@ -5,13 +5,35 @@ import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
-import { defineConfig, type PluginOption } from "vite";
+import { defineConfig, loadEnv, type PluginOption } from "vite";
 import { analyzer } from "vite-bundle-analyzer";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { BREAKPOINTS } from "./src/lib/breakpoints";
 
+/** Normalize SQUID_URL so `/api/squid/graphql` never becomes `/graphql/graphql`. */
+function squidProxyTarget(raw: string): string {
+  try {
+    const url = new URL(raw);
+    let pathname = url.pathname.replace(/\/+$/, "") || "";
+    if (pathname.endsWith("/graphql")) {
+      pathname = pathname.slice(0, -"/graphql".length);
+    }
+    url.pathname = pathname || "/";
+    return url.toString().replace(/\/$/, "") || url.origin;
+  } catch {
+    return raw.replace(/\/graphql\/?$/, "");
+  }
+}
+
 export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const keeperUrl = env.KEEPER_URL || "https://keeper.0xmarkets.io";
+  const orderKeeperUrl = env.ORDER_KEEPER_URL || "http://127.0.0.1:37018";
+  // Default to the GCP mainnet Squid (same as api/squid-proxy.ts) so local
+  // yarn-dev history/APR work without a local indexer. Override with SQUID_URL.
+  const squidUrl = squidProxyTarget(env.SQUID_URL || "http://34.10.239.169:4350");
+
   return {
     worker: {
       format: "es",
@@ -84,14 +106,19 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api/keeper": {
-          target: "http://142.93.203.222:37017",
+          target: keeperUrl,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/keeper/, ""),
         },
         "/api/order-keeper": {
-          target: "http://localhost:37018",
+          target: orderKeeperUrl,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/order-keeper/, ""),
+        },
+        "/api/squid": {
+          target: squidUrl,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/squid/, ""),
         },
       },
     },

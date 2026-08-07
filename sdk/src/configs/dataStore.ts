@@ -60,6 +60,7 @@ export const MIN_COLLATERAL_FACTOR_FOR_OPEN_INTEREST_MULTIPLIER_KEY = hashString
 );
 export const MIN_POSITION_SIZE_USD_KEY = hashString("MIN_POSITION_SIZE_USD");
 export const MAX_LEVERAGE_KEY = hashString("MAX_LEVERAGE");
+export const MIN_LEVERAGE_KEY = hashString("MIN_LEVERAGE");
 export const DEPOSIT_GAS_LIMIT_KEY = hashString("DEPOSIT_GAS_LIMIT");
 export const WITHDRAWAL_GAS_LIMIT_KEY = hashString("WITHDRAWAL_GAS_LIMIT");
 export const INCREASE_ORDER_GAS_LIMIT_KEY = hashString("INCREASE_ORDER_GAS_LIMIT");

@@ -1,12 +1,13 @@
 import invert from "lodash/invert";
 import mapValues from "lodash/mapValues";
 
-import { BASE_SEPOLIA, LOCALHOST, type ContractsChainId } from "config/chains";
+import { BASE_MAINNET, BASE_SEPOLIA, LOCALHOST, type ContractsChainId } from "config/chains";
 
 export const NETWORK_QUERY_PARAM = "network";
 export const VERSION_QUERY_PARAM = "v";
 
 export const NETWORK_ID_SLUGS_MAP: Record<ContractsChainId, string> = {
+  [BASE_MAINNET]: "base",
   [BASE_SEPOLIA]: "base_sepolia",
   [LOCALHOST]: "localhost",
 };

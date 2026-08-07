@@ -6,7 +6,7 @@
 */
 import { MARKETS as SDK_MARKETS } from "sdk/configs/markets";
 
-import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
+import { ContractsChainId, BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./chains";
 
 type MarketUiConfig = {
   enabled: boolean;
@@ -18,6 +18,16 @@ type MarketUiConfig = {
   When adding new markets, please add them also to the end of the list in ./sortedMarkets.ts
 */
 const MARKETS_UI_CONFIGS: Record<ContractsChainId, Record<string, MarketUiConfig>> = {
+  [BASE_MAINNET]: {
+    "0xF8EEf96D4af581d60d394AFD613ea75C502945dc": { enabled: true }, // EUR
+    "0x518B8cEEa7831a02143cEaDe3B68b0724964e0C8": { enabled: true }, // GBP
+    "0x516dE27eeb84cD7f86035a03f29187aC3b3448f4": { enabled: true }, // JPY
+    "0x2D5832AC0553752444D8c0dCfA654105Da9897c4": { enabled: true }, // GOLD
+    "0x73cc35AC21C6675eF5204078cAb42Cb5fB6c0F23": { enabled: true }, // XAG
+    "0x7D44b88a68c6222693c6aba6e7F4fd0a23393179": { enabled: true }, // WBTC
+    "0x35ecCBcAb7963Ea442D25aF1c405f8Cea27D8cF7": { enabled: true }, // WETH
+    "0xbC711DA54efD90dD424000B8fdFa886dbFfbDe9d": { enabled: true }, // TAO
+  },
   [BASE_SEPOLIA]: {
     // EUR/USD [USD0-USD0]
     "0x7054eb596aCF4fC1C0686C9B2cdAC4aE6c6D0F33": {

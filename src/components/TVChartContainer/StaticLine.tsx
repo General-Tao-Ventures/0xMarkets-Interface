@@ -1,11 +1,17 @@
 import { useEffect, useRef } from "react";
 
+import { colors } from "config/colors";
+
 import { LineStyle, StaticChartLine } from "./types";
 import type { IChartingLibraryWidget, IPositionLineAdapter } from "../../charting_library";
+
+const LONG_COLOR = colors.green[500].dark;
+const SHORT_COLOR = colors.red[500].dark;
 
 export function StaticLine({
   title,
   price,
+  isLong,
   tvWidgetRef,
 }: {
   tvWidgetRef: React.RefObject<IChartingLibraryWidget>;
@@ -30,6 +36,7 @@ export function StaticLine({
 
     function init() {
       const positionLine = chart!.createPositionLine({ disableUndo: true });
+      const lineColor = isLong ? LONG_COLOR : SHORT_COLOR;
 
       lineApi.current = positionLine;
 
@@ -41,16 +48,16 @@ export function StaticLine({
         .setLineLength(1)
         .setBodyFont(`normal 12pt "Relative", sans-serif`)
         .setBodyTextColor("#fff")
-        .setLineColor("#3a3e5e")
-        .setBodyBackgroundColor("#3a3e5e")
-        .setBodyBorderColor("#3a3e5e");
+        .setLineColor(lineColor)
+        .setBodyBackgroundColor(lineColor)
+        .setBodyBorderColor(lineColor);
     }
 
     return () => {
       lineApi.current?.remove();
       lineApi.current = undefined;
     };
-  }, [price, title, tvWidgetRef]);
+  }, [isLong, price, title, tvWidgetRef]);
 
   return null;
 }

@@ -155,7 +155,9 @@ function useFilterSortMarkets({
       indexTokensStats,
       [
         (item) => stripBlacklistedWords(item.token.name),
-        (item) => `${getTokenVisualMultiplier(item.token)}${item.token.symbol}`,
+        (item) =>
+          `${getTokenVisualMultiplier(item.token)}${item.token.baseSymbol || item.token.symbol}`,
+        (item) => item.token.baseSymbol || "",
         (item) => item.token.address,
       ],
       searchText

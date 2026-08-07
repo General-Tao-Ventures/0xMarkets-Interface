@@ -1,8 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const ORDER_KEEPER_URL = process.env.ORDER_KEEPER_URL || "http://142.93.203.222:37018";
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const orderKeeperUrl = process.env.ORDER_KEEPER_URL;
+  if (!orderKeeperUrl) {
+    return res.status(500).json({ error: "ORDER_KEEPER_URL is not configured" });
+  }
+
   const pathStr = (req.query._path as string) || "";
 
   const params = new URLSearchParams();
@@ -15,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  const target = new URL(`/${pathStr}`, ORDER_KEEPER_URL);
+  const target = new URL(`/${pathStr}`, orderKeeperUrl);
   target.search = params.toString();
 
   try {

@@ -324,6 +324,12 @@ body.dragging .ExchangeChart iframe {
   left: 0;
   right: 0;
   top: 0;
+  overflow: hidden;
+}
+
+.ExchangeChart.tv .ExchangeChart-bottom-content iframe {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .Exchange-price-tooltip {

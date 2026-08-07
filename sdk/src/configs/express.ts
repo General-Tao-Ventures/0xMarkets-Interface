@@ -2,7 +2,7 @@ import { Token } from "types/tokens";
 import { expandDecimals, USD_DECIMALS } from "utils/numbers";
 import { periodToSeconds } from "utils/time";
 
-import { ContractsChainId, BASE_SEPOLIA, LOCALHOST } from "./chains";
+import { ContractsChainId, BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./chains";
 import { getTokenBySymbol, getWrappedToken } from "./tokens";
 
 export const SUBACCOUNT_MESSAGE =
@@ -21,6 +21,7 @@ export const MIN_RELAYER_FEE_USD = 5n ** BigInt(USD_DECIMALS - 1); // 0.5$
 export const EXPRESS_EXTRA_EXECUTION_FEE_BUFFER_BPS = 1000;
 
 const GAS_PAYMENT_TOKENS: Record<ContractsChainId, string[]> = {
+  [BASE_MAINNET]: [getTokenBySymbol(BASE_MAINNET, "USDC").address, getTokenBySymbol(BASE_MAINNET, "WETH").address],
   [BASE_SEPOLIA]: [getTokenBySymbol(BASE_SEPOLIA, "USD0").address, getTokenBySymbol(BASE_SEPOLIA, "WETH").address],
   [LOCALHOST]: [getTokenBySymbol(LOCALHOST, "USD0").address, getTokenBySymbol(LOCALHOST, "WETH").address],
 };

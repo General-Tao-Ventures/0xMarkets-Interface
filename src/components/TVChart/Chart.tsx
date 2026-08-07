@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/macro";
 import { Suspense, lazy } from "react";
 
-import { isDevelopment } from "config/env";
+import { isLocal } from "config/env";
 import {
   selectTradeboxMarketInfo,
   selectTradeboxTradeFlags,
@@ -46,7 +46,10 @@ const TAB_CONTENTS = {
   ),
 };
 
-const TABS = isDevelopment() ? ["PRICE", "DEPTH", "MARKET_GRAPH"] : ["PRICE", "DEPTH"];
+// Market Graph is a swap-route debug tool (shows "Its a same token" for USDC-USDC
+// pools). Only expose it on localhost — Vercel Preview is not production host
+// so isDevelopment() is true there and was leaking this tab to QA.
+const TABS = isLocal() ? ["PRICE", "DEPTH", "MARKET_GRAPH"] : ["PRICE", "DEPTH"];
 
 const TABS_OPTIONS = TABS.map((tab) => ({
   value: tab,

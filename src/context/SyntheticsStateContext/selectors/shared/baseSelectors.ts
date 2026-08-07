@@ -5,4 +5,4 @@ import { createTradeFlags } from "sdk/utils/trade";
 export const selectTradeboxFromTokenAddress = (s: SyntheticsState) => s.tradebox.fromTokenAddress;
 export const selectTradeboxToTokenAddress = (s: SyntheticsState) => s.tradebox.toTokenAddress;
 export const selectTradeboxTradeFlags = (s: SyntheticsState) =>
-  createTradeFlags(s.tradebox.tradeType, s.tradebox.tradeMode);
+  createTradeFlags(s.tradebox.tradeType, s.tradebox.tradeMode, s.tradebox.marketInfo?.indexToken.symbol);

@@ -1,11 +1,11 @@
 import { ethers } from "ethers";
 
-import { BASIS_POINTS_DIVISOR, BASIS_POINTS_DIVISOR_BIGINT } from "config/factors";
+import { BASIS_POINTS_DIVISOR_BIGINT } from "config/factors";
+import { getUiMaxLeverageForSymbol } from "config/leverage";
 import { getBorrowingFactorPerPeriod, getFundingFactorPerPeriod } from "domain/synthetics/fees";
 import {
   MarketInfo,
   MarketsInfoData,
-  getMaxLeverageByMinCollateralFactor,
   getUsedLiquidity,
 } from "domain/synthetics/markets";
 import { TokenData, getMidPrice } from "domain/synthetics/tokens";
@@ -122,7 +122,7 @@ export function marketsInfoData2IndexTokenStatsMap(marketsInfoData: MarketsInfoD
     indexTokenStats.totalOpenInterestShort += marketInfo.shortInterestUsd;
     indexTokenStats.maxUiAllowedLeverage = Math.max(
       indexTokenStats.maxUiAllowedLeverage,
-      Math.floor(getMaxLeverageByMinCollateralFactor(marketInfo.minCollateralFactor) / 1.5 / BASIS_POINTS_DIVISOR)
+      getUiMaxLeverageForSymbol(marketInfo.indexToken.symbol, marketInfo.indexToken.baseSymbol)
     );
     if (netFeeLong > indexTokenStats.bestNetFeeLong) {
       indexTokenStats.bestNetFeeLong = netFeeLong;

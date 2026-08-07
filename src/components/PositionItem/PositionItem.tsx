@@ -25,13 +25,15 @@ import {
   PositionInfo,
   formatLeverage,
   formatLiquidationPrice,
+  formatPositionPrice,
   getEstimatedLiquidationTimeInHours,
   getNameByOrderType,
 } from "domain/synthetics/positions";
 import { TradeMode } from "domain/synthetics/trade";
 import { CHART_PERIODS } from "lib/legacy";
-import { calculateDisplayDecimals, formatBalanceAmount, formatDeltaUsd, formatUsd } from "lib/numbers";
+import { formatBalanceAmount, formatDeltaUsd, formatUsd, resolvePriceDisplayDecimals } from "lib/numbers";
 import { getPositiveOrNegativeClass } from "lib/utils";
+import { toFxDisplayIsLong, toFxDisplayPrice, toFxDisplayThresholdType } from "sdk/utils/fxDisplay";
 import { getMarketIndexName } from "sdk/utils/markets";
 
 import { AmountWithUsdBalance } from "components/AmountWithUsd/AmountWithUsd";
@@ -75,6 +77,8 @@ export function PositionItem(p: Props) {
   const isCurrentMarket = tradeboxSelectedPositionKey === p.position.key;
 
   const marketDecimals = useSelector(makeSelectMarketPriceDecimals(p.position.market.indexTokenAddress));
+  // JPY is traded/viewed as USD/JPY (~157); on-chain Long JPY ≡ Short USD/JPY.
+  const displayIsLong = toFxDisplayIsLong(p.position.isLong, p.position.indexToken.symbol);
 
   function renderNetValue() {
     return (
@@ -411,6 +415,8 @@ export function PositionItem(p: Props) {
               ? formatLiquidationPrice(p.position.liquidationPrice, {
                   displayDecimals: marketDecimals,
                   visualMultiplier: p.position.indexToken.visualMultiplier,
+                  markPrice: p.position.markPrice,
+                  indexSymbol: p.position.indexToken.symbol,
                 })
               : "..."
           }
@@ -433,6 +439,8 @@ export function PositionItem(p: Props) {
         {formatLiquidationPrice(p.position.liquidationPrice, {
           displayDecimals: marketDecimals,
           visualMultiplier: p.position.indexToken.visualMultiplier,
+          markPrice: p.position.markPrice,
+          indexSymbol: p.position.indexToken.symbol,
         }) || "..."}
       </span>
     );
@@ -440,7 +448,7 @@ export function PositionItem(p: Props) {
 
   function renderLarge() {
     const { indexName, poolName } = p.position;
-    const qaAttr = `position-item-${indexName}-${poolName}-${p.position.isLong ? "Long" : "Short"}`;
+    const qaAttr = `position-item-${indexName}-${poolName}-${displayIsLong ? "Long" : "Short"}`;
 
     return (
       <TableTr hoverable={true} data-qa={qaAttr}>
@@ -515,8 +523,8 @@ export function PositionItem(p: Props) {
               <span className={cx("muted mr-4 rounded-2 px-2 pb-1 numbers")}>
                 {formatLeverage(p.position.leverage) || "..."}
               </span>
-              <span className={cx({ positive: p.position.isLong, negative: !p.position.isLong })}>
-                {p.position.isLong ? t`Long` : t`Short`}
+              <span className={cx({ positive: displayIsLong, negative: !displayIsLong })}>
+                {displayIsLong ? t`Long` : t`Short`}
               </span>
             </div>
           </div>
@@ -558,9 +566,11 @@ export function PositionItem(p: Props) {
             t`Opening...`
           ) : (
             <span className="numbers">
-              {formatUsd(p.position.entryPrice, {
+              {formatPositionPrice(p.position.entryPrice, {
                 displayDecimals: marketDecimals,
                 visualMultiplier: p.position.indexToken.visualMultiplier,
+                markPrice: p.position.markPrice,
+                indexSymbol: p.position.indexToken.symbol,
               })}
             </span>
           )}
@@ -568,9 +578,10 @@ export function PositionItem(p: Props) {
         <TableTd>
           {/* markPrice */}
           <span className="numbers">
-            {formatUsd(p.position.markPrice, {
+            {formatPositionPrice(p.position.markPrice, {
               displayDecimals: marketDecimals,
               visualMultiplier: p.position.indexToken.visualMultiplier,
+              indexSymbol: p.position.indexToken.symbol,
             })}
           </span>
         </TableTd>
@@ -633,11 +644,11 @@ export function PositionItem(p: Props) {
               <span className="rounded-4 leading-1">{formatLeverage(p.position.leverage) || "..."}</span>
               <span
                 className={cx("Exchange-list-side", {
-                  positive: p.position.isLong,
-                  negative: !p.position.isLong,
+                  positive: displayIsLong,
+                  negative: !displayIsLong,
                 })}
               >
-                {p.position.isLong ? t`Long` : t`Short`}
+                {displayIsLong ? t`Long` : t`Short`}
               </span>
             </div>
             {p.position.pendingUpdate && <SpinnerIcon className="spin position-loading-icon" />}
@@ -702,9 +713,11 @@ export function PositionItem(p: Props) {
               <Trans>Entry Price</Trans>
             </div>
             <div className="numbers">
-              {formatUsd(p.position.entryPrice, {
+              {formatPositionPrice(p.position.entryPrice, {
                 displayDecimals: marketDecimals,
                 visualMultiplier: p.position.indexToken.visualMultiplier,
+                markPrice: p.position.markPrice,
+                indexSymbol: p.position.indexToken.symbol,
               })}
             </div>
           </div>
@@ -713,9 +726,10 @@ export function PositionItem(p: Props) {
               <Trans>Mark Price</Trans>
             </div>
             <div className="numbers">
-              {formatUsd(p.position.markPrice, {
+              {formatPositionPrice(p.position.markPrice, {
                 displayDecimals: marketDecimals,
                 visualMultiplier: p.position.indexToken.visualMultiplier,
+                indexSymbol: p.position.indexToken.symbol,
               })}
             </div>
           </div>
@@ -927,7 +941,9 @@ function PositionItemOrder({
 }
 
 function PositionItemOrderText({ order }: { order: PositionOrderInfo }) {
-  const triggerThresholdType = order.triggerThresholdType;
+  const indexSymbol = order.indexToken?.symbol;
+  const triggerThresholdType = toFxDisplayThresholdType(order.triggerThresholdType, indexSymbol);
+  const displayTrigger = toFxDisplayPrice(order.triggerPrice, indexSymbol) ?? order.triggerPrice;
   const isIncrease = isIncreaseOrderType(order.orderType);
   const isTwap = isTwapOrder(order);
 
@@ -937,10 +953,10 @@ function PositionItemOrderText({ order }: { order: PositionOrderInfo }) {
       {!isTwap && !isMarketOrderType(order.orderType) ? `: ${triggerThresholdType} ` : null}
       {!isTwap && !isMarketOrderType(order.orderType) && (
         <span className="numbers">
-          {formatUsd(order.triggerPrice, {
-            displayDecimals: calculateDisplayDecimals(
-              order.triggerPrice,
-              undefined,
+          {formatUsd(displayTrigger, {
+            displayDecimals: resolvePriceDisplayDecimals(
+              order.indexToken?.priceDecimals,
+              displayTrigger,
               order.indexToken?.visualMultiplier
             ),
             visualMultiplier: order.indexToken?.visualMultiplier,

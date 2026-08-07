@@ -53,6 +53,8 @@ import { useEthersSigner } from "lib/wallets/useEthersSigner";
 import useWallet from "lib/wallets/useWallet";
 import { ContractsChainId } from "sdk/configs/chains";
 import { getTokenVisualMultiplier } from "sdk/configs/tokens";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
+import { getMarketIndexName } from "sdk/utils/markets";
 import { getOrderKeys } from "sdk/utils/orders";
 
 import { AppHeader } from "components/AppHeader/AppHeader";
@@ -173,18 +175,21 @@ export function SyntheticsPage(p: Props) {
     if (!chartToken) return;
 
     const averagePrice = getMidPrice(chartToken.prices);
+    // Tab title follows display quote (USD/JPY ~157), not index (~0.006).
+    const displayPrice = toFxDisplayPrice(averagePrice, chartToken.symbol) ?? averagePrice;
     const currentTokenPriceStr =
-      formatUsdPrice(averagePrice, {
+      formatUsdPrice(displayPrice, {
         visualMultiplier: isSwap ? 1 : chartToken.visualMultiplier,
+        displayDecimals: chartToken.priceDecimals,
       }) || "...";
 
-    const prefix = isSwap ? "" : getTokenVisualMultiplier(chartToken);
+    const marketLabel = isSwap
+      ? `${getTokenVisualMultiplier(chartToken)}${chartToken.baseSymbol || chartToken.symbol}`
+      : chartToken.isStable
+        ? chartToken.symbol
+        : getMarketIndexName({ indexToken: chartToken, isSpotOnly: false }).replace("/", " ");
 
-    const title = getPageTitle(
-      currentTokenPriceStr +
-        ` | ${prefix}${chartToken?.symbol}${chartToken?.symbol ? " " : ""}${chartToken?.isStable ? "" : "USD"}`
-    );
-    document.title = title;
+    document.title = getPageTitle(`${currentTokenPriceStr} | ${marketLabel}`);
   }, [chartToken, isSwap]);
 
   const [, setIsCurtainOpen] = useIsCurtainOpen();

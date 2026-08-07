@@ -7,7 +7,7 @@ import { applyFactor, PRECISION } from "./numbers";
 import { getByKey } from "./objects";
 import { convertToContractTokenPrices, convertToUsd, getMidPrice } from "./tokens";
 
-const REVERSED_PAIR_SYMBOLS = new Set(["JPY"]);
+import { isFxDisplayReversedSymbol } from "./fxDisplay";
 
 export function getMarketFullName(p: {
   longToken: Token;
@@ -30,7 +30,8 @@ export function getMarketIndexName(
 
   const baseName = getMarketBaseName(p);
   const token = "indexToken" in p ? p.indexToken : p.glvToken;
-  const isReversed = p.reversed ?? REVERSED_PAIR_SYMBOLS.has(token.symbol);
+  // JPY (and friends) are shown as USD/XXX even when on-chain market.reversed is false.
+  const isReversed = Boolean(p.reversed) || isFxDisplayReversedSymbol(token.symbol);
   return isReversed ? `USD/${baseName}` : `${baseName}/USD`;
 }
 
@@ -112,7 +113,7 @@ export function getPoolUsdWithoutPnl(
   } else if (priceType === "maxPrice") {
     price = token.prices?.maxPrice;
   } else {
-    price = getMidPrice(token.prices);
+    price = token.prices ? getMidPrice(token.prices) : undefined;
   }
 
   return convertToUsd(poolAmount, token.decimals, price)!;
@@ -132,8 +133,10 @@ export function getCappedPoolPnl(p: { marketInfo: MarketInfo; poolUsd: bigint; p
 }
 
 export function getMaxLeverageByMinCollateralFactor(minCollateralFactor: bigint | undefined) {
-  if (minCollateralFactor === undefined) return 100 * BASIS_POINTS_DIVISOR;
-  if (minCollateralFactor === 0n) return 100 * BASIS_POINTS_DIVISOR;
+  // Fallback when MCF is unset. getMaxAllowedLeverage… divides by 1.5, so keep this
+  // high enough that the allowed value still clears product UI caps (200x FX).
+  if (minCollateralFactor === undefined) return 1000 * BASIS_POINTS_DIVISOR;
+  if (minCollateralFactor === 0n) return 1000 * BASIS_POINTS_DIVISOR;
 
   const x = Number(PRECISION / minCollateralFactor);
   const rounded = Math.round(x / 10) * 10;

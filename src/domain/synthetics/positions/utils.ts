@@ -1,19 +1,20 @@
 import { t } from "@lingui/macro";
 import { ethers } from "ethers";
 
-import { BASIS_POINTS_DIVISOR_BIGINT } from "config/factors";
+import { BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS } from "config/factors";
 import { MarketInfo, getCappedPoolPnl, getMarketPnl, getPoolUsdWithoutPnl } from "domain/synthetics/markets";
 import { Token } from "domain/tokens";
 import { CHART_PERIODS } from "lib/legacy";
 import {
   applyFactor,
-  calculateDisplayDecimals,
   expandDecimals,
   formatAmount,
   formatUsd,
   formatUsdPrice,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { bigMath } from "sdk/utils/bigmath";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import {
   capPositionImpactUsdByMaxPriceImpactFactor,
@@ -75,29 +76,108 @@ export function getPositionPnlUsd(p: {
   return totalPnl;
 }
 
-export function formatLiquidationPrice(
-  liquidationPrice?: bigint,
-  opts: { displayDecimals?: number; visualMultiplier?: number } = {}
+function priceAsFloat(price: bigint, visualMultiplier?: number): number {
+  return Number(formatAmount(price, USD_DECIMALS, 8, undefined, undefined, visualMultiplier));
+}
+
+/** Reject index prices that would render as "> $1B" and overflow the positions table. */
+export function isSaneIndexPrice(
+  price: bigint | undefined,
+  opts: { markPrice?: bigint; visualMultiplier?: number; maxAbs?: number } = {}
+): boolean {
+  if (price === undefined || price < 0n) {
+    return false;
+  }
+
+  const asFloat = priceAsFloat(price, opts.visualMultiplier);
+  const maxAbs = opts.maxAbs ?? 1_000_000;
+  if (!Number.isFinite(asFloat) || asFloat <= 0 || asFloat > maxAbs) {
+    return false;
+  }
+
+  if (opts.markPrice !== undefined && opts.markPrice > 0n) {
+    const markFloat = priceAsFloat(opts.markPrice, opts.visualMultiplier);
+    if (Number.isFinite(markFloat) && markFloat > 0 && (asFloat > markFloat * 100 || asFloat < markFloat / 100)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/** Format entry/mark prices; returns "NA" instead of unreadable "> $1,000,000,000" thresholds. */
+export function formatPositionPrice(
+  price?: bigint,
+  opts: {
+    displayDecimals?: number;
+    visualMultiplier?: number;
+    markPrice?: bigint;
+    /** Index token symbol — JPY etc. are shown as USD/XXX (~157) not index (~0.006). */
+    indexSymbol?: string;
+  } = {}
 ) {
-  if (liquidationPrice === undefined || liquidationPrice < 0) {
+  const displayPrice = toFxDisplayPrice(price, opts.indexSymbol);
+  const displayMark = toFxDisplayPrice(opts.markPrice, opts.indexSymbol);
+
+  if (!isSaneIndexPrice(displayPrice, { ...opts, markPrice: displayMark })) {
     return "NA";
   }
-  const priceDecimalPlaces = calculateDisplayDecimals(liquidationPrice, undefined, opts.visualMultiplier);
 
-  return formatUsd(liquidationPrice, {
-    ...opts,
-    displayDecimals: opts.displayDecimals ?? priceDecimalPlaces,
+  // Use formatUsd (not formatUsdPrice) so caller-provided market priceDecimals are honored.
+  const displayDecimals = resolvePriceDisplayDecimals(
+    opts.displayDecimals,
+    displayPrice,
+    opts.visualMultiplier
+  );
+
+  return (
+    formatUsd(displayPrice, {
+      displayDecimals,
+      visualMultiplier: opts.visualMultiplier,
+    }) ?? "NA"
+  );
+}
+
+export function formatLiquidationPrice(
+  liquidationPrice?: bigint,
+  opts: {
+    displayDecimals?: number;
+    visualMultiplier?: number;
+    markPrice?: bigint;
+    indexSymbol?: string;
+  } = {}
+) {
+  const displayLiq = toFxDisplayPrice(liquidationPrice, opts.indexSymbol);
+  const displayMark = toFxDisplayPrice(opts.markPrice, opts.indexSymbol);
+
+  if (
+    !isSaneIndexPrice(displayLiq, {
+      markPrice: displayMark,
+      visualMultiplier: opts.visualMultiplier,
+      maxAbs: 1_000_000,
+    })
+  ) {
+    return "NA";
+  }
+
+  return formatUsd(displayLiq, {
+    displayDecimals: resolvePriceDisplayDecimals(opts.displayDecimals, displayLiq, opts.visualMultiplier),
+    visualMultiplier: opts.visualMultiplier,
     maxThreshold: "1000000",
   });
 }
 
-export function formatAcceptablePrice(acceptablePrice?: bigint, opts: { visualMultiplier?: number } = {}) {
+export function formatAcceptablePrice(
+  acceptablePrice?: bigint,
+  opts: { visualMultiplier?: number; displayDecimals?: number; indexSymbol?: string } = {}
+) {
   if (acceptablePrice !== undefined && (acceptablePrice == 0n || acceptablePrice >= ethers.MaxInt256)) {
     return "NA";
   }
 
-  return formatUsdPrice(acceptablePrice, {
-    ...opts,
+  return formatUsdPrice(toFxDisplayPrice(acceptablePrice, opts.indexSymbol), {
+    visualMultiplier: opts.visualMultiplier,
+    displayDecimals: opts.displayDecimals,
   });
 }
 

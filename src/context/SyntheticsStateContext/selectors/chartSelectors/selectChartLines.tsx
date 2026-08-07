@@ -11,11 +11,35 @@ import { getTokenData } from "domain/synthetics/tokens";
 import { formatAmount } from "lib/numbers";
 import { EMPTY_ARRAY } from "lib/objects";
 import { convertTokenAddress, getPriceDecimals } from "sdk/configs/tokens";
+import { toFxDisplayIsLong, toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { getMarketIndexName } from "sdk/utils/markets";
 
 import { StaticChartLine } from "components/TVChartContainer/types";
 
 import { selectChartToken } from ".";
+
+/** Skip chart lines that would blow Y-axis autoscale (e.g. short liq → huge price). */
+function isSaneChartPrice(price: number, markPrice: number | undefined): boolean {
+  if (!Number.isFinite(price) || price <= 0) return false;
+  if (markPrice === undefined || !Number.isFinite(markPrice) || markPrice <= 0) {
+    // Absolute guard when mark is missing
+    return price < 1_000_000;
+  }
+  // Allow wide but finite band around mark (covers metals/crypto moves; blocks 1e9+ liq lines)
+  return price > markPrice / 100 && price < markPrice * 100;
+}
+
+function toChartPrice(
+  value: bigint | undefined,
+  priceDecimal: number,
+  visualMultiplier: number | undefined
+): number | undefined {
+  if (value === undefined || value < 0n) return undefined;
+  const formatted = formatAmount(value, USD_DECIMALS, priceDecimal, undefined, undefined, visualMultiplier);
+  if (!formatted || formatted === "NA") return undefined;
+  const price = parseFloat(formatted);
+  return Number.isFinite(price) ? price : undefined;
+}
 
 export const selectChartLines = createSelector<StaticChartLine[]>((q) => {
   const chainId = q(selectChainId);
@@ -37,33 +61,36 @@ export const selectChartLines = createSelector<StaticChartLine[]>((q) => {
 
   const positionLines = filteredPositions.flatMap((position) => {
     const priceDecimal = getPriceDecimals(chainId, position.indexToken.symbol);
-    const longOrShortText = position.isLong ? t`Long` : t`Short`;
+    const displayIsLong = toFxDisplayIsLong(position.isLong, position.indexToken.symbol);
+    const longOrShortText = displayIsLong ? t`Long` : t`Short`;
     const token = q((state) => getTokenData(selectTokensData(state), position.marketInfo?.indexTokenAddress, "native"));
     const marketIndexName = getMarketIndexName(position.marketInfo!) ?? "";
     const tokenVisualMultiplier = token?.visualMultiplier;
+    const indexSymbol = position.indexToken.symbol;
 
-    const liquidationPrice = formatAmount(
-      position?.liquidationPrice,
-      USD_DECIMALS,
+    const markPrice = toChartPrice(toFxDisplayPrice(position.markPrice, indexSymbol), priceDecimal, tokenVisualMultiplier);
+    const entryPrice = toChartPrice(toFxDisplayPrice(position.entryPrice, indexSymbol), priceDecimal, tokenVisualMultiplier);
+    const liquidationPrice = toChartPrice(
+      toFxDisplayPrice(position.liquidationPrice, indexSymbol),
       priceDecimal,
-      undefined,
-      undefined,
       tokenVisualMultiplier
     );
 
-    const lines: StaticChartLine[] = [
-      {
-        title: t`Open ${longOrShortText} - ${marketIndexName}`,
-        price: parseFloat(
-          formatAmount(position.entryPrice, USD_DECIMALS, priceDecimal, undefined, undefined, tokenVisualMultiplier)
-        ),
-      },
-    ];
+    const lines: StaticChartLine[] = [];
 
-    if (liquidationPrice && liquidationPrice !== "NA") {
+    if (entryPrice !== undefined && isSaneChartPrice(entryPrice, markPrice)) {
+      lines.push({
+        title: t`Open ${longOrShortText} - ${marketIndexName}`,
+        price: entryPrice,
+        isLong: displayIsLong,
+      });
+    }
+
+    if (liquidationPrice !== undefined && isSaneChartPrice(liquidationPrice, markPrice ?? entryPrice)) {
       lines.push({
         title: t`Liq. ${longOrShortText} - ${marketIndexName}`,
-        price: parseFloat(liquidationPrice),
+        price: liquidationPrice,
+        isLong: displayIsLong,
       });
     }
 

@@ -117,7 +117,12 @@ export interface OracleFetcher {
   readonly url: string;
   fetchTickers(): Promise<TickersResponse>;
   fetch24hPrices(): Promise<DayPriceCandle[]>;
-  fetchOracleCandles(tokenSymbol: string, period: string, limit: number): Promise<FromNewToOldArray<Bar>>;
+  fetchOracleCandles(
+    tokenSymbol: string,
+    period: string,
+    limit: number,
+    opts?: { from?: number; to?: number }
+  ): Promise<FromNewToOldArray<Bar>>;
   fetchIncentivesRewards(): Promise<RawIncentivesStats | null>;
   fetchPostBatchReport(body: BatchReportBody, debug?: boolean): Promise<Response>;
   fetchPostFeedback(body: UserFeedbackBody, debug?: boolean): Promise<Response>;

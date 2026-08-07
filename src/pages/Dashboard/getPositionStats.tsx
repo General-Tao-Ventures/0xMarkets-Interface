@@ -1,6 +1,6 @@
-import { BASE_SEPOLIA } from "config/chains";
+import { BASE_MAINNET, CONTRACTS_CHAIN_IDS } from "config/chains";
 
-const ACTIVE_CHAIN_IDS = [BASE_SEPOLIA];
+const ACTIVE_CHAIN_IDS = CONTRACTS_CHAIN_IDS.length ? CONTRACTS_CHAIN_IDS : [BASE_MAINNET];
 
 export function getPositionStats(
   positionStats?: {

@@ -34,6 +34,7 @@ import { useMissedCoinsSearch } from "domain/synthetics/userFeedback/useMissedCo
 import { stripBlacklistedWords, type Token } from "domain/tokens";
 import { getMidPrice } from "domain/tokens/utils";
 import { formatAmountHuman, formatUsdPrice } from "lib/numbers";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { EMPTY_ARRAY } from "lib/objects";
 import { searchBy } from "lib/searchBy";
 import { useBreakpoints } from "lib/useBreakpoints";
@@ -106,8 +107,8 @@ export default function ChartTokenSelector(props: Props) {
                     <span className="text-start text-[13px] font-medium text-typography-primary">
                       {!isSwap && <>{getTokenVisualMultiplier(selectedToken)}</>}
                       {REVERSED_PAIR_SYMBOLS.has(selectedToken.symbol)
-                        ? `USD-${selectedToken.symbol}`
-                        : `${selectedToken.symbol}-USD`}
+                        ? `USD-${selectedToken.baseSymbol || selectedToken.symbol}`
+                        : `${selectedToken.baseSymbol || selectedToken.symbol}-USD`}
                     </span>
 
                     {isSwap && !oneRowLabels ? (
@@ -452,7 +453,11 @@ function useFilterSortTokens({
             options,
             [
               (item) => stripBlacklistedWords(item.name),
-              (item) => (isSwap ? item.symbol : `${getTokenVisualMultiplier(item)}${item.symbol}`),
+              (item) =>
+                isSwap
+                  ? item.symbol
+                  : `${getTokenVisualMultiplier(item)}${item.baseSymbol || item.symbol}`,
+              (item) => item.baseSymbol || "",
             ],
             searchKeyword
           )
@@ -637,7 +642,10 @@ function MarketListItem({
           <div className="flex flex-col gap-4">
             <span className="numbers">
               {tokenData
-                ? formatUsdPrice(getMidPrice(tokenData.prices), { visualMultiplier: tokenData.visualMultiplier })
+                ? formatUsdPrice(toFxDisplayPrice(getMidPrice(tokenData.prices), tokenData.symbol), {
+                    visualMultiplier: tokenData.visualMultiplier,
+                    displayDecimals: tokenData.priceDecimals,
+                  })
                 : "-"}
             </span>
             {isMobile && <span>{dayPriceDeltaComponent}</span>}
@@ -678,7 +686,10 @@ function MarketListItem({
         <div className="flex flex-col gap-4">
           <span className="numbers">
             {tokenData
-              ? formatUsdPrice(getMidPrice(tokenData.prices), { visualMultiplier: tokenData.visualMultiplier })
+              ? formatUsdPrice(toFxDisplayPrice(getMidPrice(tokenData.prices), tokenData.symbol), {
+                  visualMultiplier: tokenData.visualMultiplier,
+                  displayDecimals: tokenData.priceDecimals,
+                })
               : "-"}
           </span>
           {isMobile && <span>{dayPriceDeltaComponent}</span>}

@@ -42,6 +42,26 @@ type Props = {
   setIsCandlesLoaded?: (isCandlesLoaded: boolean) => void;
 };
 
+/** Daily/weekly/monthly default viewport: ~12m (full ~3y available via scroll-back). */
+function fitHigherTimeframeVisibleRange(widget: IChartingLibraryWidget | null | undefined) {
+  try {
+    const chart = widget?.activeChart();
+    if (!chart) return;
+    const resolution = chart.resolution();
+    const isHigherTf = resolution === "1D" || resolution === "1W" || resolution === "1M";
+    if (!isHigherTf) return;
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    chart.setVisibleRange({
+      from: nowSec - 365 * 24 * 60 * 60,
+      to: nowSec + 12 * 60 * 60, // half-day pad — avoid blank months into next year
+    });
+    chart.getPanes().at(0)?.getMainSourcePriceScale()?.setAutoScale(true);
+  } catch {
+    // charting_library version differences / chart not ready
+  }
+}
+
 export default function TVChartContainer({
   chartToken,
   chainId,
@@ -81,20 +101,27 @@ export default function TVChartContainer({
 
   useEffect(() => {
     const newDatafeed = new DataFeed(chainId, oracleKeeperFetcher, tradePageVersion);
-    if (setIsCandlesLoaded) {
-      newDatafeed.addEventListener("candlesDisplay.success", (event: Event) => {
-        const isFirstDraw = (event as CustomEvent).detail.isFirstTimeLoad;
-        if (isFirstDraw) {
-          setIsCandlesLoaded(true);
-        }
-      });
-    }
+
+    const onCandlesSuccess = (event: Event) => {
+      const isFirstDraw = (event as CustomEvent).detail?.isFirstTimeLoad;
+      if (!isFirstDraw) return;
+      setIsCandlesLoaded?.(true);
+      // Only on first paint — later getBars (history scroll) must not snap the viewport.
+      // Saved chart state otherwise restores an empty future range (e.g. into 2027).
+      fitHigherTimeframeVisibleRange(tvWidgetRef.current);
+    };
+
+    newDatafeed.addEventListener("candlesDisplay.success", onCandlesSuccess);
     setDatafeed((prev) => {
       if (prev) {
         prev.destroy();
       }
       return newDatafeed;
     });
+
+    return () => {
+      newDatafeed.removeEventListener("candlesDisplay.success", onCandlesSuccess);
+    };
   }, [chainId, oracleKeeperFetcher, setIsCandlesLoaded, tradePageVersion]);
 
   // Keep a ref to the latest oracle prices so the DataFeed can read them synchronously
@@ -109,7 +136,12 @@ export default function TVChartContainer({
       const price = Number((token.minPrice + token.maxPrice) / 2n) / 1e30;
       // Return undefined if price is 0 (can happen transiently during reconnect)
       // to prevent the oracle bridge from drawing a $0 candle on the chart.
-      return price > 0 ? price : undefined;
+      if (!(price > 0)) return undefined;
+      // JPY tickers are JPY/USD (~0.006) to match the chain; chart candles are USD/JPY (~157).
+      if (symbol === "JPY") {
+        return 1 / price;
+      }
+      return price;
     });
   }, [datafeed]);
 
@@ -230,6 +262,17 @@ export default function TVChartContainer({
 
       tvWidgetRef.current?.activeChart().dataReady(() => {
         setChartDataLoading(false);
+        try {
+          const chart = tvWidgetRef.current?.activeChart();
+          const priceScale = chart?.getPanes().at(0)?.getMainSourcePriceScale();
+          priceScale?.setAutoScale(true);
+          fitHigherTimeframeVisibleRange(tvWidgetRef.current);
+          // Saved layout can re-apply after dataReady; nudge again on the next ticks.
+          requestAnimationFrame(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current));
+          window.setTimeout(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current), 250);
+        } catch {
+          // ignore — charting_library version differences
+        }
       });
     });
 

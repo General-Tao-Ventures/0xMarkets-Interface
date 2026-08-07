@@ -21,16 +21,18 @@ export async function buildMarketsConfigsRequest(
     let prebuiltHashedKeys: Record<string, string> | undefined =
       HASHED_MARKET_CONFIG_KEYS[chainId]?.[marketAddress];
 
-    // Cache miss can happen for fork addresses or any market added after the
-    // last prebuild. Fall back to hashing on the fly.
-    if (!prebuiltHashedKeys) {
+    // Cache miss / stale prebuild (new keys like minLeverage): hash on the fly.
+    if (!prebuiltHashedKeys || !prebuiltHashedKeys.minLeverage) {
       const market = marketsData?.[marketAddress];
       if (!market) {
         throw new Error(
           `No pre-built hashed config keys and no market data found for the market ${marketAddress}.`
         );
       }
-      prebuiltHashedKeys = hashMarketConfigKeys(market);
+      prebuiltHashedKeys = {
+        ...(prebuiltHashedKeys ?? {}),
+        ...hashMarketConfigKeys(market),
+      };
     }
 
     request[`${marketAddress}-dataStore`] = {
@@ -204,6 +206,10 @@ export async function buildMarketsConfigsRequest(
         minCollateralFactorForOpenInterestShort: {
           methodName: "getUint",
           params: [prebuiltHashedKeys.minCollateralFactorForOpenInterestShort],
+        },
+        minLeverage: {
+          methodName: "getUint",
+          params: [prebuiltHashedKeys.minLeverage],
         },
         positionImpactExponentFactor: {
           methodName: "getUint",

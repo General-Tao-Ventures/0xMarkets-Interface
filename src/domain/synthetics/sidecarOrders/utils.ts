@@ -4,7 +4,8 @@ import uniqueId from "lodash/uniqueId";
 import { USD_DECIMALS } from "config/factors";
 import { BASIS_POINTS_DIVISOR, MAX_ALLOWED_LEVERAGE } from "config/factors";
 import { PositionOrderInfo } from "domain/synthetics/orders";
-import { calculateDisplayDecimals, formatAmount, parseValue, removeTrailingZeros } from "lib/numbers";
+import { formatAmount, parseValue, removeTrailingZeros, resolvePriceDisplayDecimals } from "lib/numbers";
+import { toFxDisplayPrice, toFxIndexPrice } from "sdk/utils/fxDisplay";
 
 import type { InitialEntry, EntryField, SidecarOrderEntry, SidecarOrderEntryBase } from "./types";
 
@@ -14,7 +15,10 @@ export const PERCENTAGE_DECIMALS = 0;
 export function getDefaultEntryField(
   decimals: number | undefined,
   { input, value, error }: Partial<EntryField> = {},
-  visualMultiplier?: number
+  visualMultiplier?: number,
+  priceDecimals?: number,
+  /** Index token symbol — JPY prices are typed/shown as USD/JPY, stored as index. */
+  indexSymbol?: string
 ): EntryField {
   let nextInput = "";
   let nextValue: bigint | null = null;
@@ -26,15 +30,21 @@ export function getDefaultEntryField(
     if (nextValue !== null && visualMultiplier !== undefined) {
       nextValue = nextValue / BigInt(visualMultiplier);
     }
+    // User types display-domain FX quote; keep stored value in index domain.
+    if (nextValue !== null) {
+      nextValue = toFxIndexPrice(nextValue, indexSymbol) ?? nextValue;
+    }
   } else if (value) {
     nextInput = "";
     if (decimals !== undefined) {
+      // `value` is index-domain; format the USD/XXX quote into the input.
+      const displayValue = toFxDisplayPrice(value, indexSymbol) ?? value;
       nextInput = String(
         removeTrailingZeros(
           formatAmount(
-            value,
+            displayValue,
             decimals,
-            calculateDisplayDecimals(value, decimals, visualMultiplier),
+            resolvePriceDisplayDecimals(priceDecimals, displayValue, visualMultiplier),
             undefined,
             undefined,
             visualMultiplier
@@ -68,10 +78,14 @@ export function prepareInitialEntries({
   positionOrders,
   sort = "desc",
   visualMultiplier,
+  priceDecimals,
+  indexSymbol,
 }: {
   positionOrders: PositionOrderInfo[] | undefined;
   sort: "desc" | "asc";
   visualMultiplier?: number;
+  priceDecimals?: number;
+  indexSymbol?: string;
 }): undefined | InitialEntry[] {
   if (!positionOrders) return;
 
@@ -84,9 +98,16 @@ export function prepareInitialEntries({
       return 0;
     })
     .map((order) => {
+      const symbol = indexSymbol ?? order.indexToken?.symbol;
       const entry: InitialEntry = {
         sizeUsd: getDefaultEntryField(USD_DECIMALS, { value: order.sizeDeltaUsd }),
-        price: getDefaultEntryField(USD_DECIMALS, { value: order.triggerPrice }, visualMultiplier),
+        price: getDefaultEntryField(
+          USD_DECIMALS,
+          { value: order.triggerPrice },
+          visualMultiplier,
+          priceDecimals,
+          symbol
+        ),
         order,
       };
 

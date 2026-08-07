@@ -233,6 +233,8 @@ export function getIncreaseError(p: {
   numberOfParts: number;
   minPositionSizeUsd: bigint | undefined;
   chainId: number;
+  /** Combined UI / ladder / MCF max, in BPS (10000 = 1x). Same source as the leverage slider. */
+  maxLeverageForTradeBps?: number;
 }): ValidationResult {
   const {
     marketInfo,
@@ -260,6 +262,7 @@ export function getIncreaseError(p: {
     isTwap,
     numberOfParts,
     minPositionSizeUsd,
+    maxLeverageForTradeBps,
   } = p;
 
   if (!marketInfo || !indexToken) {
@@ -384,9 +387,14 @@ export function getIncreaseError(p: {
   }
 
   const maxAllowedLeverage = getMaxAllowedLeverageByMinCollateralFactor(marketInfo?.minCollateralFactor);
+  // Prefer the tradebox slider cap (MCF + UI product cap + ladder) when provided.
+  const effectiveMaxLeverageBps =
+    maxLeverageForTradeBps !== undefined
+      ? Math.min(maxAllowedLeverage, maxLeverageForTradeBps)
+      : maxAllowedLeverage;
 
-  if (nextLeverageWithoutPnl !== undefined && nextLeverageWithoutPnl > maxAllowedLeverage) {
-    return [t`Max leverage: ${(maxAllowedLeverage / BASIS_POINTS_DIVISOR).toFixed(1)}x`];
+  if (nextLeverageWithoutPnl !== undefined && nextLeverageWithoutPnl > BigInt(effectiveMaxLeverageBps)) {
+    return [t`Max leverage: ${(effectiveMaxLeverageBps / BASIS_POINTS_DIVISOR).toFixed(1)}x`, "maxLeverage"];
   }
 
   if (nextLeverageWithoutPnl !== undefined) {
@@ -394,6 +402,15 @@ export function getIncreaseError(p: {
 
     if (maxLeverageError) {
       return [t`Max. Leverage exceeded`, "maxLeverage"];
+    }
+  }
+
+  // On-chain MIN_LEVERAGE is a 1e30 factor (same as ladder maxLeverage). Opt-in when > 0.
+  const minLeverageFactor = marketInfo.minLeverage ?? 0n;
+  if (minLeverageFactor > 0n && nextLeverageWithoutPnl !== undefined) {
+    const minLeverageBps = (minLeverageFactor * BigInt(BASIS_POINTS_DIVISOR)) / PRECISION;
+    if (nextLeverageWithoutPnl < minLeverageBps) {
+      return [t`Min. leverage: ${formatAmount(minLeverageBps, 4, 2)}x — increase leverage or size`];
     }
   }
 

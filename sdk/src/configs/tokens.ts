@@ -2,16 +2,17 @@ import { zeroAddress } from "viem";
 
 import type { Token, TokenAddressTypesMap, TokenCategory } from "types/tokens";
 
-import { BASE_SEPOLIA, LOCALHOST } from "./chains";
+import { BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./chains";
 import { getContract } from "./contracts";
 
 export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
 export const TOKENS: { [chainId: number]: Token[] } = {
-  [BASE_SEPOLIA]: [
+  [BASE_MAINNET]: [
     {
       name: "Ethereum",
       symbol: "ETH",
+      priceDecimals: 2,
       decimals: 18,
       address: zeroAddress,
       isNative: true,
@@ -24,6 +25,133 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Wrapped ETH",
       symbol: "WETH",
+      priceDecimals: 2,
+      address: "0x4200000000000000000000000000000000000006",
+      decimals: 18,
+      isWrapped: true,
+      baseSymbol: "ETH",
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
+    },
+    {
+      name: "USD Coin",
+      symbol: "USDC",
+      address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      decimals: 6,
+      isStable: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/usd-coin",
+    },
+    {
+      name: "Euro",
+      symbol: "EUR",
+      decimals: 18,
+      address: "0x2C6bdB9ab7d2d48710B7dd3349Ba099cdAB3B328",
+      isSynthetic: true,
+      // Forex pairs need finer Y-axis ticks than the default 2dp pricescale.
+      priceDecimals: 5,
+      imageUrl: "https://assets.coingecko.com/coins/images/14423/small/stasis-euro.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/stasis-euro",
+    },
+    {
+      name: "British Pound",
+      symbol: "GBP",
+      decimals: 18,
+      address: "0x915327F0726eC569107C1B3F38c8e0Cf87eC9e72",
+      isSynthetic: true,
+      priceDecimals: 5,
+      imageUrl: "https://assets.coingecko.com/coins/images/1/small/gbp.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/gbp",
+    },
+    {
+      name: "Gold",
+      symbol: "GOLD",
+      priceDecimals: 3,
+      decimals: 18,
+      address: "0x82aB51eb790D1C5f1B1434057A215Eb8cF360Da5",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/3090/small/gold.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/gold",
+    },
+    {
+      name: "Silver",
+      symbol: "XAG",
+      priceDecimals: 3,
+      decimals: 18,
+      address: "0xA927aA364535ba04d88Fc5326D0773CC05d92c08",
+      isSynthetic: true,
+      imageUrl: "https://assets.coingecko.com/coins/images/1090/small/silver.png",
+    },
+    {
+      name: "Japanese Yen",
+      symbol: "JPY",
+      decimals: 18,
+      address: "0xF40d284eF3F79451E19D500A57539F753dd79Dbf",
+      isSynthetic: true,
+      // Displayed as USD/JPY (~157); 3dp for position/header prices.
+      priceDecimals: 3,
+      imageUrl: "https://assets.coingecko.com/coins/images/1/small/jpy.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/jpy",
+    },
+    {
+      name: "Bitcoin",
+      symbol: "WBTC",
+      priceDecimals: 2,
+      // Display as BTC in markets/charts; keep symbol WBTC for oracle/API.
+      baseSymbol: "BTC",
+      decimals: 8,
+      address: "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+      isSynthetic: false,
+      imageUrl: "https://assets.coingecko.com/coins/images/7598/thumb/wrapped_bitcoin_wbtc.png",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/wrapped-bitcoin",
+    },
+    {
+      name: "Bittensor",
+      symbol: "TAO",
+      priceDecimals: 2,
+      decimals: 18,
+      address: "0x53c87230E2A4640D4C200797147261300E7C284A",
+      isSynthetic: true,
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/28452/small/ARUsPeNQ_400x400.jpeg",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/bittensor",
+    },
+    {
+      name: "0xMarkets Market tokens",
+      symbol: "0xM",
+      address: "<market-token-address>",
+      decimals: 18,
+      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GM_LOGO.png",
+      isPlatformToken: true,
+    },
+    {
+      name: "GLV Market tokens",
+      symbol: "GLV",
+      address: "<market-token-address>",
+      decimals: 18,
+      imageUrl: "https://raw.githubusercontent.com/gmx-io/gmx-assets/main/GMX-Assets/PNG/GLV_LOGO.png",
+      isPlatformToken: true,
+    },
+  ],
+  [BASE_SEPOLIA]: [
+    {
+      name: "Ethereum",
+      symbol: "ETH",
+      priceDecimals: 2,
+      decimals: 18,
+      address: zeroAddress,
+      isNative: true,
+      isShortable: true,
+      categories: ["layer1"],
+      imageUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880",
+      coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
+      isV1Available: true,
+    },
+    {
+      name: "Wrapped ETH",
+      symbol: "WETH",
+      priceDecimals: 2,
       address: "0x4200000000000000000000000000000000000006",
       decimals: 18,
       isWrapped: true,
@@ -46,6 +174,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       decimals: 6,
       address: "0x18909CC26672376e8FDF1fa54Fc5B892dd6E2b0C",
       isSynthetic: true,
+      priceDecimals: 5,
       imageUrl: "https://assets.coingecko.com/coins/images/14423/small/stasis-euro.png",
       coingeckoUrl: "https://www.coingecko.com/en/coins/stasis-euro",
     },
@@ -55,12 +184,14 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       decimals: 6,
       address: "0xf7255EAb2968Fb6B8b6226eB25c6EDC2F1CcE60a",
       isSynthetic: true,
+      priceDecimals: 5,
       imageUrl: "https://assets.coingecko.com/coins/images/1/small/gbp.png",
       coingeckoUrl: "https://www.coingecko.com/en/coins/gbp",
     },
     {
       name: "Gold",
       symbol: "GOLD",
+      priceDecimals: 3,
       decimals: 6,
       address: "0xf4ac308123764edFB7453a7446D01277D7DEa1A7",
       isSynthetic: true,
@@ -70,6 +201,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Silver",
       symbol: "SILVER",
+      priceDecimals: 3,
       decimals: 6,
       address: "0x25f79151C3E00ba7710EcF02192836994E36b440",
       isSynthetic: true,
@@ -81,6 +213,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
       decimals: 6,
       address: "0x7836DF766375f02D71fa3617F5F06a0712699A81",
       isSynthetic: true,
+      priceDecimals: 3,
       imageUrl: "https://assets.coingecko.com/coins/images/1/small/jpy.png",
       coingeckoUrl: "https://www.coingecko.com/en/coins/jpy",
     },
@@ -95,6 +228,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Bitcoin",
       symbol: "BTC",
+      priceDecimals: 2,
       decimals: 8,
       address: "0xD8a6E3FCA403d79b6AD6216b60527F51cc967D39",
       isSynthetic: false,
@@ -104,6 +238,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Bittensor",
       symbol: "TAO",
+      priceDecimals: 2,
       decimals: 18,
       address: "0x8E235a31AB3bb754DA40d05e4E5787b67c8BeDcd",
       isSynthetic: true,
@@ -133,6 +268,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Ethereum",
       symbol: "ETH",
+      priceDecimals: 2,
       decimals: 18,
       address: zeroAddress,
       isNative: true,
@@ -145,6 +281,7 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     {
       name: "Wrapped ETH",
       symbol: "WETH",
+      priceDecimals: 2,
       address: "0x4200000000000000000000000000000000000006",
       decimals: 18,
       isWrapped: true,
@@ -189,7 +326,7 @@ export const V2_TOKENS: { [chainId: number]: Token[] } = {};
 export const WRAPPED_TOKENS_MAP: { [chainId: number]: Token } = {};
 export const NATIVE_TOKENS_MAP: { [chainId: number]: Token } = {};
 
-const CHAIN_IDS = [BASE_SEPOLIA, LOCALHOST];
+const CHAIN_IDS = [BASE_MAINNET, BASE_SEPOLIA, LOCALHOST];
 
 for (let j = 0; j < CHAIN_IDS.length; j++) {
   const chainId = CHAIN_IDS[j];
@@ -206,6 +343,7 @@ for (let j = 0; j < CHAIN_IDS.length; j++) {
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     TOKENS_MAP[chainId][token.address] = token;
+    TOKENS_MAP[chainId][token.address.toLowerCase()] = token;
     TOKENS_BY_SYMBOL_MAP[chainId][token.symbol] = token;
 
     if (token.isWrapped) {
@@ -284,11 +422,12 @@ export function getToken(chainId: number, address: string) {
   if (!TOKENS_MAP[chainId]) {
     throw new Error(`Incorrect chainId ${chainId}`);
   }
-  if (!TOKENS_MAP[chainId][address]) {
+  const token = TOKENS_MAP[chainId][address] || TOKENS_MAP[chainId][address.toLowerCase()];
+  if (!token) {
     throw new Error(`Incorrect address "${address}" for chainId ${chainId}`);
   }
 
-  return TOKENS_MAP[chainId][address];
+  return token;
 }
 
 export function getTokenBySymbol(

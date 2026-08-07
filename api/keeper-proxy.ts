@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const KEEPER_URL = process.env.KEEPER_URL || "http://142.93.203.222:37017";
+// Prefer Vercel/local env; public hostname is the safe default (Cloudflare → GCP keeper).
+const KEEPER_URL = process.env.KEEPER_URL || "https://keeper.0xmarkets.io";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const pathStr = (req.query._path as string) || "";

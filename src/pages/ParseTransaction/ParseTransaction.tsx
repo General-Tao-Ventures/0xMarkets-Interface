@@ -10,6 +10,7 @@ import { Hash, PublicClient, isHash } from "viem";
 import { usePublicClient } from "wagmi";
 
 import {
+  BASE_MAINNET,
   BASE_SEPOLIA,
   LOCALHOST,
   ContractsChainId,
@@ -64,6 +65,7 @@ import {
 import { LogEntryComponentProps } from "./types";
 
 export const NETWORKS_BY_CHAIN_IDS: Record<ContractsChainId, string> = {
+  [BASE_MAINNET]: "base",
   [BASE_SEPOLIA]: "base-sepolia",
   [LOCALHOST]: "localhost",
 };
@@ -74,8 +76,8 @@ export function ParseTransactionPage() {
   const { tx, network } = useParams<{ tx: string; network: string }>();
   const [, copyToClipboard] = useCopyToClipboard();
 
-  /** Default is Base Sepolia to prevent page crashes in hooks, wrong networks handled below */
-  const chainId = NETWORKS[network as string] ?? BASE_SEPOLIA;
+  /** Default is Base mainnet to prevent page crashes in hooks, wrong networks handled below */
+  const chainId = NETWORKS[network as string] ?? BASE_MAINNET;
 
   const client = usePublicClient({
     chainId,

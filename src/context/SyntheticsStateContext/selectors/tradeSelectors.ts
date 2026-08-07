@@ -17,6 +17,7 @@ import {
 import { calculateDisplayDecimals } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { MARKETS } from "sdk/configs/markets";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { ExternalSwapQuote, ExternalSwapQuoteParams } from "sdk/types/trade";
 import { buildMarketsAdjacencyGraph } from "sdk/utils/swap/buildMarketsAdjacencyGraph";
 import { createFindSwapPath, getWrappedAddress } from "sdk/utils/swap/swapPath";
@@ -81,7 +82,12 @@ export const selectSelectedMarketPriceDecimals = createSelector((q) => {
     return 2;
   }
 
-  return calculateDisplayDecimals(chartToken.prices.minPrice);
+  if (chartToken.priceDecimals !== undefined) {
+    return chartToken.priceDecimals;
+  }
+
+  const displayPrice = toFxDisplayPrice(chartToken.prices.minPrice, chartToken.symbol) ?? chartToken.prices.minPrice;
+  return calculateDisplayDecimals(displayPrice);
 });
 
 export const makeSelectMarketPriceDecimals = createSelectorFactory((tokenAddress?: string) =>
@@ -94,9 +100,14 @@ export const makeSelectMarketPriceDecimals = createSelectorFactory((tokenAddress
       return;
     }
 
-    const visualMultiplier = isSwap ? 1 : token.visualMultiplier;
+    if (token.priceDecimals !== undefined) {
+      return token.priceDecimals;
+    }
 
-    return calculateDisplayDecimals(token.prices.minPrice, undefined, visualMultiplier);
+    const visualMultiplier = isSwap ? 1 : token.visualMultiplier;
+    const displayPrice = toFxDisplayPrice(token.prices.minPrice, token.symbol) ?? token.prices.minPrice;
+
+    return calculateDisplayDecimals(displayPrice, undefined, visualMultiplier);
   })
 );
 
@@ -288,7 +299,7 @@ export const makeSelectIncreasePositionAmounts = ({
     const uiFeeFactor = q(selectUiFeeFactor);
     const externalSwapQuoteParams = q(selectExternalSwapQuoteParams);
     const chainId = q(selectChainId);
-    const tradeFlags = createTradeFlags(tradeType, tradeMode);
+    const tradeFlags = createTradeFlags(tradeType, tradeMode, marketInfo?.indexToken.symbol);
 
     let limitOrderType: OrderType | undefined = undefined;
     if (tradeFlags.isLimit) {
@@ -380,18 +391,16 @@ export const makeSelectDecreasePositionAmounts = createSelectorFactory(
         uiFeeFactor
       ) => {
         const position = positionKey ? getByKey(positionsInfoData, positionKey) : undefined;
-        const tradeFlags = createTradeFlags(tradeType, tradeMode);
+        const marketInfo = marketAddress ? getByKey(marketsInfoData, marketAddress) : undefined;
+        const tradeFlags = createTradeFlags(tradeType, tradeMode, marketInfo?.indexToken.symbol);
 
         let markPrice = position?.markPrice;
-        if (markPrice === undefined) {
-          const market = getByKey(marketsInfoData, marketAddress);
-          if (market) {
-            markPrice = getMarkPrice({
-              prices: market.indexToken.prices,
-              isIncrease: false,
-              isLong: tradeFlags.isLong,
-            });
-          }
+        if (markPrice === undefined && marketInfo) {
+          markPrice = getMarkPrice({
+            prices: marketInfo.indexToken.prices,
+            isIncrease: false,
+            isLong: tradeFlags.isLong,
+          });
         }
 
         let triggerOrderType: OrderType | undefined =
@@ -404,7 +413,6 @@ export const makeSelectDecreasePositionAmounts = createSelectorFactory(
               });
 
         const collateralToken = collateralTokenAddress ? getByKey(tokensData, collateralTokenAddress) : undefined;
-        const marketInfo = marketAddress ? getByKey(marketsInfoData, marketAddress) : undefined;
         const receiveToken = collateralTokenAddress ? getByKey(tokensData, receiveTokenAddress) : undefined;
 
         if (
@@ -504,8 +512,8 @@ export const makeSelectNextPositionValuesForIncrease = createSelectorFactory(
         selectUserReferralInfo,
       ],
       ({ minCollateralUsd }, marketsInfoData, tokensData, increaseAmounts, positionsInfoData, userReferralInfo) => {
-        const tradeFlags = createTradeFlags(tradeType, tradeMode);
         const marketInfo = getByKey(marketsInfoData, marketAddress);
+        const tradeFlags = createTradeFlags(tradeType, tradeMode, marketInfo?.indexToken.symbol);
         const collateralToken = collateralTokenAddress ? getByKey(tokensData, collateralTokenAddress) : undefined;
         const position = positionKey ? getByKey(positionsInfoData, positionKey) : undefined;
 
@@ -582,8 +590,8 @@ export const makeSelectNextPositionValuesForDecrease = createSelectorFactory(
       const positionsInfoData = q(selectPositionsInfoData);
       const userReferralInfo = q(selectUserReferralInfo);
 
-      const tradeFlags = createTradeFlags(tradeType, tradeMode);
       const marketInfo = getByKey(marketsInfoData, marketAddress);
+      const tradeFlags = createTradeFlags(tradeType, tradeMode, marketInfo?.indexToken.symbol);
       const collateralToken = collateralTokenAddress ? getByKey(tokensData, collateralTokenAddress) : undefined;
       const position = positionKey ? getByKey(positionsInfoData, positionKey) : undefined;
 

@@ -300,7 +300,8 @@ export function formatUsdPrice(price?: bigint, opts: Parameters<typeof formatUsd
     return "NA";
   }
 
-  const decimals = calculateDisplayDecimals(price, undefined, opts.visualMultiplier);
+  // Prefer caller-provided decimals (e.g. token.priceDecimals for FX: JPY=3, EUR/GBP=5).
+  const decimals = opts.displayDecimals ?? calculateDisplayDecimals(price, undefined, opts.visualMultiplier);
 
   return formatUsd(price, {
     ...opts,
@@ -791,6 +792,19 @@ export function calculateDisplayDecimals(
   }
 
   return 9;
+}
+
+/** Prefer configured token.priceDecimals (FX: JPY=3, EUR/GBP=5); else infer from price magnitude. */
+export function resolvePriceDisplayDecimals(
+  priceDecimals: number | undefined,
+  price?: bigint,
+  visualMultiplier?: number
+) {
+  if (priceDecimals !== undefined) {
+    return priceDecimals;
+  }
+
+  return calculateDisplayDecimals(price, undefined, visualMultiplier);
 }
 
 export function clamp(value: number, min: number, max: number): number {

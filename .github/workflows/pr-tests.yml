@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Check Lingui catalogs are up to date
+        run: yarn lingui:check
+
       - name: Run linting
         run: yarn lint
 

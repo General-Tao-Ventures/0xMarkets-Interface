@@ -1,9 +1,9 @@
 import { Trans, t } from "@lingui/macro";
 import { useMemo } from "react";
 
-import { BASE_SEPOLIA } from "config/chains";
 import { USD_DECIMALS } from "config/factors";
 import useV2Stats from "domain/synthetics/stats/useV2Stats";
+import { useChainId } from "lib/chains";
 import { formatAmountHuman } from "lib/numbers";
 
 import { getFormattedFeesDuration } from "./getFormattedFeesDuration";
@@ -61,7 +61,8 @@ function FeeRow({
 }
 
 export function PlatformStats() {
-  const v2Overview = useV2Stats(BASE_SEPOLIA);
+  const { chainId } = useChainId();
+  const v2Overview = useV2Stats(chainId);
 
   const formattedDuration = useMemo(() => getFormattedFeesDuration(), []);
 

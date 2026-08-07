@@ -10,6 +10,7 @@ import { getTokenData } from "domain/synthetics/tokens";
 import { formatAmount } from "lib/numbers";
 import { EMPTY_ARRAY } from "lib/objects";
 import { convertTokenAddress, getPriceDecimals } from "sdk/configs/tokens";
+import { toFxDisplayIsLong, toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import { getMarketIndexName } from "sdk/utils/markets";
 
 import { DynamicChartLine } from "components/TVChartContainer/types";
@@ -51,20 +52,15 @@ export const selectChartDynamicLines = createSelector<DynamicChartLine[]>((q) =>
           getTokenData(selectTokensData(state), positionOrder.marketInfo.indexTokenAddress, "native")?.visualMultiplier
       );
 
+      const displayTrigger = toFxDisplayPrice(positionOrder.triggerPrice, positionOrder.indexToken.symbol);
+
       return {
         id: positionOrder.key,
         marketName: getMarketIndexName(positionOrder.marketInfo),
         orderType: positionOrder.orderType,
-        isLong: order.isLong,
+        isLong: toFxDisplayIsLong(order.isLong, positionOrder.indexToken.symbol),
         price: parseFloat(
-          formatAmount(
-            positionOrder.triggerPrice,
-            USD_DECIMALS,
-            priceDecimal,
-            undefined,
-            undefined,
-            tokenVisualMultiplier
-          )
+          formatAmount(displayTrigger, USD_DECIMALS, priceDecimal, undefined, undefined, tokenVisualMultiplier)
         ),
       };
     });

@@ -7,24 +7,29 @@ import {
   CONTRACTS_CHAIN_IDS as SDK_CONTRACTS_CHAIN_IDS,
   CONTRACTS_CHAIN_IDS_DEV as SDK_CONTRACTS_CHAIN_IDS_DEV,
   SOURCE_BASE_MAINNET,
+  BASE_MAINNET,
   BASE_SEPOLIA,
   LOCALHOST,
 } from "sdk/configs/chains";
 
-import { isDevelopment } from "./env";
+import { isLocal } from "./env";
 
 export { CHAIN_NAMES_MAP, getChainName } from "sdk/configs/chains";
 export * from "./static/chains";
 
-export const CONTRACTS_CHAIN_IDS = isDevelopment() ? SDK_CONTRACTS_CHAIN_IDS_DEV : SDK_CONTRACTS_CHAIN_IDS;
+// Only expose Sepolia/Localhost on localhost. Vercel Preview is "development"
+// by isDevelopment() but must stay mainnet-only so the switcher can't put the
+// wallet on 84532 while contracts resolve to 8453.
+export const CONTRACTS_CHAIN_IDS = isLocal() ? SDK_CONTRACTS_CHAIN_IDS_DEV : SDK_CONTRACTS_CHAIN_IDS;
 
 const { parseEther } = ethers;
 
 // TODO take it from web3
-export const DEFAULT_CHAIN_ID = BASE_SEPOLIA;
+export const DEFAULT_CHAIN_ID = BASE_MAINNET;
 export const CHAIN_ID = DEFAULT_CHAIN_ID;
 
 export const IS_NETWORK_DISABLED: Record<ContractsChainId, boolean> = {
+  [BASE_MAINNET]: false,
   [BASE_SEPOLIA]: false,
   [LOCALHOST]: false,
 };
@@ -32,6 +37,19 @@ export const IS_NETWORK_DISABLED: Record<ContractsChainId, boolean> = {
 export const NETWORK_EXECUTION_TO_CREATE_FEE_FACTOR = {} as const;
 
 const constants = {
+  [BASE_MAINNET]: {
+    nativeTokenSymbol: "ETH",
+    wrappedTokenSymbol: "WETH",
+    defaultCollateralSymbol: "USDC",
+    defaultFlagOrdersEnabled: true,
+    positionReaderPropsLength: 9,
+    v2: true,
+
+    SWAP_ORDER_EXECUTION_GAS_FEE: parseEther("0.0003"),
+    INCREASE_ORDER_EXECUTION_GAS_FEE: parseEther("0.0003"),
+    // contract requires that execution fee be strictly greater than instead of gte
+    DECREASE_ORDER_EXECUTION_GAS_FEE: parseEther("0.000300001"),
+  },
   [BASE_SEPOLIA]: {
     nativeTokenSymbol: "ETH",
     wrappedTokenSymbol: "WETH",
@@ -63,10 +81,12 @@ const ALCHEMY_WHITELISTED_DOMAINS = ["0xmarkets.io", "app.0xmarkets.io"];
 
 export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
   [SOURCE_BASE_MAINNET]: [
+    // Prefer browser-friendly public RPCs (llamarpc often fails CORS from Vercel Preview)
+    getAlchemyBaseMainnetHttpUrl("fallback"),
     "https://mainnet.base.org",
-    "https://base.llamarpc.com",
     "https://base-rpc.publicnode.com",
     "https://base.drpc.org",
+    "https://rpc.ankr.com/base",
   ],
   [BASE_SEPOLIA]: [
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",

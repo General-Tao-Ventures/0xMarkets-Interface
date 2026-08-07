@@ -25,7 +25,13 @@ import { TokensData, convertToTokenAmount, convertToUsd } from "../tokens";
 import { getAcceptablePriceInfo, getMarkPrice } from "../trade";
 import { PositionsData, PositionsInfoData } from "./types";
 import { usePositionsConstantsRequest } from "./usePositionsConstants";
-import { getLeverage, getLiquidationPrice, getPositionNetValue, getPositionPendingFeesUsd } from "./utils";
+import {
+  getLeverage,
+  getLiquidationPrice,
+  getPositionNetValue,
+  getPositionPendingFeesUsd,
+  isSaneIndexPrice,
+} from "./utils";
 
 export type PositionsInfoResult = {
   positionsInfoData?: PositionsInfoData;
@@ -105,6 +111,13 @@ export function usePositionsInfoRequest(
         indexToken,
       });
 
+      // sizeInTokens can be permanently mis-scaled when oracle feed multipliers used the
+      // wrong token decimals (e.g. 6 vs 18). Mark still looks fine, but entry/PnL explode.
+      const hasSaneEntryPrice = isSaneIndexPrice(entryPrice, {
+        markPrice,
+        visualMultiplier: indexToken.visualMultiplier,
+      });
+
       const pendingFundingFeesUsd = convertToUsd(
         position.fundingFeeAmount,
         collateralToken.decimals,
@@ -143,7 +156,7 @@ export function usePositionsInfoRequest(
         collateralMinPrice
       )!;
 
-      const pnl = marketInfo
+      const rawPnl = marketInfo
         ? getPositionPnlUsd({
             marketInfo: marketInfo,
             sizeInUsd: position.sizeInUsd,
@@ -153,8 +166,13 @@ export function usePositionsInfoRequest(
           })
         : position.pnl;
 
+      // Hide fabricated PnL from mis-scaled sizeInTokens (shows as +thousands % otherwise).
+      const pnl = hasSaneEntryPrice ? rawPnl : 0n;
+
       const pnlPercentage =
-        collateralUsd !== undefined && collateralUsd != 0n ? getBasisPoints(pnl, collateralUsd) : 0n;
+        hasSaneEntryPrice && collateralUsd !== undefined && collateralUsd != 0n
+          ? getBasisPoints(pnl, collateralUsd)
+          : 0n;
 
       const closeAcceptablePriceInfo = marketInfo
         ? getAcceptablePriceInfo({
@@ -189,18 +207,24 @@ export function usePositionsInfoRequest(
         priceImpactDiffUsd: netPriceImapctValues?.priceImpactDiffUsd ?? 0n,
       });
 
-      const pnlAfterFees = getPositionPnlAfterFees({
-        pnl,
-        pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-        pendingFundingFeesUsd: pendingFundingFeesUsd,
-        closingFeeUsd,
-        uiFeeUsd,
-        totalPendingImpactDeltaUsd: netPriceImapctValues?.totalImpactDeltaUsd ?? 0n,
-        priceImpactDiffUsd: netPriceImapctValues?.priceImpactDiffUsd ?? 0n,
-      });
+      // When entry is insane, zero PnL-after-fees too — otherwise fees/impact still
+      // produce a non-zero dollar PnL while percent stays 0 and confuses the UI.
+      const pnlAfterFees = hasSaneEntryPrice
+        ? getPositionPnlAfterFees({
+            pnl,
+            pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
+            pendingFundingFeesUsd: pendingFundingFeesUsd,
+            closingFeeUsd,
+            uiFeeUsd,
+            totalPendingImpactDeltaUsd: netPriceImapctValues?.totalImpactDeltaUsd ?? 0n,
+            priceImpactDiffUsd: netPriceImapctValues?.priceImpactDiffUsd ?? 0n,
+          })
+        : 0n;
 
       const pnlAfterFeesPercentage =
-        collateralUsd != 0n ? getBasisPoints(pnlAfterFees, collateralUsd + closingFeeUsd) : 0n;
+        hasSaneEntryPrice && collateralUsd != 0n
+          ? getBasisPoints(pnlAfterFees, collateralUsd + closingFeeUsd)
+          : 0n;
 
       const leverage = getLeverage({
         sizeInUsd: position.sizeInUsd,
@@ -225,22 +249,23 @@ export function usePositionsInfoRequest(
       const hasLowCollateral =
         (leverage !== undefined && maxAllowedLeverage !== undefined && leverage > maxAllowedLeverage) || false;
 
-      const liquidationPrice = marketInfo
-        ? getLiquidationPrice({
-            marketInfo,
-            collateralToken,
-            pendingImpactAmount: position.pendingImpactAmount,
-            sizeInUsd: position.sizeInUsd,
-            sizeInTokens: position.sizeInTokens,
-            collateralUsd,
-            collateralAmount: position.collateralAmount,
-            userReferralInfo,
-            minCollateralUsd,
-            pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-            pendingFundingFeesUsd,
-            isLong: position.isLong,
-          })
-        : undefined;
+      const liquidationPrice =
+        marketInfo && hasSaneEntryPrice
+          ? getLiquidationPrice({
+              marketInfo,
+              collateralToken,
+              pendingImpactAmount: position.pendingImpactAmount,
+              sizeInUsd: position.sizeInUsd,
+              sizeInTokens: position.sizeInTokens,
+              collateralUsd,
+              collateralAmount: position.collateralAmount,
+              userReferralInfo,
+              minCollateralUsd,
+              pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
+              pendingFundingFeesUsd,
+              isLong: position.isLong,
+            })
+          : undefined;
 
       const indexName = getMarketIndexName({ indexToken, isSpotOnly: false });
       const poolName = getMarketPoolName({ longToken, shortToken });

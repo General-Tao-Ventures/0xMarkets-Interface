@@ -23,8 +23,9 @@ export const CARTHA_VAULTS: Partial<Record<number, CarthaVaultConfig[]>> = {
       type: "parent",
       category: "crypto",
       children: [
-        "0xD090239EaE0d756726b6afd57E0b23A24FCABe86",
-        "0x47EbDBE398733664250356F7F19fd516a5f1Dd0a",
+        "0xD090239EaE0d756726b6afd57E0b23A24FCABe86", // cvBTC
+        "0x47EbDBE398733664250356F7F19fd516a5f1Dd0a", // cvETH
+        "0x47C563FFa0aB3e952561a72D3F09ec2c8ADb7FD5", // cvTAO
       ],
     },
     {
@@ -34,9 +35,9 @@ export const CARTHA_VAULTS: Partial<Record<number, CarthaVaultConfig[]>> = {
       type: "parent",
       category: "currencies",
       children: [
-        "0x8AE6DDb449b3D8d1fE961483Fbe1329b5e4cbD86",
-        "0x9Eed917485e08FdFee977629bf933E8C0B33e539",
-        "0xf2e3f581A7dE8B055c0122E3bFb445A67b485831",
+        "0x8AE6DDb449b3D8d1fE961483Fbe1329b5e4cbD86", // cvEUR
+        "0x9Eed917485e08FdFee977629bf933E8C0B33e539", // cvGBP
+        "0xf2e3f581A7dE8B055c0122E3bFb445A67b485831", // cvJPY
       ],
     },
     {
@@ -46,7 +47,8 @@ export const CARTHA_VAULTS: Partial<Record<number, CarthaVaultConfig[]>> = {
       type: "parent",
       category: "commodities",
       children: [
-        "0xabc777A16E41CF6E2F02A768D1f9f4d8aa68e58F",
+        "0xabc777A16E41CF6E2F02A768D1f9f4d8aa68e58F", // cvGOLD
+        "0x48682e7Bf092219e27D27F7A8d01b2538A828998", // cvSILVER
       ],
     },
     // Child Vaults - Crypto
@@ -62,6 +64,14 @@ export const CARTHA_VAULTS: Partial<Record<number, CarthaVaultConfig[]>> = {
       address: "0x47EbDBE398733664250356F7F19fd516a5f1Dd0a",
       name: "Cartha ETH Vault",
       symbol: "cvETH",
+      type: "child",
+      category: "crypto",
+      parentAddress: "0x7c5fAc6A0295663686873E418406cf540c45CCF3",
+    },
+    {
+      address: "0x47C563FFa0aB3e952561a72D3F09ec2c8ADb7FD5",
+      name: "Cartha TAO Vault",
+      symbol: "cvTAO",
       type: "child",
       category: "crypto",
       parentAddress: "0x7c5fAc6A0295663686873E418406cf540c45CCF3",
@@ -96,6 +106,14 @@ export const CARTHA_VAULTS: Partial<Record<number, CarthaVaultConfig[]>> = {
       address: "0xabc777A16E41CF6E2F02A768D1f9f4d8aa68e58F",
       name: "Cartha GOLD Vault",
       symbol: "cvGOLD",
+      type: "child",
+      category: "commodities",
+      parentAddress: "0xa265777B6241143C752d37025Bb4dE4B3E311A19",
+    },
+    {
+      address: "0x48682e7Bf092219e27D27F7A8d01b2538A828998",
+      name: "Cartha SILVER Vault",
+      symbol: "cvSILVER",
       type: "child",
       category: "commodities",
       parentAddress: "0xa265777B6241143C752d37025Bb4dE4B3E311A19",

@@ -16,6 +16,7 @@ import useWallet from "lib/wallets/useWallet";
 import PoolsCard from "pages/Pools/PoolsCard";
 import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
 
+import Button from "components/Button/Button";
 import { EmptyTableContent } from "components/EmptyTableContent/EmptyTableContent";
 import { FavoriteTabs } from "components/FavoriteTabs/FavoriteTabs";
 import Loader from "components/Loader/Loader";
@@ -27,6 +28,10 @@ import { Sorter, useSorterHandlers } from "components/Sorter/Sorter";
 import { TableTh, TableTheadTr } from "components/Table/Table";
 import { ButtonRowScrollFadeContainer, TableScrollFadeContainer } from "components/TableScrollFade/TableScrollFade";
 import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
+
+import NewLinkIcon from "img/ic_new_link.svg?react";
+
+const LIQUIDITY_APP_URL = "https://liquidity.0xmarkets.io/";
 
 import { FeeApyLabel } from "./FeeApyLabel";
 import { GmListItem } from "./GmListItem";
@@ -135,6 +140,19 @@ export function GmList({
     <PoolsCard
       title={t`0xMarkets Pools`}
       className="grow"
+      titleAction={
+        <Button
+          variant="secondary"
+          size="small"
+          to={LIQUIDITY_APP_URL}
+          newTab
+          showExternalLinkArrow={false}
+          className="whitespace-nowrap !px-12 !py-6 !text-body-small !text-typography-secondary hover:!text-typography-primary"
+        >
+          <Trans>Manage Liquidity</Trans>
+          <NewLinkIcon className="ml-6 size-12 shrink-0 opacity-70" />
+        </Button>
+      }
       description={
         <div className="flex flex-col gap-16">
           <Trans>
@@ -221,7 +239,7 @@ export function GmList({
                         <PerformanceLabel upperCase variant="iconStroke" />
                       </Sorter>
                     </TableTh>
-                    <TableTh>
+                    <TableTh className="pr-16">
                       <TooltipWithPortal
                         handle={t`SNAPSHOT`}
                         className="normal-case"
@@ -230,7 +248,6 @@ export function GmList({
                         variant="iconStroke"
                       />
                     </TableTh>
-                    <TableTh className="pr-16" />
                   </TableTheadTr>
                 </thead>
                 <tbody>

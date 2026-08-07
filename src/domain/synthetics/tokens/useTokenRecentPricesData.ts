@@ -14,12 +14,47 @@ import { parseContractPrice } from "./utils";
 
 const WS_CONNECTED_POLL_INTERVAL = 10_000;
 
+/** Ignore wrong-chain WS feeds (e.g. Sepolia USD0 tickers while UI is on Base mainnet). */
+const MIN_MAPPED_TICKERS_FOR_WS = 3;
+
 type TokenPricesDataResult = {
   pricesData?: TokenPricesData;
   updatedAt?: number;
   error?: Error;
   isPriceDataLoading: boolean;
 };
+
+function mapTickersToPrices(chainId: number, priceItems: TickerData[]): TokenPricesData {
+  const result: TokenPricesData = {};
+
+  for (const priceItem of priceItems) {
+    let tokenConfig: Token;
+
+    try {
+      tokenConfig = getToken(chainId, priceItem.tokenAddress);
+    } catch {
+      continue;
+    }
+
+    result[tokenConfig.address] = {
+      minPrice: parseContractPrice(BigInt(priceItem.minPrice), tokenConfig.decimals),
+      maxPrice: parseContractPrice(BigInt(priceItem.maxPrice), tokenConfig.decimals),
+    };
+  }
+
+  const wrappedToken = getWrappedToken(chainId);
+
+  if (result[wrappedToken.address] && !result[NATIVE_TOKEN_ADDRESS]) {
+    result[NATIVE_TOKEN_ADDRESS] = result[wrappedToken.address];
+  }
+
+  return result;
+}
+
+function countMappedTickers(prices: TokenPricesData): number {
+  // Native is mirrored from wrapped — don't double-count
+  return Object.keys(prices).filter((address) => address !== NATIVE_TOKEN_ADDRESS).length;
+}
 
 export function useTokenRecentPricesRequest(chainId: number): TokenPricesDataResult {
   const oracleKeeperFetcher = useOracleKeeperFetcher(chainId);
@@ -43,39 +78,19 @@ export function useTokenRecentPricesRequest(chainId: number): TokenPricesDataRes
       refreshInterval: refreshPricesInterval,
       fetcher: ([chainId]) =>
         oracleKeeperFetcher.fetchTickers().then((priceItems) => {
-          // Timestamp gating: use WS data if it's fresher than HTTP response
+          // Prefer fresher WS only when it maps to this chain's tokens
           const wsLatest = wsLatestRef.current;
           if (wsLatest) {
             const httpMaxUpdatedAt = priceItems.length > 0 ? Math.max(...priceItems.map((t) => t.updatedAt)) : 0;
             if (isNewerThan(wsLatest.maxUpdatedAt, httpMaxUpdatedAt)) {
-              priceItems = wsLatest.data;
+              const wsMapped = mapTickersToPrices(chainId, wsLatest.data);
+              if (countMappedTickers(wsMapped) >= MIN_MAPPED_TICKERS_FOR_WS) {
+                priceItems = wsLatest.data;
+              }
             }
           }
 
-          const result: TokenPricesData = {};
-
-          priceItems.forEach((priceItem) => {
-            let tokenConfig: Token;
-
-            try {
-              tokenConfig = getToken(chainId, priceItem.tokenAddress);
-            } catch (e) {
-              // ignore unknown token errors
-
-              return;
-            }
-
-            result[tokenConfig.address] = {
-              minPrice: parseContractPrice(BigInt(priceItem.minPrice), tokenConfig.decimals),
-              maxPrice: parseContractPrice(BigInt(priceItem.maxPrice), tokenConfig.decimals),
-            };
-          });
-
-          const wrappedToken = getWrappedToken(chainId);
-
-          if (result[wrappedToken.address] && !result[NATIVE_TOKEN_ADDRESS]) {
-            result[NATIVE_TOKEN_ADDRESS] = result[wrappedToken.address];
-          }
+          const result = mapTickersToPrices(chainId, priceItems);
 
           return {
             pricesData: result,
@@ -88,28 +103,18 @@ export function useTokenRecentPricesRequest(chainId: number): TokenPricesDataRes
 
   // Subscribe to WS ticker events and update SWR cache directly (no refetch)
   useEffect(() => {
+    wsLatestRef.current = null;
+
     const handler = (tickers: TickerData[]) => {
+      const result = mapTickersToPrices(chainId, tickers);
+
+      // Sepolia (or other) feeds share WETH address — refuse to wipe mainnet USDC/indices
+      if (countMappedTickers(result) < MIN_MAPPED_TICKERS_FOR_WS) {
+        return;
+      }
+
       const maxUpdatedAt = Math.max(...tickers.map((t) => t.updatedAt));
       wsLatestRef.current = { data: tickers, maxUpdatedAt };
-
-      const result: TokenPricesData = {};
-      for (const priceItem of tickers) {
-        let tokenConfig: Token;
-        try {
-          tokenConfig = getToken(chainId, priceItem.tokenAddress);
-        } catch {
-          continue;
-        }
-        result[tokenConfig.address] = {
-          minPrice: parseContractPrice(BigInt(priceItem.minPrice), tokenConfig.decimals),
-          maxPrice: parseContractPrice(BigInt(priceItem.maxPrice), tokenConfig.decimals),
-        };
-      }
-
-      const wrappedToken = getWrappedToken(chainId);
-      if (result[wrappedToken.address] && !result[NATIVE_TOKEN_ADDRESS]) {
-        result[NATIVE_TOKEN_ADDRESS] = result[wrappedToken.address];
-      }
 
       mutate({ result: { pricesData: result, updatedAt: Date.now() }, start: Date.now() }, { revalidate: false });
     };

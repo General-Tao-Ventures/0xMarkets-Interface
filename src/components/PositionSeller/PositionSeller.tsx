@@ -65,19 +65,20 @@ import { helperToast } from "lib/helperToast";
 import { useLocalizedMap } from "lib/i18n";
 import { initDecreaseOrderMetricData, sendOrderSubmittedMetric, sendTxnValidationErrorMetric } from "lib/metrics/utils";
 import {
-  calculateDisplayDecimals,
   formatAmount,
   formatAmountFree,
   formatDeltaUsd,
   formatPercentage,
   formatUsd,
   parseValue,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { useJsonRpcProvider } from "lib/rpc";
 import { useHasOutdatedUi } from "lib/useHasOutdatedUi";
 import useWallet from "lib/wallets/useWallet";
 import { convertTokenAddress, getToken, getTokenVisualMultiplier } from "sdk/configs/tokens";
 import { bigMath } from "sdk/utils/bigmath";
+import { toFxDisplayIsLong, toFxDisplayPrice } from "sdk/utils/fxDisplay";
 import {
   BatchOrderTxnParams,
   buildDecreaseOrderPayload,
@@ -672,6 +673,7 @@ export function PositionSeller() {
             formatLiquidationPrice(position.liquidationPrice, {
               displayDecimals: marketDecimals,
               visualMultiplier: toToken?.visualMultiplier,
+              indexSymbol: position.indexToken.symbol,
             })!
           }
           to={
@@ -681,6 +683,7 @@ export function PositionSeller() {
                 ? formatLiquidationPrice(nextPositionValues?.nextLiqPrice, {
                     displayDecimals: marketDecimals,
                     visualMultiplier: toToken?.visualMultiplier,
+                    indexSymbol: position.indexToken.symbol,
                   })
                 : undefined
           }
@@ -895,7 +898,13 @@ export function PositionSeller() {
 
           <TradeInfoIcon
             isMobile={isMobile}
-            tradeType={position?.isLong ? TradeType.Long : TradeType.Short}
+            tradeType={
+              position
+                ? toFxDisplayIsLong(position.isLong, position.indexToken.symbol)
+                  ? TradeType.Long
+                  : TradeType.Short
+                : TradeType.Long
+            }
             tradePlace="position-seller"
           />
         </div>
@@ -933,16 +942,23 @@ export function PositionSeller() {
                   <BuyInputSection
                     topLeftLabel={t`Trigger Price`}
                     topRightLabel={t`Mark`}
-                    topRightValue={formatUsd(markPrice, {
+                    topRightValue={formatUsd(toFxDisplayPrice(markPrice, position?.indexToken.symbol), {
                       displayDecimals: marketDecimals,
                       visualMultiplier: toToken?.visualMultiplier,
                     })}
                     onClickTopRightLabel={() => {
+                      const displayMark =
+                        toFxDisplayPrice(markPrice, position?.indexToken.symbol) ?? markPrice;
+                      if (displayMark === undefined) return;
                       setTriggerPriceInputValueRaw(
                         formatAmount(
-                          markPrice,
+                          displayMark,
                           USD_DECIMALS,
-                          calculateDisplayDecimals(markPrice, USD_DECIMALS, toToken?.visualMultiplier),
+                          resolvePriceDisplayDecimals(
+                            marketDecimals ?? toToken?.priceDecimals,
+                            displayMark,
+                            toToken?.visualMultiplier
+                          ),
                           undefined,
                           undefined,
                           toToken?.visualMultiplier

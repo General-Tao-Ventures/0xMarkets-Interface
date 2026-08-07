@@ -60,7 +60,6 @@ import { useMaxAvailableAmount } from "domain/tokens/useMaxAvailableAmount";
 import { useLocalizedMap } from "lib/i18n";
 import { throttleLog } from "lib/logging";
 import {
-  calculateDisplayDecimals,
   formatAmount,
   formatAmountFree,
   formatBalanceAmount,
@@ -70,13 +69,16 @@ import {
   formatUsd,
   formatUsdPrice,
   parseValue,
+  PRECISION,
+  resolvePriceDisplayDecimals,
 } from "lib/numbers";
 import { EMPTY_ARRAY, getByKey } from "lib/objects";
 import { useCursorInside } from "lib/useCursorInside";
 import { sendTradeBoxInteractionStartedEvent } from "lib/userAnalytics";
 import useWallet from "lib/wallets/useWallet";
 import { NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
-import { TradeMode } from "sdk/types/trade";
+import { TradeMode, TradeType } from "sdk/types/trade";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import { AlertInfoCard } from "components/AlertInfo/AlertInfoCard";
 import Button from "components/Button/Button";
@@ -188,6 +190,9 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     setNumberOfParts,
     setDuration,
   } = useSelector(selectTradeboxState);
+
+  // tradeFlags.isLong is index-domain for JPY; UI chrome should follow TradeType (display).
+  const displayIsLong = tradeType === TradeType.Long;
 
   const fromToken = useSelector(selectTradeboxFromToken);
   const toToken = getByKey(tokensData, toTokenAddress);
@@ -406,11 +411,26 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
 
   useEffect(
     function validateLeverageOption() {
-      if (leverageOption && leverageOption > maxAllowedLeverage / BASIS_POINTS_DIVISOR) {
-        setLeverageOption(maxAllowedLeverage / BASIS_POINTS_DIVISOR);
+      if (leverageOption === undefined) return;
+
+      const maxX = maxAllowedLeverage / BASIS_POINTS_DIVISOR;
+      if (leverageOption > maxX) {
+        setLeverageOption(maxX);
+        return;
+      }
+
+      // Floor to on-chain MIN_LEVERAGE when configured (1e30 factor → x).
+      // Round to nearest tenth (not ceil) so exact 1.0x stays selectable.
+      const minLeverageFactor = marketInfo?.minLeverage ?? 0n;
+      if (minLeverageFactor > 0n) {
+        const minXBps = Number((minLeverageFactor * BigInt(BASIS_POINTS_DIVISOR)) / PRECISION);
+        const minX = Math.round(minXBps / 1000) / 10;
+        if (Number.isFinite(minX) && minX > 0 && leverageOption < minX) {
+          setLeverageOption(Math.min(maxX, minX));
+        }
       }
     },
-    [leverageOption, maxAllowedLeverage, setLeverageOption]
+    [leverageOption, maxAllowedLeverage, marketInfo?.minLeverage, setLeverageOption]
   );
 
   useEffect(
@@ -586,17 +606,20 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       return;
     }
 
+    // Trigger input is display-domain (USD/JPY ~157).
+    const displayMark = toFxDisplayPrice(markPrice, toToken?.symbol) ?? markPrice;
+
     setTriggerPriceInputValue(
       formatAmount(
-        markPrice,
+        displayMark,
         USD_DECIMALS,
-        calculateDisplayDecimals(markPrice, undefined, toToken?.visualMultiplier),
+        resolvePriceDisplayDecimals(toToken?.priceDecimals, displayMark, toToken?.visualMultiplier),
         undefined,
         undefined,
         toToken?.visualMultiplier
       )
     );
-  }, [markPrice, setTriggerPriceInputValue, toToken?.visualMultiplier]);
+  }, [markPrice, setTriggerPriceInputValue, toToken?.priceDecimals, toToken?.symbol, toToken?.visualMultiplier]);
 
   const handleLimitPricePercentageShortcut = useCallback(
     (pct: number) => {
@@ -604,16 +627,21 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
         return;
       }
 
-      // pct is e.g. -5, -1, 1, 5 — scale to basis points to avoid float math
+      // Apply % on display quote so +1% on USD/JPY moves ~157 → ~159 (not inverted index).
+      const displayMark = toFxDisplayPrice(markPrice, toToken?.symbol) ?? markPrice;
       const bps = BigInt(Math.round(pct * 100));
-      const adjustedPrice = (markPrice * (10000n + bps)) / 10000n;
-      const displayDecimals = calculateDisplayDecimals(adjustedPrice, undefined, toToken?.visualMultiplier);
+      const adjustedPrice = (displayMark * (10000n + bps)) / 10000n;
+      const displayDecimals = resolvePriceDisplayDecimals(
+        toToken?.priceDecimals,
+        adjustedPrice,
+        toToken?.visualMultiplier
+      );
 
       setTriggerPriceInputValue(
         formatAmount(adjustedPrice, USD_DECIMALS, displayDecimals, undefined, undefined, toToken?.visualMultiplier)
       );
     },
-    [markPrice, setTriggerPriceInputValue, toToken?.visualMultiplier]
+    [markPrice, setTriggerPriceInputValue, toToken?.priceDecimals, toToken?.symbol, toToken?.visualMultiplier]
   );
 
   const handleTriggerMarkPriceClick = useCallback(
@@ -840,8 +868,9 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       <BuyInputSection
         topLeftLabel={priceLabel}
         topRightLabel={t`Mark`}
-        topRightValue={formatUsdPrice(markPrice, {
+        topRightValue={formatUsdPrice(toFxDisplayPrice(markPrice, toToken?.symbol), {
           visualMultiplier: toToken?.visualMultiplier,
+          displayDecimals: toToken?.priceDecimals,
         })}
         onClickTopRightLabel={setMarkPriceAsTriggerPrice}
         inputValue={triggerPriceInputValue}
@@ -945,6 +974,8 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
 
     return formatLiquidationPrice(nextPositionValues?.nextLiqPrice, {
       visualMultiplier: toToken?.visualMultiplier,
+      indexSymbol: toToken?.symbol,
+      displayDecimals: toToken?.priceDecimals,
     });
   }, [
     isTrigger,
@@ -953,6 +984,8 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
     increaseAmounts,
     nextPositionValues?.nextLiqPrice,
     toToken?.visualMultiplier,
+    toToken?.symbol,
+    toToken?.priceDecimals,
     selectedPosition,
   ]);
 
@@ -1051,7 +1084,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                           marks={leverageSliderMarks}
                           value={leverageOption}
                           onChange={setLeverageOption}
-                          isPositive={isLong}
+                          isPositive={displayIsLong}
                           isSlim
                         />
                         {ladderTooltipContent && (
@@ -1132,7 +1165,7 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                     sizeUsd={isSwap ? payUsd : increaseAmounts?.sizeDeltaUsd}
                     marketInfo={marketInfo}
                     type={isSwap ? "swap" : "increase"}
-                    isLong={isLong}
+                    isLong={displayIsLong}
                   />
                 )}
               </div>
@@ -1224,6 +1257,9 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
                   selectedPosition
                     ? formatLiquidationPrice(selectedPosition?.liquidationPrice, {
                         visualMultiplier: toToken?.visualMultiplier,
+                        markPrice: selectedPosition?.markPrice,
+                        indexSymbol: toToken?.symbol,
+                        displayDecimals: toToken?.priceDecimals,
                       })
                     : undefined
                 }

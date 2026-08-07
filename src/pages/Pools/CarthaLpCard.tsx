@@ -46,6 +46,7 @@ function formatRelative(targetIso: string, nowMs: number): string {
   return `${hours}h ago`;
 }
 
+/** 0xMarkets LP stats card. */
 export default function CarthaLpCard() {
   const { data, isLoading, error } = useCarthaLpStats();
 
@@ -60,7 +61,7 @@ export default function CarthaLpCard() {
       <div className="flex flex-wrap items-end justify-between gap-16 border-b-1/2 border-slate-800 p-16">
         <div className="flex flex-col gap-4">
           <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
-            <Trans>Cartha LP</Trans>
+            <Trans>0xMarkets LP</Trans>
           </span>
           <span className="text-h2 font-medium normal-nums">
             <Trans>Earn up to</Trans>{" "}
@@ -77,9 +78,7 @@ export default function CarthaLpCard() {
             label={<Trans>TVL</Trans>}
             value={data ? usdFormatter.format(data.tvl.current_usd) : "—"}
             subValue={
-              data ? (
-                <Trans>{usdFormatter.format(data.tvl.upcoming_usd)} next epoch</Trans>
-              ) : null
+              data ? <Trans>{usdFormatter.format(data.tvl.upcoming_usd)} next epoch</Trans> : null
             }
           />
           <Stat
@@ -160,13 +159,13 @@ function ApyTierCell({ tier, isMax }: { tier?: CarthaApyTier; isMax?: boolean })
       })}
     >
       <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
-        {tier ? <Trans>{tier.lock_days}d lock</Trans> : <Trans>—</Trans>}
+        {tier ? `${tier.lock_days}d lock` : "—"}
       </span>
       <span className="text-body-large font-medium normal-nums">
         {tier ? formatPct(tier.apy_annual_pct) : "—"}
       </span>
       <span className="text-body-small text-typography-secondary normal-nums">
-        {tier ? <Trans>{formatPct(tier.apy_weekly_pct)} / week</Trans> : null}
+        {tier ? `${formatPct(tier.apy_weekly_pct)} / week` : null}
       </span>
     </div>
   );

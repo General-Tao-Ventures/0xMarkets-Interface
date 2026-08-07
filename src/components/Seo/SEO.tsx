@@ -6,7 +6,7 @@ function SEO(props) {
   const meta = {
     title: t`0xMarkets | Decentralized Perpetual Exchange`,
     description: t`Trade spot or perpetual BTC, ETH, and other top cryptocurrencies with up to 100x leverage directly from your wallet.`,
-    image: "https://app.0xmarkets.io/og.png",
+    image: "https://res.cloudinary.com/dpboshzzm/image/upload/v1778166575/Graphic_1__Wormhole_Effect_gzysjl.png",
     type: "exchange",
     ...customMeta,
   };
@@ -22,7 +22,7 @@ function SEO(props) {
         <meta property="og:title" content={meta.title} />
         <meta property="og:image" content={meta.image} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@0xMarkets" />
+        <meta name="twitter:site" content="@0x_Markets" />
         <meta name="twitter:title" content={meta.title} />
         <meta name="twitter:description" content={meta.description} />
         <meta name="twitter:image" content={meta.image} />
