@@ -1,16 +1,33 @@
 import React from "react";
 
-type InternalLink = { to: string | { pathname: string }; onClick?: (e: React.MouseEvent) => void };
+type LinkChildProps = {
+  to?: string | { pathname?: string };
+  href?: string;
+  newTab?: boolean;
+  target?: string;
+  onClick?: (e: React.MouseEvent) => void;
+};
 
-interface TrackingLinkProps<TChildren extends InternalLink | HTMLAnchorElement> {
+interface TrackingLinkProps {
   onClick?: (e: React.MouseEvent<HTMLAnchorElement | HTMLDivElement, MouseEvent>) => Promise<void> | void;
-  children: React.ReactElement<TChildren>;
+  children: React.ReactElement<LinkChildProps>;
 }
 
-export function TrackingLink<TChildren extends InternalLink | HTMLAnchorElement>({
-  onClick,
-  children,
-}: TrackingLinkProps<TChildren>) {
+function resolveUrl(props: LinkChildProps): string | undefined {
+  if (typeof props.href === "string" && props.href) {
+    return props.href;
+  }
+  if (props.to !== undefined) {
+    return typeof props.to === "string" ? props.to : props.to.pathname || "/";
+  }
+  return undefined;
+}
+
+function shouldOpenInNewTab(props: LinkChildProps): boolean {
+  return Boolean(props.newTab) || props.target === "_blank";
+}
+
+export function TrackingLink({ onClick, children }: TrackingLinkProps) {
   if (!children) {
     return null;
   }
@@ -21,24 +38,25 @@ export function TrackingLink<TChildren extends InternalLink | HTMLAnchorElement>
 
       try {
         await onClick(e);
-      } catch (error) {
+      } catch {
         // ignore
       }
 
-      // Navigate after the onClick completes
-      if ("href" in children.props) {
-        window.location.href = children.props.href;
-      } else if ("to" in children.props) {
-        const to = children.props.to;
-        window.location.href = typeof to === "string" ? to : to.pathname || "/";
+      const url = resolveUrl(children.props);
+      if (!url) return;
+
+      if (shouldOpenInNewTab(children.props)) {
+        window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        window.location.href = url;
       }
-    } else if ("onClick" in children.props) {
-      children.props.onClick?.(e);
+    } else if (children.props.onClick) {
+      children.props.onClick(e);
     }
   };
 
   return React.cloneElement(children, {
     ...children.props,
     onClick: handleClick,
-  } as TChildren);
+  });
 }

@@ -13,7 +13,7 @@ export function SocialSection() {
       {
         ...SOCIAL_MAP.Discord,
         value: (
-          <a href={SOCIAL_MAP.Discord.link}>
+          <a href={SOCIAL_MAP.Discord.link} target="_blank" rel="noopener noreferrer">
             <Trans>Join</Trans>
           </a>
         ),
@@ -21,7 +21,7 @@ export function SocialSection() {
       {
         ...SOCIAL_MAP.Twitter,
         value: (
-          <a href={SOCIAL_MAP.Twitter.link}>
+          <a href={SOCIAL_MAP.Twitter.link} target="_blank" rel="noopener noreferrer">
             <Trans>Follow</Trans>
           </a>
         ),
