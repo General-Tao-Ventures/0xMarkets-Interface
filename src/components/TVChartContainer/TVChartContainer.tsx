@@ -62,6 +62,29 @@ function fitHigherTimeframeVisibleRange(widget: IChartingLibraryWidget | null | 
   }
 }
 
+function waitForTradingView(timeoutMs = 15000): Promise<NonNullable<typeof window.TradingView>> {
+  return new Promise((resolve, reject) => {
+    if (window.TradingView?.widget) {
+      resolve(window.TradingView);
+      return;
+    }
+
+    const startedAt = Date.now();
+    const intervalId = window.setInterval(() => {
+      if (window.TradingView?.widget) {
+        window.clearInterval(intervalId);
+        resolve(window.TradingView);
+        return;
+      }
+
+      if (Date.now() - startedAt > timeoutMs) {
+        window.clearInterval(intervalId);
+        reject(new Error("TradingView charting library failed to load"));
+      }
+    }, 50);
+  });
+}
+
 export default function TVChartContainer({
   chartToken,
   chainId,
@@ -195,6 +218,8 @@ export default function TVChartContainer({
   useEffect(() => {
     if (!datafeed) return;
 
+    let cancelled = false;
+
     const widgetOptions: ChartingLibraryWidgetOptions = {
       debug: false,
       symbol: symbolRef.current && getSymbolName(symbolRef.current, visualMultiplier), // Using ref to avoid unnecessary re-renders on symbol change and still have access to the latest symbol
@@ -224,59 +249,70 @@ export default function TVChartContainer({
       auto_save_delay: 1,
       save_load_adapter: new SaveLoadAdapter(tvCharts, setTvCharts, tradePageVersion),
     };
-    tvWidgetRef.current = new window.TradingView.widget(widgetOptions);
 
-    tvWidgetRef.current!.onChartReady(function () {
-      setChartReady(true);
+    void waitForTradingView()
+      .then((TradingView) => {
+        if (cancelled || !chartContainerRef.current) return;
 
-      const savedPeriod = tvWidgetRef.current?.activeChart().resolution();
-      const preferredPeriod = getObjectKeyFromValue(period, supportedResolutions) as ResolutionString;
+        tvWidgetRef.current = new TradingView.widget(widgetOptions);
 
-      if (savedPeriod && savedPeriod !== preferredPeriod) {
-        tvWidgetRef.current?.activeChart().setResolution(preferredPeriod);
-      }
+        tvWidgetRef.current!.onChartReady(function () {
+          setChartReady(true);
 
-      tvWidgetRef.current
-        ?.activeChart()
-        .onIntervalChanged()
-        .subscribe(null, (interval) => {
-          if (supportedResolutions[interval]) {
-            const period = supportedResolutions[interval];
-            setPeriod(period);
+          const savedPeriod = tvWidgetRef.current?.activeChart().resolution();
+          const preferredPeriod = getObjectKeyFromValue(period, supportedResolutions) as ResolutionString;
+
+          if (savedPeriod && savedPeriod !== preferredPeriod) {
+            tvWidgetRef.current?.activeChart().setResolution(preferredPeriod);
+          }
+
+          tvWidgetRef.current
+            ?.activeChart()
+            .onIntervalChanged()
+            .subscribe(null, (interval) => {
+              if (supportedResolutions[interval]) {
+                const period = supportedResolutions[interval];
+                setPeriod(period);
+                tvWidgetRef.current?.saveChartToServer(undefined, undefined, {
+                  chartName: `gmx-chart-v${tradePageVersion}`,
+                });
+
+                const priceScale = tvWidgetRef.current?.activeChart().getPanes().at(0)?.getMainSourcePriceScale();
+                if (priceScale) {
+                  priceScale.setAutoScale(true);
+                }
+              }
+            });
+
+          tvWidgetRef.current?.subscribe("onAutoSaveNeeded", () => {
             tvWidgetRef.current?.saveChartToServer(undefined, undefined, {
               chartName: `gmx-chart-v${tradePageVersion}`,
             });
+          });
 
-            const priceScale = tvWidgetRef.current?.activeChart().getPanes().at(0)?.getMainSourcePriceScale();
-            if (priceScale) {
-              priceScale.setAutoScale(true);
+          tvWidgetRef.current?.activeChart().dataReady(() => {
+            setChartDataLoading(false);
+            try {
+              const chart = tvWidgetRef.current?.activeChart();
+              const priceScale = chart?.getPanes().at(0)?.getMainSourcePriceScale();
+              priceScale?.setAutoScale(true);
+              fitHigherTimeframeVisibleRange(tvWidgetRef.current);
+              // Saved layout can re-apply after dataReady; nudge again on the next ticks.
+              requestAnimationFrame(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current));
+              window.setTimeout(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current), 250);
+            } catch {
+              // ignore — charting_library version differences
             }
-          }
+          });
         });
-
-      tvWidgetRef.current?.subscribe("onAutoSaveNeeded", () => {
-        tvWidgetRef.current?.saveChartToServer(undefined, undefined, {
-          chartName: `gmx-chart-v${tradePageVersion}`,
-        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
       });
-
-      tvWidgetRef.current?.activeChart().dataReady(() => {
-        setChartDataLoading(false);
-        try {
-          const chart = tvWidgetRef.current?.activeChart();
-          const priceScale = chart?.getPanes().at(0)?.getMainSourcePriceScale();
-          priceScale?.setAutoScale(true);
-          fitHigherTimeframeVisibleRange(tvWidgetRef.current);
-          // Saved layout can re-apply after dataReady; nudge again on the next ticks.
-          requestAnimationFrame(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current));
-          window.setTimeout(() => fitHigherTimeframeVisibleRange(tvWidgetRef.current), 250);
-        } catch {
-          // ignore — charting_library version differences
-        }
-      });
-    });
 
     return () => {
+      cancelled = true;
       if (tvWidgetRef.current) {
         tvWidgetRef.current.remove();
         tvWidgetRef.current = null;
