@@ -82,6 +82,7 @@ export const selectChartLines = createSelector<StaticChartLine[]>((q) => {
       lines.push({
         title: t`Open ${longOrShortText} - ${marketIndexName}`,
         price: entryPrice,
+        isLong: displayIsLong,
       });
     }
 
@@ -89,6 +90,7 @@ export const selectChartLines = createSelector<StaticChartLine[]>((q) => {
       lines.push({
         title: t`Liq. ${longOrShortText} - ${marketIndexName}`,
         price: liquidationPrice,
+        isLong: displayIsLong,
       });
     }
 
