@@ -99,7 +99,7 @@ function TokenIcon({ className, symbol, displaySize, importSize = 24, badge, bad
   const img = (
     <img
       data-qa="token-icon"
-      className={cx(sub ? containerClassName : classNames, "object-cover")}
+      className={cx(sub ? containerClassName : classNames, "overflow-hidden rounded-full object-cover")}
       src={resolveIconSrc(symbol, importSize)}
       alt={symbol}
       width={displaySize}

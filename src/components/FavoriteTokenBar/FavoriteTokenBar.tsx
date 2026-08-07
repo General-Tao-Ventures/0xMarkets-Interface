@@ -52,10 +52,13 @@ export function FavoriteTokenBar() {
         const tokenData = tokensData?.[token.address];
         const dayPriceDelta = dayPriceDeltaMap?.[token.address];
         const isActive = chartToken?.address === token.address;
+        const displaySymbol = token.baseSymbol || token.symbol;
+        const displayDecimals = token.priceDecimals ?? 2;
 
         const price = tokenData
           ? formatUsdPrice(getMidPrice(tokenData.prices), {
-              visualMultiplier: tokenData.visualMultiplier
+              visualMultiplier: tokenData.visualMultiplier,
+              displayDecimals,
             })
           : "-";
 
@@ -63,7 +66,7 @@ export function FavoriteTokenBar() {
           <button
             key={token.address}
             className={cx(
-              "flex min-w-[120px] flex-shrink-0 items-center gap-8 px-12 py-8 transition-colors cursor-pointer",
+              "flex w-[152px] flex-shrink-0 items-center gap-8 overflow-hidden px-12 py-8 transition-colors cursor-pointer",
               "hover:bg-slate-750",
               {
                 "bg-slate-750": isActive,
@@ -72,27 +75,26 @@ export function FavoriteTokenBar() {
             onClick={() => handleTokenSelect(token.address)}
           >
             <TokenIcon
-              symbol={token.symbol}
+              symbol={displaySymbol}
               displaySize={20}
               importSize={24}
             />
-            <div className="flex flex-col items-start text-left">
+            <div className="flex min-w-0 flex-col items-start text-left">
               <div className="flex items-center gap-4 text-12 font-medium text-typography-primary">
-                {getTokenVisualMultiplier(token)}{token.symbol}
+                {getTokenVisualMultiplier(token)}
+                {displaySymbol}
               </div>
-              <div className="flex items-center gap-8 text-11">
-                <span className="text-typography-secondary">{price}</span>
-                {dayPriceDelta?.deltaPercentageStr && (
-                  <span
-                    className={cx("font-medium", {
-                      "text-green-400": dayPriceDelta.deltaPercentage && dayPriceDelta.deltaPercentage > 0,
-                      "text-red-400": dayPriceDelta.deltaPercentage && dayPriceDelta.deltaPercentage < 0,
-                      "text-typography-secondary": !dayPriceDelta.deltaPercentage,
-                    })}
-                  >
-                    {dayPriceDelta.deltaPercentageStr}
-                  </span>
-                )}
+              <div className="flex w-full items-center gap-8 text-11 tabular-nums">
+                <span className="min-w-0 truncate text-typography-secondary">{price}</span>
+                <span
+                  className={cx("ml-auto shrink-0 font-medium", {
+                    "text-green-400": dayPriceDelta?.deltaPercentage && dayPriceDelta.deltaPercentage > 0,
+                    "text-red-400": dayPriceDelta?.deltaPercentage && dayPriceDelta.deltaPercentage < 0,
+                    "text-typography-secondary": !dayPriceDelta?.deltaPercentage,
+                  })}
+                >
+                  {dayPriceDelta?.deltaPercentageStr ?? "—"}
+                </span>
               </div>
             </div>
           </button>

@@ -2,13 +2,12 @@ import { t, Trans } from "@lingui/macro";
 import { useState } from "react";
 import cx from "classnames";
 
+import { useCarthaLpStats } from "domain/cartha/useCarthaLpStats";
 import { useGmMarketsApy } from "domain/synthetics/markets/useGmMarketsApy";
 import { usePerformanceAnnualized } from "domain/synthetics/markets/usePerformanceAnnualized";
 import { usePerformanceSnapshots } from "domain/synthetics/markets/usePerformanceSnapshots";
 import { usePoolsTimeRange } from "domain/synthetics/markets/usePoolsTimeRange";
-import useV2Stats from "domain/synthetics/stats/useV2Stats";
 import { useChainId } from "lib/chains";
-import { formatUsd } from "lib/numbers";
 
 import AppPageLayout from "components/AppPageLayout/AppPageLayout";
 import { ChainContentHeader } from "components/ChainContentHeader/ChainContentHeader";
@@ -94,19 +93,25 @@ export default function Pools() {
   );
 }
 
-function PoolsTvl() {
-  const { chainId } = useChainId();
-  const v2Stats = useV2Stats(chainId);
+const tvlFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
 
-  const tvl = v2Stats?.totalGMLiquidity ?? 0n;
+function PoolsTvl() {
+  const { data } = useCarthaLpStats();
+  const tvl = data?.tvl.current_usd;
 
   return (
     <div className="flex flex-col gap-4">
       <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
         Total Value Locked
       </span>
-      <span className="text-h1 normal-nums">{formatUsd(tvl, { displayDecimals: 0 })}</span>
-      <span className="text-body-medium text-typography-secondary">In vaults and pools</span>
+      <span className="text-h1 normal-nums">{tvl != null ? tvlFormatter.format(tvl) : "—"}</span>
+      <span className="text-body-medium text-typography-secondary">
+        <Trans>In 0xMarkets LP</Trans>
+      </span>
     </div>
   );
 }
