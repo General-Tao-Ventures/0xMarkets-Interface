@@ -15,6 +15,7 @@ const TOKEN_COLOR_MAP: Record<string, string> = {
   EUR: "#003399",
   GBP: "#CF142B",
   GOLD: "#FFD700",
+  SILVER: "#C0C0C0",
   JPY: "#BC002D",
   default: "#6062a6",
 };

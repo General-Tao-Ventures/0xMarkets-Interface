@@ -79,7 +79,8 @@ export const TOKENS: { [chainId: number]: Token[] } = {
     },
     {
       name: "Silver",
-      symbol: "XAG",
+      symbol: "SILVER",
+      // Oracle/API ticker remains XAG; display as SILVER (same pattern as GOLD vs XAU).
       priceDecimals: 3,
       decimals: 18,
       address: "0xA927aA364535ba04d88Fc5326D0773CC05d92c08",
