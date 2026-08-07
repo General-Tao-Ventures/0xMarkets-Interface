@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 import { SITE_PASSWORD_UNLOCKED_KEY } from "config/localStorage";
 
@@ -26,12 +26,6 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
 
   const gateEnabled = useMemo(() => Boolean(SITE_PASSWORD), []);
   const showGate = gateEnabled && !unlocked;
-
-  // Gate mounts before ThemeProvider, so force the app dark tokens while locked.
-  useEffect(() => {
-    if (!showGate) return;
-    document.documentElement.classList.add("dark");
-  }, [showGate]);
 
   if (!showGate) {
     return <>{children}</>;
