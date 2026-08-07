@@ -17,6 +17,7 @@ const TOKEN_COLOR_MAP: Record<string, string> = {
   GBP: "#CF142B",
   GOLD: "#FFD700",
   SILVER: "#C0C0C0",
+  XAG: "#C0C0C0",
   JPY: "#BC002D",
   default: "#6062a6",
 };
@@ -104,9 +105,11 @@ export function CompositionTable<T extends CompositionType>({ composition, compo
 }
 
 const CompositionTableRow = ({ item, sum }: { item: CompositionItem; sum: bigint }) => {
-  const tokenColor =
-    TOKEN_COLOR_MAP[item.type === "market" ? item.market.indexToken.symbol : item.token.symbol] ??
-    TOKEN_COLOR_MAP.default;
+  const colorKey =
+    item.type === "market"
+      ? (item.market.indexToken.baseSymbol ?? item.market.indexToken.symbol)
+      : (item.token.baseSymbol ?? item.token.symbol);
+  const tokenColor = TOKEN_COLOR_MAP[colorKey] ?? TOKEN_COLOR_MAP.default;
 
   const tokenCircleStyles = useMemo(() => {
     return {
