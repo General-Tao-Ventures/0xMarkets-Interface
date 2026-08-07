@@ -121,6 +121,15 @@ import { PriceImpactFeesRow } from "./TradeBoxRows/PriceImpactFeesRow";
 
 import "./TradeBox.scss";
 
+/** Cap synced trade input amounts at 2dp; keep more precision if 2dp would round to 0. */
+function formatTradeInputAmount(amount: bigint, tokenDecimals: number): string {
+  const capped = formatAmountFree(amount, tokenDecimals, 2);
+  if (amount > 0n && (capped === "0" || Number(capped) === 0)) {
+    return formatAmountFree(amount, tokenDecimals, 6);
+  }
+  return capped;
+}
+
 export function TradeBox({ isMobile }: { isMobile: boolean }) {
   const localizedTradeModeLabels = useLocalizedMap(tradeModeLabels);
   const localizedTradeTypeLabels = useLocalizedMap(tradeTypeLabels);
@@ -357,12 +366,12 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
       if (isSwap && swapAmounts) {
         if (focusedInput === "from") {
           setToTokenInputValue(
-            swapAmounts.amountOut > 0 ? formatAmountFree(swapAmounts.amountOut, toToken.decimals) : "",
+            swapAmounts.amountOut > 0 ? formatTradeInputAmount(swapAmounts.amountOut, toToken.decimals) : "",
             false
           );
         } else {
           setFromTokenInputValue(
-            swapAmounts.amountIn > 0 ? formatAmountFree(swapAmounts.amountIn, fromToken.decimals) : "",
+            swapAmounts.amountIn > 0 ? formatTradeInputAmount(swapAmounts.amountIn, fromToken.decimals) : "",
             false
           );
         }
@@ -373,14 +382,14 @@ export function TradeBox({ isMobile }: { isMobile: boolean }) {
         if (focusedInput === "from") {
           setToTokenInputValue(
             increaseAmounts.indexTokenAmount > 0
-              ? formatAmountFree(increaseAmounts.indexTokenAmount / visualMultiplier, toToken.decimals)
+              ? formatTradeInputAmount(increaseAmounts.indexTokenAmount / visualMultiplier, toToken.decimals)
               : "",
             false
           );
         } else {
           setFromTokenInputValue(
             increaseAmounts.initialCollateralAmount > 0
-              ? formatAmountFree(increaseAmounts.initialCollateralAmount, fromToken.decimals)
+              ? formatTradeInputAmount(increaseAmounts.initialCollateralAmount, fromToken.decimals)
               : "",
             false
           );

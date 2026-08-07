@@ -85,6 +85,7 @@ export const EXPRESS_ORDERS_ENABLED_KEY = "express-orders-enabled";
 export const ONE_CLICK_TRADING_ENABLED_KEY = "one-click-trading-enabled";
 export const GAS_PAYMENT_TOKEN_ADDRESS_KEY = "gas-payment-token-address";
 export const EXPRESS_TRADING_BANNER_DISMISSED_KEY = "express-trading-banner-dismissed";
+export const BETA_BANNER_DISMISSED_KEY = "beta-banner-dismissed";
 
 export const SUBACCOUNT_APPROVAL_KEY = "subaccount-approval";
 export const TOKEN_PERMITS_KEY = "token-permits";
