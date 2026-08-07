@@ -47,3 +47,5 @@ CLAUDE.md
 .serena
 .claude
 claude.md
+.vercel
+.env*.local
