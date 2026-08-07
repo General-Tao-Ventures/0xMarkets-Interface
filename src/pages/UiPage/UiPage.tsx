@@ -219,7 +219,7 @@ export default memo(function UiPage() {
           {[BASE_SEPOLIA].map((chainId) => (
             <div key={chainId}>
               <h3 className="text-h3">{getChainName(chainId)}</h3>
-              {["meme", "layer1", "layer2", "defi"].map((category) => (
+              {["crypto", "forex", "commodity"].map((category) => (
                 <div key={category}>
                   <h3 className="text-h3">{category}</h3>
                   <div className="flex flex-wrap gap-4">

@@ -137,7 +137,8 @@ export function useTokensFavorites(key: TokenFavoriteKey): TokenFavoritesState {
   const { tabs, setTab, toggleFavoriteToken, indexFavoriteTokens, gmFavoriteTokens } = useContext(context);
   const type = TAB_TYPE_MAP[key];
 
-  const tab = tabs[key] || "all";
+  const tabCandidate = tabs[key] || "all";
+  const tab = tokensFavoritesTabOptions.includes(tabCandidate) ? tabCandidate : "all";
   const favoriteTokens = type === "gm" ? gmFavoriteTokens : indexFavoriteTokens;
 
   const internalSetTab = useCallback(
@@ -165,10 +166,9 @@ export function useTokensFavorites(key: TokenFavoriteKey): TokenFavoritesState {
 export const tokensFavoritesTabOptions: TokenFavoritesTabOption[] = [
   "all",
   "favorites",
-  "defi",
-  "meme",
-  "layer1",
-  "layer2",
+  "crypto",
+  "forex",
+  "commodity",
 ];
 
 export const tokensFavoritesTabOptionLabels: Record<TokenFavoritesTabOption, MessageDescriptor> = {
@@ -177,8 +177,7 @@ export const tokensFavoritesTabOptionLabels: Record<TokenFavoritesTabOption, Mes
     comment: "Filter option for tokens favorites",
   }),
   favorites: msg`Favorites`,
-  meme: msg`Meme`,
-  layer1: msg`Layer 1`,
-  layer2: msg`Layer 2`,
-  defi: msg`DeFi`,
+  crypto: msg`Crypto`,
+  forex: msg`Forex`,
+  commodity: msg`Commodity`,
 };

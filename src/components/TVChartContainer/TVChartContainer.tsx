@@ -328,9 +328,9 @@ export default function TVChartContainer({
       if (tvWidgetRef.current) {
         tvWidgetRef.current.remove();
         tvWidgetRef.current = null;
-        setChartReady(false);
-        setChartDataLoading(true);
       }
+      setChartReady(false);
+      setChartDataLoading(true);
     };
     // We don't want to re-initialize the chart when the symbol changes. This will make the chart flicker.
     // eslint-disable-next-line react-hooks/exhaustive-deps
