@@ -254,7 +254,16 @@ export default function TVChartContainer({
       .then((TradingView) => {
         if (cancelled || !chartContainerRef.current) return;
 
-        tvWidgetRef.current = new TradingView.widget(widgetOptions);
+        try {
+          tvWidgetRef.current = new TradingView.widget(widgetOptions);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          if (!cancelled) {
+            setChartDataLoading(false);
+          }
+          return;
+        }
 
         tvWidgetRef.current!.onChartReady(function () {
           setChartReady(true);
@@ -309,6 +318,9 @@ export default function TVChartContainer({
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.error(error);
+        if (!cancelled) {
+          setChartDataLoading(false);
+        }
       });
 
     return () => {
