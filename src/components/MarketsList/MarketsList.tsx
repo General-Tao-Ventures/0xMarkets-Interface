@@ -7,11 +7,12 @@ import { getMarketIndexName, getMarketPoolName } from "domain/synthetics/markets
 import { IndexTokenStat } from "domain/synthetics/stats/marketsInfoDataToIndexTokensStats";
 import { stripBlacklistedWords } from "domain/tokens/utils";
 import { useChainId } from "lib/chains";
-import { importImage } from "lib/legacy";
 import { formatAmount, formatAmountHuman, formatRatePercentage, formatUsdPrice } from "lib/numbers";
 import { searchBy } from "lib/searchBy";
 import AssetDropdown from "pages/Dashboard/AssetDropdown";
 import { getTokenVisualMultiplier } from "sdk/configs/tokens";
+
+import TokenIcon from "components/TokenIcon/TokenIcon";
 
 import { BottomTablePagination } from "components/Pagination/BottomTablePagination";
 import usePagination, { DEFAULT_PAGE_SIZE } from "components/Referrals/usePagination";
@@ -208,10 +209,10 @@ function MarketsListDesktopItem({ stats }: { stats: IndexTokenStat }) {
         <div className="token-symbol-wrapper">
           <div className="flex items-center">
             <div className="App-card-title-info-icon min-h-40">
-              <img
-                src={importImage("ic_" + stats.token.symbol.toLocaleLowerCase() + "_40.svg")}
-                alt={stats.token.symbol}
-                width="40"
+              <TokenIcon
+                symbol={stats.token.baseSymbol || stats.token.symbol}
+                displaySize={40}
+                importSize={40}
               />
             </div>
             <div>

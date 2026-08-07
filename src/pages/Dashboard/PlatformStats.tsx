@@ -2,11 +2,19 @@ import { Trans, t } from "@lingui/macro";
 import { useMemo } from "react";
 
 import { USD_DECIMALS } from "config/factors";
+import { useCarthaLpStats } from "domain/cartha/useCarthaLpStats";
 import useV2Stats from "domain/synthetics/stats/useV2Stats";
 import { useChainId } from "lib/chains";
 import { formatAmountHuman } from "lib/numbers";
 
 import { getFormattedFeesDuration } from "./getFormattedFeesDuration";
+
+const poolsTvlFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 2,
+});
 
 /**
  * Large stat cell — hero number with caption label above.
@@ -63,11 +71,14 @@ function FeeRow({
 export function PlatformStats() {
   const { chainId } = useChainId();
   const v2Overview = useV2Stats(chainId);
+  const { data: carthaLpStats } = useCarthaLpStats();
 
   const formattedDuration = useMemo(() => getFormattedFeesDuration(), []);
 
   const fmtUsd = (val: bigint | undefined) => formatAmountHuman(val, USD_DECIMALS, true, 2);
   const fmtPlain = (val: bigint | undefined) => formatAmountHuman(val, 0, false, 0);
+  const poolsTvl =
+    carthaLpStats?.tvl.current_usd != null ? poolsTvlFormatter.format(carthaLpStats.tvl.current_usd) : "—";
 
   const weeklyAnnualized = (v2Overview.weeklyFees * 365n) / 7n;
 
@@ -95,7 +106,7 @@ export function PlatformStats() {
           <StatCell label={t`Open Interest`} value={fmtUsd(v2Overview.openInterest)} />
           <StatCell label={t`24h Volume`} value={fmtUsd(v2Overview.dailyVolume)} />
           <StatCell label={t`Total Users`} value={fmtPlain(v2Overview.totalUsers)} />
-          <StatCell label={t`Pools TVL`} value={fmtUsd(v2Overview.totalGMLiquidity)} />
+          <StatCell label={t`Pools TVL`} value={poolsTvl} />
         </div>
 
         {/* Divider */}
