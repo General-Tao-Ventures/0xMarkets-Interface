@@ -37,12 +37,12 @@ export default function ButtonLink({
       className: classNames,
       onClick,
       ...rest,
-      ...(newTab
-        ? {
-            target: "_blank",
-            rel: "noopener",
-          }
-        : {}),
+            ...(newTab
+              ? {
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                }
+              : {}),
     };
     return (
       <a data-qa={qa} {...anchorProps}>
