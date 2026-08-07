@@ -133,8 +133,10 @@ export function getCappedPoolPnl(p: { marketInfo: MarketInfo; poolUsd: bigint; p
 }
 
 export function getMaxLeverageByMinCollateralFactor(minCollateralFactor: bigint | undefined) {
-  if (minCollateralFactor === undefined) return 100 * BASIS_POINTS_DIVISOR;
-  if (minCollateralFactor === 0n) return 100 * BASIS_POINTS_DIVISOR;
+  // Fallback when MCF is unset. getMaxAllowedLeverage… divides by 1.5, so keep this
+  // high enough that the allowed value still clears product UI caps (200x FX).
+  if (minCollateralFactor === undefined) return 1000 * BASIS_POINTS_DIVISOR;
+  if (minCollateralFactor === 0n) return 1000 * BASIS_POINTS_DIVISOR;
 
   const x = Number(PRECISION / minCollateralFactor);
   const rounded = Math.round(x / 10) * 10;

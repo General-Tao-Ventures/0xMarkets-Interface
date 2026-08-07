@@ -11,7 +11,7 @@ export const MAX_LEVERAGE = 100 * BASIS_POINTS_DIVISOR;
 /**
  * @deprecated for v2: calculate leverage based on marketInfo.minCollateralFactor
  */
-export const MAX_ALLOWED_LEVERAGE = 50 * BASIS_POINTS_DIVISOR;
+export const MAX_ALLOWED_LEVERAGE = 200 * BASIS_POINTS_DIVISOR;
 
 export const COLLATERAL_SPREAD_SHOW_AFTER_INITIAL_ZERO_THRESHOLD = 5; // 0.05%
 

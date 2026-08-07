@@ -210,33 +210,45 @@ export function getIncreasePositionAmounts(p: IncreasePositionParams): IncreaseP
 
     const swapAmountOut = values.swapStrategy.amountOut;
     const baseCollateralUsd = convertToUsd(swapAmountOut, collateralToken.decimals, values.collateralPrice)!;
-    const baseSizeDeltaUsd = bigMath.mulDiv(baseCollateralUsd, leverage, BASIS_POINTS_DIVISOR_BIGINT);
-    const { balanceWasImproved } = getPriceImpactForPosition(marketInfo, baseSizeDeltaUsd, isLong);
-    const basePositionFeeInfo = getPositionFee(marketInfo, baseSizeDeltaUsd, balanceWasImproved, userReferralInfo);
-    const baseUiFeeUsd = applyFactor(baseSizeDeltaUsd, uiFeeFactor);
+    const { balanceWasImproved } = getPriceImpactForPosition(
+      marketInfo,
+      bigMath.mulDiv(baseCollateralUsd, leverage, BASIS_POINTS_DIVISOR_BIGINT),
+      isLong
+    );
     const totalSwapVolumeUsd = getTotalSwapVolumeFromSwapStats(values.swapStrategy.swapPathStats?.swapSteps);
     values.swapUiFeeUsd = applyFactor(totalSwapVolumeUsd, uiFeeFactor);
 
-    values.sizeDeltaUsd = bigMath.mulDiv(
-      baseCollateralUsd - basePositionFeeInfo.positionFeeUsd - baseUiFeeUsd - values.swapUiFeeUsd,
-      leverage,
-      BASIS_POINTS_DIVISOR_BIGINT
-    );
+    // Iterate size ↔ fees so post-fee leverage matches the selected leverage.
+    // A single pass (size from fee(baseSize), collateral from fee(size)) leaves
+    // nextLeverage slightly under target — enough to fail on-chain MIN_LEVERAGE at 1x.
+    let sizeDeltaUsd = bigMath.mulDiv(baseCollateralUsd, leverage, BASIS_POINTS_DIVISOR_BIGINT);
+    for (let i = 0; i < 3; i++) {
+      const positionFeeInfo = getPositionFee(marketInfo, sizeDeltaUsd, balanceWasImproved, userReferralInfo);
+      const uiFeeUsd = applyFactor(sizeDeltaUsd, uiFeeFactor);
+      const collateralDeltaUsd =
+        baseCollateralUsd -
+        positionFeeInfo.positionFeeUsd -
+        values.borrowingFeeUsd -
+        values.fundingFeeUsd -
+        uiFeeUsd -
+        values.swapUiFeeUsd;
+      if (collateralDeltaUsd <= 0n) {
+        sizeDeltaUsd = 0n;
+        values.positionFeeUsd = positionFeeInfo.positionFeeUsd;
+        values.feeDiscountUsd = positionFeeInfo.discountUsd;
+        values.uiFeeUsd = uiFeeUsd;
+        values.collateralDeltaUsd = collateralDeltaUsd;
+        break;
+      }
+      sizeDeltaUsd = bigMath.mulDiv(collateralDeltaUsd, leverage, BASIS_POINTS_DIVISOR_BIGINT);
+      values.positionFeeUsd = positionFeeInfo.positionFeeUsd;
+      values.feeDiscountUsd = positionFeeInfo.discountUsd;
+      values.uiFeeUsd = uiFeeUsd;
+      values.collateralDeltaUsd = collateralDeltaUsd;
+    }
 
+    values.sizeDeltaUsd = sizeDeltaUsd;
     values.indexTokenAmount = convertToTokenAmount(values.sizeDeltaUsd, indexToken.decimals, values.indexPrice)!;
-
-    const positionFeeInfo = getPositionFee(marketInfo, values.sizeDeltaUsd, balanceWasImproved, userReferralInfo);
-    values.positionFeeUsd = positionFeeInfo.positionFeeUsd;
-    values.feeDiscountUsd = positionFeeInfo.discountUsd;
-    values.uiFeeUsd = applyFactor(values.sizeDeltaUsd, uiFeeFactor);
-
-    values.collateralDeltaUsd =
-      baseCollateralUsd -
-      values.positionFeeUsd -
-      values.borrowingFeeUsd -
-      values.fundingFeeUsd -
-      values.uiFeeUsd -
-      values.swapUiFeeUsd;
 
     values.collateralDeltaAmount = convertToTokenAmount(
       values.collateralDeltaUsd,
