@@ -38,7 +38,7 @@ export function AvailableLiquidityTooltip({
     };
   }, [marketInfo, isLong]);
 
-  const usingCartha = carthaTvlUsd !== undefined;
+  const usingCartha = carthaTvlUsd !== undefined && carthaTvlUsd > 0n;
 
   return (
     <div>

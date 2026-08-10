@@ -48,26 +48,29 @@ export function useChartHeaderFormattedValues() {
   const { liquidityByMarket } = useCarthaMarketLiquidity();
 
   const carthaLiquidity = getCarthaLiquidityForMarket(liquidityByMarket, marketInfo?.marketTokenAddress);
+  // Only treat Cartha as active when LP TVL is positive so header + tooltip stay in sync.
+  const carthaTvlUsd =
+    carthaLiquidity && carthaLiquidity.tvlUsd > 0n ? carthaLiquidity.tvlUsd : undefined;
 
   const liquidityLongUsd = useMemo(() => {
-    if (carthaLiquidity && carthaLiquidity.tvlUsd > 0n && info?.openInterestLong !== undefined) {
+    if (carthaTvlUsd !== undefined && info?.openInterestLong !== undefined) {
       return getCarthaAvailableLiquidityUsd({
-        carthaTvlUsd: carthaLiquidity.tvlUsd,
+        carthaTvlUsd,
         openInterestUsd: info.openInterestLong,
       });
     }
     return info?.liquidityLong;
-  }, [carthaLiquidity, info?.liquidityLong, info?.openInterestLong]);
+  }, [carthaTvlUsd, info?.liquidityLong, info?.openInterestLong]);
 
   const liquidityShortUsd = useMemo(() => {
-    if (carthaLiquidity && carthaLiquidity.tvlUsd > 0n && info?.openInterestShort !== undefined) {
+    if (carthaTvlUsd !== undefined && info?.openInterestShort !== undefined) {
       return getCarthaAvailableLiquidityUsd({
-        carthaTvlUsd: carthaLiquidity.tvlUsd,
+        carthaTvlUsd,
         openInterestUsd: info.openInterestShort,
       });
     }
     return info?.liquidityShort;
-  }, [carthaLiquidity, info?.liquidityShort, info?.openInterestShort]);
+  }, [carthaTvlUsd, info?.liquidityShort, info?.openInterestShort]);
 
   const selectedTokenOption = chartTokenAddress ? getToken(chainId, chartTokenAddress) : undefined;
   const visualMultiplier = isSwap ? 1 : selectedTokenOption?.visualMultiplier ?? 1;
@@ -186,10 +189,10 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong carthaTvlUsd={carthaLiquidity?.tvlUsd} />}
+        content={<AvailableLiquidityTooltip isLong carthaTvlUsd={carthaTvlUsd} />}
       />
     );
-  }, [liquidityLongUsd, carthaLiquidity?.tvlUsd]);
+  }, [liquidityLongUsd, carthaTvlUsd]);
 
   const liquidityShort = useMemo(() => {
     const liquidity = liquidityShortUsd;
@@ -208,10 +211,10 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong={false} carthaTvlUsd={carthaLiquidity?.tvlUsd} />}
+        content={<AvailableLiquidityTooltip isLong={false} carthaTvlUsd={carthaTvlUsd} />}
       />
     );
-  }, [liquidityShortUsd, carthaLiquidity?.tvlUsd]);
+  }, [liquidityShortUsd, carthaTvlUsd]);
 
   const netRateLong = useMemo(() => {
     const netRate = info?.netRateHourlyLong;
