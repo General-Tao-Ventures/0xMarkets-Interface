@@ -12,6 +12,11 @@ import {
 } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import {
+  getCarthaLiquidityForMarket,
+  useCarthaMarketLiquidity,
+  type CarthaMarketLiquidity,
+} from "domain/cartha/useCarthaMarketLiquidity";
+import {
   MarketTokensAPRData,
   getGlvDisplayName,
   getGlvOrMarketAddress,
@@ -48,13 +53,17 @@ export const tokenAddressStyle = { fontSize: 5 };
 
 /**
  * Compute utilization as a percentage (0–100) for a market.
- * Utilization = (longInterestUsd + shortInterestUsd) / poolValueMax * 100
+ * Prefers Cartha LP TVL: (longOI + shortOI) / carthaTvl * 100.
+ * Falls back to on-chain poolValueMax when Cartha data is missing.
  * Returns null for GLV markets or when pool value is zero.
  */
-function computeUtilization(marketOrGlv: GlvOrMarketInfo | undefined): number | null {
+function computeUtilization(
+  marketOrGlv: GlvOrMarketInfo | undefined,
+  cartha?: CarthaMarketLiquidity
+): number | null {
   if (!marketOrGlv || isGlvInfo(marketOrGlv)) return null;
   const market = marketOrGlv as MarketInfo;
-  const poolValue = market.poolValueMax;
+  const poolValue = cartha && cartha.tvlUsd > 0n ? cartha.tvlUsd : market.poolValueMax;
   if (!poolValue || poolValue === 0n) return null;
   const totalInterest = market.longInterestUsd + market.shortInterestUsd;
   // Both values are in USD with PRECISION (30 decimals), same scale — safe to divide
@@ -118,8 +127,10 @@ export function GmListItem({
   const userEarnings = useUserEarnings(chainId, srcChainId);
   const daysConsidered = useDaysConsideredInMarketsApr();
   const { showDebugValues } = useSettings();
+  const { liquidityByMarket } = useCarthaMarketLiquidity();
 
   const marketOrGlv = getByKey(marketsInfoData, token?.address);
+  const carthaLiquidity = getCarthaLiquidityForMarket(liquidityByMarket, token?.address);
 
   const isGlv = isGlvInfo(marketOrGlv);
 
@@ -155,7 +166,9 @@ export function GmListItem({
   }
 
   const totalSupply = token?.totalSupply;
-  const totalSupplyUsd = convertToUsd(totalSupply, token?.decimals, token?.prices?.minPrice);
+  const gmSupplyUsd = convertToUsd(totalSupply, token?.decimals, token?.prices?.minPrice);
+  const usesCarthaTvl = Boolean(carthaLiquidity && carthaLiquidity.tvlUsd > 0n);
+  const totalSupplyUsd = usesCarthaTvl ? carthaLiquidity!.tvlUsd : gmSupplyUsd;
   const tokenIconName = marketOrGlv?.isSpotOnly
     ? getNormalizedTokenSymbol(longToken.symbol) + getNormalizedTokenSymbol(shortToken.symbol)
     : getNormalizedTokenSymbol(indexToken.symbol);
@@ -172,8 +185,32 @@ export function GmListItem({
   const marketPerformanceSnapshots = performanceSnapshots?.[token.address.toLowerCase()];
 
   // Utilization calculation
-  const utilization = computeUtilization(marketOrGlv);
+  const utilization = computeUtilization(marketOrGlv, carthaLiquidity);
   const utilizationDisplay = utilization !== null ? `${utilization.toFixed(1)}%` : "—";
+  const tvlLabel = usesCarthaTvl ? <Trans>TVL</Trans> : <Trans>TVL (Supply)</Trans>;
+  const tvlDisplay = usesCarthaTvl ? (
+    <span className="numbers">{formatUsd(totalSupplyUsd)}</span>
+  ) : (
+    <AmountWithUsdHuman
+      amount={totalSupply}
+      decimals={token.decimals}
+      usd={totalSupplyUsd}
+      symbol={token.symbol}
+      usdOnTop
+    />
+  );
+  const tvlDisplayDesktop = usesCarthaTvl ? (
+    <span className="numbers">{formatUsd(totalSupplyUsd)}</span>
+  ) : (
+    <AmountWithUsdHuman
+      multiline
+      amount={totalSupply}
+      decimals={token.decimals}
+      usd={totalSupplyUsd}
+      symbol={token.symbol}
+      usdOnTop
+    />
+  );
 
   // Pool cap calculation
   const poolFill = computePoolFill(marketOrGlv);
@@ -232,16 +269,10 @@ export function GmListItem({
 
         <div className="flex flex-col gap-10 border-t border-slate-600 pt-8">
           <SyntheticsInfoRow
-            label={<Trans>TVL (Supply)</Trans>}
+            label={tvlLabel}
             value={
               <div>
-                <AmountWithUsdHuman
-                  amount={totalSupply}
-                  decimals={token.decimals}
-                  usd={totalSupplyUsd}
-                  symbol={token.symbol}
-                  usdOnTop
-                />
+                {tvlDisplay}
                 {poolFill && (
                   <PoolCapBar
                     fillPercent={poolFill.fillPercent}
@@ -338,14 +369,7 @@ export function GmListItem({
         {showDebugValues && <span style={tokenAddressStyle}>{marketOrGlvTokenAddress}</span>}
       </TableTdActionable>
       <TableTdActionable className="w-[13%]">
-        <AmountWithUsdHuman
-          multiline
-          amount={totalSupply}
-          decimals={token.decimals}
-          usd={totalSupplyUsd}
-          symbol={token.symbol}
-          usdOnTop
-        />
+        {tvlDisplayDesktop}
         {poolFill && (
           <PoolCapBar
             fillPercent={poolFill.fillPercent}

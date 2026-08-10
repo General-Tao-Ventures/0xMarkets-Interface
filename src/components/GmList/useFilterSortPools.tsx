@@ -5,6 +5,7 @@ import type { SortDirection } from "context/SorterContext/types";
 import { selectChainId } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import type { TokenFavoritesTabOption } from "context/TokensFavoritesContext/TokensFavoritesContextProvider";
+import { useCarthaMarketLiquidity } from "domain/cartha/useCarthaMarketLiquidity";
 import { MarketTokensAPRData, MarketsInfoData, getMarketPoolName } from "domain/synthetics/markets";
 import { PerformanceData } from "domain/synthetics/markets/usePerformanceAnnualized";
 import type { TokensData } from "domain/synthetics/tokens";
@@ -43,6 +44,7 @@ export function useFilterSortPools({
   favoriteTokens: string[];
 }) {
   const chainId = useSelector(selectChainId);
+  const { liquidityByMarket } = useCarthaMarketLiquidity();
 
   const sortedTokens = useMemo(() => {
     if (!marketsInfo || !marketTokensData) {
@@ -77,7 +79,7 @@ export function useFilterSortPools({
     }
 
     if (orderBy === "unspecified" || direction === "unspecified") {
-      return sortGmTokensDefault(marketsInfo, marketTokensData);
+      return sortGmTokensDefault(marketsInfo, marketTokensData, liquidityByMarket);
     }
 
     return sortGmTokensByField({
@@ -89,6 +91,7 @@ export function useFilterSortPools({
       marketsTokensIncentiveAprData,
       marketsTokensLidoAprData,
       performance,
+      carthaLiquidityByMarket: liquidityByMarket,
     });
   }, [
     marketsInfo,
@@ -100,6 +103,7 @@ export function useFilterSortPools({
     marketsTokensIncentiveAprData,
     marketsTokensLidoAprData,
     performance,
+    liquidityByMarket,
   ]);
 
   const filteredTokens = useMemo(() => {

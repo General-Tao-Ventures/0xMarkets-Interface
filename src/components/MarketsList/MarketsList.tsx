@@ -92,7 +92,12 @@ function MarketsListDesktop({ chainId, indexTokensStats }: { chainId: number; in
               </TableTh>
               <TableTh>
                 <Sorter {...getSorterProps("liquidity")}>
-                  <Trans>LIQUIDITY</Trans>
+                  <TooltipWithPortal
+                    handle={<Trans>LIQUIDITY</Trans>}
+                    content={
+                      <Trans>Available liquidity for new positions (Cartha LP TVL minus open interest per side).</Trans>
+                    }
+                  />
                 </Sorter>
               </TableTh>
               <TableTh>

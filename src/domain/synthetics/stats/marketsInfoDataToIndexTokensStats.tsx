@@ -2,6 +2,11 @@ import { ethers } from "ethers";
 
 import { BASIS_POINTS_DIVISOR_BIGINT } from "config/factors";
 import { getUiMaxLeverageForSymbol } from "config/leverage";
+import {
+  CarthaMarketLiquidity,
+  getCarthaAvailableLiquidityUsd,
+  getCarthaLiquidityForMarket,
+} from "domain/cartha/useCarthaMarketLiquidity";
 import { getChartBorrowingRateHourly, getChartFundingRateHourly } from "domain/synthetics/fees/chartRates";
 import {
   MarketInfo,
@@ -55,7 +60,10 @@ export function bnMax(...args: bigint[]): bigint {
   return max;
 }
 
-export function marketsInfoData2IndexTokenStatsMap(marketsInfoData: MarketsInfoData): {
+export function marketsInfoData2IndexTokenStatsMap(
+  marketsInfoData: MarketsInfoData,
+  carthaLiquidityByMarket?: Record<string, CarthaMarketLiquidity>
+): {
   indexMap: Partial<Record<string, IndexTokenStat>>;
   sortedByTotalPoolValue: string[];
 } {
@@ -94,22 +102,43 @@ export function marketsInfoData2IndexTokenStatsMap(marketsInfoData: MarketsInfoD
 
     const indexTokenStats = indexMap[marketInfo.indexTokenAddress];
 
-    const poolValueUsd = marketInfo.poolValueMax;
-
     const fundingRateLong = getChartFundingRateHourly(marketInfo, true);
     const fundingRateShort = getChartFundingRateHourly(marketInfo, false);
     const borrowingRateLong = getChartBorrowingRateHourly(marketInfo, true);
     const borrowingRateShort = getChartBorrowingRateHourly(marketInfo, false);
 
-    const [longUsedLiquidity, longMaxLiquidity] = getUsedLiquidity(marketInfo, true);
+    const cartha = getCarthaLiquidityForMarket(carthaLiquidityByMarket, marketInfo.marketTokenAddress);
 
-    const [shortUsedLiquidity, shortMaxLiquidity] = getUsedLiquidity(marketInfo, false);
+    let poolValueUsd: bigint;
+    let usedLiquidity: bigint;
+    let maxLiquidity: bigint;
+    let utilization: bigint;
 
-    const usedLiquidity = longUsedLiquidity + shortUsedLiquidity;
-    const maxLiquidity = longMaxLiquidity + shortMaxLiquidity;
+    if (cartha && cartha.tvlUsd > 0n) {
+      // Align /stats with Cartha LP: TVL = verified-miners LP, liquidity = available both sides.
+      poolValueUsd = cartha.tvlUsd;
+      const longAvailable = getCarthaAvailableLiquidityUsd({
+        carthaTvlUsd: cartha.tvlUsd,
+        openInterestUsd: marketInfo.longInterestUsd,
+      });
+      const shortAvailable = getCarthaAvailableLiquidityUsd({
+        carthaTvlUsd: cartha.tvlUsd,
+        openInterestUsd: marketInfo.shortInterestUsd,
+      });
+      maxLiquidity = longAvailable + shortAvailable;
+      usedLiquidity = marketInfo.longInterestUsd + marketInfo.shortInterestUsd;
+      utilization = bigMath.mulDiv(usedLiquidity, BASIS_POINTS_DIVISOR_BIGINT, cartha.tvlUsd);
+    } else {
+      poolValueUsd = marketInfo.poolValueMax;
 
-    const utilization =
-      maxLiquidity > 0 ? bigMath.mulDiv(usedLiquidity, BASIS_POINTS_DIVISOR_BIGINT, maxLiquidity) : 0n;
+      const [longUsedLiquidity, longMaxLiquidity] = getUsedLiquidity(marketInfo, true);
+      const [shortUsedLiquidity, shortMaxLiquidity] = getUsedLiquidity(marketInfo, false);
+
+      usedLiquidity = longUsedLiquidity + shortUsedLiquidity;
+      maxLiquidity = longMaxLiquidity + shortMaxLiquidity;
+      utilization =
+        maxLiquidity > 0 ? bigMath.mulDiv(usedLiquidity, BASIS_POINTS_DIVISOR_BIGINT, maxLiquidity) : 0n;
+    }
 
     const netFeeLong = borrowingRateLong + fundingRateLong;
     const netFeeShort = borrowingRateShort + fundingRateShort;
@@ -143,14 +172,24 @@ export function marketsInfoData2IndexTokenStatsMap(marketsInfoData: MarketsInfoD
   }
 
   for (const indexTokenStats of Object.values(indexMap)) {
+    const totalOpenInterest = indexTokenStats.totalOpenInterestLong + indexTokenStats.totalOpenInterestShort;
+    const usesCarthaTvl = Boolean(
+      carthaLiquidityByMarket &&
+        indexTokenStats.marketsStats.some((stat) =>
+          getCarthaLiquidityForMarket(carthaLiquidityByMarket, stat.marketInfo.marketTokenAddress)
+        )
+    );
+
     indexTokenStats.totalUtilization =
-      indexTokenStats.totalMaxLiquidity > 0
-        ? bigMath.mulDiv(
-            indexTokenStats.totalUsedLiquidity,
-            BASIS_POINTS_DIVISOR_BIGINT,
-            indexTokenStats.totalMaxLiquidity
-          )
-        : 0n;
+      usesCarthaTvl && indexTokenStats.totalPoolValue > 0
+        ? bigMath.mulDiv(totalOpenInterest, BASIS_POINTS_DIVISOR_BIGINT, indexTokenStats.totalPoolValue)
+        : indexTokenStats.totalMaxLiquidity > 0
+          ? bigMath.mulDiv(
+              indexTokenStats.totalUsedLiquidity,
+              BASIS_POINTS_DIVISOR_BIGINT,
+              indexTokenStats.totalMaxLiquidity
+            )
+          : 0n;
 
     indexTokenStats.marketsStats.sort((a, b) => {
       return b.poolValueUsd > a.poolValueUsd ? 1 : -1;
