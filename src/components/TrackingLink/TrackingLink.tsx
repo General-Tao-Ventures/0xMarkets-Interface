@@ -33,25 +33,30 @@ export function TrackingLink({ onClick, children }: TrackingLinkProps) {
   }
 
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement | HTMLDivElement, MouseEvent>) => {
-    if (onClick) {
-      e.preventDefault();
+    if (!onClick) {
+      children.props.onClick?.(e);
+      return;
+    }
 
-      try {
-        await onClick(e);
-      } catch {
-        // ignore
-      }
+    e.preventDefault();
 
-      const url = resolveUrl(children.props);
-      if (!url) return;
+    const url = resolveUrl(children.props);
+    const openInNewTab = shouldOpenInNewTab(children.props);
 
-      if (shouldOpenInNewTab(children.props)) {
-        window.open(url, "_blank", "noopener,noreferrer");
-      } else {
-        window.location.href = url;
-      }
-    } else if (children.props.onClick) {
-      children.props.onClick(e);
+    // Open new tabs synchronously while the click still counts as a user gesture.
+    // Awaiting analytics first loses that context and browsers block the popup.
+    if (url && openInNewTab) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    try {
+      await onClick(e);
+    } catch {
+      // ignore
+    }
+
+    if (url && !openInNewTab) {
+      window.location.href = url;
     }
   };
 

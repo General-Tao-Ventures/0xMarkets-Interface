@@ -34,8 +34,14 @@ export function getChartFundingRateHourly(marketInfo: MarketInfo, isLong: boolea
 
 export function getChartBorrowingRateHourly(marketInfo: MarketInfo, isLong: boolean): bigint {
   const period = CHART_PERIODS["1h"];
-  const live = getBorrowingFactorPerPeriod(marketInfo, isLong, period);
+  const liveLong = getBorrowingFactorPerPeriod(marketInfo, true, period);
+  const liveShort = getBorrowingFactorPerPeriod(marketInfo, false, period);
+  const live = isLong ? liveLong : liveShort;
   if (live !== 0n) return -live; // borrow is always a cost
+
+  // A single side can legitimately be 0 on an imbalanced market. Only invent a
+  // rate when both sides look stale/missing (both live factors are 0).
+  if (liveLong !== 0n || liveShort !== 0n) return 0n;
 
   const poolUsd = bigMath.max(marketInfo.poolValueMax, marketInfo.poolValueMin);
   const openInterestUsd = isLong ? marketInfo.longInterestUsd : marketInfo.shortInterestUsd;

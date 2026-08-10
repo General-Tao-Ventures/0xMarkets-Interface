@@ -50,7 +50,7 @@ export function useChartHeaderFormattedValues() {
   const carthaLiquidity = getCarthaLiquidityForMarket(liquidityByMarket, marketInfo?.marketTokenAddress);
 
   const liquidityLongUsd = useMemo(() => {
-    if (carthaLiquidity && info?.openInterestLong !== undefined) {
+    if (carthaLiquidity && carthaLiquidity.tvlUsd > 0n && info?.openInterestLong !== undefined) {
       return getCarthaAvailableLiquidityUsd({
         carthaTvlUsd: carthaLiquidity.tvlUsd,
         openInterestUsd: info.openInterestLong,
@@ -60,7 +60,7 @@ export function useChartHeaderFormattedValues() {
   }, [carthaLiquidity, info?.liquidityLong, info?.openInterestLong]);
 
   const liquidityShortUsd = useMemo(() => {
-    if (carthaLiquidity && info?.openInterestShort !== undefined) {
+    if (carthaLiquidity && carthaLiquidity.tvlUsd > 0n && info?.openInterestShort !== undefined) {
       return getCarthaAvailableLiquidityUsd({
         carthaTvlUsd: carthaLiquidity.tvlUsd,
         openInterestUsd: info.openInterestShort,
