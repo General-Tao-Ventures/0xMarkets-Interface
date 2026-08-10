@@ -4,6 +4,23 @@ import { MarketInfo } from "sdk/types/markets";
 import { bigMath } from "sdk/utils/bigmath";
 import { PRECISION } from "sdk/utils/numbers";
 
+/** Default decimals used by `formatRatePercentage` for chart / net-fee tooltips. */
+const CHART_RATE_DISPLAY_DECIMALS = 4;
+
+/**
+ * Collapse rates that would format as ±0.0000% so the header / tooltip don't show
+ * signed-zero noise (e.g. borrow -0.0000% with "pay +0.0000%").
+ *
+ * `formatRatePercentage` displays `abs(rate * 100) / 1e30` with `displayDecimals`.
+ * Half an ulp of that last decimal is the rounding threshold to 0.0000%.
+ */
+export function dustClampChartRate(rate: bigint, displayDecimals = CHART_RATE_DISPLAY_DECIMALS): bigint {
+  if (rate === 0n) return 0n;
+  const amount = bigMath.abs(rate * 100n);
+  const halfUlp = 5n * 10n ** BigInt(30 - displayDecimals - 1);
+  return amount < halfUlp ? 0n : rate;
+}
+
 /**
  * Chart-header rate helpers.
  *
@@ -21,7 +38,7 @@ export function getChartFundingRateHourly(marketInfo: MarketInfo, isLong: boolea
   if (longInterestUsd === shortInterestUsd) return 0n;
 
   const live = getFundingFactorPerPeriod(marketInfo, isLong, period);
-  if (live !== 0n) return live;
+  if (live !== 0n) return dustClampChartRate(live);
 
   if (minFundingFactorPerSecond === 0n) return 0n;
 
@@ -34,7 +51,7 @@ export function getChartFundingRateHourly(marketInfo: MarketInfo, isLong: boolea
     longsPayShorts: longInterestUsd >= shortInterestUsd,
   };
 
-  return getFundingFactorPerPeriod(patched, isLong, period);
+  return dustClampChartRate(getFundingFactorPerPeriod(patched, isLong, period));
 }
 
 export function getChartBorrowingRateHourly(marketInfo: MarketInfo, isLong: boolean): bigint {
@@ -42,7 +59,7 @@ export function getChartBorrowingRateHourly(marketInfo: MarketInfo, isLong: bool
   const liveLong = getBorrowingFactorPerPeriod(marketInfo, true, period);
   const liveShort = getBorrowingFactorPerPeriod(marketInfo, false, period);
   const live = isLong ? liveLong : liveShort;
-  if (live !== 0n) return -live; // borrow is always a cost
+  if (live !== 0n) return dustClampChartRate(-live); // borrow is always a cost
 
   // A single side can legitimately be 0 on an imbalanced market. Only invent a
   // rate when both sides look stale/missing (both live factors are 0).
@@ -58,5 +75,5 @@ export function getChartBorrowingRateHourly(marketInfo: MarketInfo, isLong: bool
   // utilization = OI / pool (capped at 100%), then borrowPerSecond ≈ borrowingFactor * utilization.
   const utilization = bigMath.min(PRECISION, bigMath.mulDiv(openInterestUsd, PRECISION, poolUsd));
   const factorPerSecond = bigMath.mulDiv(borrowingFactor, utilization, PRECISION);
-  return -(factorPerSecond * BigInt(period));
+  return dustClampChartRate(-(factorPerSecond * BigInt(period)));
 }

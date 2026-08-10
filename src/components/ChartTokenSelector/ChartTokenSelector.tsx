@@ -697,7 +697,7 @@ function MarketListItem({
       </td>
       {!isMobile && <td className={tdClassName}>{dayPriceDeltaComponent}</td>}
       <td className={cx(tdClassName, "numbers")}>
-        {dayVolume ? formatAmountHuman(dayVolume, USD_DECIMALS, true) : "-"}
+        {dayVolume !== undefined ? formatAmountHuman(dayVolume, USD_DECIMALS, true) : "-"}
       </td>
       {!isMobile && (
         <>

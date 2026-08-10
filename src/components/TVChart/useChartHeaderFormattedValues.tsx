@@ -85,7 +85,7 @@ export function useChartHeaderFormattedValues() {
 
   const dailyVolumes = use24hVolumes();
   const dailyVolumesValue = marketInfo?.marketTokenAddress
-    ? dailyVolumes?.byMarketToken?.[marketInfo?.marketTokenAddress]
+    ? dailyVolumes.byMarketToken?.[marketInfo.marketTokenAddress]
     : undefined;
   const dayPriceDeltaMap = use24hPriceDeltaMap(chainId, [priceTokenAddress as Address]);
   const dayPriceDeltaData = chartTokenAddress ? dayPriceDeltaMap?.[chartTokenAddress] : undefined;
@@ -291,12 +291,14 @@ export function useChartHeaderFormattedValues() {
   }, [info]);
 
   const dailyVolume = useMemo(() => {
-    return dailyVolumesValue !== undefined ? (
-      <span className="numbers">{formatAmountHuman(dailyVolumesValue, USD_DECIMALS, true)}</span>
-    ) : (
-      "..."
-    );
-  }, [dailyVolumesValue]);
+    // Quiet markets zero-fill to 0n after a successful Squid fetch. Keep "..." while
+    // loading, on Squid failure, or before market info is ready (distinguish from $0).
+    if (dailyVolumes.isLoading || dailyVolumes.isError || dailyVolumesValue === undefined) {
+      return "...";
+    }
+
+    return <span className="numbers">{formatAmountHuman(dailyVolumesValue, USD_DECIMALS, true)}</span>;
+  }, [dailyVolumes.isError, dailyVolumes.isLoading, dailyVolumesValue]);
 
   return {
     avgPrice,

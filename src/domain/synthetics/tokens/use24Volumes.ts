@@ -11,6 +11,13 @@ import { getByKey } from "sdk/utils/objects";
 
 type PositionVolumeInfosResponse = Record<Address, bigint>;
 
+export type DayVolumesResult = {
+  byIndexToken: PositionVolumeInfosResponse;
+  byMarketToken: PositionVolumeInfosResponse;
+  isLoading: boolean;
+  isError: boolean;
+};
+
 const MARKET_VOLUMES_QUERY = gql`
   query MarketVolumesInfoResolver($timestamp: Int!) {
     volumeInfos(where: { timestamp_gte: $timestamp, period_eq: "1h" }, limit: 10000) {
@@ -20,7 +27,14 @@ const MARKET_VOLUMES_QUERY = gql`
   }
 `;
 
-export function use24hVolumes() {
+const EMPTY_VOLUMES: DayVolumesResult = {
+  byIndexToken: {},
+  byMarketToken: {},
+  isLoading: true,
+  isError: false,
+};
+
+export function use24hVolumes(): DayVolumesResult {
   const chainId = useSelector(selectChainId);
   const marketsInfoData = useSelector(selectMarketsInfoData);
 
@@ -31,13 +45,13 @@ export function use24hVolumes() {
     timestamp: timestamp,
   };
 
-  const { data } = useSWR<PositionVolumeInfosResponse | undefined>(
+  const { data, error, isLoading } = useSWR<PositionVolumeInfosResponse>(
     [chainId, "24hVolume"],
     async () => {
       const client = getSubsquidGraphClient(chainId);
 
       if (!client) {
-        return;
+        throw new Error("Subsquid GraphQL client unavailable");
       }
 
       const response = await client.query<{ volumeInfos: { volumeUsd: string; market: string }[] }>({
@@ -45,8 +59,12 @@ export function use24hVolumes() {
         variables,
       });
 
+      if (response.errors?.length) {
+        throw new Error(response.errors[0]?.message ?? "Subsquid volumeInfos query failed");
+      }
+
       // Sum hourly buckets per market (checksum addresses to match marketsInfoData keys)
-      return response.data?.volumeInfos.reduce(
+      return (response.data?.volumeInfos ?? []).reduce(
         (acc, entry) => {
           const market = getAddress(entry.market) as Address;
           acc[market] = (acc[market] ?? 0n) + BigInt(entry.volumeUsd);
@@ -61,10 +79,14 @@ export function use24hVolumes() {
   );
 
   return useMemo(() => {
-    if (!data) {
+    const isError = Boolean(error);
+
+    // Loading / error: do not invent $0 — header keeps "..." so ops can tell quiet from down.
+    if (isLoading || data === undefined || isError) {
       return {
-        byIndexToken: {},
-        byMarketToken: {},
+        ...EMPTY_VOLUMES,
+        isLoading: isLoading || (data === undefined && !isError),
+        isError,
       };
     }
 
@@ -72,26 +94,42 @@ export function use24hVolumes() {
       return {
         byIndexToken: {},
         byMarketToken: data,
+        isLoading: true,
+        isError: false,
       };
     }
 
-    const byIndexToken: PositionVolumeInfosResponse = {};
+    // Successful Squid response: zero-fill known markets so quiet pairs show $0, not "...".
+    const byMarketToken: PositionVolumeInfosResponse = { ...data };
+    for (const marketInfo of Object.values(marketsInfoData)) {
+      const marketTokenAddress = marketInfo.marketTokenAddress as Address | undefined;
+      if (marketTokenAddress && byMarketToken[marketTokenAddress] === undefined) {
+        byMarketToken[marketTokenAddress] = 0n;
+      }
+    }
 
-    Object.entries(data).forEach(([market, volume]) => {
+    const byIndexToken: PositionVolumeInfosResponse = {};
+    for (const marketInfo of Object.values(marketsInfoData)) {
+      const indexTokenAddress = marketInfo.indexTokenAddress as Address | undefined;
+      if (indexTokenAddress && byIndexToken[indexTokenAddress] === undefined) {
+        byIndexToken[indexTokenAddress] = 0n;
+      }
+    }
+
+    Object.entries(byMarketToken).forEach(([market, volume]) => {
       const marketInfo = getByKey(marketsInfoData, market);
 
       if (!marketInfo) {
         return;
       }
 
-      const indexTokenAddress = marketInfo?.indexTokenAddress;
+      const indexTokenAddress = marketInfo.indexTokenAddress;
 
       if (!indexTokenAddress) {
         return;
       }
 
-      byIndexToken[indexTokenAddress] =
-        (byIndexToken[indexTokenAddress] === undefined ? 0n : byIndexToken[indexTokenAddress]) + BigInt(volume);
+      byIndexToken[indexTokenAddress] = (byIndexToken[indexTokenAddress] ?? 0n) + BigInt(volume);
 
       if (indexTokenAddress === convertTokenAddress(chainId, NATIVE_TOKEN_ADDRESS, "wrapped")) {
         byIndexToken[NATIVE_TOKEN_ADDRESS] = byIndexToken[indexTokenAddress];
@@ -100,7 +138,9 @@ export function use24hVolumes() {
 
     return {
       byIndexToken,
-      byMarketToken: data,
+      byMarketToken,
+      isLoading: false,
+      isError: false,
     };
-  }, [data, marketsInfoData, chainId]);
+  }, [data, marketsInfoData, chainId, error, isLoading]);
 }

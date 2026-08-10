@@ -1,6 +1,7 @@
 import "./MarketNetFee.scss";
 import { Trans, t } from "@lingui/macro";
 
+import { dustClampChartRate } from "domain/synthetics/fees/chartRates";
 import { formatRatePercentage } from "lib/numbers";
 import { getPositiveOrNegativeClass } from "lib/utils";
 
@@ -29,7 +30,10 @@ const RATE_PERIODS = [
 ];
 
 export default function MarketNetFee(props: Props) {
-  const { borrowRateHourly, fundingRateHourly, isLong } = props;
+  const { isLong } = props;
+  // Align prose / period rows with chart-header dust clamp (±0.0000% → 0).
+  const fundingRateHourly = dustClampChartRate(props.fundingRateHourly);
+  const borrowRateHourly = dustClampChartRate(props.borrowRateHourly);
   const netFeeHourly = borrowRateHourly + fundingRateHourly;
   const positionType = isLong ? t`Long Positions` : t`Short Positions`;
   const netRate = t`Net Rate`;
@@ -55,7 +59,7 @@ export default function MarketNetFee(props: Props) {
         })}
       </ul>
       <div className="mt-5">
-        <NetFeeMessage {...props} />
+        <NetFeeMessage fundingRateHourly={fundingRateHourly} borrowRateHourly={borrowRateHourly} isLong={isLong} />
       </div>
     </>
   );
