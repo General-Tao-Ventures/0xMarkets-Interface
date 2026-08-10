@@ -292,13 +292,14 @@ export function useChartHeaderFormattedValues() {
 
   const dailyVolume = useMemo(() => {
     // Quiet markets zero-fill to 0n after a successful Squid fetch. Keep "..." while
-    // loading, on Squid failure, or before market info is ready (distinguish from $0).
-    if (dailyVolumes.isLoading || dailyVolumes.isError || dailyVolumesValue === undefined) {
+    // loading / before market info is ready, or when Squid has never returned data (isError
+    // with no cache). Refresh errors keep the last good volumes — see use24hVolumes.
+    if (dailyVolumes.isLoading || dailyVolumesValue === undefined) {
       return "...";
     }
 
     return <span className="numbers">{formatAmountHuman(dailyVolumesValue, USD_DECIMALS, true)}</span>;
-  }, [dailyVolumes.isError, dailyVolumes.isLoading, dailyVolumesValue]);
+  }, [dailyVolumes.isLoading, dailyVolumesValue]);
 
   return {
     avgPrice,

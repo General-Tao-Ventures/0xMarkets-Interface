@@ -79,14 +79,12 @@ export function use24hVolumes(): DayVolumesResult {
   );
 
   return useMemo(() => {
-    const isError = Boolean(error);
-
-    // Loading / error: do not invent $0 — header keeps "..." so ops can tell quiet from down.
-    if (isLoading || data === undefined || isError) {
+    // Keep prior successful payloads across refresh failures — only wipe when we have no data.
+    if (data === undefined) {
       return {
         ...EMPTY_VOLUMES,
-        isLoading: isLoading || (data === undefined && !isError),
-        isError,
+        isLoading: isLoading && !error,
+        isError: Boolean(error),
       };
     }
 
@@ -99,7 +97,7 @@ export function use24hVolumes(): DayVolumesResult {
       };
     }
 
-    // Successful Squid response: zero-fill known markets so quiet pairs show $0, not "...".
+    // Successful (or stale-but-valid) Squid payload: zero-fill known markets so quiet pairs show $0.
     const byMarketToken: PositionVolumeInfosResponse = { ...data };
     for (const marketInfo of Object.values(marketsInfoData)) {
       const marketTokenAddress = marketInfo.marketTokenAddress as Address | undefined;
