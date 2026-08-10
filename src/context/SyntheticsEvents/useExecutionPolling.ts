@@ -105,21 +105,24 @@ export function useExecutionPolling({
   const eventLogHandlersRef = useRef(eventLogHandlers);
   eventLogHandlersRef.current = eventLogHandlers;
 
+  // Restart the poll loop when pending create→execute ops appear even if no
+  // wallet txn is being watched (express / relay). Previously the effect only
+  // keyed off watchedTxnHashes, so express fills never got Phase B recovery.
+  const hasPendingDepositOps = Object.values(depositStatuses).some(isPendingOperation);
+  const hasPendingWithdrawalOps = Object.values(withdrawalStatuses).some(isPendingOperation);
+  const hasPendingOrderOps = Object.values(orderStatuses).some(isPendingOperation);
+  const shouldPoll =
+    hasPendingDepositOps || hasPendingWithdrawalOps || hasPendingOrderOps || watchedTxnHashes.size > 0;
+
   useEffect(() => {
-    const hasPendingOps =
-      Object.values(depositStatusesRef.current).some(isPendingOperation) ||
-      Object.values(withdrawalStatusesRef.current).some(isPendingOperation) ||
-      Object.values(orderStatusesRef.current).some(isPendingOperation);
-
-    const hasWatchedTxns = watchedTxnHashes.size > 0;
-
-    // Don't start interval if nothing needs polling
-    if (!hasPendingOps && !hasWatchedTxns) return;
+    if (!shouldPoll) return;
 
     console.warn(
       "[execution-polling] Starting unified poll loop.",
-      "watchedTxns:", watchedTxnHashes.size,
-      "pendingOps:", hasPendingOps
+      "watchedTxns:",
+      watchedTxnHashes.size,
+      "pendingOps:",
+      hasPendingDepositOps || hasPendingWithdrawalOps || hasPendingOrderOps
     );
 
     const poll = async () => {
@@ -318,6 +321,7 @@ export function useExecutionPolling({
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    shouldPoll,
     watchedTxnHashes,
     chainId,
     setDepositStatuses,

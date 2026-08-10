@@ -382,11 +382,11 @@ export function OrderStatusNotification({
         return;
       }
 
-      const matchedStatusKey = Object.values(orderStatuses).find((orderStatus) => {
-        if (orderStatus.isViewed) return false;
-        if (contractOrderKey && orderStatus.key === contractOrderKey) return true;
-        if (orderStatus.data && getPendingOrderKey(orderStatus.data) === pendingOrderKey) return true;
-        return orderStatus.key === pendingOrderKey;
+      const matchedStatusKey = Object.values(orderStatuses).find((status) => {
+        if (status.isViewed) return false;
+        if (contractOrderKey && status.key === contractOrderKey) return true;
+        if (status.data && getPendingOrderKey(status.data) === pendingOrderKey) return true;
+        return status.key === pendingOrderKey;
       })?.key;
 
       if (matchedStatusKey) {
@@ -514,6 +514,12 @@ export function OrdersStatusNotificiation({
       });
 
       if (pendingOrder.txnType === "create") {
+        // Cancel / timeout must also clear the sticky toast — market creates
+        // previously waited forever for executedTxnHash only.
+        if (orderStatus?.cancelledTxnHash) {
+          return true;
+        }
+
         return isMarketOrderType(pendingOrder.orderType)
           ? Boolean(orderStatus?.executedTxnHash)
           : Boolean(orderStatus?.createdTxnHash);
