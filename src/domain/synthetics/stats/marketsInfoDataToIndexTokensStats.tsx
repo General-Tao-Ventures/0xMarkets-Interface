@@ -2,14 +2,13 @@ import { ethers } from "ethers";
 
 import { BASIS_POINTS_DIVISOR_BIGINT } from "config/factors";
 import { getUiMaxLeverageForSymbol } from "config/leverage";
-import { getBorrowingFactorPerPeriod, getFundingFactorPerPeriod } from "domain/synthetics/fees";
+import { getChartBorrowingRateHourly, getChartFundingRateHourly } from "domain/synthetics/fees/chartRates";
 import {
   MarketInfo,
   MarketsInfoData,
   getUsedLiquidity,
 } from "domain/synthetics/markets";
 import { TokenData, getMidPrice } from "domain/synthetics/tokens";
-import { CHART_PERIODS } from "lib/legacy";
 import { bigMath } from "sdk/utils/bigmath";
 export type MarketStat = {
   marketInfo: MarketInfo;
@@ -97,10 +96,10 @@ export function marketsInfoData2IndexTokenStatsMap(marketsInfoData: MarketsInfoD
 
     const poolValueUsd = marketInfo.poolValueMax;
 
-    const fundingRateLong = getFundingFactorPerPeriod(marketInfo, true, CHART_PERIODS["1h"]);
-    const fundingRateShort = getFundingFactorPerPeriod(marketInfo, false, CHART_PERIODS["1h"]);
-    const borrowingRateLong = -1n * getBorrowingFactorPerPeriod(marketInfo, true, CHART_PERIODS["1h"]);
-    const borrowingRateShort = -1n * getBorrowingFactorPerPeriod(marketInfo, false, CHART_PERIODS["1h"]);
+    const fundingRateLong = getChartFundingRateHourly(marketInfo, true);
+    const fundingRateShort = getChartFundingRateHourly(marketInfo, false);
+    const borrowingRateLong = getChartBorrowingRateHourly(marketInfo, true);
+    const borrowingRateShort = getChartBorrowingRateHourly(marketInfo, false);
 
     const [longUsedLiquidity, longMaxLiquidity] = getUsedLiquidity(marketInfo, true);
 

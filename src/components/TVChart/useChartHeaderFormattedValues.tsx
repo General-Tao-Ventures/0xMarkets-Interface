@@ -15,6 +15,11 @@ import { useSelector } from "context/SyntheticsStateContext/utils";
 import { use24hPriceDeltaMap } from "domain/synthetics/tokens";
 import { use24hVolumes } from "domain/synthetics/tokens/use24Volumes";
 import {
+  getCarthaAvailableLiquidityUsd,
+  getCarthaLiquidityForMarket,
+  useCarthaMarketLiquidity,
+} from "domain/cartha/useCarthaMarketLiquidity";
+import {
   formatAmountHuman,
   formatPercentageDisplay,
   formatRatePercentage,
@@ -40,6 +45,29 @@ export function useChartHeaderFormattedValues() {
   const chartTokenAddress = chartToken?.address as Address;
   const oraclePriceDecimals = useSelector(selectSelectedMarketPriceDecimals);
   const marketInfo = useSelector(selectTradeboxMarketInfo);
+  const { liquidityByMarket } = useCarthaMarketLiquidity();
+
+  const carthaLiquidity = getCarthaLiquidityForMarket(liquidityByMarket, marketInfo?.marketTokenAddress);
+
+  const liquidityLongUsd = useMemo(() => {
+    if (carthaLiquidity && info?.openInterestLong !== undefined) {
+      return getCarthaAvailableLiquidityUsd({
+        carthaTvlUsd: carthaLiquidity.tvlUsd,
+        openInterestUsd: info.openInterestLong,
+      });
+    }
+    return info?.liquidityLong;
+  }, [carthaLiquidity, info?.liquidityLong, info?.openInterestLong]);
+
+  const liquidityShortUsd = useMemo(() => {
+    if (carthaLiquidity && info?.openInterestShort !== undefined) {
+      return getCarthaAvailableLiquidityUsd({
+        carthaTvlUsd: carthaLiquidity.tvlUsd,
+        openInterestUsd: info.openInterestShort,
+      });
+    }
+    return info?.liquidityShort;
+  }, [carthaLiquidity, info?.liquidityShort, info?.openInterestShort]);
 
   const selectedTokenOption = chartTokenAddress ? getToken(chainId, chartTokenAddress) : undefined;
   const visualMultiplier = isSwap ? 1 : selectedTokenOption?.visualMultiplier ?? 1;
@@ -142,7 +170,7 @@ export function useChartHeaderFormattedValues() {
   }, [info?.shortOpenInterestPercentage, info?.openInterestShort]);
 
   const liquidityLong = useMemo(() => {
-    const liquidity = info?.liquidityLong;
+    const liquidity = liquidityLongUsd;
 
     if (liquidity === undefined) {
       return "...";
@@ -158,13 +186,13 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong />}
+        content={<AvailableLiquidityTooltip isLong carthaTvlUsd={carthaLiquidity?.tvlUsd} />}
       />
     );
-  }, [info?.liquidityLong]);
+  }, [liquidityLongUsd, carthaLiquidity?.tvlUsd]);
 
   const liquidityShort = useMemo(() => {
-    const liquidity = info?.liquidityShort;
+    const liquidity = liquidityShortUsd;
 
     if (liquidity === undefined) {
       return "...";
@@ -180,10 +208,10 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong={false} />}
+        content={<AvailableLiquidityTooltip isLong={false} carthaTvlUsd={carthaLiquidity?.tvlUsd} />}
       />
     );
-  }, [info?.liquidityShort]);
+  }, [liquidityShortUsd, carthaLiquidity?.tvlUsd]);
 
   const netRateLong = useMemo(() => {
     const netRate = info?.netRateHourlyLong;
