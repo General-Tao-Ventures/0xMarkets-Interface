@@ -336,14 +336,24 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         );
       }
 
-      setOrderStatuses((old) =>
-        setByKey(old, data.key, {
+      // Merge with any existing status so a late OrderCreated cannot wipe an
+      // OrderExecuted / OrderCancelled that arrived first (race with WS vs receipt).
+      setOrderStatuses((old) => {
+        if (old[data.key]) {
+          return updateByKey(old, data.key, {
+            data,
+            createdTxnHash: txnParams.transactionHash,
+            createdAt: old[data.key].createdAt ?? Date.now(),
+          });
+        }
+
+        return setByKey(old, data.key, {
           key: data.key,
           data,
           createdTxnHash: txnParams.transactionHash,
           createdAt: Date.now(),
-        })
-      );
+        });
+      });
 
       const pendingOrderKey = getPendingOrderKey(data);
       const pendingExpressTxn = Object.values(latestPendingExpressTxnParams.current).find((p) =>
@@ -402,10 +412,18 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         }
       }
 
+      // Upsert even if OrderCreated has not landed yet — otherwise the executed
+      // hash is dropped and the order toast spins forever.
       setOrderStatuses((old) => {
-        if (!old[key]) return old;
+        if (old[key]) {
+          return updateByKey(old, key, { executedTxnHash: txnParams.transactionHash });
+        }
 
-        return updateByKey(old, key, { executedTxnHash: txnParams.transactionHash });
+        return setByKey(old, key, {
+          key,
+          createdAt: Date.now(),
+          executedTxnHash: txnParams.transactionHash,
+        });
       });
 
       triggerPositionsRefresh();
@@ -897,6 +915,26 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
       setPositionIncreaseEvents((old) => [...old, data]);
 
+      // Recover sticky market-order toasts when OrderExecuted was missed but the
+      // position update still arrived (common on express / flaky WS paths).
+      if (data.orderKey && isMarketOrderType(data.orderType)) {
+        setOrderStatuses((old) => {
+          if (!old[data.orderKey]) {
+            return setByKey(old, data.orderKey, {
+              key: data.orderKey,
+              createdAt: Date.now(),
+              executedTxnHash: txnParams.transactionHash,
+            });
+          }
+
+          if (old[data.orderKey].executedTxnHash || old[data.orderKey].cancelledTxnHash) {
+            return old;
+          }
+
+          return updateByKey(old, data.orderKey, { executedTxnHash: txnParams.transactionHash });
+        });
+      }
+
       // If this is a limit order, or the order status is not received previosly, notify the user
       if (!isMarketOrderType(data.orderType) || !orderStatuses[data.orderKey]) {
         let text = "";
@@ -962,6 +1000,26 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       }
 
       setPositionDecreaseEvents((old) => [...old, data]);
+
+      // Same recovery as PositionIncrease: mark market orders executed if the
+      // OrderExecuted event was missed so decrease toasts do not stick.
+      if (data.orderKey && isMarketOrderType(data.orderType)) {
+        setOrderStatuses((old) => {
+          if (!old[data.orderKey]) {
+            return setByKey(old, data.orderKey, {
+              key: data.orderKey,
+              createdAt: Date.now(),
+              executedTxnHash: txnParams.transactionHash,
+            });
+          }
+
+          if (old[data.orderKey].executedTxnHash || old[data.orderKey].cancelledTxnHash) {
+            return old;
+          }
+
+          return updateByKey(old, data.orderKey, { executedTxnHash: txnParams.transactionHash });
+        });
+      }
 
       // If this is a trigger or liquidation order, or the order status is not received previosly, notify the user
       if (!isMarketOrderType(data.orderType) || !orderStatuses[data.orderKey]) {
