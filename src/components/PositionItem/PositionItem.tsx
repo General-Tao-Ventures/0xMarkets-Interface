@@ -87,6 +87,8 @@ export function PositionItem(p: Props) {
   const leverageLabel = formatLeverage(p.position.leverage, { maxLeverageBps: uiMaxLeverageBps }) || "...";
   const isLeverageCapped =
     p.position.leverage !== undefined && p.position.leverage > BigInt(uiMaxLeverageBps);
+  // Only style leverage as danger when truly drained (risk flag), not merely at/near UI max.
+  const showLeverageDanger = p.position.hasLowCollateral;
   const hasNegativeNetValue = p.position.netValue < 0n;
 
   function renderNetValue() {
@@ -570,7 +572,7 @@ export function PositionItem(p: Props) {
             <div className="Exchange-list-info-label">
               <span
                 className={cx("muted mr-4 rounded-2 px-2 pb-1 numbers", {
-                  negative: isLeverageCapped || p.position.hasLowCollateral,
+                  negative: showLeverageDanger,
                 })}
               >
                 {leverageLabel}
@@ -695,7 +697,7 @@ export function PositionItem(p: Props) {
             <div className="text-body-small flex items-center gap-4">
               <span
                 className={cx("rounded-4 leading-1 numbers", {
-                  negative: isLeverageCapped || p.position.hasLowCollateral,
+                  negative: showLeverageDanger,
                 })}
               >
                 {leverageLabel}

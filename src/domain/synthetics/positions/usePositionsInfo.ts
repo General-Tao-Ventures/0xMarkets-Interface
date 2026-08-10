@@ -275,13 +275,15 @@ export function usePositionsInfoRequest(
         liquidationPrice !== undefined &&
         (position.isLong ? markPrice <= liquidationPrice : markPrice >= liquidationPrice);
 
-      // Effective leverage uses remaining collateral after fees — after oracle/keeper
-      // outages that can explode past any trade-time UI max (e.g. 3116x). Flag those.
+      // Risk flag for drained / liquidatable positions. Do NOT use the trade UI max
+      // (100x/200x) here — healthy max-leverage opens cross that after tiny fee accrual.
+      // Extreme effective leverage (>> UI max) still flags fee-drained positions.
+      const extremeLeverageBps = uiMaxLeverageBps * 2n;
       const hasLowCollateral =
         remainingCollateralUsdRaw <= 0n ||
         netValue <= 0n ||
         isPastLiquidation ||
-        (leverage !== undefined && leverage > uiMaxLeverageBps) ||
+        (leverage !== undefined && leverage > extremeLeverageBps) ||
         (leverage !== undefined && maxAllowedLeverage !== undefined && leverage > maxAllowedLeverage);
 
       const indexName = getMarketIndexName({ indexToken, isSpotOnly: false });
