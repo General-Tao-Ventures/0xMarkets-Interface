@@ -173,11 +173,18 @@ export function marketsInfoData2IndexTokenStatsMap(
 
   for (const indexTokenStats of Object.values(indexMap)) {
     const totalOpenInterest = indexTokenStats.totalOpenInterestLong + indexTokenStats.totalOpenInterestShort;
+    // Only treat Cartha as active when TVL is actually > 0. A pair-performance
+    // map entry with tvlUsd === 0 still falls back to on-chain pool/liquidity,
+    // so aggregate utilization must use the on-chain used/max formula.
     const usesCarthaTvl = Boolean(
       carthaLiquidityByMarket &&
-        indexTokenStats.marketsStats.some((stat) =>
-          getCarthaLiquidityForMarket(carthaLiquidityByMarket, stat.marketInfo.marketTokenAddress)
-        )
+        indexTokenStats.marketsStats.some((stat) => {
+          const cartha = getCarthaLiquidityForMarket(
+            carthaLiquidityByMarket,
+            stat.marketInfo.marketTokenAddress
+          );
+          return Boolean(cartha && cartha.tvlUsd > 0n);
+        })
     );
 
     indexTokenStats.totalUtilization =
