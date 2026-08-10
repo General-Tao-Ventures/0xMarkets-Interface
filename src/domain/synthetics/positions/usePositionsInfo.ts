@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { getUiMaxLeverageBps } from "config/leverage";
 import { useUserReferralInfoRequest } from "domain/referrals";
 import { getBasisPoints } from "lib/numbers";
 import { getByKey } from "lib/objects";
@@ -148,7 +149,10 @@ export function usePositionsInfoRequest(
 
       const collateralUsd = convertToUsd(position.collateralAmount, collateralToken.decimals, collateralMinPrice)!;
 
-      const remainingCollateralUsd = collateralUsd - totalPendingFeesUsd;
+      // Fees can exceed collateral after long outages; keep signed value for risk
+      // flags but never show a negative remaining-collateral balance in the list.
+      const remainingCollateralUsdRaw = collateralUsd - totalPendingFeesUsd;
+      const remainingCollateralUsd = remainingCollateralUsdRaw > 0n ? remainingCollateralUsdRaw : 0n;
 
       const remainingCollateralAmount = convertToTokenAmount(
         remainingCollateralUsd,
@@ -245,9 +249,9 @@ export function usePositionsInfoRequest(
       const maxAllowedLeverage = marketInfo
         ? getMaxAllowedLeverageByMinCollateralFactor(marketInfo.minCollateralFactor)
         : undefined;
-
-      const hasLowCollateral =
-        (leverage !== undefined && maxAllowedLeverage !== undefined && leverage > maxAllowedLeverage) || false;
+      const uiMaxLeverageBps = BigInt(
+        getUiMaxLeverageBps(indexToken.symbol, indexToken.baseSymbol)
+      );
 
       const liquidationPrice =
         marketInfo && hasSaneEntryPrice
@@ -266,6 +270,19 @@ export function usePositionsInfoRequest(
               isLong: position.isLong,
             })
           : undefined;
+
+      const isPastLiquidation =
+        liquidationPrice !== undefined &&
+        (position.isLong ? markPrice <= liquidationPrice : markPrice >= liquidationPrice);
+
+      // Effective leverage uses remaining collateral after fees — after oracle/keeper
+      // outages that can explode past any trade-time UI max (e.g. 3116x). Flag those.
+      const hasLowCollateral =
+        remainingCollateralUsdRaw <= 0n ||
+        netValue <= 0n ||
+        isPastLiquidation ||
+        (leverage !== undefined && leverage > uiMaxLeverageBps) ||
+        (leverage !== undefined && maxAllowedLeverage !== undefined && leverage > maxAllowedLeverage);
 
       const indexName = getMarketIndexName({ indexToken, isSpotOnly: false });
       const poolName = getMarketPoolName({ longToken, shortToken });
@@ -288,6 +305,7 @@ export function usePositionsInfoRequest(
         remainingCollateralUsd,
         remainingCollateralAmount,
         hasLowCollateral,
+        isPastLiquidation,
         leverage,
         leverageWithPnl,
         pnl,

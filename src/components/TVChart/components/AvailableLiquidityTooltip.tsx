@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { selectTradeboxMarketInfo } from "context/SyntheticsStateContext/selectors/tradeboxSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
+import { getCarthaSideCapacityUsd } from "domain/cartha/useCarthaMarketLiquidity";
 import {
   getMaxOpenInterestUsd,
   getMaxReservedUsd,
@@ -39,6 +40,7 @@ export function AvailableLiquidityTooltip({
   }, [marketInfo, isLong]);
 
   const usingCartha = carthaTvlUsd !== undefined && carthaTvlUsd > 0n;
+  const carthaSideCapacityUsd = usingCartha ? getCarthaSideCapacityUsd(carthaTvlUsd!) : undefined;
 
   return (
     <div>
@@ -50,13 +52,19 @@ export function AvailableLiquidityTooltip({
             showDollar={false}
           />
           <StatsTooltipRow
+            label={t`${longShortText} Cap (25% of TVL)`}
+            value={formatUsd(carthaSideCapacityUsd, { displayDecimals: 0 }) || "..."}
+            showDollar={false}
+          />
+          <StatsTooltipRow
             label={t`${longShortText} Open Interest`}
             value={formatUsd(currentOpenInterest, { displayDecimals: 0 }) || "..."}
             showDollar={false}
           />
           <br />
           <Trans>
-            Available liquidity is Cartha LP TVL minus current {longShortText.toLowerCase()} open interest.
+            Available liquidity is 25% of Cartha LP TVL (50/50 side split, then 50% cap) minus current{" "}
+            {longShortText.toLowerCase()} open interest.
           </Trans>
         </>
       ) : (

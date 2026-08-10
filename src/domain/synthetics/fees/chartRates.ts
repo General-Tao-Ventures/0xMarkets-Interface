@@ -13,16 +13,21 @@ import { PRECISION } from "sdk/utils/numbers";
  */
 export function getChartFundingRateHourly(marketInfo: MarketInfo, isLong: boolean): bigint {
   const period = CHART_PERIODS["1h"];
+  const { longInterestUsd, shortInterestUsd, minFundingFactorPerSecond } = marketInfo;
+
+  // Funding is a transfer between longs and shorts. With no counterparty OI there
+  // is nothing to pay/receive — never show a one-sided rate (e.g. long pays while short is $0).
+  if (longInterestUsd === 0n || shortInterestUsd === 0n) return 0n;
+  if (longInterestUsd === shortInterestUsd) return 0n;
+
   const live = getFundingFactorPerPeriod(marketInfo, isLong, period);
   if (live !== 0n) return live;
 
-  const { longInterestUsd, shortInterestUsd, minFundingFactorPerSecond } = marketInfo;
-  if (longInterestUsd === 0n && shortInterestUsd === 0n) return 0n;
   if (minFundingFactorPerSecond === 0n) return 0n;
-  if (longInterestUsd === shortInterestUsd) return 0n;
 
   // When live rate is unset, estimate from minFundingFactorPerSecond + current imbalance.
-  // Heavier side pays.
+  // Heavier side pays; getFundingFactorPerPeriod keeps USD paid == USD received
+  // (percentage rates differ when OI is imbalanced).
   const patched: MarketInfo = {
     ...marketInfo,
     fundingFactorPerSecond: minFundingFactorPerSecond,

@@ -100,12 +100,26 @@ export function getCarthaLiquidityForMarket(
   return liquidityByMarket[marketTokenAddress.toLowerCase()];
 }
 
-/** Available liquidity for a side = Cartha LP TVL − that side's open interest. */
+/**
+ * Available liquidity for one side from Cartha LP TVL:
+ * 1) Split TVL 50/50 across long/short
+ * 2) Cap each side at 50% of that half (= 25% of total TVL)
+ * 3) Subtract that side's open interest
+ *
+ * Example: $350k TVL → $175k/side → $87.5k cap → available = $87.5k − OI.
+ */
 export function getCarthaAvailableLiquidityUsd(params: {
   carthaTvlUsd: bigint;
   openInterestUsd: bigint;
 }): bigint {
   const { carthaTvlUsd, openInterestUsd } = params;
-  const available = carthaTvlUsd - openInterestUsd;
+  const sideShareUsd = carthaTvlUsd / 2n;
+  const cappedSideUsd = sideShareUsd / 2n;
+  const available = cappedSideUsd - openInterestUsd;
   return available > 0n ? available : 0n;
+}
+
+/** Per-side capacity before OI (25% of Cartha LP TVL). */
+export function getCarthaSideCapacityUsd(carthaTvlUsd: bigint): bigint {
+  return carthaTvlUsd / 4n;
 }

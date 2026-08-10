@@ -95,7 +95,9 @@ function MarketsListDesktop({ chainId, indexTokensStats }: { chainId: number; in
                   <TooltipWithPortal
                     handle={<Trans>LIQUIDITY</Trans>}
                     content={
-                      <Trans>Available liquidity for new positions (Cartha LP TVL minus open interest per side).</Trans>
+                      <Trans>
+                        Available liquidity for new positions (25% of Cartha LP TVL per side, minus open interest).
+                      </Trans>
                     }
                   />
                 </Sorter>

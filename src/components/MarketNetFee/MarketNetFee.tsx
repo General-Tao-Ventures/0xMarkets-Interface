@@ -61,19 +61,20 @@ export default function MarketNetFee(props: Props) {
   );
 }
 
-function renderRate(rate: bigint) {
-  return <span className={getPositiveOrNegativeClass(rate)}>{formatRatePercentage(rate)}</span>;
+function renderRateMagnitude(rate: bigint) {
+  // Show unsigned magnitude in prose ("pay 0.01%" not "pay -0.01%").
+  const magnitude = rate < 0n ? -rate : rate;
+  return <span className={getPositiveOrNegativeClass(rate)}>{formatRatePercentage(magnitude)}</span>;
 }
 
 function NetFeeMessage(props: Props) {
   const { fundingRateHourly, borrowRateHourly, isLong } = props;
   const fundingAction = fundingRateHourly >= 0 ? t`receive` : t`pay`;
-  const borrowAction = fundingAction === t`receive` ? t`pay` : "";
   const longOrShort = isLong ? t`Long` : t`Short`;
   const isFundingRateZero = fundingRateHourly === 0n;
   const isBorrowRateZero = borrowRateHourly === 0n;
-  const fundingRate = renderRate(fundingRateHourly);
-  const borrowRate = renderRate(borrowRateHourly);
+  const fundingRate = renderRateMagnitude(fundingRateHourly);
+  const borrowRate = renderRateMagnitude(borrowRateHourly);
 
   if (isFundingRateZero && isBorrowRateZero) {
     return <Trans>{longOrShort} positions do not pay a funding fee or a borrow fee.</Trans>;
@@ -92,8 +93,8 @@ function NetFeeMessage(props: Props) {
   } else {
     return (
       <Trans>
-        {longOrShort} positions {fundingAction} a funding fee of {fundingRate} per hour and {borrowAction} a borrow fee
-        of {borrowRate} per hour.
+        {longOrShort} positions {fundingAction} a funding fee of {fundingRate} per hour and pay a borrow fee of{" "}
+        {borrowRate} per hour.
       </Trans>
     );
   }
