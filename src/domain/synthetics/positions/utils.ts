@@ -201,8 +201,24 @@ export function getLeverage(p: {
   return bigMath.mulDiv(sizeInUsd, BASIS_POINTS_DIVISOR_BIGINT, remainingCollateralUsd);
 }
 
-export function formatLeverage(leverage?: bigint) {
+/**
+ * Format leverage for display.
+ * When `maxLeverageBps` is set and effective leverage exceeds it (common after
+ * fee-drained collateral), show `>NNx` instead of thousands of ×.
+ */
+export function formatLeverage(leverage?: bigint, opts?: { maxLeverageBps?: number | bigint }) {
   if (leverage === undefined) return undefined;
+
+  const max =
+    opts?.maxLeverageBps !== undefined && opts.maxLeverageBps !== null
+      ? typeof opts.maxLeverageBps === "bigint"
+        ? opts.maxLeverageBps
+        : BigInt(opts.maxLeverageBps)
+      : undefined;
+
+  if (max !== undefined && leverage > max) {
+    return `>${formatAmount(max, 4, 2)}x`;
+  }
 
   return `${formatAmount(leverage, 4, 2)}x`;
 }

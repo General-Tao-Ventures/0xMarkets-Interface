@@ -74,6 +74,8 @@ export type PositionInfo = Position & {
   remainingCollateralUsd: bigint;
   remainingCollateralAmount: bigint;
   hasLowCollateral: boolean;
+  /** True when mark has crossed liquidation price (position should be liquidatable). */
+  isPastLiquidation?: boolean;
   pnl: bigint;
   pnlPercentage: bigint;
   pnlAfterFees: bigint;

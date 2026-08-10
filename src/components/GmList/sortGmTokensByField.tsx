@@ -1,6 +1,8 @@
 import values from "lodash/values";
 
 import type { SortDirection } from "context/SorterContext/types";
+import type { CarthaMarketLiquidity } from "domain/cartha/useCarthaMarketLiquidity";
+import { getCarthaLiquidityForMarket } from "domain/cartha/useCarthaMarketLiquidity";
 import { MarketTokensAPRData, MarketsInfoData } from "domain/synthetics/markets";
 import { PerformanceData } from "domain/synthetics/markets/usePerformanceAnnualized";
 import { convertToUsd, type TokensData } from "domain/synthetics/tokens";
@@ -17,6 +19,7 @@ export function sortGmTokensByField({
   marketsTokensIncentiveAprData,
   marketsTokensLidoAprData,
   performance,
+  carthaLiquidityByMarket,
 }: {
   marketsInfo: MarketsInfoData;
   marketTokensData: TokensData;
@@ -26,6 +29,7 @@ export function sortGmTokensByField({
   marketsTokensIncentiveAprData: MarketTokensAPRData | undefined;
   marketsTokensLidoAprData: MarketTokensAPRData | undefined;
   performance: PerformanceData | undefined;
+  carthaLiquidityByMarket?: Record<string, CarthaMarketLiquidity>;
 }) {
   const gmTokens = values(marketTokensData);
 
@@ -38,8 +42,16 @@ export function sortGmTokensByField({
 
   if (orderBy === "totalSupply") {
     return gmTokens.sort((a, b) => {
-      const totalSupplyUsdA = convertToUsd(a.totalSupply, a.decimals, a.prices.minPrice) ?? 0n;
-      const totalSupplyUsdB = convertToUsd(b.totalSupply, b.decimals, b.prices.minPrice) ?? 0n;
+      const carthaA = getCarthaLiquidityForMarket(carthaLiquidityByMarket, a.address);
+      const carthaB = getCarthaLiquidityForMarket(carthaLiquidityByMarket, b.address);
+      const totalSupplyUsdA =
+        carthaA && carthaA.tvlUsd > 0n
+          ? carthaA.tvlUsd
+          : (convertToUsd(a.totalSupply, a.decimals, a.prices.minPrice) ?? 0n);
+      const totalSupplyUsdB =
+        carthaB && carthaB.tvlUsd > 0n
+          ? carthaB.tvlUsd
+          : (convertToUsd(b.totalSupply, b.decimals, b.prices.minPrice) ?? 0n);
 
       return totalSupplyUsdA > totalSupplyUsdB ? directionMultiplier : -directionMultiplier;
     });
@@ -81,5 +93,5 @@ export function sortGmTokensByField({
     });
   }
 
-  return sortGmTokensDefault(marketsInfo, marketTokensData);
+  return sortGmTokensDefault(marketsInfo, marketTokensData, carthaLiquidityByMarket);
 }

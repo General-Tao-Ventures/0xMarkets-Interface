@@ -15,6 +15,11 @@ import { useSelector } from "context/SyntheticsStateContext/utils";
 import { use24hPriceDeltaMap } from "domain/synthetics/tokens";
 import { use24hVolumes } from "domain/synthetics/tokens/use24Volumes";
 import {
+  getCarthaAvailableLiquidityUsd,
+  getCarthaLiquidityForMarket,
+  useCarthaMarketLiquidity,
+} from "domain/cartha/useCarthaMarketLiquidity";
+import {
   formatAmountHuman,
   formatPercentageDisplay,
   formatRatePercentage,
@@ -40,6 +45,32 @@ export function useChartHeaderFormattedValues() {
   const chartTokenAddress = chartToken?.address as Address;
   const oraclePriceDecimals = useSelector(selectSelectedMarketPriceDecimals);
   const marketInfo = useSelector(selectTradeboxMarketInfo);
+  const { liquidityByMarket } = useCarthaMarketLiquidity();
+
+  const carthaLiquidity = getCarthaLiquidityForMarket(liquidityByMarket, marketInfo?.marketTokenAddress);
+  // Only treat Cartha as active when LP TVL is positive so header + tooltip stay in sync.
+  const carthaTvlUsd =
+    carthaLiquidity && carthaLiquidity.tvlUsd > 0n ? carthaLiquidity.tvlUsd : undefined;
+
+  const liquidityLongUsd = useMemo(() => {
+    if (carthaTvlUsd !== undefined && info?.openInterestLong !== undefined) {
+      return getCarthaAvailableLiquidityUsd({
+        carthaTvlUsd,
+        openInterestUsd: info.openInterestLong,
+      });
+    }
+    return info?.liquidityLong;
+  }, [carthaTvlUsd, info?.liquidityLong, info?.openInterestLong]);
+
+  const liquidityShortUsd = useMemo(() => {
+    if (carthaTvlUsd !== undefined && info?.openInterestShort !== undefined) {
+      return getCarthaAvailableLiquidityUsd({
+        carthaTvlUsd,
+        openInterestUsd: info.openInterestShort,
+      });
+    }
+    return info?.liquidityShort;
+  }, [carthaTvlUsd, info?.liquidityShort, info?.openInterestShort]);
 
   const selectedTokenOption = chartTokenAddress ? getToken(chainId, chartTokenAddress) : undefined;
   const visualMultiplier = isSwap ? 1 : selectedTokenOption?.visualMultiplier ?? 1;
@@ -54,7 +85,7 @@ export function useChartHeaderFormattedValues() {
 
   const dailyVolumes = use24hVolumes();
   const dailyVolumesValue = marketInfo?.marketTokenAddress
-    ? dailyVolumes?.byMarketToken?.[marketInfo?.marketTokenAddress]
+    ? dailyVolumes.byMarketToken?.[marketInfo.marketTokenAddress]
     : undefined;
   const dayPriceDeltaMap = use24hPriceDeltaMap(chainId, [priceTokenAddress as Address]);
   const dayPriceDeltaData = chartTokenAddress ? dayPriceDeltaMap?.[chartTokenAddress] : undefined;
@@ -142,7 +173,7 @@ export function useChartHeaderFormattedValues() {
   }, [info?.shortOpenInterestPercentage, info?.openInterestShort]);
 
   const liquidityLong = useMemo(() => {
-    const liquidity = info?.liquidityLong;
+    const liquidity = liquidityLongUsd;
 
     if (liquidity === undefined) {
       return "...";
@@ -158,13 +189,13 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong />}
+        content={<AvailableLiquidityTooltip isLong carthaTvlUsd={carthaTvlUsd} />}
       />
     );
-  }, [info?.liquidityLong]);
+  }, [liquidityLongUsd, carthaTvlUsd]);
 
   const liquidityShort = useMemo(() => {
-    const liquidity = info?.liquidityShort;
+    const liquidity = liquidityShortUsd;
 
     if (liquidity === undefined) {
       return "...";
@@ -180,10 +211,10 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong={false} />}
+        content={<AvailableLiquidityTooltip isLong={false} carthaTvlUsd={carthaTvlUsd} />}
       />
     );
-  }, [info?.liquidityShort]);
+  }, [liquidityShortUsd, carthaTvlUsd]);
 
   const netRateLong = useMemo(() => {
     const netRate = info?.netRateHourlyLong;
@@ -260,12 +291,15 @@ export function useChartHeaderFormattedValues() {
   }, [info]);
 
   const dailyVolume = useMemo(() => {
-    return dailyVolumesValue !== undefined ? (
-      <span className="numbers">{formatAmountHuman(dailyVolumesValue, USD_DECIMALS, true)}</span>
-    ) : (
-      "..."
-    );
-  }, [dailyVolumesValue]);
+    // Quiet markets zero-fill to 0n after a successful Squid fetch. Keep "..." while
+    // loading / before market info is ready, or when Squid has never returned data (isError
+    // with no cache). Refresh errors keep the last good volumes — see use24hVolumes.
+    if (dailyVolumes.isLoading || dailyVolumesValue === undefined) {
+      return "...";
+    }
+
+    return <span className="numbers">{formatAmountHuman(dailyVolumesValue, USD_DECIMALS, true)}</span>;
+  }, [dailyVolumes.isLoading, dailyVolumesValue]);
 
   return {
     avgPrice,

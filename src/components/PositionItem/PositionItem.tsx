@@ -3,6 +3,7 @@ import cx from "classnames";
 import { useCallback, useMemo } from "react";
 import Skeleton from "react-loading-skeleton";
 
+import { getUiMaxLeverageBps } from "config/leverage";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
 import { usePositionsConstants } from "context/SyntheticsStateContext/hooks/globalsHooks";
 import { useEditingOrderState } from "context/SyntheticsStateContext/hooks/orderEditorHooks";
@@ -79,15 +80,43 @@ export function PositionItem(p: Props) {
   const marketDecimals = useSelector(makeSelectMarketPriceDecimals(p.position.market.indexTokenAddress));
   // JPY is traded/viewed as USD/JPY (~157); on-chain Long JPY ≡ Short USD/JPY.
   const displayIsLong = toFxDisplayIsLong(p.position.isLong, p.position.indexToken.symbol);
+  const uiMaxLeverageBps = getUiMaxLeverageBps(
+    p.position.indexToken.symbol,
+    p.position.indexToken.baseSymbol
+  );
+  const leverageLabel = formatLeverage(p.position.leverage, { maxLeverageBps: uiMaxLeverageBps }) || "...";
+  const isLeverageCapped =
+    p.position.leverage !== undefined && p.position.leverage > BigInt(uiMaxLeverageBps);
+  // Only style leverage as danger when truly drained (risk flag), not merely at/near UI max.
+  const showLeverageDanger = p.position.hasLowCollateral;
+  const hasNegativeNetValue = p.position.netValue < 0n;
 
   function renderNetValue() {
     return (
       <TooltipWithPortal
-        handle={formatUsd(p.position.netValue)}
-        handleClassName="numbers"
+        handle={formatUsd(hasNegativeNetValue ? 0n : p.position.netValue)}
+        handleClassName={cx("numbers", { negative: hasNegativeNetValue || p.position.hasLowCollateral })}
         position={p.isLarge ? "bottom-start" : "bottom-end"}
         renderContent={() => (
           <div>
+            {hasNegativeNetValue && (
+              <>
+                <Trans>
+                  WARNING: Net value is at or below $0 after PnL, fees and closing costs. Add collateral or close this
+                  position — it may already be liquidatable.
+                </Trans>
+                <br />
+                <br />
+                <StatsTooltipRow
+                  label={t`Computed Net Value`}
+                  value={formatUsd(p.position.netValue) || "..."}
+                  valueClassName="numbers"
+                  showDollar={false}
+                  textClassName="text-red-500"
+                />
+                <br />
+              </>
+            )}
             <Trans>
               Net value is the amount held in the position inclusive of PnL, fees and net price impact at close.
             </Trans>
@@ -240,6 +269,16 @@ export function PositionItem(p: Props) {
                     <br />
                   </div>
                 )}
+                {isLeverageCapped && p.position.leverage !== undefined && (
+                  <div>
+                    <Trans>
+                      Effective leverage is {formatLeverage(p.position.leverage)} (position size ÷ remaining collateral
+                      after fees). Display is capped at the market UI max.
+                    </Trans>
+                    <br />
+                    <br />
+                  </div>
+                )}
                 <StatsTooltipRow
                   label={t`Initial Collateral`}
                   value={
@@ -364,11 +403,22 @@ export function PositionItem(p: Props) {
       }
     }
 
-    const isProximitySoftWarning = liqPriceProximityPercent !== undefined && liqPriceProximityPercent < 5;
-    const isProximityHardWarning = liqPriceProximityPercent !== undefined && liqPriceProximityPercent < 2;
+    const isPastLiquidation = Boolean(p.position.isPastLiquidation);
+    const isProximitySoftWarning =
+      !isPastLiquidation && liqPriceProximityPercent !== undefined && liqPriceProximityPercent < 5;
+    const isProximityHardWarning =
+      isPastLiquidation || (liqPriceProximityPercent !== undefined && liqPriceProximityPercent < 2);
 
     const getLiqPriceTooltipContent = () => (
       <>
+        {isPastLiquidation && (
+          <div>
+            <Trans>
+              WARNING: Mark price has crossed the liquidation price. This position should be liquidatable — if it stays
+              open, liquidation keepers or oracle updates may be delayed.
+            </Trans>
+          </div>
+        )}
         {liqPriceWarning && <div>{liqPriceWarning}</div>}
         {isProximitySoftWarning && liqPriceProximityPercent !== undefined && (
           <div>
@@ -405,7 +455,7 @@ export function PositionItem(p: Props) {
     );
 
     const hasTimeWarning = estimatedLiquidationHours && estimatedLiquidationHours < 24 * 7;
-    const hasAnyWarning = liqPriceWarning || hasTimeWarning || isProximitySoftWarning;
+    const hasAnyWarning = liqPriceWarning || hasTimeWarning || isProximitySoftWarning || isPastLiquidation;
 
     if (hasAnyWarning) {
       return (
@@ -520,8 +570,12 @@ export function PositionItem(p: Props) {
               )}
             </div>
             <div className="Exchange-list-info-label">
-              <span className={cx("muted mr-4 rounded-2 px-2 pb-1 numbers")}>
-                {formatLeverage(p.position.leverage) || "..."}
+              <span
+                className={cx("muted mr-4 rounded-2 px-2 pb-1 numbers", {
+                  negative: showLeverageDanger,
+                })}
+              >
+                {leverageLabel}
               </span>
               <span className={cx({ positive: displayIsLong, negative: !displayIsLong })}>
                 {displayIsLong ? t`Long` : t`Short`}
@@ -641,7 +695,13 @@ export function PositionItem(p: Props) {
               {getMarketIndexName({ indexToken: p.position.indexToken, isSpotOnly: false })}
             </span>
             <div className="text-body-small flex items-center gap-4">
-              <span className="rounded-4 leading-1">{formatLeverage(p.position.leverage) || "..."}</span>
+              <span
+                className={cx("rounded-4 leading-1 numbers", {
+                  negative: showLeverageDanger,
+                })}
+              >
+                {leverageLabel}
+              </span>
               <span
                 className={cx("Exchange-list-side", {
                   positive: displayIsLong,

@@ -207,7 +207,7 @@ export function GmList({
                     </TableTh>
                     <TableTh>
                       <Sorter {...getSorterProps("totalSupply")}>
-                        <Trans>TVL (SUPPLY)</Trans>
+                        <Trans>TVL</Trans>
                       </Sorter>
                     </TableTh>
                     <TableTh>

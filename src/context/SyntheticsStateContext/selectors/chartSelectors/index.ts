@@ -6,9 +6,8 @@ import {
   selectTradeboxTradeFlags,
 } from "context/SyntheticsStateContext/selectors/tradeboxSelectors";
 import { createSelector } from "context/SyntheticsStateContext/utils";
-import { getBorrowingFactorPerPeriod, getFundingFactorPerPeriod } from "domain/synthetics/fees";
+import { getChartBorrowingRateHourly, getChartFundingRateHourly } from "domain/synthetics/fees/chartRates";
 import { getAvailableUsdLiquidityForPosition } from "domain/synthetics/markets";
-import { CHART_PERIODS } from "lib/legacy";
 import { bigMath } from "sdk/utils/bigmath";
 
 export { selectChartToken } from "../shared/marketSelectors";
@@ -45,10 +44,10 @@ export const selectChartHeaderInfo = createSelector((q) => {
     return;
   }
 
-  const borrowingRateLong = -getBorrowingFactorPerPeriod(marketInfo, true, CHART_PERIODS["1h"]);
-  const borrowingRateShort = -getBorrowingFactorPerPeriod(marketInfo, false, CHART_PERIODS["1h"]);
-  const fundingRateLong = getFundingFactorPerPeriod(marketInfo, true, CHART_PERIODS["1h"]);
-  const fundingRateShort = getFundingFactorPerPeriod(marketInfo, false, CHART_PERIODS["1h"]);
+  const borrowingRateLong = getChartBorrowingRateHourly(marketInfo, true);
+  const borrowingRateShort = getChartBorrowingRateHourly(marketInfo, false);
+  const fundingRateLong = getChartFundingRateHourly(marketInfo, true);
+  const fundingRateShort = getChartFundingRateHourly(marketInfo, false);
 
   const netRateHourlyLong = (fundingRateLong ?? 0n) + (borrowingRateLong ?? 0n);
   const netRateHourlyShort = (fundingRateShort ?? 0n) + (borrowingRateShort ?? 0n);
@@ -65,6 +64,7 @@ export const selectChartHeaderInfo = createSelector((q) => {
     totalVolume === 0n ? 0 : longOpenInterestPercentage !== undefined ? 100 - longOpenInterestPercentage : undefined;
 
   return {
+    // On-chain reserve/OI-cap liquidity — may be overridden by Cartha LP TVL in the chart header hook.
     liquidityLong: getAvailableUsdLiquidityForPosition(marketInfo, true),
     liquidityShort: getAvailableUsdLiquidityForPosition(marketInfo, false),
     netRateHourlyLong,
