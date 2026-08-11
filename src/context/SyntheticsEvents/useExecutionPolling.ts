@@ -11,6 +11,7 @@ import { parseEventLogData } from "context/WebsocketContext/subscribeToEvents";
 
 import type { DepositStatuses, EventLogData, EventTxnParams, OrderStatuses, WithdrawalStatuses, MultiTransactionStatus } from "./types";
 import { EXECUTION_TIMEOUT_HASH } from "./types";
+import { mirrorTerminalStatusOntoProvisional } from "./utils";
 
 // --- Constants ---
 
@@ -297,7 +298,12 @@ export function useExecutionPolling({
       for (const pending of pendingOrders) {
         if (now - pending.createdAt > MAX_WAIT_MS) {
           console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
-          setOrderStatuses((old) => updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
+          setOrderStatuses((old) => {
+            const next = updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH });
+            return mirrorTerminalStatusOntoProvisional(next, pending.key, {
+              cancelledTxnHash: EXECUTION_TIMEOUT_HASH,
+            });
+          });
           continue;
         }
 
@@ -312,9 +318,22 @@ export function useExecutionPolling({
             (key, txnHash, isExecuted, cancelledReason) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
-                setOrderStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
+                setOrderStatuses((old) => {
+                  const next = updateByKey(old, key, { executedTxnHash: txnHash });
+                  return mirrorTerminalStatusOntoProvisional(next, key, {
+                    executedTxnHash: txnHash,
+                    createdTxnHash: txnHash,
+                  });
+                });
               } else {
-                setOrderStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash, cancelledReason }));
+                setOrderStatuses((old) => {
+                  const next = updateByKey(old, key, { cancelledTxnHash: txnHash, cancelledReason });
+                  return mirrorTerminalStatusOntoProvisional(next, key, {
+                    cancelledTxnHash: txnHash,
+                    cancelledReason,
+                    createdTxnHash: txnHash,
+                  });
+                });
               }
             }
           );

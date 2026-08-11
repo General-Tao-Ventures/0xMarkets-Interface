@@ -59,24 +59,76 @@ export function pendingOrderToProvisionalCreatedData(order: PendingOrderData): O
   };
 }
 
+type PositionFillMatch = {
+  account: string;
+  marketAddress: string;
+  collateralTokenAddress: string;
+  isLong: boolean;
+  orderType: number;
+  sizeDeltaUsd?: bigint;
+};
+
 /** Match a create-toast provisional status to a PositionIncrease/Decrease fill. */
-export function doesOrderStatusMatchPositionFill(
-  data: OrderCreatedEventData,
-  fill: {
-    account: string;
-    marketAddress: string;
-    collateralTokenAddress: string;
-    isLong: boolean;
-    orderType: number;
+export function doesOrderStatusMatchPositionFill(data: OrderCreatedEventData, fill: PositionFillMatch): boolean {
+  if (
+    data.account.toLowerCase() !== fill.account.toLowerCase() ||
+    data.marketAddress.toLowerCase() !== fill.marketAddress.toLowerCase() ||
+    data.isLong !== fill.isLong ||
+    data.orderType !== fill.orderType
+  ) {
+    return false;
   }
-): boolean {
-  return (
-    data.account.toLowerCase() === fill.account.toLowerCase() &&
-    data.marketAddress.toLowerCase() === fill.marketAddress.toLowerCase() &&
-    data.initialCollateralTokenAddress.toLowerCase() === fill.collateralTokenAddress.toLowerCase() &&
-    data.isLong === fill.isLong &&
-    data.orderType === fill.orderType
-  );
+
+  // No swap: initial collateral token is the position collateral.
+  // With a swap path, fill.collateralToken is the swap *output* — do not require equality.
+  if (
+    data.swapPath.length === 0 &&
+    data.initialCollateralTokenAddress.toLowerCase() !== fill.collateralTokenAddress.toLowerCase()
+  ) {
+    return false;
+  }
+
+  // Disambiguate concurrent same-market creates when both sides have a size delta.
+  if (
+    fill.sizeDeltaUsd !== undefined &&
+    fill.sizeDeltaUsd !== 0n &&
+    data.sizeDeltaUsd !== 0n &&
+    data.sizeDeltaUsd !== fill.sizeDeltaUsd
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Mirror a terminal execute/cancel onto the provisional pending-order-key status
+ * the toast may already be bound to (seeded before OrderCreated).
+ */
+export function mirrorTerminalStatusOntoProvisional(
+  old: OrderStatuses,
+  contractKey: string,
+  patch: {
+    executedTxnHash?: string;
+    cancelledTxnHash?: string;
+    cancelledReason?: string;
+    createdTxnHash?: string;
+  }
+): OrderStatuses {
+  const orderData = old[contractKey]?.data;
+  if (!orderData) return old;
+
+  const pendingKey = getPendingOrderKey(orderData);
+  if (pendingKey === contractKey || !old[pendingKey]) return old;
+
+  const provisional = old[pendingKey];
+  // Don't clobber a terminal state already set on the provisional status.
+  if (provisional.executedTxnHash || provisional.cancelledTxnHash) return old;
+
+  return updateByKey(old, pendingKey, {
+    ...patch,
+    createdTxnHash: provisional.createdTxnHash ?? patch.createdTxnHash,
+  });
 }
 
 /**
@@ -85,14 +137,7 @@ export function doesOrderStatusMatchPositionFill(
  */
 export function markMarketOrderStatusesExecuted(
   old: OrderStatuses,
-  fill: {
-    orderKey: string;
-    account: string;
-    marketAddress: string;
-    collateralTokenAddress: string;
-    isLong: boolean;
-    orderType: number;
-  },
+  fill: PositionFillMatch & { orderKey: string },
   txnHash: string
 ): OrderStatuses {
   let next = old;

@@ -98,6 +98,7 @@ import {
   getGelatoTaskUrl,
   getPendingOrderKey,
   markMarketOrderStatusesExecuted,
+  mirrorTerminalStatusOntoProvisional,
   pendingOrderToProvisionalCreatedData,
 } from "./utils";
 
@@ -436,7 +437,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       // hash is dropped and the order toast spins forever. Also mirror onto the
       // provisional pending-order-key the toast may already be bound to.
       setOrderStatuses((old) => {
-        let next = old[key]
+        const next = old[key]
           ? updateByKey(old, key, { executedTxnHash: txnParams.transactionHash })
           : setByKey(old, key, {
               key,
@@ -444,18 +445,10 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
               executedTxnHash: txnParams.transactionHash,
             });
 
-        const orderData = next[key]?.data;
-        if (orderData) {
-          const pendingKey = getPendingOrderKey(orderData);
-          if (pendingKey !== key && next[pendingKey] && !next[pendingKey].executedTxnHash) {
-            next = updateByKey(next, pendingKey, {
-              executedTxnHash: txnParams.transactionHash,
-              createdTxnHash: next[pendingKey].createdTxnHash ?? txnParams.transactionHash,
-            });
-          }
-        }
-
-        return next;
+        return mirrorTerminalStatusOntoProvisional(next, key, {
+          executedTxnHash: txnParams.transactionHash,
+          createdTxnHash: txnParams.transactionHash,
+        });
       });
 
       triggerPositionsRefresh();
@@ -474,20 +467,24 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       }
 
       setOrderStatuses((old) => {
-        if (old[key]) {
-          return updateByKey(old, key, {
-            cancelledTxnHash: txnParams.transactionHash,
-            cancelledReason,
-            isViewed: false,
-          });
-        } else {
-          return setByKey(old, key, {
-            key,
-            createdAt: Date.now(),
-            cancelledTxnHash: txnParams.transactionHash,
-            cancelledReason,
-          });
-        }
+        const next = old[key]
+          ? updateByKey(old, key, {
+              cancelledTxnHash: txnParams.transactionHash,
+              cancelledReason,
+              isViewed: false,
+            })
+          : setByKey(old, key, {
+              key,
+              createdAt: Date.now(),
+              cancelledTxnHash: txnParams.transactionHash,
+              cancelledReason,
+            });
+
+        return mirrorTerminalStatusOntoProvisional(next, key, {
+          cancelledTxnHash: txnParams.transactionHash,
+          cancelledReason,
+          createdTxnHash: txnParams.transactionHash,
+        });
       });
 
       const order = orderStatuses[key]?.data;
