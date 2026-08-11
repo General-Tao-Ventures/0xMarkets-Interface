@@ -1,8 +1,12 @@
 import { ErrorLike, extendError } from "lib/errors";
 import { OrderMetricId, sendTxnErrorMetric } from "lib/metrics";
 
+import { setByKey, updateByKey } from "lib/objects";
+
 import type {
   GelatoTaskStatus,
+  OrderCreatedEventData,
+  OrderStatuses,
   PendingDepositData,
   PendingOrderData,
   PendingShiftData,
@@ -21,6 +25,149 @@ export function getPendingOrderKey(
     data.isLong,
     data.orderType,
   ].join(":");
+}
+
+/**
+ * Seed a provisional OrderCreated-shaped status so create toasts can bind before
+ * OrderCreated arrives (express / flaky WS). Key = getPendingOrderKey(order).
+ */
+export function pendingOrderToProvisionalCreatedData(order: PendingOrderData): OrderCreatedEventData {
+  const zero = "0x0000000000000000000000000000000000000000";
+  return {
+    key: getPendingOrderKey(order),
+    account: order.account,
+    receiver: order.account,
+    callbackContract: zero,
+    marketAddress: order.marketAddress,
+    initialCollateralTokenAddress: order.initialCollateralTokenAddress,
+    swapPath: order.swapPath,
+    sizeDeltaUsd: order.sizeDeltaUsd,
+    initialCollateralDeltaAmount: order.initialCollateralDeltaAmount,
+    contractTriggerPrice: order.triggerPrice,
+    contractAcceptablePrice: order.acceptablePrice,
+    executionFee: 0n,
+    callbackGasLimit: 0n,
+    minOutputAmount: order.minOutputAmount,
+    updatedAtBlock: 0n,
+    orderType: order.orderType,
+    isLong: order.isLong,
+    shouldUnwrapNativeToken: order.shouldUnwrapNativeToken,
+    isFrozen: false,
+    uiFeeReceiver: zero,
+    externalSwapQuote: undefined,
+    isTwap: order.isTwap,
+  };
+}
+
+type PositionFillMatch = {
+  account: string;
+  marketAddress: string;
+  collateralTokenAddress: string;
+  isLong: boolean;
+  orderType: number;
+  sizeDeltaUsd?: bigint;
+};
+
+/** Match a create-toast provisional status to a PositionIncrease/Decrease fill. */
+export function doesOrderStatusMatchPositionFill(data: OrderCreatedEventData, fill: PositionFillMatch): boolean {
+  if (
+    data.account.toLowerCase() !== fill.account.toLowerCase() ||
+    data.marketAddress.toLowerCase() !== fill.marketAddress.toLowerCase() ||
+    data.isLong !== fill.isLong ||
+    data.orderType !== fill.orderType
+  ) {
+    return false;
+  }
+
+  // No swap: initial collateral token is the position collateral.
+  // With a swap path, fill.collateralToken is the swap *output* — do not require equality.
+  if (
+    data.swapPath.length === 0 &&
+    data.initialCollateralTokenAddress.toLowerCase() !== fill.collateralTokenAddress.toLowerCase()
+  ) {
+    return false;
+  }
+
+  // Disambiguate concurrent same-market creates when both sides have a size delta.
+  if (
+    fill.sizeDeltaUsd !== undefined &&
+    fill.sizeDeltaUsd !== 0n &&
+    data.sizeDeltaUsd !== 0n &&
+    data.sizeDeltaUsd !== fill.sizeDeltaUsd
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Mirror a terminal execute/cancel onto the provisional pending-order-key status
+ * the toast may already be bound to (seeded before OrderCreated).
+ */
+export function mirrorTerminalStatusOntoProvisional(
+  old: OrderStatuses,
+  contractKey: string,
+  patch: {
+    executedTxnHash?: string;
+    cancelledTxnHash?: string;
+    cancelledReason?: string;
+    createdTxnHash?: string;
+  }
+): OrderStatuses {
+  const orderData = old[contractKey]?.data;
+  if (!orderData) return old;
+
+  const pendingKey = getPendingOrderKey(orderData);
+  if (pendingKey === contractKey || !old[pendingKey]) return old;
+
+  const provisional = old[pendingKey];
+  // Don't clobber a terminal state already set on the provisional status.
+  if (provisional.executedTxnHash || provisional.cancelledTxnHash) return old;
+
+  return updateByKey(old, pendingKey, {
+    ...patch,
+    createdTxnHash: provisional.createdTxnHash ?? patch.createdTxnHash,
+  });
+}
+
+/**
+ * Mark contract-key + matching provisional create statuses as executed so sticky
+ * toasts can bind even when OrderCreated/OrderExecuted were missed.
+ */
+export function markMarketOrderStatusesExecuted(
+  old: OrderStatuses,
+  fill: PositionFillMatch & { orderKey: string },
+  txnHash: string
+): OrderStatuses {
+  let next = old;
+
+  if (!next[fill.orderKey]) {
+    next = setByKey(next, fill.orderKey, {
+      key: fill.orderKey,
+      createdAt: Date.now(),
+      createdTxnHash: txnHash,
+      executedTxnHash: txnHash,
+    });
+  } else if (!next[fill.orderKey].executedTxnHash && !next[fill.orderKey].cancelledTxnHash) {
+    next = updateByKey(next, fill.orderKey, {
+      executedTxnHash: txnHash,
+      createdTxnHash: next[fill.orderKey].createdTxnHash ?? txnHash,
+    });
+  }
+
+  for (const [key, status] of Object.entries(next)) {
+    if (key === fill.orderKey) continue;
+    if (!status.data || status.executedTxnHash || status.cancelledTxnHash) continue;
+    if (!doesOrderStatusMatchPositionFill(status.data, fill)) continue;
+
+    next = updateByKey(next, key, {
+      executedTxnHash: txnHash,
+      createdTxnHash: status.createdTxnHash ?? txnHash,
+    });
+  }
+
+  return next;
 }
 
 export function getPendingDepositKey(data: PendingDepositData) {

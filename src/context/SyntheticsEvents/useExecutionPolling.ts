@@ -11,6 +11,7 @@ import { parseEventLogData } from "context/WebsocketContext/subscribeToEvents";
 
 import type { DepositStatuses, EventLogData, EventTxnParams, OrderStatuses, WithdrawalStatuses, MultiTransactionStatus } from "./types";
 import { EXECUTION_TIMEOUT_HASH } from "./types";
+import { mirrorTerminalStatusOntoProvisional } from "./utils";
 
 // --- Constants ---
 
@@ -62,6 +63,11 @@ function isPendingOperation(status: MultiTransactionStatus<unknown>): status is 
   );
 }
 
+/** Provisional market-create statuses (no create hash yet) still need timeout dismiss. */
+function isOrphanProvisionalCreate(status: MultiTransactionStatus<unknown>): boolean {
+  return Boolean(status.data && !status.createdTxnHash && !status.executedTxnHash && !status.cancelledTxnHash);
+}
+
 function getPendingOperations(statuses: Record<string, MultiTransactionStatus<unknown>>): PendingOperation[] {
   return Object.values(statuses)
     .filter(isPendingOperation)
@@ -111,8 +117,13 @@ export function useExecutionPolling({
   const hasPendingDepositOps = Object.values(depositStatuses).some(isPendingOperation);
   const hasPendingWithdrawalOps = Object.values(withdrawalStatuses).some(isPendingOperation);
   const hasPendingOrderOps = Object.values(orderStatuses).some(isPendingOperation);
+  const hasOrphanProvisionalOrders = Object.values(orderStatuses).some(isOrphanProvisionalCreate);
   const shouldPoll =
-    hasPendingDepositOps || hasPendingWithdrawalOps || hasPendingOrderOps || watchedTxnHashes.size > 0;
+    hasPendingDepositOps ||
+    hasPendingWithdrawalOps ||
+    hasPendingOrderOps ||
+    hasOrphanProvisionalOrders ||
+    watchedTxnHashes.size > 0;
 
   useEffect(() => {
     if (!shouldPoll) return;
@@ -287,7 +298,12 @@ export function useExecutionPolling({
       for (const pending of pendingOrders) {
         if (now - pending.createdAt > MAX_WAIT_MS) {
           console.warn("[execution-polling] Operation timed out:", pending.key, "after", now - pending.createdAt, "ms");
-          setOrderStatuses((old) => updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
+          setOrderStatuses((old) => {
+            const next = updateByKey(old, pending.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH });
+            return mirrorTerminalStatusOntoProvisional(next, pending.key, {
+              cancelledTxnHash: EXECUTION_TIMEOUT_HASH,
+            });
+          });
           continue;
         }
 
@@ -302,15 +318,42 @@ export function useExecutionPolling({
             (key, txnHash, isExecuted, cancelledReason) => {
               console.warn("[execution-polling] Found event via RPC poll:", isExecuted ? "executed" : "cancelled", "key:", key, "txnHash:", txnHash);
               if (isExecuted) {
-                setOrderStatuses((old) => updateByKey(old, key, { executedTxnHash: txnHash }));
+                setOrderStatuses((old) => {
+                  const next = updateByKey(old, key, { executedTxnHash: txnHash });
+                  return mirrorTerminalStatusOntoProvisional(next, key, {
+                    executedTxnHash: txnHash,
+                    createdTxnHash: txnHash,
+                  });
+                });
               } else {
-                setOrderStatuses((old) => updateByKey(old, key, { cancelledTxnHash: txnHash, cancelledReason }));
+                setOrderStatuses((old) => {
+                  const next = updateByKey(old, key, { cancelledTxnHash: txnHash, cancelledReason });
+                  return mirrorTerminalStatusOntoProvisional(next, key, {
+                    cancelledTxnHash: txnHash,
+                    cancelledReason,
+                    createdTxnHash: txnHash,
+                  });
+                });
               }
             }
           );
         } catch {
           // Will retry on next interval
         }
+      }
+
+      // Timeout provisional create toasts that never got OrderCreated (express WS miss).
+      for (const status of Object.values(orderStatusesRef.current)) {
+        if (!isOrphanProvisionalCreate(status)) continue;
+        if (now - status.createdAt <= MAX_WAIT_MS) continue;
+        console.warn(
+          "[execution-polling] Provisional create timed out:",
+          status.key,
+          "after",
+          now - status.createdAt,
+          "ms"
+        );
+        setOrderStatuses((old) => updateByKey(old, status.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
       }
     };
 

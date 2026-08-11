@@ -12,6 +12,7 @@ import { use24hPriceDeltaMap } from "domain/synthetics/tokens";
 import { getMidPrice } from "domain/tokens/utils";
 import { formatUsdPrice } from "lib/numbers";
 import { isChartAvailableForToken, getTokenVisualMultiplier } from "sdk/configs/tokens";
+import { toFxDisplayPrice } from "sdk/utils/fxDisplay";
 
 import TokenIcon from "components/TokenIcon/TokenIcon";
 
@@ -56,10 +57,14 @@ export function FavoriteTokenBar() {
         const displayDecimals = token.priceDecimals ?? 2;
 
         const price = tokenData
-          ? formatUsdPrice(getMidPrice(tokenData.prices), {
-              visualMultiplier: tokenData.visualMultiplier,
-              displayDecimals,
-            })
+          ? formatUsdPrice(
+              // Match chart header / token picker — invert JPY/USD index to USD/JPY (~157).
+              toFxDisplayPrice(getMidPrice(tokenData.prices), tokenData.symbol ?? token.symbol),
+              {
+                visualMultiplier: tokenData.visualMultiplier,
+                displayDecimals,
+              }
+            )
           : "-";
 
         return (
