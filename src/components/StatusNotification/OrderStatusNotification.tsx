@@ -284,7 +284,8 @@ export function OrderStatusNotification({
     let isCompleted = false;
 
     if (orderData?.txnType === "create") {
-      isCompleted = Boolean(orderStatus?.createdTxnHash);
+      // Express recovery may set executed without a separate create hash — treat as sent.
+      isCompleted = Boolean(orderStatus?.createdTxnHash || orderStatus?.executedTxnHash);
     } else if (orderData?.txnType === "update") {
       isCompleted = Boolean(orderStatus?.updatedTxnHash);
     } else if (orderData?.txnType === "cancel") {
@@ -305,7 +306,10 @@ export function OrderStatusNotification({
     } else if (isCompleted) {
       status = "success";
       text = t`Order request sent`;
-      txnHash = hideTxLink !== "creation" && orderData?.txnType === "create" ? orderStatus?.createdTxnHash : undefined;
+      txnHash =
+        hideTxLink !== "creation" && orderData?.txnType === "create"
+          ? orderStatus?.createdTxnHash || orderStatus?.executedTxnHash
+          : undefined;
     }
 
     return <TransactionStatus status={status} txnHash={txnHash} txnLink={txnLink} text={text} />;
@@ -313,6 +317,7 @@ export function OrderStatusNotification({
     orderData?.txnType,
     isGelatoTaskFailed,
     orderStatus?.createdTxnHash,
+    orderStatus?.executedTxnHash,
     orderStatus?.updatedTxnHash,
     orderStatus?.cancelledTxnHash,
     tenderlyAccountSlug,
@@ -330,7 +335,8 @@ export function OrderStatusNotification({
     let status: TransactionStatusType = "muted";
     let txnHash: string | undefined;
 
-    if (orderStatus?.createdTxnHash) {
+    // Show fulfilling progress once create OR execute is known (recovery may skip create).
+    if (orderStatus?.createdTxnHash || orderStatus?.executedTxnHash) {
       status = "loading";
 
       if (elapsedSeconds < 15) {

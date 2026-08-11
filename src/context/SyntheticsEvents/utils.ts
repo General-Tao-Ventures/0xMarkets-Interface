@@ -1,8 +1,12 @@
 import { ErrorLike, extendError } from "lib/errors";
 import { OrderMetricId, sendTxnErrorMetric } from "lib/metrics";
 
+import { setByKey, updateByKey } from "lib/objects";
+
 import type {
   GelatoTaskStatus,
+  OrderCreatedEventData,
+  OrderStatuses,
   PendingDepositData,
   PendingOrderData,
   PendingShiftData,
@@ -21,6 +25,104 @@ export function getPendingOrderKey(
     data.isLong,
     data.orderType,
   ].join(":");
+}
+
+/**
+ * Seed a provisional OrderCreated-shaped status so create toasts can bind before
+ * OrderCreated arrives (express / flaky WS). Key = getPendingOrderKey(order).
+ */
+export function pendingOrderToProvisionalCreatedData(order: PendingOrderData): OrderCreatedEventData {
+  const zero = "0x0000000000000000000000000000000000000000";
+  return {
+    key: getPendingOrderKey(order),
+    account: order.account,
+    receiver: order.account,
+    callbackContract: zero,
+    marketAddress: order.marketAddress,
+    initialCollateralTokenAddress: order.initialCollateralTokenAddress,
+    swapPath: order.swapPath,
+    sizeDeltaUsd: order.sizeDeltaUsd,
+    initialCollateralDeltaAmount: order.initialCollateralDeltaAmount,
+    contractTriggerPrice: order.triggerPrice,
+    contractAcceptablePrice: order.acceptablePrice,
+    executionFee: 0n,
+    callbackGasLimit: 0n,
+    minOutputAmount: order.minOutputAmount,
+    updatedAtBlock: 0n,
+    orderType: order.orderType,
+    isLong: order.isLong,
+    shouldUnwrapNativeToken: order.shouldUnwrapNativeToken,
+    isFrozen: false,
+    uiFeeReceiver: zero,
+    externalSwapQuote: undefined,
+    isTwap: order.isTwap,
+  };
+}
+
+/** Match a create-toast provisional status to a PositionIncrease/Decrease fill. */
+export function doesOrderStatusMatchPositionFill(
+  data: OrderCreatedEventData,
+  fill: {
+    account: string;
+    marketAddress: string;
+    collateralTokenAddress: string;
+    isLong: boolean;
+    orderType: number;
+  }
+): boolean {
+  return (
+    data.account.toLowerCase() === fill.account.toLowerCase() &&
+    data.marketAddress.toLowerCase() === fill.marketAddress.toLowerCase() &&
+    data.initialCollateralTokenAddress.toLowerCase() === fill.collateralTokenAddress.toLowerCase() &&
+    data.isLong === fill.isLong &&
+    data.orderType === fill.orderType
+  );
+}
+
+/**
+ * Mark contract-key + matching provisional create statuses as executed so sticky
+ * toasts can bind even when OrderCreated/OrderExecuted were missed.
+ */
+export function markMarketOrderStatusesExecuted(
+  old: OrderStatuses,
+  fill: {
+    orderKey: string;
+    account: string;
+    marketAddress: string;
+    collateralTokenAddress: string;
+    isLong: boolean;
+    orderType: number;
+  },
+  txnHash: string
+): OrderStatuses {
+  let next = old;
+
+  if (!next[fill.orderKey]) {
+    next = setByKey(next, fill.orderKey, {
+      key: fill.orderKey,
+      createdAt: Date.now(),
+      createdTxnHash: txnHash,
+      executedTxnHash: txnHash,
+    });
+  } else if (!next[fill.orderKey].executedTxnHash && !next[fill.orderKey].cancelledTxnHash) {
+    next = updateByKey(next, fill.orderKey, {
+      executedTxnHash: txnHash,
+      createdTxnHash: next[fill.orderKey].createdTxnHash ?? txnHash,
+    });
+  }
+
+  for (const [key, status] of Object.entries(next)) {
+    if (key === fill.orderKey) continue;
+    if (!status.data || status.executedTxnHash || status.cancelledTxnHash) continue;
+    if (!doesOrderStatusMatchPositionFill(status.data, fill)) continue;
+
+    next = updateByKey(next, key, {
+      executedTxnHash: txnHash,
+      createdTxnHash: status.createdTxnHash ?? txnHash,
+    });
+  }
+
+  return next;
 }
 
 export function getPendingDepositKey(data: PendingDepositData) {

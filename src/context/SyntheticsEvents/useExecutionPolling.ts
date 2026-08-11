@@ -62,6 +62,11 @@ function isPendingOperation(status: MultiTransactionStatus<unknown>): status is 
   );
 }
 
+/** Provisional market-create statuses (no create hash yet) still need timeout dismiss. */
+function isOrphanProvisionalCreate(status: MultiTransactionStatus<unknown>): boolean {
+  return Boolean(status.data && !status.createdTxnHash && !status.executedTxnHash && !status.cancelledTxnHash);
+}
+
 function getPendingOperations(statuses: Record<string, MultiTransactionStatus<unknown>>): PendingOperation[] {
   return Object.values(statuses)
     .filter(isPendingOperation)
@@ -111,8 +116,13 @@ export function useExecutionPolling({
   const hasPendingDepositOps = Object.values(depositStatuses).some(isPendingOperation);
   const hasPendingWithdrawalOps = Object.values(withdrawalStatuses).some(isPendingOperation);
   const hasPendingOrderOps = Object.values(orderStatuses).some(isPendingOperation);
+  const hasOrphanProvisionalOrders = Object.values(orderStatuses).some(isOrphanProvisionalCreate);
   const shouldPoll =
-    hasPendingDepositOps || hasPendingWithdrawalOps || hasPendingOrderOps || watchedTxnHashes.size > 0;
+    hasPendingDepositOps ||
+    hasPendingWithdrawalOps ||
+    hasPendingOrderOps ||
+    hasOrphanProvisionalOrders ||
+    watchedTxnHashes.size > 0;
 
   useEffect(() => {
     if (!shouldPoll) return;
@@ -311,6 +321,20 @@ export function useExecutionPolling({
         } catch {
           // Will retry on next interval
         }
+      }
+
+      // Timeout provisional create toasts that never got OrderCreated (express WS miss).
+      for (const status of Object.values(orderStatusesRef.current)) {
+        if (!isOrphanProvisionalCreate(status)) continue;
+        if (now - status.createdAt <= MAX_WAIT_MS) continue;
+        console.warn(
+          "[execution-polling] Provisional create timed out:",
+          status.key,
+          "after",
+          now - status.createdAt,
+          "ms"
+        );
+        setOrderStatuses((old) => updateByKey(old, status.key, { cancelledTxnHash: EXECUTION_TIMEOUT_HASH }));
       }
     };
 

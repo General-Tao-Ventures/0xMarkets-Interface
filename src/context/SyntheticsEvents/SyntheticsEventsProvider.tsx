@@ -93,7 +93,13 @@ import {
 } from "./types";
 import { useExecutionPolling } from "./useExecutionPolling";
 import { useMultichainEvents } from "./useMultichainEvents";
-import { extractGelatoError, getGelatoTaskUrl, getPendingOrderKey } from "./utils";
+import {
+  extractGelatoError,
+  getGelatoTaskUrl,
+  getPendingOrderKey,
+  markMarketOrderStatusesExecuted,
+  pendingOrderToProvisionalCreatedData,
+} from "./utils";
 
 /**
  * Extract a human-readable cancellation reason from event data.
@@ -338,24 +344,38 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
       // Merge with any existing status so a late OrderCreated cannot wipe an
       // OrderExecuted / OrderCancelled that arrived first (race with WS vs receipt).
+      // Also update the provisional pending-order-key status the toast may already be bound to.
+      const pendingOrderKey = getPendingOrderKey(data);
       setOrderStatuses((old) => {
-        if (old[data.key]) {
-          return updateByKey(old, data.key, {
+        let next = old;
+
+        if (next[data.key]) {
+          next = updateByKey(next, data.key, {
             data,
             createdTxnHash: txnParams.transactionHash,
-            createdAt: old[data.key].createdAt ?? Date.now(),
+            createdAt: next[data.key].createdAt ?? Date.now(),
+          });
+        } else {
+          next = setByKey(next, data.key, {
+            key: data.key,
+            data,
+            createdTxnHash: txnParams.transactionHash,
+            createdAt: Date.now(),
           });
         }
 
-        return setByKey(old, data.key, {
-          key: data.key,
-          data,
-          createdTxnHash: txnParams.transactionHash,
-          createdAt: Date.now(),
-        });
+        if (pendingOrderKey !== data.key && next[pendingOrderKey]) {
+          next = updateByKey(next, pendingOrderKey, {
+            data,
+            createdTxnHash: txnParams.transactionHash,
+            executedTxnHash: next[pendingOrderKey].executedTxnHash ?? next[data.key]?.executedTxnHash,
+            cancelledTxnHash: next[pendingOrderKey].cancelledTxnHash ?? next[data.key]?.cancelledTxnHash,
+          });
+        }
+
+        return next;
       });
 
-      const pendingOrderKey = getPendingOrderKey(data);
       const pendingExpressTxn = Object.values(latestPendingExpressTxnParams.current).find((p) =>
         p.pendingOrdersKeys?.includes(pendingOrderKey)
       );
@@ -413,17 +433,29 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       }
 
       // Upsert even if OrderCreated has not landed yet — otherwise the executed
-      // hash is dropped and the order toast spins forever.
+      // hash is dropped and the order toast spins forever. Also mirror onto the
+      // provisional pending-order-key the toast may already be bound to.
       setOrderStatuses((old) => {
-        if (old[key]) {
-          return updateByKey(old, key, { executedTxnHash: txnParams.transactionHash });
+        let next = old[key]
+          ? updateByKey(old, key, { executedTxnHash: txnParams.transactionHash })
+          : setByKey(old, key, {
+              key,
+              createdAt: Date.now(),
+              executedTxnHash: txnParams.transactionHash,
+            });
+
+        const orderData = next[key]?.data;
+        if (orderData) {
+          const pendingKey = getPendingOrderKey(orderData);
+          if (pendingKey !== key && next[pendingKey] && !next[pendingKey].executedTxnHash) {
+            next = updateByKey(next, pendingKey, {
+              executedTxnHash: txnParams.transactionHash,
+              createdTxnHash: next[pendingKey].createdTxnHash ?? txnParams.transactionHash,
+            });
+          }
         }
 
-        return setByKey(old, key, {
-          key,
-          createdAt: Date.now(),
-          executedTxnHash: txnParams.transactionHash,
-        });
+        return next;
       });
 
       triggerPositionsRefresh();
@@ -917,22 +949,9 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
 
       // Recover sticky market-order toasts when OrderExecuted was missed but the
       // position update still arrived (common on express / flaky WS paths).
+      // Also mark provisional create statuses (pending-order-key) so the toast can bind.
       if (data.orderKey && isMarketOrderType(data.orderType)) {
-        setOrderStatuses((old) => {
-          if (!old[data.orderKey]) {
-            return setByKey(old, data.orderKey, {
-              key: data.orderKey,
-              createdAt: Date.now(),
-              executedTxnHash: txnParams.transactionHash,
-            });
-          }
-
-          if (old[data.orderKey].executedTxnHash || old[data.orderKey].cancelledTxnHash) {
-            return old;
-          }
-
-          return updateByKey(old, data.orderKey, { executedTxnHash: txnParams.transactionHash });
-        });
+        setOrderStatuses((old) => markMarketOrderStatusesExecuted(old, data, txnParams.transactionHash));
       }
 
       // If this is a limit order, or the order status is not received previosly, notify the user
@@ -1004,21 +1023,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
       // Same recovery as PositionIncrease: mark market orders executed if the
       // OrderExecuted event was missed so decrease toasts do not stick.
       if (data.orderKey && isMarketOrderType(data.orderType)) {
-        setOrderStatuses((old) => {
-          if (!old[data.orderKey]) {
-            return setByKey(old, data.orderKey, {
-              key: data.orderKey,
-              createdAt: Date.now(),
-              executedTxnHash: txnParams.transactionHash,
-            });
-          }
-
-          if (old[data.orderKey].executedTxnHash || old[data.orderKey].cancelledTxnHash) {
-            return old;
-          }
-
-          return updateByKey(old, data.orderKey, { executedTxnHash: txnParams.transactionHash });
-        });
+        setOrderStatuses((old) => markMarketOrderStatusesExecuted(old, data, txnParams.transactionHash));
       }
 
       // If this is a trigger or liquidation order, or the order status is not received previosly, notify the user
@@ -1188,6 +1193,12 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
               transactionHash: taskStatus.transactionHash,
             })
           );
+
+          // Express path never hits wallet watchOrderTxn — watch Gelato's on-chain
+          // tx so Phase A can parse OrderCreated / OrderExecuted from the receipt.
+          if (taskStatus.taskState === TaskState.ExecSuccess && taskStatus.transactionHash) {
+            watchOrderTxn(taskStatus.transactionHash);
+          }
           break;
         }
         default:
@@ -1200,7 +1211,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
     return () => {
       gelatoRelay.offTaskStatusUpdate(handler);
     };
-  }, []);
+  }, [watchOrderTxn]);
 
   useEffect(
     function notifyPendingExpressTxn() {
@@ -1331,6 +1342,24 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
         );
 
         const arrayData = Array.isArray(data) ? data : [data];
+
+        // Seed provisional statuses for market creates so the toast can bind via
+        // getPendingOrderKey(status.data) before OrderCreated (express / WS miss).
+        setOrderStatuses((old) => {
+          let next = old;
+          for (const order of arrayData) {
+            if (order.txnType !== "create" || !isMarketOrderType(order.orderType)) continue;
+            const key = getPendingOrderKey(order);
+            if (next[key]) continue;
+            next = setByKey(next, key, {
+              key,
+              data: pendingOrderToProvisionalCreatedData(order),
+              createdAt: order.createdAt || Date.now(),
+            });
+          }
+          return next;
+        });
+
         const objData: Record<string, OrderTxnType> = arrayData.reduce(
           (acc, order) => (!order.orderKey ? acc : setByKey(acc, order.orderKey, order.txnType)),
           {}
