@@ -40,6 +40,9 @@ export function StaticLine({
 
       lineApi.current = positionLine;
 
+      // Long uses bright green — white text washes out; short red keeps white.
+      const bodyTextColor = isLong ? "#000000" : "#ffffff";
+
       return positionLine
         .setText(title)
         .setPrice(price)
@@ -47,7 +50,7 @@ export function StaticLine({
         .setLineStyle(LineStyle.Dotted)
         .setLineLength(1)
         .setBodyFont(`normal 12pt "Relative", sans-serif`)
-        .setBodyTextColor("#fff")
+        .setBodyTextColor(bodyTextColor)
         .setLineColor(lineColor)
         .setBodyBackgroundColor(lineColor)
         .setBodyBorderColor(lineColor);
