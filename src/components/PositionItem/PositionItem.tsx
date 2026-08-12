@@ -87,15 +87,14 @@ export function PositionItem(p: Props) {
   const leverageLabel = formatLeverage(p.position.leverage, { maxLeverageBps: uiMaxLeverageBps }) || "...";
   const isLeverageCapped =
     p.position.leverage !== undefined && p.position.leverage > BigInt(uiMaxLeverageBps);
-  // Only style leverage as danger when truly drained (risk flag), not merely at/near UI max.
-  const showLeverageDanger = p.position.hasLowCollateral;
   const hasNegativeNetValue = p.position.netValue < 0n;
 
   function renderNetValue() {
     return (
       <TooltipWithPortal
         handle={formatUsd(hasNegativeNetValue ? 0n : p.position.netValue)}
-        handleClassName={cx("numbers", { negative: hasNegativeNetValue || p.position.hasLowCollateral })}
+        // Keep net-value amount neutral; PnL row below stays green/red.
+        handleClassName="numbers"
         position={p.isLarge ? "bottom-start" : "bottom-end"}
         renderContent={() => (
           <div>
@@ -254,7 +253,8 @@ export function PositionItem(p: Props) {
         <div className={cx("position-list-collateral", { isSmall: !p.isLarge })}>
           <TooltipWithPortal
             handle={formatUsd(p.position.remainingCollateralUsd)}
-            handleClassName={cx("numbers", { negative: p.position.hasLowCollateral })}
+            // Keep collateral amount neutral; warnings stay in the tooltip body.
+            handleClassName="numbers"
             position={p.isLarge ? "bottom-start" : "bottom-end"}
             className="PositionItem-collateral-tooltip"
             content={
@@ -570,13 +570,7 @@ export function PositionItem(p: Props) {
               )}
             </div>
             <div className="Exchange-list-info-label">
-              <span
-                className={cx("muted mr-4 rounded-2 px-2 pb-1 numbers", {
-                  negative: showLeverageDanger,
-                })}
-              >
-                {leverageLabel}
-              </span>
+              <span className="muted mr-4 rounded-2 px-2 pb-1 numbers">{leverageLabel}</span>
               <span className={cx({ positive: displayIsLong, negative: !displayIsLong })}>
                 {displayIsLong ? t`Long` : t`Short`}
               </span>
@@ -695,13 +689,7 @@ export function PositionItem(p: Props) {
               {getMarketIndexName({ indexToken: p.position.indexToken, isSpotOnly: false })}
             </span>
             <div className="text-body-small flex items-center gap-4">
-              <span
-                className={cx("rounded-4 leading-1 numbers", {
-                  negative: showLeverageDanger,
-                })}
-              >
-                {leverageLabel}
-              </span>
+              <span className="rounded-4 leading-1 numbers">{leverageLabel}</span>
               <span
                 className={cx("Exchange-list-side", {
                   positive: displayIsLong,
