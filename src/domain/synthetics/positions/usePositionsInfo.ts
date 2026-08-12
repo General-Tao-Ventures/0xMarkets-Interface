@@ -276,7 +276,7 @@ export function usePositionsInfoRequest(
         (position.isLong ? markPrice <= liquidationPrice : markPrice >= liquidationPrice);
 
       // Risk flag for drained / liquidatable positions. Do NOT use the trade UI max
-      // (100x/200x) here — healthy max-leverage opens cross that after tiny fee accrual.
+      // (50x/100x) here — healthy max-leverage opens cross that after tiny fee accrual.
       // Extreme effective leverage (>> UI max) still flags fee-drained positions.
       const extremeLeverageBps = uiMaxLeverageBps * 2n;
       const hasLowCollateral =
