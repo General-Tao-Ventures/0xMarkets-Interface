@@ -88,15 +88,30 @@ export function doesOrderStatusMatchPositionFill(data: OrderCreatedEventData, fi
     return false;
   }
 
-  // Size is intentionally not compared: UI estimate vs fill can differ slightly and was
-  // leaving sticky toasts spinning after the position already appeared.
+  // Disambiguate concurrent same-market creates. Allow a small relative drift so UI
+  // size estimates still recover sticky toasts without marking a different order done.
+  if (
+    fill.sizeDeltaUsd !== undefined &&
+    fill.sizeDeltaUsd !== 0n &&
+    data.sizeDeltaUsd !== 0n &&
+    data.sizeDeltaUsd !== fill.sizeDeltaUsd
+  ) {
+    const larger = fill.sizeDeltaUsd > data.sizeDeltaUsd ? fill.sizeDeltaUsd : data.sizeDeltaUsd;
+    const smaller = fill.sizeDeltaUsd > data.sizeDeltaUsd ? data.sizeDeltaUsd : fill.sizeDeltaUsd;
+    // 1% relative tolerance
+    if (larger - smaller > larger / 100n) {
+      return false;
+    }
+  }
 
   return true;
 }
 
 /**
- * Mirror a terminal execute/cancel onto every sibling status the toast may be bound to
- * (provisional pending-order-key and any other entry sharing that pending key).
+ * Mirror a terminal execute/cancel onto the provisional pending-order-key status
+ * the toast may already be bound to (seeded before OrderCreated).
+ * Only touches that provisional entry — never other contract-key statuses that
+ * happen to share the same pending fingerprint.
  */
 export function mirrorTerminalStatusOntoProvisional(
   old: OrderStatuses,
@@ -110,42 +125,33 @@ export function mirrorTerminalStatusOntoProvisional(
 ): OrderStatuses {
   const orderData = old[contractKey]?.data;
   if (!orderData) {
-    // OrderExecuted before OrderCreated: propagate by matching create txn hash when present.
-    if (!patch.createdTxnHash && !patch.executedTxnHash) return old;
+    // OrderExecuted before OrderCreated: propagate only when create txn hash matches
+    // (same-tx express path). Never fan out to every open provisional.
     const terminalHash = patch.executedTxnHash ?? patch.cancelledTxnHash;
+    if (!terminalHash) return old;
     let next = old;
     for (const [key, status] of Object.entries(next)) {
       if (key === contractKey) continue;
       if (!status.data || status.executedTxnHash || status.cancelledTxnHash) continue;
-      // Same-tx express path: create hash on provisional equals execute txn.
-      if (status.createdTxnHash && terminalHash && status.createdTxnHash === terminalHash) {
-        next = updateByKey(next, key, {
-          ...patch,
-          createdTxnHash: status.createdTxnHash,
-        });
-      }
+      if (status.createdTxnHash !== terminalHash) continue;
+      next = updateByKey(next, key, {
+        ...patch,
+        createdTxnHash: status.createdTxnHash,
+      });
     }
     return next;
   }
 
   const pendingKey = getPendingOrderKey(orderData);
-  let next = old;
+  if (pendingKey === contractKey || !old[pendingKey]) return old;
 
-  for (const [key, status] of Object.entries(next)) {
-    if (key === contractKey) continue;
-    if (status.executedTxnHash || status.cancelledTxnHash) continue;
+  const provisional = old[pendingKey];
+  if (provisional.executedTxnHash || provisional.cancelledTxnHash) return old;
 
-    const samePendingKey = key === pendingKey;
-    const samePendingData = status.data !== undefined && getPendingOrderKey(status.data) === pendingKey;
-    if (!samePendingKey && !samePendingData) continue;
-
-    next = updateByKey(next, key, {
-      ...patch,
-      createdTxnHash: status.createdTxnHash ?? patch.createdTxnHash,
-    });
-  }
-
-  return next;
+  return updateByKey(old, pendingKey, {
+    ...patch,
+    createdTxnHash: provisional.createdTxnHash ?? patch.createdTxnHash,
+  });
 }
 
 /**

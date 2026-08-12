@@ -11,8 +11,6 @@ import { createBrowserHistory } from "history";
 
 import WalletProvider from "lib/wallets/WalletProvider";
 
-import { PasswordGate } from "components/PasswordGate/PasswordGate";
-
 import App from "./App/App";
 import reportWebVitals from "./reportWebVitals";
 
@@ -37,11 +35,9 @@ createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Router>
       <Sentry.ErrorBoundary fallback={<p>Something went wrong.</p>}>
-        <PasswordGate>
-          <WalletProvider>
-            <App />
-          </WalletProvider>
-        </PasswordGate>
+        <WalletProvider>
+          <App />
+        </WalletProvider>
       </Sentry.ErrorBoundary>
     </Router>
   </React.StrictMode>

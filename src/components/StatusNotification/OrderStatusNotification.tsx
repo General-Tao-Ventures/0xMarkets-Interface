@@ -45,6 +45,9 @@ import { useToastAutoClose } from "./useToastAutoClose";
 import { TaskState } from "@gelatonetwork/relay-sdk";
 import "./StatusNotification.scss";
 
+/** Statuses older than toast create time minus this are treated as prior fills. */
+const TOAST_STATUS_SKEW_MS = 15_000;
+
 function getOrderActionableMessage(errorReason: string | null): string {
   if (!errorReason) return t`Your order was cancelled.`;
 
@@ -384,15 +387,26 @@ export function OrderStatusNotification({
 
   useEffect(
     function getOrderStatusKey() {
+      const minCreatedAt = (pendingOrderData.createdAt ?? toastTimestamp) - TOAST_STATUS_SKEW_MS;
+
       const matches = Object.values(orderStatuses).filter((status) => {
-        if (contractOrderKey && status.key === contractOrderKey) return true;
-        if (status.data && getPendingOrderKey(status.data) === pendingOrderKey) return true;
-        return status.key === pendingOrderKey;
+        const fingerprintMatch =
+          (contractOrderKey && status.key === contractOrderKey) ||
+          status.key === pendingOrderKey ||
+          (status.data !== undefined && getPendingOrderKey(status.data) === pendingOrderKey);
+        if (!fingerprintMatch) return false;
+
+        // Already bound to this toast instance.
+        if (status.key === orderStatusKey) return true;
+        // Fresh / unclaimed statuses for this submission window only — never a prior fill.
+        if (status.createdAt < minCreatedAt) return false;
+        return !status.isViewed || status.key === pendingOrderKey;
       });
 
       if (!matches.length) return;
 
-      // Prefer a terminal sibling (contract key may execute while toast stayed on provisional).
+      // Prefer a terminal sibling from this toast window (contract key may execute while
+      // the UI stayed on the provisional pending-order-key).
       const best =
         matches.find((s) => s.executedTxnHash || s.cancelledTxnHash) ||
         matches.find((s) => s.createdTxnHash) ||
@@ -410,6 +424,7 @@ export function OrderStatusNotification({
       orderStatusKey,
       orderStatuses,
       pendingOrderKey,
+      pendingOrderData.createdAt,
       setOrderStatusViewed,
       toastTimestamp,
     ]
@@ -503,47 +518,51 @@ export function OrdersStatusNotificiation({
   }, [pendingOrders]);
 
   useEffect(() => {
+    const minCreatedAt = toastTimestamp - TOAST_STATUS_SKEW_MS;
+
     Object.values(allOrderStatuses).forEach((orderStatus) => {
       const isPendingOrderMatch = orderStatus.data && ordersByPendingKey.has(getPendingOrderKey(orderStatus.data));
       const isContractOrderMatch = ordersByContractKey.has(orderStatus.key);
+      if (!isPendingOrderMatch && !isContractOrderMatch) return;
 
-      if (orderStatus.isViewed || (!isPendingOrderMatch && !isContractOrderMatch)) return;
+      // Claim fresh statuses for this toast, or siblings already in our matched set's window.
+      const isFreshForToast = orderStatus.createdAt >= minCreatedAt;
+      if (orderStatus.isViewed && !isFreshForToast) return;
+      if (!isFreshForToast) return;
 
-      setMatchedOrderStatusKeys((prev) => [...prev, orderStatus.key]);
-      setOrderStatusViewed(orderStatus.key);
+      setMatchedOrderStatusKeys((prev) => (prev.includes(orderStatus.key) ? prev : [...prev, orderStatus.key]));
+      if (!orderStatus.isViewed) {
+        setOrderStatusViewed(orderStatus.key);
+      }
     });
-  }, [allOrderStatuses, ordersByPendingKey, ordersByContractKey, setOrderStatusViewed]);
+  }, [allOrderStatuses, ordersByPendingKey, ordersByContractKey, setOrderStatusViewed, toastTimestamp]);
 
   const isCompleted = useMemo(() => {
     return pendingOrders.every((pendingOrder) => {
-      // Check every matching status — provisional may lack executed while contract key has it.
-      const matchingStatuses = Object.values(allOrderStatuses).filter((status) => {
-        const isPendingOrderMatch =
-          (status.data && getPendingOrderKey(pendingOrder) === getPendingOrderKey(status.data)) ||
-          status.key === getPendingOrderKey(pendingOrder);
-        const isContractOrderMatch = Boolean(pendingOrder.orderKey && pendingOrder.orderKey === status.key);
-        return isPendingOrderMatch || isContractOrderMatch;
-      });
+      // Only statuses claimed by this toast — never a prior fill with the same fingerprint.
+      const matchingStatuses = matchedOrderStatuses.filter(Boolean);
+
+      const orderStatus = findMatchedOrderStatus(matchingStatuses, pendingOrder);
 
       if (pendingOrder.txnType === "create") {
-        if (matchingStatuses.some((s) => s.cancelledTxnHash)) {
+        if (orderStatus?.cancelledTxnHash || matchingStatuses.some((s) => s?.cancelledTxnHash)) {
           return true;
         }
 
         return isMarketOrderType(pendingOrder.orderType)
-          ? matchingStatuses.some((s) => Boolean(s.executedTxnHash))
-          : matchingStatuses.some((s) => Boolean(s.createdTxnHash));
+          ? matchingStatuses.some((s) => Boolean(s?.executedTxnHash))
+          : matchingStatuses.some((s) => Boolean(s?.createdTxnHash));
       }
       if (pendingOrder.txnType === "update") {
-        return matchingStatuses.some((s) => Boolean(s.updatedTxnHash));
+        return matchingStatuses.some((s) => Boolean(s?.updatedTxnHash));
       }
       if (pendingOrder.txnType === "cancel") {
-        return matchingStatuses.some((s) => Boolean(s.cancelledTxnHash));
+        return matchingStatuses.some((s) => Boolean(s?.cancelledTxnHash));
       }
 
       mustNeverExist(pendingOrder.txnType);
     });
-  }, [allOrderStatuses, pendingOrders]);
+  }, [matchedOrderStatuses, pendingOrders]);
 
   const isMainOrderFailed = useMemo(() => {
     return pendingOrders.some((pendingOrder) => {
