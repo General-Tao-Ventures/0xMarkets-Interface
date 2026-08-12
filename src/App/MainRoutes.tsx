@@ -4,7 +4,6 @@ import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import type { Address } from "viem";
 
 import { isDevelopment } from "config/env";
-import { PoolsDetailsContextProvider } from "context/PoolsDetailsContext/PoolsDetailsContext";
 import { SyntheticsStateContextProvider } from "context/SyntheticsStateContext/SyntheticsStateContextProvider";
 import { useChainId } from "lib/chains";
 import { AccountDashboard } from "pages/AccountDashboard/AccountDashboard";
@@ -18,7 +17,6 @@ import NftWallet from "pages/NftWallet/NftWallet";
 import PageNotFound from "pages/PageNotFound/PageNotFound";
 import { ParseTransactionPage } from "pages/ParseTransaction/ParseTransaction";
 import Pools from "pages/Pools/Pools";
-import { PoolsDetails } from "pages/PoolsDetails/PoolsDetails";
 import { PriceImpactRebatesStatsPage } from "pages/PriceImpactRebatesStats/PriceImpactRebatesStats";
 import Referrals from "pages/Referrals/Referrals";
 import ReferralsTier from "pages/ReferralsTier/ReferralsTier";
@@ -88,11 +86,7 @@ export function MainRoutes({ openSettings }: { openSettings: () => void }) {
       </Route>
 
       <Route exact path="/pools/details">
-        <SyntheticsStateContextProvider skipLocalReferralCode={false} pageType="pools">
-          <PoolsDetailsContextProvider>
-            <PoolsDetails />
-          </PoolsDetailsContextProvider>
-        </SyntheticsStateContextProvider>
+        <Redirect to="/pools" />
       </Route>
 
       <Route exact path="/trade/:tradeType?">

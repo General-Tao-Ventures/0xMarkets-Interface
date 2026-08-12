@@ -78,6 +78,11 @@ function getPendingOperations(statuses: Record<string, MultiTransactionStatus<un
     }));
 }
 
+/** Contract order keys are bytes32; provisional toast keys are colon-joined strings. */
+function isBytes32OrderKey(key: string): boolean {
+  return /^0x[a-fA-F0-9]{64}$/.test(key);
+}
+
 // --- Hook ---
 
 export function useExecutionPolling({
@@ -290,8 +295,11 @@ export function useExecutionPolling({
         }
       }
 
-      // Poll for pending orders
-      const pendingOrders = getPendingOperations(orderStatusesRef.current);
+      // Poll for pending orders. Provisional toast keys are "account:market:..." strings —
+      // OrderExecuted logs use the bytes32 order key, so only poll contract keys (0x + 64 hex).
+      const pendingOrders = getPendingOperations(orderStatusesRef.current).filter((pending) =>
+        isBytes32OrderKey(pending.key)
+      );
       for (const pending of pendingOrders) {
         console.warn("[execution-polling] Polling for pending operation:", pending.key, "type:", "order", "elapsed:", now - pending.createdAt, "ms");
       }
@@ -415,31 +423,40 @@ async function pollForEvents(
       // Extract eventData from parsed args based on event type
       let eventData: unknown;
       let eventName: string | undefined;
+      let topic1: string | undefined;
       if (parsed.name === "EventLog") {
         eventData = parsed.args[3]; // (sender, eventName, eventNameHash, eventData)
         eventName = parsed.args[1];
       } else if (parsed.name === "EventLog1") {
         eventData = parsed.args[4]; // (sender, eventName, eventNameHash, topic1, eventData)
         eventName = parsed.args[1];
+        topic1 = parsed.args[3];
       } else if (parsed.name === "EventLog2") {
         eventData = parsed.args[5]; // (sender, eventName, eventNameHash, topic1, topic2, eventData)
         eventName = parsed.args[1];
+        topic1 = parsed.args[3];
       } else {
         continue;
       }
 
-      // Extract the key from bytes32Items.items
-      const eventLogData = eventData as {
-        bytes32Items?: { items?: Array<{ key: string; value: string }> };
-        stringItems?: { items?: Array<{ key: string; value: string }> };
-      };
+      // Normalize the same way WS handlers do — raw ABI Result arrays are not
+      // `{ key, value }[]` after parseLog, so `.find(item => item.key === "key")` missed every log.
+      const parsedData = parseEventLogData(eventData);
+      const dataKey = parsedData.bytes32Items?.items?.key as string | undefined;
+      const eventKey = dataKey || topic1;
 
-      const items = eventLogData?.bytes32Items?.items;
-      const keyItem = items?.find((item: { key: string; value: string }) => item.key === "key");
+      console.warn(
+        "[execution-polling] pollForEvents: log event:",
+        eventName,
+        "parsed.name:",
+        parsed.name,
+        "eventKey:",
+        eventKey ?? "NOT_FOUND",
+        "want:",
+        operationKey
+      );
 
-      console.warn("[execution-polling] pollForEvents: log event:", eventName, "parsed.name:", parsed.name, "bytes32Items.items type:", typeof items, "isArray:", Array.isArray(items), "length:", items?.length, "keyItem:", keyItem ? { key: keyItem.key, value: keyItem.value } : "NOT_FOUND");
-
-      if (!keyItem || keyItem.value !== operationKey) continue;
+      if (!eventKey || eventKey.toLowerCase() !== operationKey.toLowerCase()) continue;
 
       // Determine the event name hash (topic[1] in the log)
       const eventNameHash = log.topics[1];
@@ -447,9 +464,10 @@ async function pollForEvents(
       // Determine if this is an execution or cancellation
       const isExecuted = eventNameHash === eventNameHashes[0]; // First hash is always the Executed variant
 
-      // Extract cancellation reason from stringItems if available
-      const reasonItem = eventLogData?.stringItems?.items?.find((item: { key: string; value: string }) => item.key === "reason");
-      const cancelledReason = !isExecuted && reasonItem ? reasonItem.value : undefined;
+      const cancelledReason =
+        !isExecuted && parsedData.stringItems?.items?.reason
+          ? String(parsedData.stringItems.items.reason)
+          : undefined;
 
       onFound(operationKey, log.transactionHash, isExecuted, cancelledReason);
       return; // Found a match, stop searching
