@@ -384,21 +384,25 @@ export function OrderStatusNotification({
 
   useEffect(
     function getOrderStatusKey() {
-      if (orderStatusKey) {
-        return;
-      }
-
-      const matchedStatusKey = Object.values(orderStatuses).find((status) => {
-        if (status.isViewed) return false;
+      const matches = Object.values(orderStatuses).filter((status) => {
         if (contractOrderKey && status.key === contractOrderKey) return true;
         if (status.data && getPendingOrderKey(status.data) === pendingOrderKey) return true;
         return status.key === pendingOrderKey;
-      })?.key;
+      });
 
-      if (matchedStatusKey) {
-        setOrderStatusKey(matchedStatusKey);
-        setOrderStatusViewed(matchedStatusKey);
-      }
+      if (!matches.length) return;
+
+      // Prefer a terminal sibling (contract key may execute while toast stayed on provisional).
+      const best =
+        matches.find((s) => s.executedTxnHash || s.cancelledTxnHash) ||
+        matches.find((s) => s.createdTxnHash) ||
+        matches.find((s) => !s.isViewed) ||
+        matches[0];
+
+      if (best.key === orderStatusKey) return;
+
+      setOrderStatusKey(best.key);
+      setOrderStatusViewed(best.key);
     },
     [
       orderStatus,
@@ -512,34 +516,34 @@ export function OrdersStatusNotificiation({
 
   const isCompleted = useMemo(() => {
     return pendingOrders.every((pendingOrder) => {
-      const orderStatus = matchedOrderStatuses.find((status) => {
-        const isPendingOrderMatch = status.data && getPendingOrderKey(pendingOrder) === getPendingOrderKey(status.data);
-        const isContractOrderMatch = pendingOrder.orderKey && pendingOrder.orderKey === status.key;
-
+      // Check every matching status — provisional may lack executed while contract key has it.
+      const matchingStatuses = Object.values(allOrderStatuses).filter((status) => {
+        const isPendingOrderMatch =
+          (status.data && getPendingOrderKey(pendingOrder) === getPendingOrderKey(status.data)) ||
+          status.key === getPendingOrderKey(pendingOrder);
+        const isContractOrderMatch = Boolean(pendingOrder.orderKey && pendingOrder.orderKey === status.key);
         return isPendingOrderMatch || isContractOrderMatch;
       });
 
       if (pendingOrder.txnType === "create") {
-        // Cancel / timeout must also clear the sticky toast — market creates
-        // previously waited forever for executedTxnHash only.
-        if (orderStatus?.cancelledTxnHash) {
+        if (matchingStatuses.some((s) => s.cancelledTxnHash)) {
           return true;
         }
 
         return isMarketOrderType(pendingOrder.orderType)
-          ? Boolean(orderStatus?.executedTxnHash)
-          : Boolean(orderStatus?.createdTxnHash);
+          ? matchingStatuses.some((s) => Boolean(s.executedTxnHash))
+          : matchingStatuses.some((s) => Boolean(s.createdTxnHash));
       }
       if (pendingOrder.txnType === "update") {
-        return Boolean(orderStatus?.updatedTxnHash);
+        return matchingStatuses.some((s) => Boolean(s.updatedTxnHash));
       }
       if (pendingOrder.txnType === "cancel") {
-        return Boolean(orderStatus?.cancelledTxnHash);
+        return matchingStatuses.some((s) => Boolean(s.cancelledTxnHash));
       }
 
       mustNeverExist(pendingOrder.txnType);
     });
-  }, [matchedOrderStatuses, pendingOrders]);
+  }, [allOrderStatuses, pendingOrders]);
 
   const isMainOrderFailed = useMemo(() => {
     return pendingOrders.some((pendingOrder) => {
@@ -654,10 +658,17 @@ export function OrdersStatusNotificiation({
 function findMatchedOrderStatus(orderList: OrderStatus[], orderData: PendingOrderData) {
   const matchingOrderKey = getPendingOrderKey(orderData);
 
-  return orderList.find((status) => {
-    const isPendingOrderMatch = status.data && matchingOrderKey === getPendingOrderKey(status.data);
+  const matches = orderList.filter((status) => {
+    const isPendingOrderMatch =
+      (status.data && matchingOrderKey === getPendingOrderKey(status.data)) || status.key === matchingOrderKey;
     const isContractOrderMatch = orderData.orderKey && orderData.orderKey === status.key;
 
     return isPendingOrderMatch || isContractOrderMatch;
   });
+
+  return (
+    matches.find((s) => s.executedTxnHash || s.cancelledTxnHash) ||
+    matches.find((s) => s.createdTxnHash) ||
+    matches[0]
+  );
 }

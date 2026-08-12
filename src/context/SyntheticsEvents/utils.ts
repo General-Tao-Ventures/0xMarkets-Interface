@@ -88,22 +88,15 @@ export function doesOrderStatusMatchPositionFill(data: OrderCreatedEventData, fi
     return false;
   }
 
-  // Disambiguate concurrent same-market creates when both sides have a size delta.
-  if (
-    fill.sizeDeltaUsd !== undefined &&
-    fill.sizeDeltaUsd !== 0n &&
-    data.sizeDeltaUsd !== 0n &&
-    data.sizeDeltaUsd !== fill.sizeDeltaUsd
-  ) {
-    return false;
-  }
+  // Size is intentionally not compared: UI estimate vs fill can differ slightly and was
+  // leaving sticky toasts spinning after the position already appeared.
 
   return true;
 }
 
 /**
- * Mirror a terminal execute/cancel onto the provisional pending-order-key status
- * the toast may already be bound to (seeded before OrderCreated).
+ * Mirror a terminal execute/cancel onto every sibling status the toast may be bound to
+ * (provisional pending-order-key and any other entry sharing that pending key).
  */
 export function mirrorTerminalStatusOntoProvisional(
   old: OrderStatuses,
@@ -116,19 +109,43 @@ export function mirrorTerminalStatusOntoProvisional(
   }
 ): OrderStatuses {
   const orderData = old[contractKey]?.data;
-  if (!orderData) return old;
+  if (!orderData) {
+    // OrderExecuted before OrderCreated: propagate by matching create txn hash when present.
+    if (!patch.createdTxnHash && !patch.executedTxnHash) return old;
+    const terminalHash = patch.executedTxnHash ?? patch.cancelledTxnHash;
+    let next = old;
+    for (const [key, status] of Object.entries(next)) {
+      if (key === contractKey) continue;
+      if (!status.data || status.executedTxnHash || status.cancelledTxnHash) continue;
+      // Same-tx express path: create hash on provisional equals execute txn.
+      if (status.createdTxnHash && terminalHash && status.createdTxnHash === terminalHash) {
+        next = updateByKey(next, key, {
+          ...patch,
+          createdTxnHash: status.createdTxnHash,
+        });
+      }
+    }
+    return next;
+  }
 
   const pendingKey = getPendingOrderKey(orderData);
-  if (pendingKey === contractKey || !old[pendingKey]) return old;
+  let next = old;
 
-  const provisional = old[pendingKey];
-  // Don't clobber a terminal state already set on the provisional status.
-  if (provisional.executedTxnHash || provisional.cancelledTxnHash) return old;
+  for (const [key, status] of Object.entries(next)) {
+    if (key === contractKey) continue;
+    if (status.executedTxnHash || status.cancelledTxnHash) continue;
 
-  return updateByKey(old, pendingKey, {
-    ...patch,
-    createdTxnHash: provisional.createdTxnHash ?? patch.createdTxnHash,
-  });
+    const samePendingKey = key === pendingKey;
+    const samePendingData = status.data !== undefined && getPendingOrderKey(status.data) === pendingKey;
+    if (!samePendingKey && !samePendingData) continue;
+
+    next = updateByKey(next, key, {
+      ...patch,
+      createdTxnHash: status.createdTxnHash ?? patch.createdTxnHash,
+    });
+  }
+
+  return next;
 }
 
 /**

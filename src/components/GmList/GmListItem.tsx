@@ -1,6 +1,5 @@
 import { Trans } from "@lingui/macro";
-import React, { useCallback, useMemo } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useMemo } from "react";
 import { Area, AreaChart } from "recharts";
 
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
@@ -41,7 +40,7 @@ import { AmountWithUsdHuman } from "components/AmountWithUsd/AmountWithUsd";
 import { AprInfo } from "components/AprInfo/AprInfo";
 import Button from "components/Button/Button";
 import FavoriteStar from "components/FavoriteStar/FavoriteStar";
-import { TableTdActionable, TableTrActionable } from "components/Table/Table";
+import { TableTd, TableTr } from "components/Table/Table";
 import { GmTokensBalanceInfo } from "./GmTokensTotalBalanceInfo";
 import { PoolTokenIcon } from "components/TokenIcon/PoolTokenIcon";
 import GmAssetDropdown from "../GmAssetDropdown/GmAssetDropdown";
@@ -151,16 +150,6 @@ export function GmListItem({
 
   const isMobile = usePoolsIsMobilePage();
 
-  const history = useHistory();
-
-  const handleItemClick = useCallback(
-    (event: React.MouseEvent) => {
-      history.push(`/pools/details?market=${marketOrGlvTokenAddress}`);
-      event.stopPropagation();
-    },
-    [history, marketOrGlvTokenAddress]
-  );
-
   if (!token || !indexToken || !longToken || !shortToken || !marketOrGlv) {
     return null;
   }
@@ -223,7 +212,7 @@ export function GmListItem({
   if (isMobile) {
     return (
       <div className="flex flex-col gap-4 rounded-8 bg-fill-surfaceElevated50 p-12">
-        <div className="flex flex-wrap items-center pb-8" onClick={handleItemClick}>
+        <div className="flex flex-wrap items-center pb-8">
           <div className="flex items-center">
             <div className="mr-12 flex shrink-0 items-center ">
               <PoolTokenIcon
@@ -331,8 +320,8 @@ export function GmListItem({
   }
 
   return (
-    <TableTrActionable key={token.address} className="cursor-pointer" onClick={handleItemClick}>
-      <TableTdActionable className="w-[220px] pl-16">
+    <TableTr key={token.address}>
+      <TableTd className="w-[220px] pl-16">
         <div className="flex items-center gap-8">
           {onFavoriteClick && (
             <Button variant="ghost" className="!p-8" onClick={handleFavoriteClick}>
@@ -367,8 +356,8 @@ export function GmListItem({
           </div>
         </div>
         {showDebugValues && <span style={tokenAddressStyle}>{marketOrGlvTokenAddress}</span>}
-      </TableTdActionable>
-      <TableTdActionable className="w-[13%]">
+      </TableTd>
+      <TableTd className="w-[13%]">
         {tvlDisplayDesktop}
         {poolFill && (
           <PoolCapBar
@@ -378,8 +367,8 @@ export function GmListItem({
             tokenDecimals={longToken.decimals}
           />
         )}
-      </TableTdActionable>
-      <TableTdActionable className="w-[11%]">
+      </TableTd>
+      <TableTd className="w-[11%]">
         <div className="flex flex-col gap-4">
           <GmTokensBalanceInfo
             token={token}
@@ -394,15 +383,15 @@ export function GmListItem({
             </div>
           )}
         </div>
-      </TableTdActionable>
+      </TableTd>
 
-      <TableTdActionable className="w-[11%]">
+      <TableTd className="w-[11%]">
         <div className={`apy-value ${apy && apy > 0n ? "apy-positive" : ""}`}>
           <AprInfo apy={apy} incentiveApr={incentiveApr} lidoApr={lidoApr} marketAddress={token.address} />
         </div>
-      </TableTdActionable>
+      </TableTd>
 
-      <TableTdActionable className="w-[8%]">
+      <TableTd className="w-[8%]">
         <div>
           <span className="numbers text-body-small">{utilizationDisplay}</span>
           {utilization !== null && (
@@ -414,9 +403,9 @@ export function GmListItem({
             </div>
           )}
         </div>
-      </TableTdActionable>
+      </TableTd>
 
-      <TableTdActionable className="w-[18%]">
+      <TableTd className="w-[18%]">
         {marketPerformance !== undefined ? (
           <div className="numbers">
             {formatPercentage(marketPerformance, { bps: false, signed: true, showPlus: false })}
@@ -424,15 +413,15 @@ export function GmListItem({
         ) : (
           "—"
         )}
-      </TableTdActionable>
+      </TableTd>
 
-      <TableTdActionable className="w-[14%] pr-16">
+      <TableTd className="w-[14%] pr-16">
         <SnapshotGraph
           performanceSnapshots={marketPerformanceSnapshots ?? EMPTY_ARRAY}
           performance={marketPerformance ?? 0n}
         />
-      </TableTdActionable>
-    </TableTrActionable>
+      </TableTd>
+    </TableTr>
   );
 }
 
