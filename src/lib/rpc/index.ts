@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AnyChainId,
   FALLBACK_PROVIDERS,
-  getAlchemyBaseMainnetWsUrl,
   getExpressRpcUrl,
   getFallbackRpcUrl,
+  ONFINALITY_BASE_WS_URL,
   SOURCE_BASE_MAINNET,
   BASE_SEPOLIA,
   LOCALHOST,
@@ -36,13 +36,9 @@ export function getWsProvider(chainId: AnyChainId): WebSocketProvider | JsonRpcP
   const network = Network.from(chainId);
 
   if (chainId === SOURCE_BASE_MAINNET) {
-    return new ethers.WebSocketProvider(
-      getAlchemyBaseMainnetWsUrl(getIsLargeAccount() ? "largeAccount" : "fallback"),
-      network,
-      {
-        staticNetwork: network,
-      }
-    );
+    return new ethers.WebSocketProvider(ONFINALITY_BASE_WS_URL, network, {
+      staticNetwork: network,
+    });
   }
 
   if (chainId === BASE_SEPOLIA) {

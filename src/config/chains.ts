@@ -79,9 +79,15 @@ const constants = {
 
 const ALCHEMY_WHITELISTED_DOMAINS = ["0xmarkets.io", "app.0xmarkets.io"];
 
+/** Primary Base mainnet RPC (OnFinality). Prefer this over Alchemy/dRPC for browser + multicall reliability. */
+export const ONFINALITY_BASE_HTTP_URL =
+  "https://base.api.onfinality.io/rpc?apikey=a341ce9f-0b05-404f-b09b-20647212ce2b";
+export const ONFINALITY_BASE_WS_URL =
+  "wss://base.api.onfinality.io/ws?apikey=a341ce9f-0b05-404f-b09b-20647212ce2b";
+
 export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
   [SOURCE_BASE_MAINNET]: [
-    // Prefer browser-friendly public RPCs (llamarpc often fails CORS from Vercel Preview)
+    ONFINALITY_BASE_HTTP_URL,
     getAlchemyBaseMainnetHttpUrl("fallback"),
     "https://mainnet.base.org",
     "https://base-rpc.publicnode.com",
@@ -100,7 +106,7 @@ export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
 };
 
 export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
-  [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("fallback")],
+  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("fallback")],
   [BASE_SEPOLIA]: [
     "https://sepolia.base.org",
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
@@ -112,11 +118,11 @@ export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
 };
 
 export const PRIVATE_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
-  [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("largeAccount")],
+  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("largeAccount")],
 };
 
 export const EXPRESS_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
-  [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("express")],
+  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("express")],
 };
 
 type ConstantName = keyof (typeof constants)[ContractsChainId];
