@@ -106,7 +106,9 @@ export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
 };
 
 export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
-  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("fallback")],
+  // Do NOT put OnFinality here: bestRpcTracker would overwrite it as isPublic:false,
+  // then skip it for normal accounts and leave a public RPC (e.g. dRPC) as primary.
+  [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("fallback")],
   [BASE_SEPOLIA]: [
     "https://sepolia.base.org",
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
@@ -118,6 +120,7 @@ export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
 };
 
 export const PRIVATE_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
+  // Large accounts probe private providers and prefer them as primary.
   [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("largeAccount")],
 };
 
