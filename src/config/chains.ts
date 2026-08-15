@@ -91,7 +91,7 @@ export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
     getAlchemyBaseMainnetHttpUrl("fallback"),
     "https://mainnet.base.org",
     "https://base-rpc.publicnode.com",
-    "https://base.drpc.org",
+    "https://lb.drpc.live/base/AsXrliHWN0lBsLrcHQvp9ZjDvJ7hyK4R8JVrQmlfqV1j",
     "https://rpc.ankr.com/base",
   ],
   [BASE_SEPOLIA]: [
