@@ -180,7 +180,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     const isFirstDraw = metricsIsFirstDrawTime;
     metricsIsFirstDrawTime = false;
 
-    const periodSeconds = RESOLUTION_TO_SECONDS[resolution];
+    const periodSeconds = RESOLUTION_TO_SECONDS[resolution] ?? 60;
     // During a first data request we fetch regular amount of candles
     const countBack = periodParams.firstDataRequest
       ? Math.max(periodParams.countBack, minBarsForFirstLoad(resolution))
@@ -243,7 +243,6 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     // reset open/high/low that TradingView already loaded from getBars.
     const symbol = symbolInfo.ticker!;
     const historyKey = historyKeyFor(symbol, resolution);
-    const periodSeconds = RESOLUTION_TO_SECONDS[resolution] ?? 60;
     const currentPeriodStartMs = getPeriodStartMs(periodSeconds);
 
     if (barsToReturn.length > 0) {
