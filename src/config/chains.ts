@@ -79,13 +79,19 @@ const constants = {
 
 const ALCHEMY_WHITELISTED_DOMAINS = ["0xmarkets.io", "app.0xmarkets.io"];
 
+/** Primary Base mainnet RPC (OnFinality). Prefer this over Alchemy/dRPC for browser + multicall reliability. */
+export const ONFINALITY_BASE_HTTP_URL =
+  "https://base.api.onfinality.io/rpc?apikey=a341ce9f-0b05-404f-b09b-20647212ce2b";
+export const ONFINALITY_BASE_WS_URL =
+  "wss://base.api.onfinality.io/ws?apikey=a341ce9f-0b05-404f-b09b-20647212ce2b";
+
 export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
   [SOURCE_BASE_MAINNET]: [
-    // Prefer browser-friendly public RPCs (llamarpc often fails CORS from Vercel Preview)
+    ONFINALITY_BASE_HTTP_URL,
     getAlchemyBaseMainnetHttpUrl("fallback"),
     "https://mainnet.base.org",
     "https://base-rpc.publicnode.com",
-    "https://base.drpc.org",
+    "https://lb.drpc.live/base/AsXrliHWN0lBsLrcHQvp9ZjDvJ7hyK4R8JVrQmlfqV1j",
     "https://rpc.ankr.com/base",
   ],
   [BASE_SEPOLIA]: [
@@ -100,6 +106,8 @@ export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
 };
 
 export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
+  // Do NOT put OnFinality here: bestRpcTracker would overwrite it as isPublic:false,
+  // then skip it for normal accounts and leave a public RPC (e.g. dRPC) as primary.
   [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("fallback")],
   [BASE_SEPOLIA]: [
     "https://sepolia.base.org",
@@ -112,11 +120,12 @@ export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
 };
 
 export const PRIVATE_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
-  [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("largeAccount")],
+  // Large accounts probe private providers and prefer them as primary.
+  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("largeAccount")],
 };
 
 export const EXPRESS_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
-  [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("express")],
+  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("express")],
 };
 
 type ConstantName = keyof (typeof constants)[ContractsChainId];

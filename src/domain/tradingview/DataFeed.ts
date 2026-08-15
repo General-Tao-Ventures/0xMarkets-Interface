@@ -70,6 +70,16 @@ function toUnixSeconds(ts: number): number {
   return ts > 1e12 ? Math.floor(ts / 1000) : Math.floor(ts);
 }
 
+/** Period-aligned start in ms — uses RESOLUTION_TO_SECONDS (works for 1W/1M; CHART_PERIODS does not). */
+function getPeriodStartMs(periodSeconds: number, nowMs = Date.now()): number {
+  const periodMs = Math.max(1, periodSeconds) * 1000;
+  return Math.floor(nowMs / periodMs) * periodMs;
+}
+
+function historyKeyFor(symbol: string, resolution: ResolutionString): string {
+  return `${symbol}|${resolution}`;
+}
+
 export class DataFeed extends EventTarget implements IBasicDataFeed {
   private subscriptions: Record<string, { destroy: () => void }> = {};
   private prefetchedBarsPromises: Record<string, Promise<FromOldToNewArray<Bar>>> = {};
@@ -77,8 +87,10 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
   private wsManager: KeeperWebSocketManager;
   private activeSubscriptions: Record<
     string,
-    { onTick: SubscribeBarsCallback; lastBar: Bar | null; visualMultiplier: number }
+    { onTick: SubscribeBarsCallback; lastBar: Bar | null; visualMultiplier: number; resolution: ResolutionString }
   > = {};
+  /** Last in-progress period bar from getBars, keyed by `${symbol}|${resolution}`. */
+  private historyLastBars: Record<string, Bar> = {};
   private oraclePriceGetter: ((symbol: string) => number | undefined) | null = null;
   private oraclePriceInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -168,7 +180,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     const isFirstDraw = metricsIsFirstDrawTime;
     metricsIsFirstDrawTime = false;
 
-    const periodSeconds = RESOLUTION_TO_SECONDS[resolution];
+    const periodSeconds = RESOLUTION_TO_SECONDS[resolution] ?? 60;
     // During a first data request we fetch regular amount of candles
     const countBack = periodParams.firstDataRequest
       ? Math.max(periodParams.countBack, minBarsForFirstLoad(resolution))
@@ -226,18 +238,39 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       noData: barsToReturn.length === 0 || (barsToReturn.length < countBack && reachedHistoryLimit),
     });
 
-    // Seed lastBar for the oracle price bridge so it can push ticks immediately.
-    // Only seed if the bar belongs to the CURRENT candle period. Seeding from a
-    // stale historical bar (e.g. after a reconnect gap) would cause the oracle
-    // bridge to stretch that old bar's low/high to the current price, producing
-    // a visible free-fall wick before the live stream resumes.
+    // Seed lastBar for the live stream / oracle bridge from history.
+    // Prefer history OHLC for the *open* period so a premature 1m live tick cannot
+    // reset open/high/low that TradingView already loaded from getBars.
     const symbol = symbolInfo.ticker!;
-    if (barsToReturn.length > 0 && this.activeSubscriptions[symbol] && !this.activeSubscriptions[symbol].lastBar) {
+    const historyKey = historyKeyFor(symbol, resolution);
+    const currentPeriodStartMs = getPeriodStartMs(periodSeconds);
+
+    if (barsToReturn.length > 0) {
       const lastBar = barsToReturn[barsToReturn.length - 1];
-      const currentCandleStartMs = getCurrentCandleTime(SUPPORTED_RESOLUTIONS_V2[resolution]) * 1000;
-      if (lastBar.time >= currentCandleStartMs) {
-        this.activeSubscriptions[symbol].lastBar = lastBar;
+      // Always remember the latest history bar (anchor), even if it is the previous period.
+      this.historyLastBars[historyKey] = lastBar;
+
+      if (lastBar.time >= currentPeriodStartMs) {
+        const sub = this.activeSubscriptions[symbol];
+        if (sub && sub.resolution === resolution) {
+          if (!sub.lastBar || sub.lastBar.time < lastBar.time) {
+            sub.lastBar = lastBar;
+          } else if (sub.lastBar.time === lastBar.time) {
+            // Merge: keep history open + extremes, preserve any newer live close.
+            sub.lastBar = {
+              time: lastBar.time,
+              open: lastBar.open,
+              high: Math.max(lastBar.high, sub.lastBar.high),
+              low: Math.min(lastBar.low, sub.lastBar.low),
+              close: sub.lastBar.close,
+            };
+            sub.onTick(sub.lastBar);
+          }
+        }
       }
+    } else {
+      // No bars for this window — drop any stale seed so we do not revive an old period.
+      delete this.historyLastBars[historyKey];
     }
 
     if (metricsIsFirstDrawTime) {
@@ -276,33 +309,107 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     // Use WebSocket candle listener for V2 non-stable tokens
     if (this.tradePageVersion === 2 && !isStable) {
       const symbol = symbolInfo.ticker!;
-      let lastBarTime = 0;
+      const periodSeconds = RESOLUTION_TO_SECONDS[resolution] ?? 60;
+      const historyKey = historyKeyFor(symbol, resolution);
+      const currentPeriodStartMs = getPeriodStartMs(periodSeconds);
+      const history = this.historyLastBars[historyKey] ?? null;
+      // Only seed lastBar from the *open* period — a stale completed bar would be
+      // stretched by the oracle bridge into a free-fall wick after rollover.
+      const seeded = history && history.time >= currentPeriodStartMs ? history : null;
 
-      this.activeSubscriptions[symbol] = { onTick, lastBar: null, visualMultiplier };
+      this.activeSubscriptions[symbol] = { onTick, lastBar: seeded, visualMultiplier, resolution };
 
       const handler = (candles: CandleData[]) => {
         const candle = candles.find((c) => c.tokenSymbol === symbol);
         if (!candle) return;
 
+        // Keeper WS always streams 1m candles. Bucket into the chart resolution
+        // (e.g. 5m) so TradingView never sees out-of-order 1m timestamps.
+        const candleSec = toUnixSeconds(candle.minuteTs);
+        const periodStartSec = Math.floor(candleSec / periodSeconds) * periodSeconds;
+        const periodStartMs = periodStartSec * 1000;
+
+        const sub = this.activeSubscriptions[symbol];
+        if (!sub) return;
+
         // Use oracle price for close if available, so chart matches header.
         // Use || (not ??) so a transient 0 from the getter falls back to candle data.
         const oraclePrice = this.oraclePriceGetter?.(symbol);
         const close = oraclePrice || candle.close;
+        const high = Math.max(candle.high, close);
+        const low = Math.min(candle.low, close);
+        const closeM = close * visualMultiplier;
+        const highM = high * visualMultiplier;
+        const lowM = low * visualMultiplier;
 
-        const bar: Bar = {
-          time: candle.minuteTs,
-          open: candle.open,
-          high: Math.max(candle.high, close),
-          low: Math.min(candle.low, close),
-          close,
-        };
-
-        lastBarTime = candle.minuteTs;
-        const multipliedBar = multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier);
-        if (this.activeSubscriptions[symbol]) {
-          this.activeSubscriptions[symbol].lastBar = multipliedBar;
+        let lastBar = sub.lastBar;
+        if (!lastBar) {
+          const hist = this.historyLastBars[historyKey];
+          if (hist && hist.time === periodStartMs) {
+            lastBar = hist;
+            sub.lastBar = hist;
+          }
         }
-        onTick(multipliedBar);
+
+        if (lastBar && periodStartMs < lastBar.time) {
+          // Stale / out-of-order minute — drop (TradingView throws on time violations).
+          return;
+        }
+
+        let nextBar: Bar;
+        if (lastBar && periodStartMs === lastBar.time) {
+          // Same period: fold the new 1m candle into the open period bar.
+          nextBar = {
+            time: lastBar.time,
+            open: lastBar.open,
+            high: Math.max(lastBar.high, highM),
+            low: Math.min(lastBar.low, lowM),
+            close: closeM,
+          };
+        } else if (lastBar && periodStartMs > lastBar.time) {
+          // Truly a new period after a seeded/history bar.
+          nextBar = multiplyBarValues(
+            {
+              time: periodStartMs,
+              open: candle.open,
+              high,
+              low,
+              close,
+            },
+            visualMultiplier
+          );
+        } else {
+          // No open-period lastBar. Safe to start a live bar only when history does
+          // not already own this period (otherwise we'd reset its OHLC).
+          const hist = this.historyLastBars[historyKey];
+          if (hist && hist.time === periodStartMs) {
+            nextBar = {
+              time: hist.time,
+              open: hist.open,
+              high: Math.max(hist.high, highM),
+              low: Math.min(hist.low, lowM),
+              close: closeM,
+            };
+          } else if (!hist || hist.time < periodStartMs) {
+            // History omitted this in-progress candle (or only has older periods) —
+            // inventing OHLC for a period TV does not have yet is OK.
+            nextBar = multiplyBarValues(
+              {
+                time: periodStartMs,
+                open: candle.open,
+                high,
+                low,
+                close,
+              },
+              visualMultiplier
+            );
+          } else {
+            return;
+          }
+        }
+
+        sub.lastBar = nextBar;
+        onTick(nextBar);
       };
 
       this.wsManager.on("candle", handler);
@@ -548,6 +655,15 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     this.oraclePriceInterval = setInterval(() => {
       for (const [symbol, sub] of Object.entries(this.activeSubscriptions)) {
         if (!sub.lastBar) continue;
+
+        const periodSeconds = RESOLUTION_TO_SECONDS[sub.resolution] ?? 60;
+        const currentPeriodStartMs = getPeriodStartMs(periodSeconds);
+        // Never stretch a completed/stale period bar to the live price (free-fall wick).
+        if (sub.lastBar.time < currentPeriodStartMs) {
+          sub.lastBar = null;
+          continue;
+        }
+
         const price = this.oraclePriceGetter?.(symbol);
         // Skip if price is missing or transiently 0 to avoid drawing a $0 bar.
         if (!price) continue;
@@ -555,6 +671,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
         const displayPrice = price * sub.visualMultiplier;
         if (displayPrice === sub.lastBar.close) continue;
 
+        // Only mutate the open period — never push a bar with an older timestamp.
         const updatedBar: Bar = {
           ...sub.lastBar,
           close: displayPrice,
