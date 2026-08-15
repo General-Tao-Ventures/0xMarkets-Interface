@@ -276,7 +276,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     // Use WebSocket candle listener for V2 non-stable tokens
     if (this.tradePageVersion === 2 && !isStable) {
       const symbol = symbolInfo.ticker!;
-      let lastBarTime = 0;
+      const periodSeconds = RESOLUTION_TO_SECONDS[resolution] ?? 60;
 
       this.activeSubscriptions[symbol] = { onTick, lastBar: null, visualMultiplier };
 
@@ -284,25 +284,54 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
         const candle = candles.find((c) => c.tokenSymbol === symbol);
         if (!candle) return;
 
+        // Keeper WS always streams 1m candles. Bucket into the chart resolution
+        // (e.g. 5m) so TradingView never sees out-of-order 1m timestamps.
+        const candleSec = toUnixSeconds(candle.minuteTs);
+        const periodStartSec = Math.floor(candleSec / periodSeconds) * periodSeconds;
+        const periodStartMs = periodStartSec * 1000;
+
+        const sub = this.activeSubscriptions[symbol];
+        if (!sub) return;
+
         // Use oracle price for close if available, so chart matches header.
         // Use || (not ??) so a transient 0 from the getter falls back to candle data.
         const oraclePrice = this.oraclePriceGetter?.(symbol);
         const close = oraclePrice || candle.close;
+        const open = candle.open;
+        const high = Math.max(candle.high, close);
+        const low = Math.min(candle.low, close);
 
-        const bar: Bar = {
-          time: candle.minuteTs,
-          open: candle.open,
-          high: Math.max(candle.high, close),
-          low: Math.min(candle.low, close),
-          close,
-        };
-
-        lastBarTime = candle.minuteTs;
-        const multipliedBar = multiplyBarValues(formatTimeInBarToMs(bar), visualMultiplier);
-        if (this.activeSubscriptions[symbol]) {
-          this.activeSubscriptions[symbol].lastBar = multipliedBar;
+        const lastBar = sub.lastBar;
+        if (lastBar && periodStartMs < lastBar.time) {
+          // Stale / out-of-order minute — drop (TradingView throws on time violations).
+          return;
         }
-        onTick(multipliedBar);
+
+        let nextBar: Bar;
+        if (lastBar && periodStartMs === lastBar.time) {
+          // Same period: fold the new 1m candle into the open period bar.
+          nextBar = {
+            time: lastBar.time,
+            open: lastBar.open,
+            high: Math.max(lastBar.high, high * visualMultiplier),
+            low: Math.min(lastBar.low, low * visualMultiplier),
+            close: close * visualMultiplier,
+          };
+        } else {
+          nextBar = multiplyBarValues(
+            {
+              time: periodStartMs,
+              open,
+              high,
+              low,
+              close,
+            },
+            visualMultiplier
+          );
+        }
+
+        sub.lastBar = nextBar;
+        onTick(nextBar);
       };
 
       this.wsManager.on("candle", handler);
@@ -555,6 +584,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
         const displayPrice = price * sub.visualMultiplier;
         if (displayPrice === sub.lastBar.close) continue;
 
+        // Only mutate the open period — never push a bar with an older timestamp.
         const updatedBar: Bar = {
           ...sub.lastBar,
           close: displayPrice,

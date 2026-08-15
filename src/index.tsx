@@ -2,6 +2,9 @@ import "regenerator-runtime/runtime";
 import "lib/polyfills";
 import "styles/tailwind.css";
 import "lib/monkeyPatching";
+import { quietExtensionConsole } from "lib/quietExtensionConsole";
+
+quietExtensionConsole();
 
 import * as Sentry from "@sentry/react";
 import React from "react";
@@ -29,6 +32,12 @@ Sentry.init({
   tracesSampleRate: 0.2,
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 1.0,
+  ignoreErrors: [
+    "Failed to connect to MetaMask",
+    "MetaMask extension not found",
+    "A listener indicated an asynchronous response by returning true",
+    "message channel closed before a response was received",
+  ],
 });
 
 createRoot(document.getElementById("root")!).render(
