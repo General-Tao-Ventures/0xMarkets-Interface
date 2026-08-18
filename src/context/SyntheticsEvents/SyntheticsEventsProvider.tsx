@@ -56,6 +56,7 @@ import { TokenApproveResultEvent } from "lib/userAnalytics/types";
 import useWallet from "lib/wallets/useWallet";
 import { getToken, getWrappedToken, NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
 import { gelatoRelay } from "sdk/utils/gelatoRelay";
+import { toFxDisplayIsLong } from "sdk/utils/fxDisplay";
 import { decodeTwapUiFeeReceiver } from "sdk/utils/twap/uiFeeReceiver";
 
 import { getInsufficientExecutionFeeToastContent } from "components/Errors/errorToasts";
@@ -963,7 +964,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
           return;
         }
 
-        const longShortText = data.isLong ? t`Long` : t`Short`;
+        const longShortText = toFxDisplayIsLong(data.isLong, indexToken?.symbol) ? t`Long` : t`Short`;
         const positionText = `${indexToken?.symbol} ${longShortText}`;
 
         if (data.sizeDeltaUsd == 0n) {
@@ -1035,7 +1036,7 @@ export function SyntheticsEventsProvider({ children }: { children: ReactNode }) 
           return;
         }
 
-        const longShortText = data.isLong ? t`Long` : t`Short`;
+        const longShortText = toFxDisplayIsLong(data.isLong, indexToken?.symbol) ? t`Long` : t`Short`;
         const positionText = `${indexToken?.symbol} ${longShortText}`;
 
         if (data.sizeDeltaUsd == 0n) {
