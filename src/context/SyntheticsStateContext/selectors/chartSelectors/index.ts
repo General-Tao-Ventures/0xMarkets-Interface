@@ -64,7 +64,7 @@ export const selectChartHeaderInfo = createSelector((q) => {
     totalVolume === 0n ? 0 : longOpenInterestPercentage !== undefined ? 100 - longOpenInterestPercentage : undefined;
 
   return {
-    // On-chain reserve/OI-cap liquidity — may be overridden by Cartha LP TVL in the chart header hook.
+    // On-chain reserve/OI-cap liquidity — used by trade chart header and order validation.
     liquidityLong: getAvailableUsdLiquidityForPosition(marketInfo, true),
     liquidityShort: getAvailableUsdLiquidityForPosition(marketInfo, false),
     netRateHourlyLong,
