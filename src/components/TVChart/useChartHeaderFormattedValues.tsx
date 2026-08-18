@@ -15,11 +15,6 @@ import { useSelector } from "context/SyntheticsStateContext/utils";
 import { use24hPriceDeltaMap } from "domain/synthetics/tokens";
 import { use24hVolumes } from "domain/synthetics/tokens/use24Volumes";
 import {
-  getCarthaAvailableLiquidityUsd,
-  getCarthaLiquidityForMarket,
-  useCarthaMarketLiquidity,
-} from "domain/cartha/useCarthaMarketLiquidity";
-import {
   formatAmountHuman,
   formatPercentageDisplay,
   formatRatePercentage,
@@ -45,32 +40,10 @@ export function useChartHeaderFormattedValues() {
   const chartTokenAddress = chartToken?.address as Address;
   const oraclePriceDecimals = useSelector(selectSelectedMarketPriceDecimals);
   const marketInfo = useSelector(selectTradeboxMarketInfo);
-  const { liquidityByMarket } = useCarthaMarketLiquidity();
 
-  const carthaLiquidity = getCarthaLiquidityForMarket(liquidityByMarket, marketInfo?.marketTokenAddress);
-  // Only treat Cartha as active when LP TVL is positive so header + tooltip stay in sync.
-  const carthaTvlUsd =
-    carthaLiquidity && carthaLiquidity.tvlUsd > 0n ? carthaLiquidity.tvlUsd : undefined;
-
-  const liquidityLongUsd = useMemo(() => {
-    if (carthaTvlUsd !== undefined && info?.openInterestLong !== undefined) {
-      return getCarthaAvailableLiquidityUsd({
-        carthaTvlUsd,
-        openInterestUsd: info.openInterestLong,
-      });
-    }
-    return info?.liquidityLong;
-  }, [carthaTvlUsd, info?.liquidityLong, info?.openInterestLong]);
-
-  const liquidityShortUsd = useMemo(() => {
-    if (carthaTvlUsd !== undefined && info?.openInterestShort !== undefined) {
-      return getCarthaAvailableLiquidityUsd({
-        carthaTvlUsd,
-        openInterestUsd: info.openInterestShort,
-      });
-    }
-    return info?.liquidityShort;
-  }, [carthaTvlUsd, info?.liquidityShort, info?.openInterestShort]);
+  // Trade header uses on-chain available liquidity (same source as order validation).
+  const liquidityLongUsd = info?.liquidityLong;
+  const liquidityShortUsd = info?.liquidityShort;
 
   const selectedTokenOption = chartTokenAddress ? getToken(chainId, chartTokenAddress) : undefined;
   const visualMultiplier = isSwap ? 1 : selectedTokenOption?.visualMultiplier ?? 1;
@@ -189,10 +162,10 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong carthaTvlUsd={carthaTvlUsd} />}
+        content={<AvailableLiquidityTooltip isLong />}
       />
     );
-  }, [liquidityLongUsd, carthaTvlUsd]);
+  }, [liquidityLongUsd]);
 
   const liquidityShort = useMemo(() => {
     const liquidity = liquidityShortUsd;
@@ -211,10 +184,10 @@ export function useChartHeaderFormattedValues() {
           </span>
         }
         position="bottom-end"
-        content={<AvailableLiquidityTooltip isLong={false} carthaTvlUsd={carthaTvlUsd} />}
+        content={<AvailableLiquidityTooltip isLong={false} />}
       />
     );
-  }, [liquidityShortUsd, carthaTvlUsd]);
+  }, [liquidityShortUsd]);
 
   const netRateLong = useMemo(() => {
     const netRate = info?.netRateHourlyLong;
