@@ -34,6 +34,7 @@ import { getByKey } from "lib/objects";
 import { mustNeverExist } from "lib/types";
 import useWallet from "lib/wallets/useWallet";
 import { getTokenVisualMultiplier, getWrappedToken } from "sdk/configs/tokens";
+import { toFxDisplayIsLong } from "sdk/utils/fxDisplay";
 
 import ExternalLink from "components/ExternalLink/ExternalLink";
 import { TransactionStatus, TransactionStatusType } from "components/TransactionStatus/TransactionStatus";
@@ -201,7 +202,9 @@ export function OrderStatusNotification({
         initialCollateralToken,
       } = orderData;
 
-      const longShortText = isLong ? t`Long` : t`Short`;
+      // JPY is index-domain Long = short USD/JPY on the chart; flip for human-facing copy.
+      const displayIsLong = toFxDisplayIsLong(isLong, marketInfo?.indexToken?.symbol);
+      const longShortText = displayIsLong ? t`Long` : t`Short`;
       const visualMultiplierPrefix = marketInfo?.indexToken ? getTokenVisualMultiplier(marketInfo.indexToken) : "";
       const positionText = `${visualMultiplierPrefix}${marketInfo?.indexToken.symbol} ${longShortText}`;
 

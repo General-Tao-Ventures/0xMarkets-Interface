@@ -12,6 +12,7 @@ import {
 import { MarketInfo, MarketsInfoData, getMarketIndexName, getMarketPoolName } from "domain/synthetics/markets";
 import { isMarketOrderType } from "domain/synthetics/orders";
 import { getByKey } from "lib/objects";
+import { toFxDisplayIsLong } from "sdk/utils/fxDisplay";
 
 import { TransactionStatus, TransactionStatusType } from "components/TransactionStatus/TransactionStatus";
 
@@ -142,9 +143,10 @@ export function FeesSettlementStatusNotification({ orders, toastTimestamp, marke
 
           const indexName = getMarketIndexName(marketInfo);
           const poolName = getMarketPoolName(marketInfo);
+          const displayIsLong = toFxDisplayIsLong(order.isLong, marketInfo.indexToken?.symbol);
           const positionName = (
             <Trans>
-              <span>{order.isLong ? t`Long` : t`Short`}</span>{" "}
+              <span>{displayIsLong ? t`Long` : t`Short`}</span>{" "}
               <div className="inline-flex">
                 <span>{indexName}</span>
                 <span className="subtext gm-toast !text-typography-primary">[{poolName}]</span>
