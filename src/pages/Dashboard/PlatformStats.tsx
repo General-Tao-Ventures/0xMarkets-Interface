@@ -7,7 +7,7 @@ import { selectMarketsInfoData } from "context/SyntheticsStateContext/selectors/
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import useV2Stats from "domain/synthetics/stats/useV2Stats";
 import { useChainId } from "lib/chains";
-import { formatAmountHuman } from "lib/numbers";
+import { formatAmountHuman, formatUsd } from "lib/numbers";
 
 import { getFormattedFeesDuration } from "./getFormattedFeesDuration";
 
@@ -79,7 +79,7 @@ export function PlatformStats() {
       return acc + (market.poolValueMax ?? 0n);
     }, 0n);
   }, [marketsInfoData]);
-  const poolsTvl = poolsTvlUsd !== undefined ? fmtUsd(poolsTvlUsd) : "—";
+  const poolsTvl = formatUsd(poolsTvlUsd, { displayDecimals: 0 }) ?? "—";
 
   const weeklyAnnualized = (v2Overview.weeklyFees * 365n) / 7n;
 

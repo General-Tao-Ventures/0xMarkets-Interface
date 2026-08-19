@@ -2,6 +2,7 @@ import { Trans } from "@lingui/macro";
 import cx from "classnames";
 
 import { useCarthaLpStats, type CarthaApyTier } from "domain/cartha/useCarthaLpStats";
+import { formatUsd } from "lib/numbers";
 
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -47,7 +48,7 @@ function formatRelative(targetIso: string, nowMs: number): string {
 }
 
 /** 0xMarkets LP stats card. */
-export default function CarthaLpCard() {
+export default function CarthaLpCard({ tvlUsd }: { tvlUsd: bigint | undefined }) {
   const { data, isLoading, error } = useCarthaLpStats();
 
   if (error) {
@@ -76,10 +77,7 @@ export default function CarthaLpCard() {
         <div className="flex flex-wrap items-end gap-x-32 gap-y-12">
           <Stat
             label={<Trans>TVL</Trans>}
-            value={data ? usdFormatter.format(data.tvl.current_usd) : "—"}
-            subValue={
-              data ? <Trans>{usdFormatter.format(data.tvl.upcoming_usd)} next epoch</Trans> : null
-            }
+            value={tvlUsd !== undefined ? formatUsd(tvlUsd, { displayDecimals: 0 }) : "—"}
           />
           <Stat
             label={<Trans>Weekly rewards</Trans>}

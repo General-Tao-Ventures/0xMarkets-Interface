@@ -170,6 +170,7 @@ export function GmListItem({
       usd={totalSupplyUsd}
       symbol={token.symbol}
       usdOnTop
+      compact={false}
     />
   );
   const tvlDisplayDesktop = (
@@ -180,6 +181,7 @@ export function GmListItem({
       usd={totalSupplyUsd}
       symbol={token.symbol}
       usdOnTop
+      compact={false}
     />
   );
 

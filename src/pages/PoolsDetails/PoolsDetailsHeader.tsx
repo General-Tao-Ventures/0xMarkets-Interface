@@ -2,7 +2,6 @@ import { Trans } from "@lingui/macro";
 import cx from "classnames";
 import { useCallback, useState } from "react";
 
-import { USD_DECIMALS } from "config/factors";
 import {
   getGlvMarketShortening,
   getGlvOrMarketAddress,
@@ -14,7 +13,7 @@ import { GlvOrMarketInfo } from "domain/synthetics/markets/types";
 import { useUserEarnings } from "domain/synthetics/markets/useUserEarnings";
 import { TokenData, convertToUsd } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
-import { formatAmountHuman, formatBalanceAmount, formatUsd } from "lib/numbers";
+import { formatBalanceAmount, formatUsd } from "lib/numbers";
 import { getByKey } from "lib/objects";
 import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
 import { getNormalizedTokenSymbol } from "sdk/configs/tokens";
@@ -100,10 +99,10 @@ export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
             <div className="flex gap-14 max-md:flex-col">
               <PoolsDetailsMarketAmount
                 label={<Trans>TVL (Supply)</Trans>}
-                value={formatAmountHuman(marketTotalSupplyUsd, USD_DECIMALS, true, 2)}
+                value={formatUsd(marketTotalSupplyUsd, { displayDecimals: 0 })}
                 secondaryValue={
                   typeof marketTotalSupply === "bigint" && typeof marketToken?.decimals === "number"
-                    ? `${formatAmountHuman(marketTotalSupply, marketToken?.decimals, false, 2)} ${isGlv ? "GLV" : ""}`
+                    ? `${formatBalanceAmount(marketTotalSupply, marketToken?.decimals, undefined, { showZero: true })} ${isGlv ? "GLV" : ""}`
                     : undefined
                 }
               />

@@ -10,6 +10,7 @@ export function AmountWithUsdHuman({
   symbol,
   multiline = false,
   usdOnTop = false,
+  compact = true,
   className,
 }: {
   amount: bigint | undefined;
@@ -18,18 +19,23 @@ export function AmountWithUsdHuman({
   symbol?: string;
   multiline?: boolean;
   usdOnTop?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   if (amount === undefined || usd === undefined || decimals === undefined) {
     return "...";
   }
 
-  let formattedAmount = formatAmountHuman(amount, decimals, false, 2);
+  let formattedAmount = compact
+    ? formatAmountHuman(amount, decimals, false, 2)
+    : formatBalanceAmount(amount, decimals, undefined, { showZero: true });
   if (symbol) {
     formattedAmount = `${formattedAmount} ${symbol}`;
   }
 
-  const formattedUsd = formatAmountHuman(usd, USD_DECIMALS, true, 2);
+  const formattedUsd = compact
+    ? formatAmountHuman(usd, USD_DECIMALS, true, 2)
+    : (formatUsd(usd, { displayDecimals: 0 }) ?? "...");
 
   const topValue = usdOnTop ? formattedUsd : formattedAmount;
   const bottomValue = usdOnTop ? formattedAmount : formattedUsd;
