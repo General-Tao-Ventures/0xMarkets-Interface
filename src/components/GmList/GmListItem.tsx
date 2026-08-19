@@ -11,11 +11,6 @@ import {
 } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import {
-  getCarthaLiquidityForMarket,
-  useCarthaMarketLiquidity,
-  type CarthaMarketLiquidity,
-} from "domain/cartha/useCarthaMarketLiquidity";
-import {
   MarketTokensAPRData,
   getGlvDisplayName,
   getGlvOrMarketAddress,
@@ -52,23 +47,18 @@ export const tokenAddressStyle = { fontSize: 5 };
 
 /**
  * Compute utilization as a percentage (0–100) for a market.
- * Prefers Cartha LP TVL: (longOI + shortOI) / carthaTvl * 100.
- * Falls back to on-chain poolValueMax when Cartha data is missing.
+ * Uses on-chain poolValueMax as the denominator.
  * Returns null for GLV markets or when pool value is zero.
  */
-function computeUtilization(
-  marketOrGlv: GlvOrMarketInfo | undefined,
-  cartha?: CarthaMarketLiquidity
-): number | null {
+function computeUtilization(marketOrGlv: GlvOrMarketInfo | undefined): number | null {
   if (!marketOrGlv || isGlvInfo(marketOrGlv)) return null;
   const market = marketOrGlv as MarketInfo;
-  const poolValue = cartha && cartha.tvlUsd > 0n ? cartha.tvlUsd : market.poolValueMax;
+  const poolValue = market.poolValueMax;
   if (!poolValue || poolValue === 0n) return null;
   const totalInterest = market.longInterestUsd + market.shortInterestUsd;
-  // Both values are in USD with PRECISION (30 decimals), same scale — safe to divide
   const utilizationBps = bigMath.mulDiv(totalInterest, 10000n, poolValue);
   const util = Number(utilizationBps) / 100;
-  return Math.min(util, 100); // cap at 100% in edge cases
+  return Math.min(util, 100);
 }
 
 /**
@@ -126,10 +116,8 @@ export function GmListItem({
   const userEarnings = useUserEarnings(chainId, srcChainId);
   const daysConsidered = useDaysConsideredInMarketsApr();
   const { showDebugValues } = useSettings();
-  const { liquidityByMarket } = useCarthaMarketLiquidity();
 
   const marketOrGlv = getByKey(marketsInfoData, token?.address);
-  const carthaLiquidity = getCarthaLiquidityForMarket(liquidityByMarket, token?.address);
 
   const isGlv = isGlvInfo(marketOrGlv);
 
@@ -155,9 +143,7 @@ export function GmListItem({
   }
 
   const totalSupply = token?.totalSupply;
-  const gmSupplyUsd = convertToUsd(totalSupply, token?.decimals, token?.prices?.minPrice);
-  const usesCarthaTvl = Boolean(carthaLiquidity && carthaLiquidity.tvlUsd > 0n);
-  const totalSupplyUsd = usesCarthaTvl ? carthaLiquidity!.tvlUsd : gmSupplyUsd;
+  const totalSupplyUsd = convertToUsd(totalSupply, token?.decimals, token?.prices?.minPrice);
   const tokenIconName = marketOrGlv?.isSpotOnly
     ? getNormalizedTokenSymbol(longToken.symbol) + getNormalizedTokenSymbol(shortToken.symbol)
     : getNormalizedTokenSymbol(indexToken.symbol);
@@ -174,23 +160,20 @@ export function GmListItem({
   const marketPerformanceSnapshots = performanceSnapshots?.[token.address.toLowerCase()];
 
   // Utilization calculation
-  const utilization = computeUtilization(marketOrGlv, carthaLiquidity);
+  const utilization = computeUtilization(marketOrGlv);
   const utilizationDisplay = utilization !== null ? `${utilization.toFixed(1)}%` : "—";
-  const tvlLabel = usesCarthaTvl ? <Trans>TVL</Trans> : <Trans>TVL (Supply)</Trans>;
-  const tvlDisplay = usesCarthaTvl ? (
-    <span className="numbers">{formatUsd(totalSupplyUsd)}</span>
-  ) : (
+  const tvlLabel = <Trans>TVL (Supply)</Trans>;
+  const tvlDisplay = (
     <AmountWithUsdHuman
       amount={totalSupply}
       decimals={token.decimals}
       usd={totalSupplyUsd}
       symbol={token.symbol}
       usdOnTop
+      compact={false}
     />
   );
-  const tvlDisplayDesktop = usesCarthaTvl ? (
-    <span className="numbers">{formatUsd(totalSupplyUsd)}</span>
-  ) : (
+  const tvlDisplayDesktop = (
     <AmountWithUsdHuman
       multiline
       amount={totalSupply}
@@ -198,6 +181,7 @@ export function GmListItem({
       usd={totalSupplyUsd}
       symbol={token.symbol}
       usdOnTop
+      compact={false}
     />
   );
 

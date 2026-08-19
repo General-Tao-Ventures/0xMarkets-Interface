@@ -23,7 +23,7 @@ export const LEADERBOARD_PAGES: Record<LeaderboardPageKey, LeaderboardPageConfig
     isCompetition: true,
     isTestnet: true,
     chainId: BASE_SEPOLIA,
-    enabled: true,
+    enabled: false,
     timeframe: {
       from: 1774288800, // March 23, 2026 18:00 UTC
       to: 1776816000, // April 22, 2026 00:00 UTC

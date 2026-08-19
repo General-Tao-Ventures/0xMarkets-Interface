@@ -1,13 +1,15 @@
-import { t, Trans } from "@lingui/macro";
-import { useState } from "react";
+import { Trans } from "@lingui/macro";
+import { useMemo, useState } from "react";
 import cx from "classnames";
 
-import { useCarthaLpStats } from "domain/cartha/useCarthaLpStats";
+import { selectMarketsInfoData } from "context/SyntheticsStateContext/selectors/globalSelectors";
+import { useSelector } from "context/SyntheticsStateContext/utils";
 import { useGmMarketsApy } from "domain/synthetics/markets/useGmMarketsApy";
 import { usePerformanceAnnualized } from "domain/synthetics/markets/usePerformanceAnnualized";
 import { usePerformanceSnapshots } from "domain/synthetics/markets/usePerformanceSnapshots";
 import { usePoolsTimeRange } from "domain/synthetics/markets/usePoolsTimeRange";
 import { useChainId } from "lib/chains";
+import { formatUsd } from "lib/numbers";
 
 import AppPageLayout from "components/AppPageLayout/AppPageLayout";
 import { ChainContentHeader } from "components/ChainContentHeader/ChainContentHeader";
@@ -50,6 +52,7 @@ export default function Pools() {
   });
 
   const isMobile = usePoolsIsMobilePage();
+  const tvlUsd = useOnchainPoolsTvlUsd();
 
   return (
     <AppPageLayout header={<ChainContentHeader />}>
@@ -59,12 +62,12 @@ export default function Pools() {
           "items-end justify-between": !isMobile,
         })}
       >
-        <PoolsTvl />
+        <PoolsTvl tvlUsd={tvlUsd} />
         <PoolsTimeRangeFilter timeRange={timeRange} setTimeRange={setTimeRange} />
       </div>
 
       <div className="mb-16">
-        <CarthaLpCard />
+        <CarthaLpCard tvlUsd={tvlUsd} />
       </div>
 
       <div className="mb-16">
@@ -93,22 +96,24 @@ export default function Pools() {
   );
 }
 
-const tvlFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+function useOnchainPoolsTvlUsd() {
+  const marketsInfoData = useSelector(selectMarketsInfoData);
+  return useMemo(() => {
+    if (!marketsInfoData) return undefined;
+    return Object.values(marketsInfoData).reduce((acc, market) => {
+      if (market.isSpotOnly || market.isDisabled) return acc;
+      return acc + (market.poolValueMax ?? 0n);
+    }, 0n);
+  }, [marketsInfoData]);
+}
 
-function PoolsTvl() {
-  const { data } = useCarthaLpStats();
-  const tvl = data?.tvl.current_usd;
-
+function PoolsTvl({ tvlUsd }: { tvlUsd: bigint | undefined }) {
   return (
     <div className="flex flex-col gap-4">
       <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
         Total Value Locked
       </span>
-      <span className="text-h1 normal-nums">{tvl != null ? tvlFormatter.format(tvl) : "—"}</span>
+      <span className="text-h1 normal-nums">{tvlUsd !== undefined ? formatUsd(tvlUsd, { displayDecimals: 0 }) : "—"}</span>
       <span className="text-body-medium text-typography-secondary">
         <Trans>In 0xMarkets LP</Trans>
       </span>

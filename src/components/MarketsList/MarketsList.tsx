@@ -7,7 +7,7 @@ import { getMarketIndexName, getMarketPoolName } from "domain/synthetics/markets
 import { IndexTokenStat } from "domain/synthetics/stats/marketsInfoDataToIndexTokensStats";
 import { stripBlacklistedWords } from "domain/tokens/utils";
 import { useChainId } from "lib/chains";
-import { formatAmount, formatAmountHuman, formatRatePercentage, formatUsdPrice } from "lib/numbers";
+import { formatAmount, formatAmountHuman, formatRatePercentage, formatUsd, formatUsdPrice } from "lib/numbers";
 import { searchBy } from "lib/searchBy";
 import AssetDropdown from "pages/Dashboard/AssetDropdown";
 import { getTokenVisualMultiplier } from "sdk/configs/tokens";
@@ -96,7 +96,7 @@ function MarketsListDesktop({ chainId, indexTokensStats }: { chainId: number; in
                     handle={<Trans>LIQUIDITY</Trans>}
                     content={
                       <Trans>
-                        Available liquidity for new positions (25% of Cartha LP TVL per side, minus open interest).
+                        Available liquidity for new positions based on pool reserve and open interest caps.
                       </Trans>
                     }
                   />
@@ -239,7 +239,7 @@ function MarketsListDesktopItem({ stats }: { stats: IndexTokenStat }) {
       <TableTd>
         <TooltipWithPortal
           className="nowrap"
-          handle={formatAmountHuman(stats.totalPoolValue, USD_DECIMALS, true, 2)}
+          handle={formatUsd(stats.totalPoolValue, { displayDecimals: 0 })}
           handleClassName="numbers"
           content={
             <>
@@ -254,7 +254,7 @@ function MarketsListDesktopItem({ stats }: { stats: IndexTokenStat }) {
                       <span className="subtext leading-1">[{getMarketPoolName(marketInfo)}]</span>:
                     </div>
                   }
-                  value={formatAmountHuman(poolValueUsd, USD_DECIMALS, true, 2)}
+                  value={formatUsd(poolValueUsd, { displayDecimals: 0 })}
                   valueClassName="numbers"
                 />
               ))}

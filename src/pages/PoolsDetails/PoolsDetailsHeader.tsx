@@ -2,11 +2,6 @@ import { Trans } from "@lingui/macro";
 import cx from "classnames";
 import { useCallback, useState } from "react";
 
-import { USD_DECIMALS } from "config/factors";
-import {
-  getCarthaLiquidityForMarket,
-  useCarthaMarketLiquidity,
-} from "domain/cartha/useCarthaMarketLiquidity";
 import {
   getGlvMarketShortening,
   getGlvOrMarketAddress,
@@ -18,7 +13,7 @@ import { GlvOrMarketInfo } from "domain/synthetics/markets/types";
 import { useUserEarnings } from "domain/synthetics/markets/useUserEarnings";
 import { TokenData, convertToUsd } from "domain/synthetics/tokens";
 import { useChainId } from "lib/chains";
-import { formatAmountHuman, formatBalanceAmount, formatUsd } from "lib/numbers";
+import { formatBalanceAmount, formatUsd } from "lib/numbers";
 import { getByKey } from "lib/objects";
 import { usePoolsIsMobilePage } from "pages/Pools/usePoolsIsMobilePage";
 import { getNormalizedTokenSymbol } from "sdk/configs/tokens";
@@ -38,7 +33,6 @@ type Props = {
 export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
   const { chainId, srcChainId } = useChainId();
   const isGlv = glvOrMarketInfo && isGlvInfo(glvOrMarketInfo);
-  const { liquidityByMarket } = useCarthaMarketLiquidity();
   const iconName = glvOrMarketInfo?.isSpotOnly
     ? getNormalizedTokenSymbol(glvOrMarketInfo.longToken.symbol) +
       getNormalizedTokenSymbol(glvOrMarketInfo.shortToken.symbol)
@@ -51,12 +45,7 @@ export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
   const marketBalanceUsd = convertToUsd(marketBalance, marketToken?.decimals, marketPrice);
 
   const marketTotalSupply = marketToken?.totalSupply;
-  const gmSupplyUsd = convertToUsd(marketTotalSupply, marketToken?.decimals, marketPrice);
-  const cartha = !isGlv
-    ? getCarthaLiquidityForMarket(liquidityByMarket, marketToken?.address)
-    : undefined;
-  const usesCarthaTvl = Boolean(cartha && cartha.tvlUsd > 0n);
-  const marketTotalSupplyUsd = usesCarthaTvl ? cartha!.tvlUsd : gmSupplyUsd;
+  const marketTotalSupplyUsd = convertToUsd(marketTotalSupply, marketToken?.decimals, marketPrice);
 
   const userEarnings = useUserEarnings(chainId, srcChainId);
   const marketEarnings = getByKey(userEarnings?.byMarketAddress, marketToken?.address);
@@ -109,14 +98,12 @@ export function PoolsDetailsHeader({ glvOrMarketInfo, marketToken }: Props) {
           {!isOpen && isMobile ? null : (
             <div className="flex gap-14 max-md:flex-col">
               <PoolsDetailsMarketAmount
-                label={usesCarthaTvl ? <Trans>TVL</Trans> : <Trans>TVL (Supply)</Trans>}
-                value={formatAmountHuman(marketTotalSupplyUsd, USD_DECIMALS, true, 2)}
+                label={<Trans>TVL (Supply)</Trans>}
+                value={formatUsd(marketTotalSupplyUsd, { displayDecimals: 0 })}
                 secondaryValue={
-                  usesCarthaTvl
-                    ? undefined
-                    : typeof marketTotalSupply === "bigint" && typeof marketToken?.decimals === "number"
-                      ? `${formatAmountHuman(marketTotalSupply, marketToken?.decimals, false, 2)} ${isGlv ? "GLV" : ""}`
-                      : undefined
+                  typeof marketTotalSupply === "bigint" && typeof marketToken?.decimals === "number"
+                    ? `${formatBalanceAmount(marketTotalSupply, marketToken?.decimals, undefined, { showZero: true })} ${isGlv ? "GLV" : ""}`
+                    : undefined
                 }
               />
 

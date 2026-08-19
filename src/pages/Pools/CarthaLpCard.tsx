@@ -2,6 +2,7 @@ import { Trans } from "@lingui/macro";
 import cx from "classnames";
 
 import { useCarthaLpStats, type CarthaApyTier } from "domain/cartha/useCarthaLpStats";
+import { formatUsd } from "lib/numbers";
 
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -12,11 +13,6 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
 const pctFormatter = new Intl.NumberFormat("en-US", {
   style: "percent",
   maximumFractionDigits: 2,
-});
-
-const compactNumberFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  maximumFractionDigits: 1,
 });
 
 function formatPct(value: number): string {
@@ -47,7 +43,7 @@ function formatRelative(targetIso: string, nowMs: number): string {
 }
 
 /** 0xMarkets LP stats card. */
-export default function CarthaLpCard() {
+export default function CarthaLpCard({ tvlUsd }: { tvlUsd: bigint | undefined }) {
   const { data, isLoading, error } = useCarthaLpStats();
 
   if (error) {
@@ -76,30 +72,15 @@ export default function CarthaLpCard() {
         <div className="flex flex-wrap items-end gap-x-32 gap-y-12">
           <Stat
             label={<Trans>TVL</Trans>}
-            value={data ? usdFormatter.format(data.tvl.current_usd) : "—"}
-            subValue={
-              data ? <Trans>{usdFormatter.format(data.tvl.upcoming_usd)} next epoch</Trans> : null
-            }
+            value={tvlUsd !== undefined ? formatUsd(tvlUsd, { displayDecimals: 0 }) : "—"}
           />
           <Stat
             label={<Trans>Weekly rewards</Trans>}
             value={data ? usdFormatter.format(data.weekly_rewards.weekly_usd) : "—"}
-            subValue={
-              data ? (
-                <Trans>{compactNumberFormatter.format(data.weekly_rewards.weekly_alpha)} α</Trans>
-              ) : null
-            }
           />
           <Stat
-            label={<Trans>Liquidity providers</Trans>}
-            value={data ? compactNumberFormatter.format(data.extras.total_miners_current) : "—"}
-            subValue={
-              data ? (
-                <Trans>
-                  {compactNumberFormatter.format(data.extras.total_positions_current)} positions
-                </Trans>
-              ) : null
-            }
+            label={<Trans>Positions</Trans>}
+            value={data ? data.extras.total_positions_current.toLocaleString("en-US") : "—"}
           />
         </div>
       </div>

@@ -14,9 +14,10 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import once from "lodash/once";
 import { http } from "viem";
-import { base, baseSepolia } from "viem/chains";
+import { base } from "viem/chains";
 
 import { localhost } from "config/chains";
+import { isLocal } from "config/env";
 
 import binanceWallet from "./connecters/binanceW3W/binanceWallet";
 
@@ -52,16 +53,15 @@ export const getRainbowKitConfig = once(() =>
   getDefaultConfig({
     appName: APP_NAME,
     projectId: WALLET_CONNECT_PROJECT_ID,
-    chains: [
-      base,
-      baseSepolia,
-      localhost as Chain,
-    ],
-    transports: {
-      [base.id]: http(),
-      [baseSepolia.id]: http(),
-      [localhost.id]: http(),
-    },
+    chains: isLocal() ? [base, localhost as Chain] : [base],
+    transports: isLocal()
+      ? {
+          [base.id]: http(),
+          [localhost.id]: http(),
+        }
+      : {
+          [base.id]: http(),
+        },
     wallets: [...popularWalletList, ...othersWalletList],
   })
 );
