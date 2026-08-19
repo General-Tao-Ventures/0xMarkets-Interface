@@ -96,7 +96,7 @@ function MarketsListDesktop({ chainId, indexTokensStats }: { chainId: number; in
                     handle={<Trans>LIQUIDITY</Trans>}
                     content={
                       <Trans>
-                        Available liquidity for new positions (25% of Cartha LP TVL per side, minus open interest).
+                        Available liquidity for new positions based on pool reserve and open interest caps.
                       </Trans>
                     }
                   />

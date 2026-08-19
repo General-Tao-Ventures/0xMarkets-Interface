@@ -17,9 +17,9 @@ import { isLocal } from "./env";
 export { CHAIN_NAMES_MAP, getChainName } from "sdk/configs/chains";
 export * from "./static/chains";
 
-// Only expose Sepolia/Localhost on localhost. Vercel Preview is "development"
-// by isDevelopment() but must stay mainnet-only so the switcher can't put the
-// wallet on 84532 while contracts resolve to 8453.
+// Only expose Localhost on localhost. Vercel Preview is "development" by
+// isDevelopment() but must stay mainnet-only. Base Sepolia is kept in contract
+// maps but disabled in the switcher.
 export const CONTRACTS_CHAIN_IDS = isLocal() ? SDK_CONTRACTS_CHAIN_IDS_DEV : SDK_CONTRACTS_CHAIN_IDS;
 
 const { parseEther } = ethers;
@@ -30,7 +30,7 @@ export const CHAIN_ID = DEFAULT_CHAIN_ID;
 
 export const IS_NETWORK_DISABLED: Record<ContractsChainId, boolean> = {
   [BASE_MAINNET]: false,
-  [BASE_SEPOLIA]: false,
+  [BASE_SEPOLIA]: true,
   [LOCALHOST]: false,
 };
 

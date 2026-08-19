@@ -3,7 +3,7 @@ import { createContext, PropsWithChildren, useContext, useMemo } from "react";
 import { isSourceChain } from "config/multichain";
 import { useGmxAccountSettlementChainId } from "context/GmxAccountContext/hooks";
 import { useChainIdImpl } from "lib/chains/useChainIdImpl";
-import { BASE_SEPOLIA, ContractsChainId, SourceChainId } from "sdk/configs/chains";
+import { BASE_MAINNET, ContractsChainId, SourceChainId } from "sdk/configs/chains";
 
 export type ChainContext = {
   chainId: ContractsChainId;
@@ -11,7 +11,7 @@ export type ChainContext = {
   isConnectedToChainId: boolean | undefined;
 };
 
-const initialChainId: ContractsChainId = BASE_SEPOLIA;
+const initialChainId: ContractsChainId = BASE_MAINNET;
 const realChainId = window.ethereum?.chainId ? parseInt(window.ethereum?.chainId) : initialChainId;
 
 export const context = createContext<ChainContext>({

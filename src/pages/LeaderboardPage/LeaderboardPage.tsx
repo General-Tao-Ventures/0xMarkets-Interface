@@ -42,6 +42,16 @@ const LeaderboardBreadcrumbs = () => {
 };
 
 export function LeaderboardPage() {
+  const pageKey = useLeaderboardPageKey();
+  const history = useHistory();
+  const currentPage = LEADERBOARD_PAGES[pageKey];
+
+  useEffect(() => {
+    if (currentPage.isCompetition && currentPage.enabled === false) {
+      history.replace(LEADERBOARD_PAGES.leaderboard.href);
+    }
+  }, [currentPage, history]);
+
   return (
     <AppPageLayout header={<ChainContentHeader breadcrumbs={<LeaderboardBreadcrumbs />} />}>
       <div className="page-layout">

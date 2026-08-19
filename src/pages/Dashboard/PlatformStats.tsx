@@ -2,19 +2,14 @@ import { Trans, t } from "@lingui/macro";
 import { useMemo } from "react";
 
 import { USD_DECIMALS } from "config/factors";
-import { useCarthaLpStats } from "domain/cartha/useCarthaLpStats";
+import { getChainName } from "config/chains";
+import { selectMarketsInfoData } from "context/SyntheticsStateContext/selectors/globalSelectors";
+import { useSelector } from "context/SyntheticsStateContext/utils";
 import useV2Stats from "domain/synthetics/stats/useV2Stats";
 import { useChainId } from "lib/chains";
 import { formatAmountHuman } from "lib/numbers";
 
 import { getFormattedFeesDuration } from "./getFormattedFeesDuration";
-
-const poolsTvlFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  notation: "compact",
-  maximumFractionDigits: 2,
-});
 
 /**
  * Large stat cell — hero number with caption label above.
@@ -71,14 +66,20 @@ function FeeRow({
 export function PlatformStats() {
   const { chainId } = useChainId();
   const v2Overview = useV2Stats(chainId);
-  const { data: carthaLpStats } = useCarthaLpStats();
+  const marketsInfoData = useSelector(selectMarketsInfoData);
 
   const formattedDuration = useMemo(() => getFormattedFeesDuration(), []);
 
   const fmtUsd = (val: bigint | undefined) => formatAmountHuman(val, USD_DECIMALS, true, 2);
   const fmtPlain = (val: bigint | undefined) => formatAmountHuman(val, 0, false, 0);
-  const poolsTvl =
-    carthaLpStats?.tvl.current_usd != null ? poolsTvlFormatter.format(carthaLpStats.tvl.current_usd) : "—";
+  const poolsTvlUsd = useMemo(() => {
+    if (!marketsInfoData) return undefined;
+    return Object.values(marketsInfoData).reduce((acc, market) => {
+      if (market.isSpotOnly || market.isDisabled) return acc;
+      return acc + (market.poolValueMax ?? 0n);
+    }, 0n);
+  }, [marketsInfoData]);
+  const poolsTvl = poolsTvlUsd !== undefined ? fmtUsd(poolsTvlUsd) : "—";
 
   const weeklyAnnualized = (v2Overview.weeklyFees * 365n) / 7n;
 
@@ -95,7 +96,7 @@ export function PlatformStats() {
             <Trans>Platform Stats</Trans>
           </h3>
           <div className="rounded-4 border border-slate-600 bg-slate-900/60 px-10 py-3 text-caption text-typography-secondary">
-            Base Sepolia
+            {getChainName(chainId)}
           </div>
         </div>
 

@@ -1,13 +1,16 @@
-import { t, Trans } from "@lingui/macro";
-import { useState } from "react";
+import { Trans } from "@lingui/macro";
+import { useMemo, useState } from "react";
 import cx from "classnames";
 
-import { useCarthaLpStats } from "domain/cartha/useCarthaLpStats";
+import { USD_DECIMALS } from "config/factors";
+import { selectMarketsInfoData } from "context/SyntheticsStateContext/selectors/globalSelectors";
+import { useSelector } from "context/SyntheticsStateContext/utils";
 import { useGmMarketsApy } from "domain/synthetics/markets/useGmMarketsApy";
 import { usePerformanceAnnualized } from "domain/synthetics/markets/usePerformanceAnnualized";
 import { usePerformanceSnapshots } from "domain/synthetics/markets/usePerformanceSnapshots";
 import { usePoolsTimeRange } from "domain/synthetics/markets/usePoolsTimeRange";
 import { useChainId } from "lib/chains";
+import { formatAmountHuman } from "lib/numbers";
 
 import AppPageLayout from "components/AppPageLayout/AppPageLayout";
 import { ChainContentHeader } from "components/ChainContentHeader/ChainContentHeader";
@@ -93,22 +96,25 @@ export default function Pools() {
   );
 }
 
-const tvlFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+const tvlFormatter = (usd: bigint | undefined) =>
+  usd !== undefined ? formatAmountHuman(usd, USD_DECIMALS, true, 0) : "—";
 
 function PoolsTvl() {
-  const { data } = useCarthaLpStats();
-  const tvl = data?.tvl.current_usd;
+  const marketsInfoData = useSelector(selectMarketsInfoData);
+  const tvl = useMemo(() => {
+    if (!marketsInfoData) return undefined;
+    return Object.values(marketsInfoData).reduce((acc, market) => {
+      if (market.isSpotOnly || market.isDisabled) return acc;
+      return acc + (market.poolValueMax ?? 0n);
+    }, 0n);
+  }, [marketsInfoData]);
 
   return (
     <div className="flex flex-col gap-4">
       <span className="text-body-small font-medium uppercase tracking-wide text-typography-secondary">
         Total Value Locked
       </span>
-      <span className="text-h1 normal-nums">{tvl != null ? tvlFormatter.format(tvl) : "—"}</span>
+      <span className="text-h1 normal-nums">{tvlFormatter(tvl)}</span>
       <span className="text-body-medium text-typography-secondary">
         <Trans>In 0xMarkets LP</Trans>
       </span>

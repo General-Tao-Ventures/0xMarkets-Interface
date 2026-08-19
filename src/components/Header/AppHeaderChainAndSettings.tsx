@@ -2,12 +2,7 @@ import { Trans } from "@lingui/macro";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useCallback } from "react";
 
-import {
-  LOCALHOST,
-  SOURCE_BASE_MAINNET,
-  BASE_SEPOLIA,
-  getChainName,
-} from "config/chains";
+import { LOCALHOST, SOURCE_BASE_MAINNET, getChainName } from "config/chains";
 import { isDevelopment } from "config/env";
 import { getChainIcon } from "config/icons";
 import { useChainId } from "lib/chains";
@@ -44,12 +39,6 @@ export const NETWORK_OPTIONS: NetworkOption[] = [
     label: getChainName(SOURCE_BASE_MAINNET),
     value: SOURCE_BASE_MAINNET,
     icon: getChainIcon(SOURCE_BASE_MAINNET),
-    color: "#0052ff",
-  },
-  {
-    label: getChainName(BASE_SEPOLIA),
-    value: BASE_SEPOLIA,
-    icon: getChainIcon(BASE_SEPOLIA),
     color: "#0052ff",
   },
 ];

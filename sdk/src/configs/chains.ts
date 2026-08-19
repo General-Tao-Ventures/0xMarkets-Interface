@@ -7,7 +7,7 @@ import { SOURCE_BASE_MAINNET, BASE_MAINNET, BASE_SEPOLIA, LOCALHOST } from "./ch
 export { SOURCE_BASE_MAINNET, BASE_MAINNET, BASE_SEPOLIA, LOCALHOST };
 
 export const CONTRACTS_CHAIN_IDS: ContractsChainId[] = [BASE_MAINNET];
-export const CONTRACTS_CHAIN_IDS_DEV: ContractsChainId[] = [BASE_MAINNET, BASE_SEPOLIA, LOCALHOST];
+export const CONTRACTS_CHAIN_IDS_DEV: ContractsChainId[] = [BASE_MAINNET, LOCALHOST];
 
 export type ContractsChainId = typeof BASE_MAINNET | typeof BASE_SEPOLIA | typeof LOCALHOST;
 
