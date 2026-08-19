@@ -15,11 +15,6 @@ const pctFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-const compactNumberFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
-
 function formatPct(value: number): string {
   return pctFormatter.format(value / 100);
 }
@@ -82,22 +77,10 @@ export default function CarthaLpCard({ tvlUsd }: { tvlUsd: bigint | undefined })
           <Stat
             label={<Trans>Weekly rewards</Trans>}
             value={data ? usdFormatter.format(data.weekly_rewards.weekly_usd) : "—"}
-            subValue={
-              data ? (
-                <Trans>{compactNumberFormatter.format(data.weekly_rewards.weekly_alpha)} α</Trans>
-              ) : null
-            }
           />
           <Stat
-            label={<Trans>Liquidity providers</Trans>}
-            value={data ? compactNumberFormatter.format(data.extras.total_miners_current) : "—"}
-            subValue={
-              data ? (
-                <Trans>
-                  {compactNumberFormatter.format(data.extras.total_positions_current)} positions
-                </Trans>
-              ) : null
-            }
+            label={<Trans>Positions</Trans>}
+            value={data ? data.extras.total_positions_current.toLocaleString("en-US") : "—"}
           />
         </div>
       </div>
