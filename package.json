@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "VITE_APP_VERSION=$(git rev-parse HEAD) vite --port 3010 --host",
+    "partner-api": "tsx scripts/partner-dev-server.ts",
     "start-home": "yarn lingui:prepare && VITE_APP_VERSION=$(git rev-parse HEAD) env-cmd -e development-home vite --port 3010 --config vite.landing.config.ts",
     "start-app": "yarn lingui:prepare && VITE_APP_VERSION=$(git rev-parse HEAD) env-cmd -e development-app vite --port 3011",
     "build": "yarn lingui:prepare && NODE_OPTIONS='--max-old-space-size=8192' VITE_APP_VERSION=$(git rev-parse HEAD) vite build",
@@ -83,6 +84,7 @@
     "html-to-image": "^1.10.8",
     "immer": "10.1.1",
     "lodash": "4.17.21",
+    "pg": "8.23.0",
     "qrcode.react": "^3.1.0",
     "query-string": "7.1.1",
     "rc-slider": "9.7.5",
@@ -147,6 +149,7 @@
     "@lingui/loader": "4.10.0",
     "@lingui/vite-plugin": "4.11.3",
     "@typechain/ethers-v6": "0.5.1",
+    "@types/pg": "8.23.1",
     "@types/react-calendar": "4.1.0",
     "@types/react-date-range": "1.4.9",
     "@types/regenerator-runtime": "^0",
