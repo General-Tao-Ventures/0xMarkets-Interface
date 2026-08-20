@@ -4,13 +4,7 @@ import useSWR from "swr";
 
 import { getSubsquidGraphClient } from "lib/subgraph";
 
-import type {
-  AffiliateRewardEntry,
-  AffiliateStat,
-  CodeBreakdown,
-  PeriodAffiliateStat,
-  ReferredTrader,
-} from "./types";
+import type { AffiliateRewardEntry, AffiliateStat, CodeBreakdown, PeriodAffiliateStat, ReferredTrader } from "./types";
 
 const DAY_SECONDS = 86400;
 
@@ -35,10 +29,7 @@ const PARTNER_QUERY = gql`
       firstTradeTimestamp
       lastTradeTimestamp
     }
-    periodAffiliateStats(
-      where: { affiliate_eq: $affiliate, periodStart_gte: $since }
-      orderBy: periodStart_ASC
-    ) {
+    periodAffiliateStats(where: { affiliate_eq: $affiliate, periodStart_gte: $since }, orderBy: periodStart_ASC) {
       periodStart
       volumeUsd
       tradesCount
@@ -170,7 +161,7 @@ export function usePartnerData(chainId: number, account: string | undefined) {
             const pnl = pnlByAccount.get(t.trader.toLowerCase());
             if (pnl !== undefined) t.realizedPnlUsd = pnl;
           }
-        } catch {
+        } catch (error) {
           // P&L is supplementary — a failure here must not blank the whole portal.
         }
       }
@@ -186,10 +177,7 @@ export function usePartnerData(chainId: number, account: string | undefined) {
         transactionHash: r.transaction?.hash ?? "",
       }));
 
-      const outstandingRewardRaw = rewards.reduce(
-        (acc, r) => (r.isClaim ? acc - r.delta : acc + r.delta),
-        0n
-      );
+      const outstandingRewardRaw = rewards.reduce((acc, r) => (r.isClaim ? acc - r.delta : acc + r.delta), 0n);
 
       const statRaw = (raw.affiliateStats ?? [])[0];
 
@@ -225,10 +213,7 @@ export function usePartnerData(chainId: number, account: string | undefined) {
     { refreshInterval: 30_000, revalidateOnFocus: false }
   );
 
-  return useMemo(
-    () => ({ data: data ?? EMPTY, error, isLoading, refresh: mutate }),
-    [data, error, isLoading, mutate]
-  );
+  return useMemo(() => ({ data: data ?? EMPTY, error, isLoading, refresh: mutate }), [data, error, isLoading, mutate]);
 }
 
 /** Sum a set of daily buckets over the trailing `days`. */

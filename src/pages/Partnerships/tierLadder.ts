@@ -45,3 +45,13 @@ export function rungForNumbers(volume30dUsd: number, fundedReferrals: number) {
 
 export const compactUsd = (n: number) =>
   n >= 1e6 ? `$${(n / 1e6).toFixed(2)}m` : n >= 1e3 ? `$${Math.round(n / 1e3)}k` : `$${n}`;
+
+/** Blended trading fee the programme quotes against. Illustrative — REBATES_SPEC.md. */
+export const BLENDED_FEE_RATE = 0.00025;
+
+/** Whole-dollar money for illustrative figures. Real balances go through `usd()` instead. */
+export const money = (n: number, decimals = 0) =>
+  `${n < 0 ? "−$" : "$"}${Math.abs(n).toLocaleString("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })}`;

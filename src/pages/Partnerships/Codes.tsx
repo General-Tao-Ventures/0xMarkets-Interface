@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
 import { usePendingTxns } from "context/PendingTxnsContext/PendingTxnsContext";
-import { usePartnerAddress, usePartnerData } from "domain/partnerships";
+import { useLocalPartnerCodes, usePartnerAddress, usePartnerData } from "domain/partnerships";
 import { registerReferralCode } from "domain/referrals";
 import { useChainId } from "lib/chains";
 import { helperToast } from "lib/helperToast";
@@ -33,12 +33,7 @@ export default function PartnershipsCodes() {
     [chainId, "partnership-code-labels", address ?? ""],
     {}
   );
-  // A code registered but not yet traded under is invisible to the indexer, so remember locally
-  // created ones to bridge the gap until the first fill.
-  const [localCodes, setLocalCodes] = useLocalStorageSerializeKey<string[]>(
-    [chainId, "partnership-local-codes", address ?? ""],
-    []
-  );
+  const { localCodes, remember } = useLocalPartnerCodes(chainId, account);
 
   const [newCode, setNewCode] = useState("");
   const [newLabel, setNewLabel] = useState("");
@@ -53,7 +48,7 @@ export default function PartnershipsCodes() {
       pending: false,
     }));
     const seen = new Set(indexed.map((r) => r.code));
-    const pendingOnes = (localCodes ?? [])
+    const pendingOnes = localCodes
       .filter((c) => !seen.has(c))
       .map((c) => ({ code: c, traders: 0, volumeUsd: 0n, rebateUsd: 0n, pending: true }));
     return [...indexed, ...pendingOnes];
@@ -71,7 +66,7 @@ export default function PartnershipsCodes() {
         successMsg: t`Referral code created.`,
         pendingTxns,
       });
-      setLocalCodes([...(localCodes ?? []), newCode]);
+      remember(newCode);
       if (newLabel) setLabels({ ...(labels ?? {}), [newCode]: newLabel });
       setNewCode("");
       setNewLabel("");
