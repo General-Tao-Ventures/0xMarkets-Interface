@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import type { Hex } from "viem";
 import useSWR from "swr";
 
 import { getSubsquidGraphClient } from "lib/subgraph";
@@ -22,7 +23,7 @@ export function usePartnerCodes(chainId: number, account: string | undefined) {
   const client = getSubsquidGraphClient(chainId);
   const owner = account?.toLowerCase();
 
-  const { data, isLoading, mutate } = useSWR<string[]>(
+  const { data, isLoading, mutate } = useSWR<Hex[]>(
     owner && client ? ["partner-owned-codes", chainId, owner] : null,
     async () => {
       const res = await client!.query({
@@ -30,7 +31,7 @@ export function usePartnerCodes(chainId: number, account: string | undefined) {
         variables: { owner },
         fetchPolicy: "no-cache",
       });
-      return (res.data?.referralCodes ?? []).map((c: any) => c.code as string);
+      return (res.data?.referralCodes ?? []).map((c: any) => c.code as Hex);
     },
     { revalidateOnFocus: false }
   );

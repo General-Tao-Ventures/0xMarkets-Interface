@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
 import { usePendingTxns } from "context/PendingTxnsContext/PendingTxnsContext";
-import { useLocalPartnerCodes, usePartnerAddress, usePartnerData } from "domain/partnerships";
+import { useLocalPartnerCodes, usePartnerAddress, usePartnerCodes, usePartnerData } from "domain/partnerships";
 import { registerReferralCode } from "domain/referrals";
 import { useChainId } from "lib/chains";
 import { helperToast } from "lib/helperToast";
@@ -24,6 +24,9 @@ export default function PartnershipsCodes() {
   const { signer, account } = useWallet();
   const { address, isViewingOther } = usePartnerAddress();
   const { data, isLoading } = usePartnerData(chainId, address);
+  // Ownership comes from the registration events, not from trading. A code with no traders yet
+  // still belongs to you and must still be listed — that is every brand-new partner.
+  const { codes: ownedCodes, isLoading: ownedLoading } = usePartnerCodes(chainId, address);
   const { pendingTxns } = usePendingTxns();
   const [, copyToClipboard] = useCopyToClipboard();
 
@@ -40,19 +43,35 @@ export default function PartnershipsCodes() {
   const [isCreating, setIsCreating] = useState(false);
 
   const rows = useMemo(() => {
-    const indexed = data.codes.map((c) => ({
-      code: decodeReferralCode(c.referralCode),
-      traders: c.tradersCount,
-      volumeUsd: c.volumeUsd,
-      rebateUsd: c.rebateEarnedUsd,
-      pending: false,
-    }));
-    const seen = new Set(indexed.map((r) => r.code));
+    // Per-code trading figures, keyed by the decoded code. Only codes someone has traded under
+    // appear here, so this is an enrichment layer rather than the list itself.
+    const statsByCode = new Map(
+      data.codes.map((c) => [
+        decodeReferralCode(c.referralCode),
+        { traders: c.tradersCount, volumeUsd: c.volumeUsd, rebateUsd: c.rebateEarnedUsd },
+      ])
+    );
+
+    const owned = ownedCodes.map((raw) => {
+      const code = decodeReferralCode(raw);
+      const stats = statsByCode.get(code);
+      return {
+        code,
+        traders: stats?.traders ?? 0,
+        volumeUsd: stats?.volumeUsd ?? 0n,
+        rebateUsd: stats?.rebateUsd ?? 0n,
+        pending: false,
+      };
+    });
+
+    // A code registered in this browser but not yet seen by the indexer.
+    const seen = new Set(owned.map((r) => r.code));
     const pendingOnes = localCodes
       .filter((c) => !seen.has(c))
       .map((c) => ({ code: c, traders: 0, volumeUsd: 0n, rebateUsd: 0n, pending: true }));
-    return [...indexed, ...pendingOnes];
-  }, [data.codes, localCodes]);
+
+    return [...owned, ...pendingOnes];
+  }, [data.codes, ownedCodes, localCodes]);
 
   const canCreate = Boolean(account) && !isViewingOther && CODE_PATTERN.test(newCode) && !isCreating;
 
@@ -94,7 +113,7 @@ export default function PartnershipsCodes() {
             </span>
           </div>
           <Table head={[t`Code`, t`Label`, t`Traders`, t`Volume`, t`Rebate earned`, ""]}>
-            {isLoading ? (
+            {isLoading || ownedLoading ? (
               <EmptyRow colSpan={6}>
                 <Trans>Loading…</Trans>
               </EmptyRow>
