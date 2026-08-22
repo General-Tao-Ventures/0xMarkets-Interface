@@ -22,6 +22,11 @@ import PartnershipsJoin from "pages/Partnerships/Join";
 import PartnershipsPerformance from "pages/Partnerships/Performance";
 import PartnershipsReferrals from "pages/Partnerships/Referrals";
 import PartnershipsStart from "pages/Partnerships/Start";
+import AdminEconomics from "pages/PartnershipsAdmin/Economics";
+import AdminGrants from "pages/PartnershipsAdmin/Grants";
+import AdminPartners from "pages/PartnershipsAdmin/Partners";
+import AdminReferrals from "pages/PartnershipsAdmin/Referrals";
+import AdminRisk from "pages/PartnershipsAdmin/Risk";
 import Pools from "pages/Pools/Pools";
 import { PriceImpactRebatesStatsPage } from "pages/PriceImpactRebatesStats/PriceImpactRebatesStats";
 import Referrals from "pages/Referrals/Referrals";
@@ -158,6 +163,27 @@ export function MainRoutes({ openSettings }: { openSettings: () => void }) {
 
       <Route exact path="/partnerships">
         <PartnershipsEntry />
+      </Route>
+
+      {/* Internal console. Each screen gates itself on the admin allowlist and 404s otherwise. */}
+      <Route exact path="/partnerships-admin/referrals">
+        <AdminReferrals />
+      </Route>
+
+      <Route exact path="/partnerships-admin/grants">
+        <AdminGrants />
+      </Route>
+
+      <Route exact path="/partnerships-admin/economics">
+        <AdminEconomics />
+      </Route>
+
+      <Route exact path="/partnerships-admin/risk">
+        <AdminRisk />
+      </Route>
+
+      <Route exact path="/partnerships-admin">
+        <AdminPartners />
       </Route>
 
       <Route exact path="/nft_wallet">

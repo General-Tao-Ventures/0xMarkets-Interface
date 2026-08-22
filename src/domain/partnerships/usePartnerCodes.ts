@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
-import type { Hex } from "viem";
 import useSWR from "swr";
+import type { Hex } from "viem";
 
 import { getSubsquidGraphClient } from "lib/subgraph";
 

@@ -55,3 +55,23 @@ export const money = (n: number, decimals = 0) =>
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   })}`;
+
+/**
+ * Fee split, from REBATES_SPEC.md. Treasury takes a fixed cut of the whole fee and is never
+ * reduced by a rebate; LP and veAlpha split whatever is left after treasury and the rebate, 5:4.
+ *
+ *   LP%  = (90 − rebate%) × 5/9      veAlpha% = (90 − rebate%) × 4/9
+ *
+ * At a 90% rebate both reach zero, which is why the contract must reject any tier above it.
+ */
+export const TREASURY_SHARE = 0.1;
+export const LP_SPLIT = 5 / 9;
+export const VE_SPLIT = 4 / 9;
+
+/** Where a partner's fee actually goes, given their rebate rate. All figures in USD. */
+export function splitFee(feeUsd: number, rebatePct: number) {
+  const rebate = feeUsd * (rebatePct / 100);
+  const treasury = feeUsd * TREASURY_SHARE;
+  const remainder = feeUsd - treasury - rebate;
+  return { rebate, treasury, lp: remainder * LP_SPLIT, veAlpha: remainder * VE_SPLIT };
+}

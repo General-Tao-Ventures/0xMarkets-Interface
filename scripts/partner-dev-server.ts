@@ -11,6 +11,7 @@ import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import adminContactsHandler from "../api/partner/admin-contacts";
 import contactHandler from "../api/partner/contact";
 import contactStartHandler from "../api/partner/contact-start";
 import contactVerifyHandler from "../api/partner/contact-verify";
@@ -25,6 +26,7 @@ const ROUTES: Record<string, any> = {
   "/api/partner/contact": contactHandler,
   "/api/partner/contact-start": contactStartHandler,
   "/api/partner/contact-verify": contactVerifyHandler,
+  "/api/partner/admin-contacts": adminContactsHandler,
 };
 
 /** Pull PARTNER_* out of a .env file so the server can be started without exporting anything. */

@@ -168,6 +168,8 @@ export function usePartnerSession() {
   );
 
   return {
+    /** Authenticated call against any partner endpoint, for callers outside this hook. */
+    authedFetch: authed,
     isSignedIn: Boolean(token),
     contact,
     isLoading,
