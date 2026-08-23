@@ -121,7 +121,7 @@ export default function AdminRisk() {
                     <Pnl value={-p.lpNetUsd} render={() => money(p.lpNetUsd, 4)} />
                   </Cell>
                   <Cell right>
-                    <Link to={`/partnerships-admin/referrals?affiliate=${p.affiliate}`} className="text-blue-300">
+                    <Link to={`/referrals?affiliate=${p.affiliate}`} className="text-blue-300">
                       <Trans>Review</Trans>
                     </Link>
                   </Cell>
@@ -145,7 +145,7 @@ export default function AdminRisk() {
                     <Pnl value={-r.lpNetUsd} render={() => money(r.lpNetUsd, 4)} />
                   </Cell>
                   <Cell right>
-                    <Link to={`/partnerships-admin/referrals?affiliate=${r.affiliate}`} className="text-blue-300">
+                    <Link to={`/referrals?affiliate=${r.affiliate}`} className="text-blue-300">
                       <Trans>Review</Trans>
                     </Link>
                   </Cell>
@@ -184,7 +184,7 @@ export default function AdminRisk() {
                   <Pnl value={p.pnlPer1mUsd} />
                 </Cell>
                 <Cell right>
-                  <Link to={`/partnerships-admin/referrals?affiliate=${p.affiliate}`} className="text-blue-300">
+                  <Link to={`/referrals?affiliate=${p.affiliate}`} className="text-blue-300">
                     <Trans>Review</Trans>
                   </Link>
                 </Cell>

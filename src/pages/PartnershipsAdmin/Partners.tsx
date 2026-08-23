@@ -135,7 +135,7 @@ export default function AdminPartners() {
               return (
                 <tr key={p.affiliate} className="border-t border-slate-700">
                   <Cell mono>
-                    <Link to={`/partnerships-admin/referrals?affiliate=${p.affiliate}`} className="text-blue-300">
+                    <Link to={`/referrals?affiliate=${p.affiliate}`} className="text-blue-300">
                       {short(p.affiliate)}
                     </Link>
                   </Cell>

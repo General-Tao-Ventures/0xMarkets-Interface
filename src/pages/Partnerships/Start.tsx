@@ -55,52 +55,55 @@ export default function PartnershipsStart() {
   }, [codes.length, codesLoading, createdCode, history]);
 
   return (
-    <AppPageLayout contentClassName="max-w-[720px] gap-16 pb-32">
-      {!done && (
-        <ol className="flex items-center gap-8 pt-16">
-          {STEPS.map((s, i) => (
-            <li key={s.key} className="flex flex-1 items-center gap-8">
-              <span
-                className={cx(
-                  "flex size-24 shrink-0 items-center justify-center rounded-full text-12 font-medium",
-                  i < step && "bg-green-500 text-slate-900",
-                  i === step && "bg-blue-300 text-slate-900",
-                  i > step && "bg-slate-700 text-slate-100"
+    <AppPageLayout>
+      {/* Narrow on purpose: one decision per step, nothing else competing for attention. */}
+      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-16 pb-32">
+        {!done && (
+          <ol className="flex items-center gap-8 pt-16">
+            {STEPS.map((s, i) => (
+              <li key={s.key} className="flex flex-1 items-center gap-8">
+                <span
+                  className={cx(
+                    "flex size-24 shrink-0 items-center justify-center rounded-full text-12 font-medium",
+                    i < step && "bg-green-500 text-slate-900",
+                    i === step && "bg-blue-300 text-slate-900",
+                    i > step && "bg-slate-700 text-slate-100"
+                  )}
+                >
+                  {i < step ? "✓" : i + 1}
+                </span>
+                <span className={cx("text-13", i === step ? "text-white" : "text-slate-100")}>{s.label}</span>
+                {i < STEPS.length - 1 && (
+                  <span className={cx("h-1 flex-1 rounded-full", i < step ? "bg-green-500" : "bg-slate-700")} />
                 )}
-              >
-                {i < step ? "✓" : i + 1}
-              </span>
-              <span className={cx("text-13", i === step ? "text-white" : "text-slate-100")}>{s.label}</span>
-              {i < STEPS.length - 1 && (
-                <span className={cx("h-1 flex-1 rounded-full", i < step ? "bg-green-500" : "bg-slate-700")} />
-              )}
-            </li>
-          ))}
-        </ol>
-      )}
+              </li>
+            ))}
+          </ol>
+        )}
 
-      {done ? (
-        <DoneStep code={(createdCode ?? existingCode)!} />
-      ) : step === 0 ? (
-        <WalletStep onConnect={openConnectModal} />
-      ) : step === 1 ? (
-        <ContactStep session={session} />
-      ) : (
-        <CodeStep
-          onCreated={(code) => {
-            remember(code);
-            setCreatedCode(code);
-            void refreshCodes();
-          }}
-          canSubmit={Boolean(account && signer)}
-        />
-      )}
+        {done ? (
+          <DoneStep code={(createdCode ?? existingCode)!} />
+        ) : step === 0 ? (
+          <WalletStep onConnect={openConnectModal} />
+        ) : step === 1 ? (
+          <ContactStep session={session} />
+        ) : (
+          <CodeStep
+            onCreated={(code) => {
+              remember(code);
+              setCreatedCode(code);
+              void refreshCodes();
+            }}
+            canSubmit={Boolean(account && signer)}
+          />
+        )}
 
-      <p className="text-center text-12 text-slate-100">
-        <Trans>
-          Stuck? <ExternalLink href="https://discord.gg/0xmarkets">Ask in the 0xMarkets Discord.</ExternalLink>
-        </Trans>
-      </p>
+        <p className="text-center text-12 text-slate-100">
+          <Trans>
+            Stuck? <ExternalLink href="https://discord.gg/0xmarkets">Ask in the 0xMarkets Discord.</ExternalLink>
+          </Trans>
+        </p>
+      </div>
     </AppPageLayout>
   );
 }
