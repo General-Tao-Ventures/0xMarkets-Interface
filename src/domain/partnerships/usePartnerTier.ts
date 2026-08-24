@@ -34,8 +34,7 @@ export function usePartnerTier(account: string | undefined) {
       return undefined;
     }
 
-    const effectiveDiscountShare =
-      (customDiscountShare ?? 0n) > 0n ? (customDiscountShare as bigint) : discountShare;
+    const effectiveDiscountShare = (customDiscountShare ?? 0n) > 0n ? (customDiscountShare as bigint) : discountShare;
 
     const affiliateShareBps = (totalRebate * (BASIS_POINTS - effectiveDiscountShare)) / BASIS_POINTS;
 

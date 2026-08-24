@@ -6,6 +6,7 @@
   "scripts": {
     "start": "VITE_APP_VERSION=$(git rev-parse HEAD) vite --port 3010 --host",
     "partner-api": "tsx scripts/partner-dev-server.ts",
+    "telegram-poller": "tsx scripts/telegram-poller.ts",
     "start-admin": "VITE_APP_VERSION=$(git rev-parse HEAD) vite --config vite.admin.config.ts",
     "start-home": "yarn lingui:prepare && VITE_APP_VERSION=$(git rev-parse HEAD) env-cmd -e development-home vite --port 3010 --config vite.landing.config.ts",
     "start-app": "yarn lingui:prepare && VITE_APP_VERSION=$(git rev-parse HEAD) env-cmd -e development-app vite --port 3011",

@@ -13,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!address) return res.status(401).json({ error: "Sign in with your wallet first." });
 
   const body = readBody(req);
-  if (!isChannel(body.channel)) return badRequest(res, "Choose Discord, Telegram or email.");
+  if (!isChannel(body.channel)) return badRequest(res, "Choose Discord or Telegram.");
 
   const handle = normaliseHandle(body.channel, body.handle);
   if (!handle) return badRequest(res, "That does not look like a valid contact for this channel.");

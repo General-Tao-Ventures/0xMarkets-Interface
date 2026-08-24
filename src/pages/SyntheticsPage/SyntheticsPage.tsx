@@ -77,6 +77,7 @@ import { TradeBoxResponsiveContainer } from "components/TradeBox/TradeBoxRespons
 import { TradeHistory } from "components/TradeHistory/TradeHistory";
 import { Chart } from "components/TVChart/Chart";
 import ChartHeader from "components/TVChart/ChartHeader";
+import { ActiveReferralCode } from "components/Referrals/ActiveReferralCode";
 import { FavoriteTokenBar } from "components/FavoriteTokenBar/FavoriteTokenBar";
 
 import logoIcon from "img/logo_0xMarkets.svg";
@@ -344,13 +345,19 @@ export function SyntheticsPage(p: Props) {
       pageWrapperClassName="max-md:!p-0"
     >
       <FavoriteTokenBar />
+      {/* A visitor arriving on a partner's ?ref= link carries that code silently; show it here so
+          they can see it — and drop it — before they commit any funds. */}
+      <ActiveReferralCode className="max-md:px-8" />
       <ChartHeader />
       <div className="flex gap-8 pt-0 max-lg:flex-col lg:grow">
         <div className="Exchange-left flex grow flex-col gap-8">
           {/* <OneClickPromoBanner openSettings={openSettings} /> */}
           <Chart />
           {!isTablet && (
-            <div className="flex grow flex-col overflow-hidden rounded-8 border border-slate-800 bg-slate-750" data-qa="trade-table-large">
+            <div
+              className="flex grow flex-col overflow-hidden rounded-8 border border-slate-800 bg-slate-750"
+              data-qa="trade-table-large"
+            >
               <Tabs
                 options={tabsOptions}
                 selectedValue={listSection}
@@ -406,7 +413,7 @@ export function SyntheticsPage(p: Props) {
             )}
           </>
         ) : (
-          <div className="w-[40rem] shrink-0 max-xl:w-[36rem] border border-slate-800 bg-slate-750 rounded-8">
+          <div className="w-[40rem] shrink-0 rounded-8 border border-slate-800 bg-slate-750 max-xl:w-[36rem]">
             <TradeBoxResponsiveContainer />
 
             {isSwap && !isTwap && (

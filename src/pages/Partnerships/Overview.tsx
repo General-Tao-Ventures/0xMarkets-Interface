@@ -23,7 +23,7 @@ export default function PartnershipsOverview() {
   const { chainId } = useChainId();
   const { account } = useWallet();
   const { address, isViewingOther } = usePartnerAddress();
-  const { data, isLoading } = usePartnerData(chainId, address);
+  const { data, isLoading, error: dataError } = usePartnerData(chainId, address);
   const tier = usePartnerTier(address);
 
   const [isClaiming, setIsClaiming] = useState(false);
@@ -57,6 +57,16 @@ export default function PartnershipsOverview() {
 
   return (
     <PartnershipsLayout title={t`Overview`}>
+      {/* Without this, an unreachable indexer looks exactly like a partner who has earned nothing —
+          the worst possible ambiguity on a page about money. */}
+      {dataError && (
+        <div className="rounded-4 bg-red-500/10 px-12 py-8 text-12 text-red-500">
+          <Trans>
+            Figures below may be incomplete — the indexer could not be reached. This is a display problem, not a loss of
+            funds; your balances are held on chain.
+          </Trans>
+        </div>
+      )}
       <Card className="flex flex-wrap items-center gap-16">
         <div>
           <div className="text-12 uppercase tracking-wide text-slate-100">

@@ -158,6 +158,19 @@ export function usePartnerSession() {
     [authed]
   );
 
+  /** Discord is an OAuth redirect, not a code: this returns the URL to send the browser to. */
+  const startDiscord = useCallback(() => authed<{ url: string }>("discord-start", { method: "POST" }), [authed]);
+
+  /** Telegram Login Widget: the payload is already signed, so this just submits it for checking. */
+  const telegramLogin = useCallback(
+    (payload: Record<string, unknown>) =>
+      authed<PartnerContact>("telegram-login", { method: "POST", body: JSON.stringify(payload) }).then((next) => {
+        setContact(next);
+        return next;
+      }),
+    [authed]
+  );
+
   const verify = useCallback(
     async (code: string) => {
       const next = await authed<PartnerContact>("contact-verify", { method: "POST", body: JSON.stringify({ code }) });
@@ -179,6 +192,8 @@ export function usePartnerSession() {
     refresh,
     saveName,
     startVerification,
+    startDiscord,
+    telegramLogin,
     verify,
   };
 }

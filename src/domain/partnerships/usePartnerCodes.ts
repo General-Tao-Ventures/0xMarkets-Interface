@@ -36,5 +36,15 @@ export function usePartnerCodes(chainId: number, account: string | undefined) {
     { revalidateOnFocus: false }
   );
 
-  return { codes: data ?? [], isPartner: (data?.length ?? 0) > 0, isLoading, refresh: mutate };
+  return {
+    codes: data ?? [],
+    isPartner: (data?.length ?? 0) > 0,
+    isLoading,
+    /**
+     * The query has actually returned. `isLoading` alone is not enough: SWR reports false for a
+     * null key, so an unavailable client looks identical to an empty result.
+     */
+    hasAnswer: data !== undefined,
+    refresh: mutate,
+  };
 }

@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/macro";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, Redirect } from "react-router-dom";
 
-import { usePartnerAddress } from "domain/partnerships";
+import { usePartnerAddress, usePartnerStatus } from "domain/partnerships";
 
 import AppPageLayout from "components/AppPageLayout/AppPageLayout";
 import Button from "components/Button/Button";
@@ -16,7 +16,12 @@ const TABS = [
 ];
 
 export function PartnershipsLayout({ title, children }: { title: React.ReactNode; children: React.ReactNode }) {
-  const { address } = usePartnerAddress();
+  const { address, isViewingOther } = usePartnerAddress();
+  const { status } = usePartnerStatus(address);
+
+  // Deep-linking straight to a tab must resolve the same way /partnerships does. Without this a
+  // stranger who lands on /partnerships/codes sees an empty portal instead of the sign-up steps.
+  if (!isViewingOther && status === "stranger") return <Redirect to="/partnerships/start" />;
 
   return (
     <AppPageLayout header={<ChainContentHeader />}>

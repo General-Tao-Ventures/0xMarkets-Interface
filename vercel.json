@@ -45,6 +45,10 @@
     "api/partner/contact.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" },
     "api/partner/contact-start.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" },
     "api/partner/contact-verify.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" },
-    "api/partner/admin-contacts.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" }
+    "api/partner/admin-contacts.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" },
+    "api/partner/discord-start.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" },
+    "api/partner/discord-callback.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" },
+    "api/partner/telegram-webhook.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" },
+    "api/partner/telegram-login.ts": { "memory": 256, "maxDuration": 10, "includeFiles": "node_modules/pg/**" }
   }
 }

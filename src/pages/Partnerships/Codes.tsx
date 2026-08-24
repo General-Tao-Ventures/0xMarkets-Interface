@@ -1,11 +1,12 @@
 import { Trans, t } from "@lingui/macro";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
 import { usePendingTxns } from "context/PendingTxnsContext/PendingTxnsContext";
 import { useLocalPartnerCodes, usePartnerAddress, usePartnerCodes, usePartnerData } from "domain/partnerships";
 import { registerReferralCode } from "domain/referrals";
 import { useChainId } from "lib/chains";
+import { getContract } from "sdk/configs/contracts";
 import { helperToast } from "lib/helperToast";
 import { useLocalStorageSerializeKey } from "lib/localStorage";
 import useWallet from "lib/wallets/useWallet";
@@ -36,7 +37,9 @@ export default function PartnershipsCodes() {
     [chainId, "partnership-code-labels", address ?? ""],
     {}
   );
-  const { localCodes, remember } = useLocalPartnerCodes(chainId, account);
+  // Scoped to the address being VIEWED, not the connected wallet: with ?address=0x… your own
+  // pending codes would otherwise appear in someone else's table.
+  const { localCodes, remember } = useLocalPartnerCodes(chainId, address);
 
   const [newCode, setNewCode] = useState("");
   const [newLabel, setNewLabel] = useState("");
@@ -73,7 +76,9 @@ export default function PartnershipsCodes() {
     return [...owned, ...pendingOnes];
   }, [data.codes, ownedCodes, localCodes]);
 
-  const canCreate = Boolean(account) && !isViewingOther && CODE_PATTERN.test(newCode) && !isCreating;
+  // `signer` as well as `account`: a connected wallet whose signer has not resolved yet would
+  // let the button be pressed and then fail inside ethers, which reads as the app hanging.
+  const canCreate = Boolean(account && signer) && !isViewingOther && CODE_PATTERN.test(newCode) && !isCreating;
 
   async function handleCreate() {
     if (!canCreate) return;

@@ -177,8 +177,8 @@ export default function PartnershipsJoin() {
           <div className="mt-16 flex flex-col gap-8">
             <Faq open q={t`What do I need to start?`}>
               <Trans>
-                A wallet, your name and one verified contact channel — Discord, Telegram or email. No application, no
-                review, no minimum book.
+                A wallet, your name and one verified contact channel — Discord or Telegram. No application, no review,
+                no minimum book.
               </Trans>
             </Faq>
             <Faq q={t`Why do you need my contact details?`}>

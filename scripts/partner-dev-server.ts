@@ -13,6 +13,10 @@ import { resolve } from "node:path";
 
 import adminContactsHandler from "../api/partner/admin-contacts";
 import contactHandler from "../api/partner/contact";
+import discordCallbackHandler from "../api/partner/discord-callback";
+import discordStartHandler from "../api/partner/discord-start";
+import telegramLoginHandler from "../api/partner/telegram-login";
+import telegramWebhookHandler from "../api/partner/telegram-webhook";
 import contactStartHandler from "../api/partner/contact-start";
 import contactVerifyHandler from "../api/partner/contact-verify";
 import nonceHandler from "../api/partner/nonce";
@@ -27,6 +31,10 @@ const ROUTES: Record<string, any> = {
   "/api/partner/contact-start": contactStartHandler,
   "/api/partner/contact-verify": contactVerifyHandler,
   "/api/partner/admin-contacts": adminContactsHandler,
+  "/api/partner/discord-start": discordStartHandler,
+  "/api/partner/discord-callback": discordCallbackHandler,
+  "/api/partner/telegram-webhook": telegramWebhookHandler,
+  "/api/partner/telegram-login": telegramLoginHandler,
 };
 
 /** Pull PARTNER_* out of a .env file so the server can be started without exporting anything. */
@@ -75,6 +83,11 @@ const server = createServer(async (req, res) => {
     },
     send(payload: string) {
       res.end(payload);
+      return vercelRes;
+    },
+    redirect(status: number, location: string) {
+      res.writeHead(status, { Location: location });
+      res.end();
       return vercelRes;
     },
   });

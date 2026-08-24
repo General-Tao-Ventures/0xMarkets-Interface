@@ -74,20 +74,24 @@ async function deliver(channel: Channel, handle: string, secret: string): Promis
 
   if (channel === "telegram") {
     const bot = process.env.PARTNER_TELEGRAM_BOT || "@0xMarketsBot";
-    // The token has to be redeemed BY THE BOT, reporting which Telegram account sent it. Handing
-    // it to the browser and letting the browser submit it back would verify nothing at all — the
-    // partner would just be reading their own token. So this stays unavailable until the bot
-    // exists, and the instruction below is the copy it will use when it does.
-    return {
-      sent: false,
-      echoed: echo,
-      instruction: `Send "/verify ${secret}" to ${bot}`,
-      reason: "Telegram verification is not connected yet.",
-    };
+    // The partner carries the token to the bot themselves; the bot redeems it via the webhook.
+    // Nothing is "sent" from here, but the flow is live as long as a bot token is configured.
+    if (!process.env.PARTNER_TELEGRAM_BOT_TOKEN) {
+      return { sent: false, echoed: echo, reason: "Telegram verification is not connected yet." };
+    }
+    return { sent: true, echoed: false, instruction: `Send "/verify ${secret}" to ${bot}` };
   }
 
   if (channel === "discord") {
-    return { sent: false, echoed: echo, reason: "Discord verification is not connected yet." };
+    // Discord does not use a challenge secret at all — it is an OAuth redirect, handled by
+    // discord-start / discord-callback. Reaching here means the caller used the wrong endpoint.
+    return { sent: false, echoed: false, reason: "Use /api/partner/discord-start for Discord." };
+  }
+
+  // Email verification is off for now. Set PARTNER_EMAIL_ENABLED=1 to bring it back — the delivery
+  // path below still works, it is simply not offered.
+  if (process.env.PARTNER_EMAIL_ENABLED !== "1") {
+    return { sent: false, echoed: false, reason: "Email verification is not available. Use Telegram or Discord." };
   }
 
   const apiKey = process.env.PARTNER_RESEND_API_KEY;

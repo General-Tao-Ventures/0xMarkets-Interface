@@ -6,8 +6,9 @@ import { Link, useHistory } from "react-router-dom";
 import { useCopyToClipboard } from "react-use";
 
 import { usePendingTxns } from "context/PendingTxnsContext/PendingTxnsContext";
-import { useLocalPartnerCodes, usePartnerCodes, usePartnerSession } from "domain/partnerships";
+import { useLocalPartnerCodes, usePartnerCodes, usePartnerSession, usePartnerStatus } from "domain/partnerships";
 import { registerReferralCode } from "domain/referrals";
+import { decodeReferralCode } from "sdk/utils/referrals";
 import { useChainId } from "lib/chains";
 import { helperToast } from "lib/helperToast";
 import useWallet from "lib/wallets/useWallet";
@@ -17,9 +18,12 @@ import Button from "components/Button/Button";
 import ExternalLink from "components/ExternalLink/ExternalLink";
 import { getReferralCodeTradeUrl } from "components/Referrals/referralsHelper";
 
+import { TelegramLoginButton } from "./TelegramLoginButton";
 import { Card } from "./components";
 
 const CODE_PATTERN = /^[A-Za-z0-9_]{1,20}$/;
+/** Must match the bot whose domain is bound with BotFather /setdomain. */
+const TELEGRAM_BOT = import.meta.env.VITE_TELEGRAM_BOT ?? "oxmarkets_partnerships_bot";
 const STEPS = [
   { key: "wallet", label: <Trans>Wallet</Trans> },
   { key: "contact", label: <Trans>Contact</Trans> },
@@ -40,19 +44,23 @@ export default function PartnershipsStart() {
   const history = useHistory();
 
   const session = usePartnerSession();
-  const { codes, isLoading: codesLoading, refresh: refreshCodes } = usePartnerCodes(chainId, account);
+  const { codes, refresh: refreshCodes } = usePartnerCodes(chainId, account);
   const { localCodes, remember } = useLocalPartnerCodes(chainId, account);
 
   const [createdCode, setCreatedCode] = useState<string | undefined>();
-  const existingCode = codes[0] ?? localCodes[0];
+  // The indexer returns bytes32; localCodes are already plain text. Decoding here stops a raw
+  // 0x47554c46… ending up in the share link on the done screen.
+  const existingCode = codes[0] ? decodeReferralCode(codes[0] as `0x${string}`) : localCodes[0];
 
   const step = !account ? 0 : !session.contact?.verified ? 1 : 2;
   const done = Boolean(createdCode ?? existingCode);
 
-  // Someone who is already a partner should not be walked through sign-up.
+  // Someone who is already a partner should not be walked through sign-up. Keyed on the resolved
+  // status, not on an empty-but-unloaded code list, so this cannot fire on a half-known answer.
+  const { status } = usePartnerStatus(account);
   useEffect(() => {
-    if (!createdCode && !codesLoading && codes.length > 0) history.replace("/partnerships");
-  }, [codes.length, codesLoading, createdCode, history]);
+    if (!createdCode && status === "partner") history.replace("/partnerships");
+  }, [status, createdCode, history]);
 
   return (
     <AppPageLayout>
@@ -152,17 +160,15 @@ function WalletStep({ onConnect }: { onConnect?: () => void }) {
   );
 }
 
+/**
+ * Email is deliberately absent: it is disabled server-side too (PARTNER_EMAIL_ENABLED). Offering a
+ * channel the API will refuse is worse than not offering it. Both one-click channels remain.
+ */
 const CHANNELS = [
-  {
-    key: "email" as const,
-    name: <Trans>Email</Trans>,
-    hint: <Trans>Six-digit code</Trans>,
-    placeholder: "you@example.com",
-  },
   {
     key: "telegram" as const,
     name: <Trans>Telegram</Trans>,
-    hint: <Trans>Message our bot</Trans>,
+    hint: <Trans>One click</Trans>,
     placeholder: "@yourhandle",
   },
   { key: "discord" as const, name: <Trans>Discord</Trans>, hint: <Trans>One click</Trans>, placeholder: "yourhandle" },
@@ -170,7 +176,7 @@ const CHANNELS = [
 
 function ContactStep({ session }: { session: ReturnType<typeof usePartnerSession> }) {
   const [name, setName] = useState("");
-  const [channel, setChannel] = useState<"email" | "telegram" | "discord">("email");
+  const [channel, setChannel] = useState<"email" | "telegram" | "discord">("telegram");
   const [handle, setHandle] = useState("");
   const [code, setCode] = useState("");
   const [challenge, setChallenge] = useState<{ instruction: string | null; devCode: string | null } | undefined>();
@@ -265,57 +271,100 @@ function ContactStep({ session }: { session: ReturnType<typeof usePartnerSession
         ))}
       </div>
 
-      <div className="mt-12 flex gap-8">
-        <input
-          className="w-full rounded-4 bg-slate-700 px-12 py-10 text-13 outline-none"
-          placeholder={placeholder}
-          spellCheck={false}
-          value={handle}
-          onChange={(e) => setHandle(e.target.value)}
-        />
-        <Button
-          variant="secondary"
-          disabled={busy || handle.trim().length < 3}
-          onClick={() =>
-            void run(async () => {
-              const started = await session.startVerification(channel, handle);
-              setChallenge({ instruction: started.instruction, devCode: started.devCode });
-            })
-          }
-        >
-          <Trans>Send code</Trans>
-        </Button>
-      </div>
-
-      {challenge && (
-        <div className="mt-12 rounded-4 bg-slate-700/50 p-12 text-12">
-          {challenge.instruction ? (
-            <div className="font-mono text-13">{challenge.instruction}</div>
-          ) : (
-            <Trans>We sent a six-digit code to {handle}. It expires in 15 minutes.</Trans>
-          )}
-          {challenge.devCode && (
-            <div className="mt-8 text-11 text-yellow-500">
-              <Trans>Local development: the code is {challenge.devCode}</Trans>
-            </div>
-          )}
-          <div className="mt-12 flex gap-8">
-            <input
-              className="w-full rounded-4 bg-slate-700 px-12 py-10 font-mono text-13 outline-none"
-              placeholder="000000"
-              inputMode="numeric"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+      {channel === "telegram" ? (
+        <div className="mt-12">
+          <p className="text-12 text-slate-100">
+            <Trans>
+              One click — Telegram confirms it's you and sends us your username. We never see your messages, your
+              contacts or your phone number.
+            </Trans>
+          </p>
+          <div className="mt-12">
+            <TelegramLoginButton
+              botUsername={TELEGRAM_BOT}
+              onAuth={(payload) => void run(() => session.telegramLogin(payload))}
             />
+          </div>
+        </div>
+      ) : channel === "discord" ? (
+        <div className="mt-12">
+          <p className="text-12 text-slate-100">
+            <Trans>
+              You'll be sent to Discord to authorise, then straight back here. We only ask for your username — not your
+              email, servers or messages.
+            </Trans>
+          </p>
+          <div className="mt-12">
             <Button
               variant="primary-action"
-              disabled={busy || !code.trim()}
-              onClick={() => void run(() => session.verify(code))}
+              disabled={busy}
+              onClick={() =>
+                void run(async () => {
+                  const { url } = await session.startDiscord();
+                  window.location.href = url;
+                })
+              }
             >
-              <Trans>Verify</Trans>
+              <Trans>Continue with Discord</Trans>
             </Button>
           </div>
         </div>
+      ) : (
+        <>
+          <div className="mt-12 flex gap-8">
+            <input
+              className="w-full rounded-4 bg-slate-700 px-12 py-10 text-13 outline-none"
+              placeholder={placeholder}
+              spellCheck={false}
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+            />
+            <Button
+              variant="secondary"
+              disabled={busy || handle.trim().length < 3}
+              onClick={() =>
+                void run(async () => {
+                  const started = await session.startVerification(channel, handle);
+                  setChallenge({ instruction: started.instruction, devCode: started.devCode });
+                })
+              }
+            >
+              <Trans>Send code</Trans>
+            </Button>
+          </div>
+
+          {challenge && (
+            <div className="mt-12 rounded-4 bg-slate-700/50 p-12 text-12">
+              {challenge.instruction ? (
+                <div className="font-mono text-13">{challenge.instruction}</div>
+              ) : (
+                <Trans>We sent a six-digit code to {handle}. It expires in 15 minutes.</Trans>
+              )}
+              {challenge.devCode && (
+                <div className="mt-8 text-11 text-yellow-500">
+                  <Trans>Local development: the code is {challenge.devCode}</Trans>
+                </div>
+              )}
+              {/* Telegram is redeemed by the bot, so there is nothing to type here. Email is. */}
+              <div className="mt-12 flex gap-8">
+                <input
+                  className="w-full rounded-4 bg-slate-700 px-12 py-10 font-mono text-13 outline-none"
+                  placeholder="000000"
+                  inputMode="numeric"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                />
+                <Button
+                  variant="primary-action"
+                  disabled={busy || !code.trim()}
+                  onClick={() => void run(() => session.verify(code))}
+                >
+                  <Trans>Verify</Trans>
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {error && <p className="mt-12 text-12 text-red-500">{error}</p>}

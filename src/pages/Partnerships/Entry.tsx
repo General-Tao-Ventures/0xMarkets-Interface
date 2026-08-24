@@ -1,35 +1,29 @@
 import { Trans } from "@lingui/macro";
 import { Redirect } from "react-router-dom";
 
-import { useLocalPartnerCodes, usePartnerAddress, usePartnerCodes } from "domain/partnerships";
-import { useChainId } from "lib/chains";
-import useWallet from "lib/wallets/useWallet";
+import { usePartnerAddress, usePartnerStatus } from "domain/partnerships";
 
 import AppPageLayout from "components/AppPageLayout/AppPageLayout";
 
 import Overview from "./Overview";
 
 /**
- * What `/partnerships` should actually show.
+ * What `/partnerships` should show.
  *
- * A partner gets their portal. Everyone else gets the sign-up steps — showing a stranger an empty
- * scoreboard tells them nothing about the programme and nothing about what to do next.
- *
- * Owning a code is the test, because that is the only fact the contract records about a partner.
+ * A partner gets their portal; everyone else gets the sign-up steps. The one rule that matters is
+ * never to route while the answer is still unknown — doing that is what sent returning partners
+ * back through sign-up.
  */
 export default function PartnershipsEntry() {
-  const { chainId } = useChainId();
-  const { account } = useWallet();
   const { address, isViewingOther } = usePartnerAddress();
-  const { isPartner, isLoading } = usePartnerCodes(chainId, address);
-  const { localCodes } = useLocalPartnerCodes(chainId, account);
+  const { status } = usePartnerStatus(address);
 
-  // Support looking at someone else's figures never gets redirected into sign-up.
+  // Support looking at someone else's figures is never redirected into sign-up.
   if (isViewingOther) return <Overview />;
 
-  if (!account) return <Redirect to="/partnerships/start" />;
+  if (status === "no-wallet") return <Redirect to="/partnerships/start" />;
 
-  if (isLoading) {
+  if (status === "resolving") {
     return (
       <AppPageLayout>
         <div className="py-64 text-center text-13 text-slate-100">
@@ -39,8 +33,5 @@ export default function PartnershipsEntry() {
     );
   }
 
-  // localCodes covers the gap between registering a code and the indexer seeing its first trade.
-  if (isPartner || localCodes.length > 0) return <Overview />;
-
-  return <Redirect to="/partnerships/start" />;
+  return status === "partner" ? <Overview /> : <Redirect to="/partnerships/start" />;
 }
