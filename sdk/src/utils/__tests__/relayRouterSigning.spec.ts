@@ -81,6 +81,22 @@ describe("relay router signing", () => {
     expect(getRelayRouterTypedDataHash(ds, structHash)).toBe(EXPECTED.digest);
   });
 
+  it("pads each swap path entry to 32 bytes, as abi.encodePacked does", () => {
+    const twoHop: RelayRouterCreateOrderParams = {
+      ...params,
+      addresses: {
+        ...params.addresses,
+        swapPath: [
+          "0x35ecCBcAb7963Ea442D25aF1c405f8Cea27D8cF7",
+          "0x7D44b88a68c6222693c6aba6e7F4fd0a23393179",
+        ],
+      },
+    };
+    expect(getRelayRouterCreateOrderStructHash(relayParams, COLLATERAL, twoHop)).toBe(
+      "0xd7617cc23d66891a6bb927024319b9c19eff97ddbcb7f9e4ee57719cbb96d2a4"
+    );
+  });
+
   it("changes the digest when the signed fee changes", () => {
     const a = getRelayRouterCreateOrderStructHash(relayParams, COLLATERAL, params);
     const b = getRelayRouterCreateOrderStructHash(

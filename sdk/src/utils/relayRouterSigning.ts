@@ -1,4 +1,4 @@
-import { concat, encodeAbiParameters, keccak256, parseAbiParameters, toHex } from "viem";
+import { concat, encodeAbiParameters, encodePacked, keccak256, parseAbiParameters, toHex } from "viem";
 import type { Address, Hex } from "viem";
 
 // Signing for RelayRouter, the in-house relay path. Distinct from the Gelato helpers in
@@ -114,7 +114,9 @@ function hashAddresses(a: RelayRouterCreateOrderParams["addresses"]): Hex {
         a.uiFeeReceiver,
         a.market,
         a.initialCollateralToken,
-        keccak256(a.swapPath.length === 0 ? "0x" : concat(a.swapPath as Hex[])),
+        // abi.encodePacked(address[]) pads each element to 32 bytes. A raw concat agrees only for
+        // an empty path, so the mistake hides behind every default fixture.
+        keccak256(encodePacked(["address[]"], [a.swapPath])),
       ]
     )
   );

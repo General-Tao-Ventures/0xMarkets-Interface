@@ -96,7 +96,8 @@ describe("relay router client", () => {
   it("survives a round trip above 2^53 that a float would round", () => {
     const body = serializeCreateOrderRequest(request);
     expect(BigInt(body.relayParams.fee.feeAmount)).toBe(relayParams.fee.feeAmount);
-    expect(Number(body.relayParams.fee.feeAmount)).not.toBe(Number(relayParams.fee.feeAmount) + 0);
+    // Going through a float instead loses the low bit, which is the whole reason for the strings.
+    expect(BigInt(Number(body.relayParams.fee.feeAmount))).not.toBe(relayParams.fee.feeAmount);
   });
 
   it("keeps v as a number, since the relayer expects a byte not a string", () => {
