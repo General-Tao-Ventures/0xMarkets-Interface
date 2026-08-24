@@ -157,6 +157,9 @@ export const getSampleReferrarStat = ({
   account?: string;
 } = {}): ReferralCodeStats => {
   return {
+    // Consumed by isRecentReferralCodeNotExpired(); without it the "code just created"
+    // fallback never fires and the affiliate stats screen stays unreachable.
+    time: Date.now(),
     discountUsd: 0n,
     referralCode: code,
     totalRebateUsd: 0n,

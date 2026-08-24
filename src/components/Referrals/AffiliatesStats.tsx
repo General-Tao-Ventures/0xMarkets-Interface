@@ -15,7 +15,7 @@ import { formatBalanceAmount, formatBigUsd, formatUsd } from "lib/numbers";
 import { userAnalytics } from "lib/userAnalytics";
 import { ReferralCreateCodeEvent, ReferralShareEvent } from "lib/userAnalytics/types";
 import useWallet from "lib/wallets/useWallet";
-import { getNativeToken, getToken, getTokenBySymbol } from "sdk/configs/tokens";
+import { getNativeToken, getToken, getTokenBySymbolSafe } from "sdk/configs/tokens";
 
 import Button from "components/Button/Button";
 import ExternalLink from "components/ExternalLink/ExternalLink";
@@ -75,7 +75,10 @@ function AffiliatesStats({
   const { marketsInfoData } = useMarketsInfoRequest(chainId, { tokensData });
   const { affiliateRewardsData } = useAffiliateRewards(chainId);
 
-  const esGmxAddress = getTokenBySymbol(chainId, "esGMX").address;
+  // esGMX is a GMX-v1 legacy token and is not configured on Base. getTokenBySymbol throws
+  // on an unknown symbol, which crashed the whole Affiliates tab; only used to label old
+  // V1 airdrop rows, so resolve it safely and fall back to "V1 Airdrop".
+  const esGmxAddress = getTokenBySymbolSafe(chainId, "esGMX")?.address;
 
   const [isClaiming, setIsClaiming] = useState(false);
   const [, copyToClipboard] = useCopyToClipboard();
