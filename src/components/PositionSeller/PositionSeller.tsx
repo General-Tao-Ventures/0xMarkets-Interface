@@ -871,6 +871,9 @@ export function PositionSeller() {
   ]);
 
   const isMobile = useMedia("(max-width: 1024px)");
+  const displayIsLong = position
+    ? toFxDisplayIsLong(position.isLong, position.indexToken.symbol)
+    : undefined;
 
   return (
     <div className="text-body-medium">
@@ -879,7 +882,7 @@ export function PositionSeller() {
         setIsVisible={onClose}
         label={
           <Trans>
-            Close {position?.isLong ? t`Long` : t`Short`}{" "}
+            Close {displayIsLong ? t`Long` : t`Short`}{" "}
             {position?.indexToken && getTokenVisualMultiplier(position.indexToken)}
             {position?.indexToken?.symbol}
           </Trans>
