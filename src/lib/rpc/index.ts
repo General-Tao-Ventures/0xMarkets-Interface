@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AnyChainId,
   FALLBACK_PROVIDERS,
+  FORK_RPC_URL,
   getExpressRpcUrl,
   getFallbackRpcUrl,
   ONFINALITY_BASE_WS_URL,
@@ -34,6 +35,15 @@ export function getProvider(signer: Signer | undefined, chainId: number): ethers
 
 export function getWsProvider(chainId: AnyChainId): WebSocketProvider | JsonRpcProvider {
   const network = Network.from(chainId);
+
+  // Local anvil fork has no websocket endpoint we want to use -> poll the fork over HTTP.
+  if (FORK_RPC_URL) {
+    const forkProvider = new ethers.JsonRpcProvider(FORK_RPC_URL, network, {
+      staticNetwork: network,
+    });
+    forkProvider.pollingInterval = 2000;
+    return forkProvider;
+  }
 
   if (chainId === SOURCE_BASE_MAINNET) {
     return new ethers.WebSocketProvider(ONFINALITY_BASE_WS_URL, network, {

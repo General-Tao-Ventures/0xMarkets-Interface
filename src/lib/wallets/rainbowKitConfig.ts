@@ -16,7 +16,7 @@ import once from "lodash/once";
 import { http } from "viem";
 import { base } from "viem/chains";
 
-import { localhost } from "config/chains";
+import { FORK_RPC_URL, localhost } from "config/chains";
 import { isLocal } from "config/env";
 
 import binanceWallet from "./connecters/binanceW3W/binanceWallet";
@@ -54,13 +54,15 @@ export const getRainbowKitConfig = once(() =>
     appName: APP_NAME,
     projectId: WALLET_CONNECT_PROJECT_ID,
     chains: isLocal() ? [base, localhost as Chain] : [base],
+    // With VITE_FORK_RPC_URL set, wagmi's public client for Base must read the local anvil
+    // fork too, otherwise usePublicClient() silently reads real mainnet state.
     transports: isLocal()
       ? {
-          [base.id]: http(),
+          [base.id]: FORK_RPC_URL ? http(FORK_RPC_URL) : http(),
           [localhost.id]: http(),
         }
       : {
-          [base.id]: http(),
+          [base.id]: FORK_RPC_URL ? http(FORK_RPC_URL) : http(),
         },
     wallets: [...popularWalletList, ...othersWalletList],
   })

@@ -24,6 +24,14 @@ export const CONTRACTS_CHAIN_IDS = isLocal() ? SDK_CONTRACTS_CHAIN_IDS_DEV : SDK
 
 const { parseEther } = ethers;
 
+/**
+ * Local-development escape hatch: when `VITE_FORK_RPC_URL` is set (e.g. in `.env.local`)
+ * every Base-mainnet RPC list collapses to that single URL, so the app talks to a local
+ * anvil fork while still resolving all real mainnet contract addresses on chainId 8453.
+ * Unset in production builds -> behaviour is identical to before.
+ */
+export const FORK_RPC_URL: string | undefined = import.meta.env.VITE_FORK_RPC_URL || undefined;
+
 // TODO take it from web3
 export const DEFAULT_CHAIN_ID = BASE_MAINNET;
 export const CHAIN_ID = DEFAULT_CHAIN_ID;
@@ -86,14 +94,16 @@ export const ONFINALITY_BASE_WS_URL =
   "wss://base.api.onfinality.io/ws?apikey=a341ce9f-0b05-404f-b09b-20647212ce2b";
 
 export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
-  [SOURCE_BASE_MAINNET]: [
-    ONFINALITY_BASE_HTTP_URL,
-    getAlchemyBaseMainnetHttpUrl("fallback"),
-    "https://mainnet.base.org",
-    "https://base-rpc.publicnode.com",
-    "https://lb.drpc.live/base/AsXrliHWN0lBsLrcHQvp9ZjDvJ7hyK4R8JVrQmlfqV1j",
-    "https://rpc.ankr.com/base",
-  ],
+  [SOURCE_BASE_MAINNET]: FORK_RPC_URL
+    ? [FORK_RPC_URL]
+    : [
+        ONFINALITY_BASE_HTTP_URL,
+        getAlchemyBaseMainnetHttpUrl("fallback"),
+        "https://mainnet.base.org",
+        "https://base-rpc.publicnode.com",
+        "https://lb.drpc.live/base/AsXrliHWN0lBsLrcHQvp9ZjDvJ7hyK4R8JVrQmlfqV1j",
+        "https://rpc.ankr.com/base",
+      ],
   [BASE_SEPOLIA]: [
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
     "https://base-sepolia.drpc.org",
@@ -108,7 +118,7 @@ export const RPC_PROVIDERS: Record<AnyChainId, string[]> = {
 export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
   // Do NOT put OnFinality here: bestRpcTracker would overwrite it as isPublic:false,
   // then skip it for normal accounts and leave a public RPC (e.g. dRPC) as primary.
-  [SOURCE_BASE_MAINNET]: [getAlchemyBaseMainnetHttpUrl("fallback")],
+  [SOURCE_BASE_MAINNET]: FORK_RPC_URL ? [FORK_RPC_URL] : [getAlchemyBaseMainnetHttpUrl("fallback")],
   [BASE_SEPOLIA]: [
     "https://sepolia.base.org",
     "https://base-sepolia.core.chainstack.com/eb2a709e3101b602a19c3bebf81d1124",
@@ -121,11 +131,15 @@ export const FALLBACK_PROVIDERS: Record<AnyChainId, string[]> = {
 
 export const PRIVATE_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
   // Large accounts probe private providers and prefer them as primary.
-  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("largeAccount")],
+  [SOURCE_BASE_MAINNET]: FORK_RPC_URL
+    ? [FORK_RPC_URL]
+    : [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("largeAccount")],
 };
 
 export const EXPRESS_RPC_PROVIDERS: Partial<Record<AnyChainId, string[]>> = {
-  [SOURCE_BASE_MAINNET]: [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("express")],
+  [SOURCE_BASE_MAINNET]: FORK_RPC_URL
+    ? [FORK_RPC_URL]
+    : [ONFINALITY_BASE_HTTP_URL, getAlchemyBaseMainnetHttpUrl("express")],
 };
 
 type ConstantName = keyof (typeof constants)[ContractsChainId];
