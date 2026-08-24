@@ -31,7 +31,7 @@ function SideNav({ className }: { className?: string }) {
 
   return (
     <nav
-      className={cx("flex h-full shrink-0 flex-col border border-slate-800 bg-slate-750 rounded-8", className, {
+      className={cx("flex h-full shrink-0 flex-col rounded-8 border border-slate-800 bg-slate-750", className, {
         "w-[172px] max-xl:w-[144px]": !isCollapsed,
       })}
     >
@@ -66,7 +66,7 @@ export function LogoSection({ isCollapsed }: { isCollapsed: boolean | undefined 
     <Link
       to="/"
       className={cx("flex cursor-pointer items-center justify-center gap-5 text-typography-primary", {
-        "py-24 px-16 mb-4": !isCollapsed,
+        "mb-4 px-16 py-24": !isCollapsed,
       })}
     >
       <img src={logoIcon} alt="0xMarkets Logo" />
@@ -86,7 +86,16 @@ export interface NavItemProps {
   indicator?: ReactNode;
 }
 
-export function NavItem({ icon, label, isActive = false, isCollapsed = false, onClick, to, external, indicator }: NavItemProps) {
+export function NavItem({
+  icon,
+  label,
+  isActive = false,
+  isCollapsed = false,
+  onClick,
+  to,
+  external,
+  indicator,
+}: NavItemProps) {
   const button = (
     <button className={cx("group cursor-pointer select-none py-1", { "w-full": !isCollapsed })} onClick={onClick}>
       <div
@@ -175,6 +184,7 @@ export function MenuSection({
     { icon: <DashboardIcon />, label: t`Stats`, key: "stats", to: "/stats" },
     // Hidden for now: { icon: <ReferralsIcon />, label: t`Referrals`, key: "referrals", to: "/referrals" },
     { icon: <LeaderboardIcon />, label: t`Leaderboard`, key: "leaderboard", to: "/leaderboard" },
+    { icon: <ReferralsIcon />, label: t`Partnerships`, key: "partnerships", to: "/partnerships" },
     // Hidden for now: { icon: <EcosystemIcon />, label: t`Ecosystem`, key: "ecosystem", to: "/ecosystem" },
   ];
 
@@ -187,7 +197,8 @@ export function MenuSection({
           key={item.key}
           icon={item.icon}
           label={item.label}
-          isActive={pathname === item.to}
+          // Prefix match so a sub-page (/partnerships/codes) still lights up its section.
+          isActive={pathname === item.to || pathname.startsWith(`${item.to}/`)}
           isCollapsed={isCollapsed}
           to={item.to}
           onClick={onMenuItemClick}

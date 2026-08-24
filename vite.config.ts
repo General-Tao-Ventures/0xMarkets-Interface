@@ -33,6 +33,9 @@ export default defineConfig(({ mode }) => {
   // Default to the GCP mainnet Squid (same as api/squid-proxy.ts) so local
   // yarn-dev history/APR work without a local indexer. Override with SQUID_URL.
   const squidUrl = squidProxyTarget(env.SQUID_URL || "http://34.10.239.169:4350");
+  // Vercel runs api/partner/* as functions; `vite dev` does not, so point at the local
+  // stand-in (scripts/partner-dev-server.ts) instead.
+  const partnerApiUrl = env.PARTNER_API_URL || "http://127.0.0.1:3020";
 
   return {
     worker: {
@@ -119,6 +122,11 @@ export default defineConfig(({ mode }) => {
           target: squidUrl,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/squid/, ""),
+        },
+        // No rewrite: the dev server mounts the same /api/partner/* paths Vercel does.
+        "/api/partner": {
+          target: partnerApiUrl,
+          changeOrigin: true,
         },
       },
     },

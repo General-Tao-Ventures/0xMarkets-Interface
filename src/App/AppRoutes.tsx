@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/macro";
 import { ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
@@ -11,6 +12,7 @@ import { useSettings } from "context/SettingsContext/SettingsContextProvider";
 import { useTheme } from "context/ThemeContext/ThemeContext";
 import { useMultichainFundingToast } from "domain/multichain/useMultichainFundingToast";
 import { useRealChainIdWarning } from "lib/chains/useRealChainIdWarning";
+import { helperToast } from "lib/helperToast";
 import { REFERRAL_CODE_QUERY_PARAM, getAppBaseUrl } from "lib/legacy";
 import { useAccountInitedMetric, useOpenAppMetric } from "lib/metrics";
 import { useConfigureMetrics } from "lib/metrics/useConfigureMetrics";
@@ -66,7 +68,25 @@ export function AppRoutes() {
     if (referralCode && referralCode.length <= 20) {
       const encodedReferralCode = encodeReferralCode(referralCode);
       if (encodedReferralCode !== ethers.ZeroHash) {
+        // Only announce a code that is actually new. The param is stripped below, but a reload of a
+        // still-open tab can re-run this, and repeating the toast every time would be noise.
+        const previous = localStorage.getItem(REFERRAL_CODE_KEY);
         localStorage.setItem(REFERRAL_CODE_KEY, encodedReferralCode);
+        if (previous !== encodedReferralCode) {
+          // Deferred a tick: this effect fires while the ToastContainer is still settling (React
+          // remounts it under StrictMode), and a toast emitted before it is ready is dropped.
+          setTimeout(() =>
+            helperToast.success(
+              <div>
+                <Trans>Referral code {referralCode} applied.</Trans>
+                <br />
+                <span className="text-12 opacity-70">
+                  <Trans>You'll get a fee discount on trades from this browser.</Trans>
+                </span>
+              </div>
+            )
+          );
+        }
         const queryParams = new URLSearchParams(location.search);
         if (queryParams.has(REFERRAL_CODE_QUERY_PARAM)) {
           queryParams.delete(REFERRAL_CODE_QUERY_PARAM);
@@ -117,7 +137,7 @@ export function AppRoutes() {
 
   return (
     <>
-      <div className="App w-full bg-cover bg-center bg-[url('/src/img/background.png')] bg-no-repeat">
+      <div className="App w-full bg-[url('/src/img/background.png')] bg-cover bg-center bg-no-repeat">
         <MainRoutes openSettings={openSettings} />
       </div>
       <ToastContainer

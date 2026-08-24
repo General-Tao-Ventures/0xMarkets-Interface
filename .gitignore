@@ -49,3 +49,5 @@ CLAUDE.md
 claude.md
 .vercel
 .env*.local
+.env.partner
+build-admin

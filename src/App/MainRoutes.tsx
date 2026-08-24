@@ -16,6 +16,12 @@ import { CompetitionRedirect, LeaderboardPage } from "pages/LeaderboardPage/Lead
 import NftWallet from "pages/NftWallet/NftWallet";
 import PageNotFound from "pages/PageNotFound/PageNotFound";
 import { ParseTransactionPage } from "pages/ParseTransaction/ParseTransaction";
+import PartnershipsCodes from "pages/Partnerships/Codes";
+import PartnershipsEntry from "pages/Partnerships/Entry";
+import PartnershipsJoin from "pages/Partnerships/Join";
+import PartnershipsPerformance from "pages/Partnerships/Performance";
+import PartnershipsReferrals from "pages/Partnerships/Referrals";
+import PartnershipsStart from "pages/Partnerships/Start";
 import Pools from "pages/Pools/Pools";
 import { PriceImpactRebatesStatsPage } from "pages/PriceImpactRebatesStats/PriceImpactRebatesStats";
 import Referrals from "pages/Referrals/Referrals";
@@ -52,7 +58,6 @@ export function MainRoutes({ openSettings }: { openSettings: () => void }) {
       {/* redirect from previous dashboard url */}
       <RedirectWithQuery exact from="/dashboard" to="/stats" />
       <RedirectWithQuery exact from="/monitor/v2" to="/monitor" />
-
 
       <RedirectWithQuery from="/v2" to="/trade" />
 
@@ -129,11 +134,37 @@ export function MainRoutes({ openSettings }: { openSettings: () => void }) {
         <Referrals />
       </Route>
 
+      {/* The public pitch and the sign-up steps come before the portal routes: both are reachable
+          without a wallet, and /partnerships itself decides which of the two a visitor needs. */}
+      <Route exact path="/partnerships/join">
+        <PartnershipsJoin />
+      </Route>
+
+      <Route exact path="/partnerships/start">
+        <PartnershipsStart />
+      </Route>
+
+      <Route exact path="/partnerships/codes">
+        <PartnershipsCodes />
+      </Route>
+
+      <Route exact path="/partnerships/referrals">
+        <PartnershipsReferrals />
+      </Route>
+
+      <Route exact path="/partnerships/performance">
+        <PartnershipsPerformance />
+      </Route>
+
+      <Route exact path="/partnerships">
+        <PartnershipsEntry />
+      </Route>
+
       <Route exact path="/nft_wallet">
         <NftWallet />
       </Route>
 
-<Route exact path="/actions/:v/:account">
+      <Route exact path="/actions/:v/:account">
         {({ match }) => (
           <Redirect
             to={buildAccountDashboardUrl(match?.params.account as Address, chainId, match?.params.v === "v1" ? 1 : 2)}

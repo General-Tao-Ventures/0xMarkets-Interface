@@ -68,6 +68,12 @@ export type ReferralCodeStats = {
     affiliateRebateUsd: bigint;
     discountUsd: bigint;
   };
+  /**
+   * Local-only: epoch ms at which this code was registered from this browser.
+   * Read by isRecentReferralCodeNotExpired() so a freshly created code shows up in the
+   * affiliate stats screen before the indexer has caught up. Never returned by the API.
+   */
+  time?: number;
 };
 
 export type AffiliateTotalStats = {
