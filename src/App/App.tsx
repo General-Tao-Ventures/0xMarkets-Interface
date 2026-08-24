@@ -33,8 +33,8 @@ import { WebsocketContextProvider } from "context/WebsocketContext/WebsocketCont
 import { useChainId } from "lib/chains";
 import { defaultLocale, dynamicActivate } from "lib/i18n";
 import { RainbowKitProviderWrapper } from "lib/wallets/WalletProvider";
+import Maintenance from "components/Maintenance";
 
-import { BetaBanner } from "components/BetaBanner/BetaBanner";
 import { KeeperStatusBanner } from "components/KeeperStatusBanner/KeeperStatusBanner";
 import SEO from "components/Seo/SEO";
 
@@ -62,9 +62,27 @@ function App() {
     dynamicActivate(defaultLanguage);
   }, []);
 
+  const MAINTENANCE_MODE = import.meta.env.VITE_NEXT_PUBLIC_MAINTENANCE_MODE === "true" || true;
+
+  if (MAINTENANCE_MODE) {
+    return <Maintenance />;
+  }
+
   let app = (
     <>
-      <BetaBanner />
+      <div className="bg-yellow-500/20 px-16 py-12 text-center text-16 font-normal text-yellow-300">
+        You're early. This is the 0xMarkets <span className="font-medium">BETA</span> on Base Mainnet.{" "}
+        <span className="font-medium">Funds and trades are real</span>. Any issues or feedback — please tell us in{" "}
+        <a
+          href="https://discord.gg/zGkW2kTsGM"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-white"
+        >
+          Discord
+        </a>
+        .{" "}
+      </div>
       <KeeperStatusBanner />
       <AppRoutes />
     </>
